@@ -6,3 +6,4 @@ lib/
 .vscode/
 *.log
 .pnpm-store/
+.reasonix/
