@@ -51,33 +51,38 @@ const SETTINGS_SCHEMA = z.object({
 })
 
 export function applyPixelHostLayer(ctx: Context, stateDir: string): void {
-  // Register the settings namespace lazily; settings service may mount after
-  // this plugin under concurrent activation. The bind is best-effort: if the
-  // settings service never arrives the floater still works with defaults.
-  const tryRegisterSettings = (): boolean => {
-    const settings = ctx.get('settings') as { register?: (ns: string, schema: unknown, opts: { base: unknown }) => { getSnapshot(): unknown; watch(fn: () => void): () => void } } | undefined
-    if (settings === undefined || typeof settings.register !== 'function') return false
-    try {
-      settings.register('agent-teams-pixel', SETTINGS_SCHEMA, { base: { collapsed: true, includeArchived: false } })
-      ctx.logger?.info?.('agent-teams-pixel: settings namespace registered')
-      return true
-    } catch (error: unknown) {
-      ctx.logger?.warn?.('agent-teams-pixel: settings.register failed: ' + String(error))
-      return false
+  // Every code path inside this function is wrapped in try/catch so a bug
+  // in one layer (settings namespace, web route, etc.) cannot crash the
+  // entire dsh host composition — a blank dsh-desktop screen usually means
+  // an activation throw bubbled up to the loader and aborted the tree.
+  try {
+    // Register the settings namespace lazily; settings service may mount after
+    // this plugin under concurrent activation. The bind is best-effort: if the
+    // settings service never arrives the floater still works with defaults.
+    const tryRegisterSettings = (): boolean => {
+      const settings = ctx.get('settings') as { register?: (ns: string, schema: unknown, opts: { base: unknown }) => { getSnapshot(): unknown; watch(fn: () => void): () => void } } | undefined
+      if (settings === undefined || typeof settings.register !== 'function') return false
+      try {
+        settings.register('agent-teams-pixel', SETTINGS_SCHEMA, { base: { collapsed: true, includeArchived: false } })
+        ctx.logger?.info?.('agent-teams-pixel: settings namespace registered')
+        return true
+      } catch (error: unknown) {
+        ctx.logger?.warn?.('agent-teams-pixel: settings.register failed: ' + String(error))
+        return false
+      }
     }
-  }
-  if (!tryRegisterSettings()) {
-    ctx.on('internal/service', (name) => {
-      if (name === 'settings') tryRegisterSettings()
-    })
-  }
-  const tryRegister = (): boolean => {
-    const rawWebServer = (ctx.get(WEB_SERVER_KEYS[0]) ?? ctx.get(WEB_SERVER_KEYS[1])) as WebRouteHost | undefined
-    const workspaceRegistry = (ctx.get(WORKSPACE_KEYS[0]) ?? ctx.get(WORKSPACE_KEYS[1])) as WorkspaceRegistry | undefined
-    if (rawWebServer === undefined || workspaceRegistry === undefined) return false
-    const webServer = rawWebServer
+    if (!tryRegisterSettings()) {
+      ctx.on('internal/service', (name) => {
+        if (name === 'settings') tryRegisterSettings()
+      })
+    }
+    const tryRegister = (): boolean => {
+      const rawWebServer = (ctx.get(WEB_SERVER_KEYS[0]) ?? ctx.get(WEB_SERVER_KEYS[1])) as WebRouteHost | undefined
+      const workspaceRegistry = (ctx.get(WORKSPACE_KEYS[0]) ?? ctx.get(WORKSPACE_KEYS[1])) as WorkspaceRegistry | undefined
+      if (rawWebServer === undefined || workspaceRegistry === undefined) return false
+      const webServer = rawWebServer
 
-    ctx.effect(() => webServer.register({
+      ctx.effect(() => webServer.register({
       kind: 'exact',
       path: '/plugins/agent-teams-pixel/roles',
       handler: async (_req: IncomingMessage, res: ServerResponse) => {
@@ -469,12 +474,19 @@ export function applyPixelHostLayer(ctx: Context, stateDir: string): void {
   }
 
   if (!tryRegister()) {
-    ctx.on('internal/service', (name) => {
-      if (WEB_SERVER_KEYS.includes(name as (typeof WEB_SERVER_KEYS)[number])
-        || WORKSPACE_KEYS.includes(name as (typeof WORKSPACE_KEYS)[number])) {
-        tryRegister()
-      }
-    })
+      ctx.on('internal/service', (name) => {
+        if (WEB_SERVER_KEYS.includes(name as (typeof WEB_SERVER_KEYS)[number])
+          || WORKSPACE_KEYS.includes(name as (typeof WORKSPACE_KEYS)[number])) {
+          tryRegister()
+        }
+      })
+    }
+  } catch (error: unknown) {
+    // Last-resort safety net: an activation throw here would abort the
+    // cordis composition and leave dsh-desktop with a blank screen. Swallow
+    // and surface the failure through ctx.logger so the operator can see it
+    // in the host log instead of a hostile crash dump.
+    ctx.logger?.error?.('agent-teams-pixel: host activation failed: ' + String(error))
   }
 }
 
