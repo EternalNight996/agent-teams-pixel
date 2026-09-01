@@ -1,0 +1,12 @@
+src/
+test/
+scripts/
+docs/
+tsconfig*.json
+tsdown.config.ts
+.gitignore
+.npmignore
+.idea/
+.vscode/
+*.log
+release-notes/

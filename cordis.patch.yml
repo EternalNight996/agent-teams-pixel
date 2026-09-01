@@ -1,0 +1,18 @@
+# agent-teams-pixel bundle patch: mounts the host (team backend + tools) and
+# client (pixel office + role tab + activity floater) rows into the dsh
+# composition. Installed via `dsh plugin --profile <name> add <this package>`.
+#
+# `id` collisions with upstream `agent-teams` and `ui-agents-pixe` are avoided
+# by renaming to `agent-teams-pixel` (host) and `ui-agent-teams-pixel` (client).
+# The host row's `stateDir` and `memberProvider` config are inherited from the
+# proven upstream defaults.
+- insert:
+    - id: agent-teams-pixel
+      name: 'agent-teams-pixel'
+      config:
+        stateDir: .agent-teams
+        memberProvider: spawn
+        # Roles shipped with the package (`lib/roles-full.json`).
+        rolesSource: bundled
+    - id: ui-agent-teams-pixel
+      name: 'agent-teams-pixel'
