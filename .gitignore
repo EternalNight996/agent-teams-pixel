@@ -7,3 +7,6 @@ lib/
 *.log
 .pnpm-store/
 .reasonix/
+# npm install artifacts — peer resolution creates these even though
+# the canonical lockfile is the one dsh ships in the profile dir.
+package-lock.json
