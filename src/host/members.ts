@@ -363,7 +363,17 @@ export function installMemberSelectionRuntime(
   onFailureSettled?: (workspace: string, teamId: string, memberName: string) => Promise<void>,
 ): MemberSelectionRuntime {
   const pending = new Map<string, MemberLlmSelection>()
-  ctx.subagents.registerContinuableSetup((childCtx) => {
+  // registerContinuableSetup was removed from the host subagents API in the
+  // alpha.4 train (refactored into the SubagentContinuationManager /
+  // ActivationObserver model). This setup bridge only restores a continuable
+  // child's saved LLM route on cold resume and reports a member's turn failure
+  // back to the captain — these are enhancements, not the core spawn path.
+  // Feature-detect so the plugin still loads (and the dsh composition boots)
+  // on hosts that dropped the method, instead of throwing in apply() and
+  // blanking the whole UI.
+  const continueSetup = ctx.subagents.registerContinuableSetup
+  if (typeof continueSetup === 'function') {
+  continueSetup((childCtx) => {
     const child = childCtx.agent
     if (child === undefined) return () => undefined
     const suffix = child.session.events.slice(child.session.header.seedLength ?? 0)
@@ -465,6 +475,7 @@ export function installMemberSelectionRuntime(
       disposeFailure()
     }
   })
+  }
 
   return {
     async withPending<T>(
