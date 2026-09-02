@@ -61,7 +61,10 @@ interface TeamPreset {
   readonly roles: readonly string[]
 }
 
-export const inject = ['slots', 'sessions', 'locale', 'uiConversation', 'settingsScope']
+// `settingsScope` is intentionally NOT in inject: the host profile may not
+// ship the dsh-client-ui-settings peer (the floater degrades to defaults).
+// The other four are platform slots every web shell exposes.
+export const inject = ['slots', 'sessions', 'locale', 'uiConversation']
 
 const POLL_MS = 5000
 
@@ -168,7 +171,10 @@ function useOfficeState(workspace: string | undefined, includeArchived: boolean 
 }
 
 interface OfficeOverlayProps {
-  readonly sessions: ObservableSnapshot<SessionListSnapshot>
+  /** Live session list subscription; may be undefined if the host profile
+   *  does not ship the sessions peer — the overlay renders with an empty
+   *  list and the start-team button is disabled. */
+  readonly sessions?: ObservableSnapshot<SessionListSnapshot>
   readonly workspace?: string
   /** Holder ref that reads the latest settings snapshot from the bound scope.
    *  We use a ref instead of the snapshot itself because the floater is
@@ -198,11 +204,12 @@ function OfficeOverlay({ sessions, workspace, settings }: OfficeOverlayProps): R
   const [lastStartError, setLastStartError] = useState<string>('')
   const { state, members, reload } = useOfficeState(workspace, includeArchived)
   // Subscribe to the live session list so the floater always knows which
-  // captain to address when the user presses 一键组队 / 申请增配.
+  // captain to address when the user presses 一键组队 / 申请增配. Falls
+  // back to the no-sessions stub when the host profile lacks the peer.
   const sessionSnapshot = useSyncExternalStore(
-    sessions.subscribe,
-    sessions.getSnapshot,
-    sessions.getSnapshot,
+    sessions?.subscribe ?? NOOP_SUBSCRIBE,
+    sessions?.getSnapshot ?? EMPTY_SNAPSHOT_GETTER,
+    sessions?.getSnapshot ?? EMPTY_SNAPSHOT_GETTER,
   )
   const activeSessionId = sessionSnapshot.current
 
@@ -1020,11 +1027,20 @@ function bindSettingsScope(ctx: ClientContext): void {
 }
 
 export function apply(ctx: ClientContext): void {
+  // Hardening: every dependent service lookup is fail-open. If the profile
+  // does not ship a peer, we skip the corresponding slot registration
+  // instead of throwing — which would otherwise leave dsh-desktop with no
+  // plugin rows mounted (the symptom of a hidden inject missing).
   const slots = ctx.get('slots')
-  if (slots === undefined) return
+  if (slots === undefined) {
+    if (typeof console !== 'undefined') console.warn('[agent-teams-pixel] no slots service — plugin row will not render')
+    return
+  }
   const sessions = ctx.get('sessions') as ObservableSnapshot<SessionListSnapshot> | undefined
-  if (sessions === undefined) return
   bindSettingsScope(ctx)
+  if (sessions === undefined) {
+    if (typeof console !== 'undefined') console.warn('[agent-teams-pixel] no sessions service — overlay renders empty list, working-roles tab disabled')
+  }
 
   // Keyboard shortcuts: Alt+O toggles the floater, Alt+R jumps to the
   // working-roles tab. Register globally on the window so the shortcut
