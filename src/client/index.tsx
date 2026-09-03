@@ -63,8 +63,12 @@ interface TeamPreset {
 
 // `settingsScope` is intentionally NOT in inject: the host profile may not
 // ship the dsh-client-ui-settings peer (the floater degrades to defaults).
-// The other four are platform slots every web shell exposes.
-export const inject = ['slots', 'sessions', 'locale', 'uiConversation']
+// `uiConversation` is also deliberately absent: the dsh web client catalog
+// does not expose it as a cordis service. Injecting a missing service makes
+// cordis throw and aborts the whole client bundle — the symptom was an empty
+// working-roles tab and empty pixel-office floater. The three below are
+// platform services every web shell exposes.
+export const inject = ['slots', 'sessions', 'locale']
 
 const POLL_MS = 5000
 
