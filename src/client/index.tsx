@@ -211,7 +211,11 @@ function OfficeOverlay({ sessions, workspace, settings }: OfficeOverlayProps): R
     sessions?.getSnapshot ?? EMPTY_SNAPSHOT_GETTER,
     sessions?.getSnapshot ?? EMPTY_SNAPSHOT_GETTER,
   )
-  const activeSessionId = sessionSnapshot.current
+  // `current` is masked to undefined when the active session is a subagent
+  // child or otherwise off the plain sidebar list. Fall back to the most
+  // recently listed session so 一键组队 / 申请增配 still have a captain to
+  // address. If the list is genuinely empty the buttons degrade to a hint.
+  const activeSessionId = sessionSnapshot.current ?? sessionSnapshot.items[0]?.sessionId
 
   // Keyboard shortcut listener: Alt+O toggles the floater. Bound via a
   // window CustomEvent so apply() owns the global listener registration
@@ -345,7 +349,9 @@ function OfficeOverlay({ sessions, workspace, settings }: OfficeOverlayProps): R
               type="button"
               onClick={() => {
                 if (activeSessionId === undefined) {
-                  setLastStartError('当前没有活动的会话，无法恢复归档团队。')
+                  setLastStartError(sessionSnapshot.items.length === 0
+                    ? '当前没有可用会话，无法恢复归档团队。请在 DSH 侧栏新建/选中一个会话。'
+                    : '未识别到选中会话，无法恢复归档团队。请在 DSH 侧栏选中会话。')
                   return
                 }
                 const reason = window.prompt('说明恢复该归档团队的理由：', '继续上次的任务') ?? ''
@@ -439,7 +445,13 @@ function OfficeOverlay({ sessions, workspace, settings }: OfficeOverlayProps): R
             onClick={() => {
               const id = activeSessionId
               if (id === undefined) {
-                window.alert('当前没有活动的会话。')
+                // Distinguish "no supervisor service" from "side bar empty" so
+                // the operator knows what to fix instead of a dead-end alert.
+                if (sessionSnapshot.items.length === 0) {
+                  window.alert('当前没有可用的会话。\n请在 DSH 侧栏新建/选中一个会话后再申请增配。')
+                } else {
+                  window.alert('当前会话列表未标记选中项。\n请在 DSH 侧栏选中你要让船长增配的会话。')
+                }
                 return
               }
               const sessionTitle = sessionSnapshot.items.find((s) => s.sessionId === id)?.title ?? ''
@@ -557,7 +569,7 @@ function WorkingRolesTab({ setView, sessions }: WorkingRolesProps): React.ReactE
     sessions?.getSnapshot ?? EMPTY_SNAPSHOT_GETTER,
     sessions?.getSnapshot ?? EMPTY_SNAPSHOT_GETTER,
   )
-  const activeSessionId: SessionId | undefined = liveSnapshot.current
+  const activeSessionId: SessionId | undefined = liveSnapshot.current ?? liveSnapshot.items[0]?.sessionId
 
   useEffect(() => {
     let cancelled = false
@@ -607,7 +619,9 @@ function WorkingRolesTab({ setView, sessions }: WorkingRolesProps): React.ReactE
   const startTeam = async (): Promise<void> => {
     if (selectedPreset === '' || goal.trim() === '' || starting) return
     if (activeSessionId === undefined) {
-      setStartMsg('❌ 当前没有活动的会话。请先在 DSH 里打开一个会话再一键组队。')
+      setStartMsg(liveSnapshot.items.length === 0
+        ? '❌ 当前没有可用会话。请在 DSH 侧栏新建/选中一个会话后再一键组队。'
+        : '❌ 未识别到选中会话。请在 DSH 侧栏选中你要组队的会话。')
       return
     }
     setStarting(true)
