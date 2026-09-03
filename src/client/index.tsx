@@ -199,7 +199,7 @@ interface TaskRow {
 
 function OfficeOverlay({ sessions, workspace, settings }: OfficeOverlayProps): React.ReactElement {
   // Initialize from the persisted settings snapshot; fall back to defaults.
-  const [collapsed, setCollapsed] = useState(settings?.value?.collapsed ?? true)
+  const [collapsed, setCollapsed] = useState(settings?.value?.collapsed ?? false)
   const [includeArchived, setIncludeArchived] = useState(settings?.value?.includeArchived ?? false)
   const [activeTeam, setActiveTeam] = useState<{ teamId: string; name: string } | null>(null)
   const [activeTeamDetail, setActiveTeamDetail] = useState<{ tasks: TaskRow[]; inbox: Record<string, unknown>[] }>({ tasks: [], inbox: [] })

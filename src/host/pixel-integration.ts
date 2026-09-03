@@ -26,7 +26,10 @@ import { TEAM_PRESETS } from './team-presets.ts'
 import z from '@deepseek-ai/schemastery'
 
 const WEB_SERVER_KEYS = ['webServer', 'web-server'] as const
-const WORKSPACE_KEYS = ['workspaces', 'workspace'] as const
+// The workspace registry service key. dsh-agent-teams uses 'workspaceRegistry'
+// (recent) with a 'workspace' fallback; the older 'workspaces' name was wrong
+// and silently disabled every /plugins/agent-teams-pixel/* route.
+const WORKSPACE_KEYS = ['workspaceRegistry', 'workspaces', 'workspace'] as const
 
 const ROLES_PATH = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets', 'agent-teams-pixel', 'roles.json')
 const ROLES_FULL_PATH = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets', 'agent-teams-pixel', 'roles-full.json')
@@ -46,7 +49,7 @@ const ROLES_FULL_PATH = join(dirname(fileURLToPath(import.meta.url)), '..', '..'
  *  Host document so reloading the page or restarting dsh keeps the user's
  *  preferences. */
 const SETTINGS_SCHEMA = z.object({
-  collapsed: z.boolean().default(true),
+  collapsed: z.boolean().default(false),
   includeArchived: z.boolean().default(false),
 })
 
@@ -63,7 +66,7 @@ export function applyPixelHostLayer(ctx: Context, stateDir: string): void {
       const settings = ctx.get('settings') as { register?: (ns: string, schema: unknown, opts: { base: unknown }) => { getSnapshot(): unknown; watch(fn: () => void): () => void } } | undefined
       if (settings === undefined || typeof settings.register !== 'function') return false
       try {
-        settings.register('agent-teams-pixel', SETTINGS_SCHEMA, { base: { collapsed: true, includeArchived: false } })
+        settings.register('agent-teams-pixel', SETTINGS_SCHEMA, { base: { collapsed: false, includeArchived: false } })
         ctx.logger?.info?.('agent-teams-pixel: settings namespace registered')
         return true
       } catch (error: unknown) {

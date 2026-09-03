@@ -1,6 +1,6 @@
 {
   "name": "agent-teams-pixel",
-  "version": "0.1.12-test",
+  "version": "0.1.13-test",
   "description": "AgentTeams × Pixel Office: captain-led multi-agent collaboration driven by 508 role cards, with a live pixel office canvas showing each role's real state (idle / typing / walking / done / error). Tasks chain through roles by dependency; leader evaluates delivery and loops back if not satisfied.",
   "type": "module",
   "main": "lib/index.js",
