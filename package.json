@@ -1,0 +1,61 @@
+{
+  "name": "agent-teams-pixel",
+  "description": "给 DeepSeek Harness Web 主窗口加「工作角色」页签 + 对话区像素人办公室浮层（The Agency en / agency-agents-zh 255+ 角色，29 预设团队）。一条命令安装，不改 dsh 源码。",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "lib/roles-full.json",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build:client": "node scripts/build-client.mjs",
+    "gen:roles": "node scripts/gen-roles.mjs",
+    "test": "node --test",
+    "prepublishOnly": "npm test"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-llm": "^0.1.0-rc.7 || ^0.1.1-rc.2",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.7 || ^0.1.1-rc.2"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "inject": []
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "agents-pixe",
+    "pixel-office",
+    "roles",
+    "agency-agents"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EternalNight996/agent-teams-pixel.git"
+  },
+  "homepage": "https://github.com/EternalNight996/agent-teams-pixel",
+  "engines": {
+    "node": ">=22"
+  }
+}

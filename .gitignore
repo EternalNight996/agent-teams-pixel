@@ -1,0 +1,12 @@
+node_modules/
+*.tgz
+.npm-cache/
+*.log
+.DS_Store
+Thumbs.db
+.dsh-vision-router/
+.npmrc
+pnpm-lock.yaml
+
+# 误存的会话截图（非插件资源）
+企业微信截图*.png
