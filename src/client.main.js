@@ -1224,30 +1224,54 @@ function openPixeSettings() {
         trigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
       } catch (e) {}
     }
-    var tries = 0;
-    var timer = setInterval(function () {
-      tries++;
-      var target = null;
-      var cells = document.querySelectorAll('*');
-      for (var i = 0; i < cells.length; i++) {
-        var el = cells[i];
-        var navText = ((el.textContent || '') + ' ' + (el.getAttribute ? (el.getAttribute('aria-label') || '') : '') + ' ' + (el.getAttribute ? (el.getAttribute('title') || '') : '')).trim();
-        if (navText.indexOf('角色办公室') >= 0 || navText.indexOf('Role Office') >= 0 || navText.indexOf('agent-teams-pixel') >= 0 || navText.indexOf('像素办公室') >= 0) {
-          target = el;
-          if (el.closest) {
-            var clickable = el.closest('button,[role="button"],a,[class*="navCell"],[class*="nav_cell"],[class*="nav-cell"],[class*="settings"]');
-            if (clickable) target = clickable;
-          }
-          break;
-        }
-      }
-      if (target) {
-        try { target.click(); } catch (e) {}
-        try { target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window })); } catch (e) {}
-        clearInterval(timer);
-      }
-      else if (tries > 50) clearInterval(timer);
-    }, 120);
+    var tries = 0;
+
+    var timer = setInterval(function () {
+
+      tries++;
+
+      var target = null;
+
+      var cells = document.querySelectorAll('*');
+
+      for (var i = 0; i < cells.length; i++) {
+
+        var el = cells[i];
+
+        var navText = ((el.textContent || '') + ' ' + (el.getAttribute ? (el.getAttribute('aria-label') || '') : '') + ' ' + (el.getAttribute ? (el.getAttribute('title') || '') : '')).trim();
+
+        if (navText.indexOf('角色办公室') >= 0 || navText.indexOf('Role Office') >= 0 || navText.indexOf('agent-teams-pixel') >= 0 || navText.indexOf('像素办公室') >= 0) {
+
+          target = el;
+
+          if (el.closest) {
+
+            var clickable = el.closest('button,[role="button"],a,[class*="navCell"],[class*="nav_cell"],[class*="nav-cell"],[class*="settings"]');
+
+            if (clickable) target = clickable;
+
+          }
+
+          break;
+
+        }
+
+      }
+
+      if (target) {
+
+        try { target.click(); } catch (e) {}
+
+        try { target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window })); } catch (e) {}
+
+        clearInterval(timer);
+
+      }
+
+      else if (tries > 50) clearInterval(timer);
+
+    }, 120);
+
 
   } catch (e) {}
 }
@@ -1783,6 +1807,7 @@ function OfficeOverlay(props) {
   var [pos, setPos] = React.useState({ dx: 0, dy: 0 });
   var [zoom, setZoom] = React.useState(zoomInit);
   var [pickerOpen, setPickerOpen] = React.useState(false);
+    var [showSettings, setShowSettings] = React.useState(false);
   var [page, setPage] = React.useState(0);
   var [teams, setTeams] = React.useState(TEAMS.list());
   var [draftN, setDraftN] = React.useState(sid ? STATE.getDraft().length : 0);
@@ -1974,11 +1999,19 @@ function OfficeOverlay(props) {
       React.createElement('button', { onClick: function () { setPickerOpen(!pickerOpen); }, title: t('o.pick'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 14, lineHeight: 1.3 } }, pickerOpen ? t('o.collapse') : t('o.add')),
       React.createElement('button', { onClick: function () { setZoom(Math.max(0.5, zoom - 0.25)); }, title: t('o.zoomOut'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 12px', fontSize: 15, lineHeight: 1.3 } }, '−'),
       React.createElement('button', { onClick: function () { setZoom(Math.min(2.5, zoom + 0.25)); }, title: t('o.zoomIn'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 12px', fontSize: 15, lineHeight: 1.3 } }, '＋'),
-      React.createElement('button', { onClick: openPixeSettings, title: t('o.settings'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 17, lineHeight: 1.3 } }, '⚙️'),
+      React.createElement('button', { onClick: function () { setShowSettings(true); setPickerOpen(false); }, title: t('o.settings'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 17, lineHeight: 1.3 } }, '⚙️'),
       React.createElement('span', { onClick: function (e) { e.stopPropagation(); setCollapsed(true); }, title: t('o.fold'), style: { cursor: 'pointer', fontSize: 17, lineHeight: 1, padding: '6px 6px', alignSelf: 'center' } }, '—')
     ),
     pixBoundary('选人面板或办公室画布',
-      pickerOpen
+        showSettings
+          ? React.createElement('div', { style: { padding: 10, width: Math.max(360, Math.round(520 * zoom)) + 'px', maxWidth: 'calc(100vw - 24px)', maxHeight: 460, overflowY: 'auto' } },
+              React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 } },
+                React.createElement('span', { style: { fontSize: 13, fontWeight: 700 } }, t('st.nav')),
+                React.createElement('button', { onClick: function () { setShowSettings(false); }, style: { cursor: 'pointer', border: 'none', background: 'transparent', color: 'inherit', fontSize: 16 } }, '✕')
+              ),
+              React.createElement(PixeSettingsSection, { t: t, scope: PIXE_SCOPE })
+            )
+          : pickerOpen
       ? React.createElement('div', { style: { padding: 10, width: Math.max(360, Math.round(520 * zoom)) + 'px', maxWidth: 'calc(100vw - 24px)', maxHeight: 460, overflowY: 'auto' } },
           React.createElement('div', { style: { fontSize: 12, fontWeight: 700, opacity: 0.92, marginBottom: 6 } }, t('o.recTeams')),
           React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 } },

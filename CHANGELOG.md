@@ -4,6 +4,12 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.3-rc5] - 2026-09-06
+
+### 变更
+
+- **右侧浮层 ⚙️ 不再依赖 DSH 设置导航 DOM**：改为在浮层内部直接打开“角色办公室”设置面板（复用 `PixeSettingsSection`，带 ✕ 关闭按钮），不再尝试点击“通用设置”/“角色办公室”等 DSH 菜单项，彻底绕开跳转失效问题。
+
 ## [0.1.3-rc4] - 2026-09-06
 
 ### 修复
