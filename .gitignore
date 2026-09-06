@@ -10,3 +10,6 @@ pnpm-lock.yaml
 
 # 误存的会话截图（非插件资源）
 企业微信截图*.png
+
+.dsh-tmp/
+package-lock.json

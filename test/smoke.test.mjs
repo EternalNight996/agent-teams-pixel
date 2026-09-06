@@ -29,10 +29,18 @@ test('自挂载声明齐全（dsh.bundle.patch + 插件行）', () => {
 })
 
 test('发布 files 覆盖运行时全部依赖', () => {
-  for (const f of ['lib/index.js', 'lib/client.js', 'lib/roles-full.json', 'cordis.patch.yml', 'README.md']) {
+  for (const f of ['lib/index.js', 'lib/client.js', 'lib/team-engine.js', 'lib/roles-full.json', 'cordis.patch.yml', 'README.md', 'docs']) {
     assert.ok(pkg.files.includes(f), 'files 缺少 ' + f)
     assert.ok(existsSync(join(root, f)), f + ' 文件缺失')
   }
+})
+
+test('发布 files 覆盖引擎模块与规格文档（docs/）', () => {
+  // lib/team-engine.js 被 lib/index.js import；docs/ 被 README 引用 → 必须随包分发
+  assert.ok(pkg.files.includes('lib/team-engine.js'), 'team-engine.js 未列入 files，发布后 import 会失败')
+  assert.ok(pkg.files.includes('docs'), 'docs 未列入 files，README 引用会 404')
+  assert.ok(existsSync(join(root, 'docs', 'usage.md')), 'docs/usage.md 缺失')
+  assert.ok(existsSync(join(root, 'docs', 'agent-teams-analysis.md')), 'docs/agent-teams-analysis.md 缺失')
 })
 
 test('roles-full.json 是合法 JSON 且含 en/zh 全量角色', () => {

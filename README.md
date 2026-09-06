@@ -157,6 +157,23 @@ window.__AGENTS_PIXE_CHAT_API__.isOn();                       // 当前开关状
 
 **成本与质量权衡**（编排内核的取舍）：完整卡保真度最高、最耗 token；`sections=rules/deliverables` 取单章节是质量/成本的中间档；`agents_pixe_team` 用 N+2 次子代理换真并行闭环。**简单问题不套团队，深度任务才编排。**
 
+### 真·团队协助引擎（v0.1.2 新增）
+
+团队协作从「一轮到底」升级为**真正团队协助**，设计参考 [dsh-agent-teams](https://github.com/NanmiCoder/dsh-agent-teams) 上游，但**基于宿主 `subagents` 续聊原语 + 文件态自建引擎**（不依赖`agentTeams`，后者在若干 dsh 仅声明契约未挂载）：
+
+1. **当前会话创建团队并成为领袖**（一领袖同时只带一个活动团队）。
+2. **成员 = 驻留可续聊子 Agent**（`subagents.startContinuable` 建立），上下文互不挤占、可被唤醒续做。
+3. **目标拆成带显式依赖的任务**（`blockedBy`）；`ready = 依赖全完成`。
+4. **共享调度器**：按真实 `running/idle/ready` 为每个空闲成员**原子领取**一项就绪任务并唤醒；持有开放进度的空闲成员**停驻**可被直发续用或转派；冷重启遗留任务自动释放并**重claim（新 attempt）**恢复。
+5. **成员携带 attempt_id 更新任务**（`expected_revision` CAS）；转派/接管先撤销旧 attempt 等原成员归静再启新 attempt。
+6. **领袖汇总后归档**完整团队记录。
+
+调用方式：宿主 `subagents` 可达时 `agents_pixe_team` 自动走真引擎（创建→拆依赖任务→派单→汇总）；也可用细粒度工具逐步编排——`agents_pixe_team_create` / `agents_pixe_task_create` / `agents_pixe_task_update` / `agents_pixe_team_step` / `agents_pixe_team_message` / `agents_pixe_team_report`。
+
+像素办公室标题栏新增「**🤝 团队**」按钮 → 活动面板：roster 状态徽章（工作中/空闲/离线/启动中/失败）+ 任务板（状态/负责人/依赖/就绪）+ 进度分段 + 归档标记，数据读 `<DSH_HOME>/agents-pixe/teams/<leadId>.json` 磁盘真相快照。
+
+> 宿主导航：**用法见 [`docs/usage.md`](docs/usage.md)（标准 7 步 + 一键 3 步配方 + token 防爆）**，设计分析见 [`docs/agent-teams-analysis.md`](docs/agent-teams-analysis.md)。宿主无 `subagents` 时引擎工具不注册、`agents_pixe_team` 沿用原一次性逻辑、面板返回 `available:false`，均不报错。
+
 ### AI 闲聊：同样省着花
 
 - **闲聊走便宜快模型**：默认自动路由到 `flash/mini/lite/free/small` 等便宜模型（可手动指定）；`reasoningEffort: off` 关思考、`maxTokens: 120` 封顶输出。

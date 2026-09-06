@@ -4,6 +4,34 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.3] - 2026-09-06
+
+### 修复
+
+- **客户端 i18n 中英切换**：按 dsh-market 的 locale 用法，先 `locale.register` 再 `locale.bind`，并通过 slot `inject` 把 `t` 传给组件；补上 `useSystemLang` 订阅与 OfficeCanvas 重绘依赖，切换语言时标题/按钮/角色名/聊天气泡跟随切换。
+- **设置“角色办公室”入口消失**：`settingsScope` 改为延迟/安全获取（`scoped.settingsScope` / `scoped.get` / `ctx.get` 三种途径），避免因服务未就绪或 scoped 属性缺失导致设置分区不注册。
+- **像素人消失**：`OfficeCanvas` 中 `t` 恢复为画布动画时间 `(now - start) / 1000`，不再被翻译函数覆盖。
+- **错误边界兼容**：`PixErrorBoundary` 不再在模块加载期强制依赖 `React.Component`；当前 `pixBoundary` 先透传子节点，避免宿主 React 兼容性问题导致浮层空白。
+
+## [0.1.2] - 2026-09-01
+
+### 新增：真·团队协助引擎（基于宿主 `subagents` 续聊原语 + 文件态自建）
+
+把 agent-teams-pixel 的团队协作从「一轮到底的一次性编排」升级为「真正团队协助」——**当前会话创建团队并成为领袖，成员是驻留可续聊子 Agent，目标拆成带显式依赖的任务，共享调度器按真实 running/idle/ready 原子领取 + 唤醒，attempt(CAS) 生命周期 + 冷恢复，邮箱直投，文件快照落盘 + 活动面板**。设计参考 dsh-agent-teams 上游；不移植其独立文件引擎，也**不依赖宿主 `agentTeams` 服务**（该服务在若干 dsh 版本里仅声明契约、未真正挂载，会导致引擎整体降级）——改为**基于 `subagents` 续聊原语（startContinuable/sendMessage/listChildren）+ 文件态团队/任务/attempt 模型**自建，最稳、可复现。
+
+- **引擎模块 `lib/team-engine.js`**：纯服务注入、仅 `node:fs` 落盘，逻辑可单测——依赖 `ready` 计算 / attempt 状态机 / 停驻检测 / 冷停恢复 / CAS 冲突 / 归档。
+- **宿主 `lib/index.js`**：检测 `ctx.get('subagents')`；注册 6 个协调工具 `agents_pixe_team_create` / `agents_pixe_task_create` / `agents_pixe_task_update` / `agents_pixe_team_step` / `agents_pixe_team_message` / `agents_pixe_team_report`；`agents_pixe_team` 升级为真引擎便捷入口（创建→拆依赖任务→派单→汇总），旧一次性逻辑作降级；新增 `GET /agents-pixe/teams/view`（磁盘快照优先）。
+- **确定性「对话中唤醒」**：注册 `/agent-teams` 斜杠命令（`recordInput` 保留输入为可见用户消息）+ 强化系统提示段「`/agent-teams` 或团队协作请求 → **必须**调用 `agents_pixe_team` 启动团队协议」——像参考 dsh-agent-teams 一样，命中即令模型在对话里自动跑团队（建团→拆依赖→调度→汇总），工具调用卡片可见。
+- **计划先行（Plan before execution）**：`agents_pixe_team` 默认 `plan_only=true` 只出「团队计划草案」（roster + 任务 DAG + 依赖，不建团不调度）；用户评审确认后传 `plan_only=false` 执行（Approve & Run）——建团→拆依赖任务→调度→汇总。可用 `plan_tasks` 回传调整后的任务 JSON 覆盖草案。
+- **团队大小与像素办公室对齐**：`agents_pixe_team`/`/agent-teams` 默认用**当前会话办公室选中角色**作团队成员（读 `<DSH_HOME>/agents-pixe/persist.json` 的 `agents-pixe.state.v4` → `sessions[<sid>].active`），先「选人」再发任务，团队大小=办公室选人数；办公室无该会话选人时退回预设/自定义。
+- **客户端 `src/client.main.js`**：像素办公室标题栏新增「🤝 团队」按钮，切出 `TeamPanel`（roster 状态徽章 + 任务板 + 进度分段 + 归档标记），轮询 `/agents-pixe/teams/view?lead=<sid>`。
+- **落盘**：`<DSH_HOME>/agents-pixe/teams/<leadId>.json`（磁盘真相快照）+ `<leadId>.inbox.json`（成员成果）+ `archive/`（完整团队记录）。
+- **降级**：宿主无 `agentTeams`（老版本）时引擎工具不注册、`agents_pixe_team` 沿用原一次性逻辑、面板返回 `available:false`，均不报错。
+- **修复**：冷停恢复（`team-engine.js` `step`）在**无空闲成员可接手**时改为**先释放死属主**（任务落回 pending、不再卡在 `in_progress`），留待后续认领——避免冷停任务永久卡死。
+- **强化**：`agents_pixe_team` 便捷编排新增**依赖防护**（`team-engine.js` `resolvePlanDeps`）——拆解出的自依赖/前向引用/非法依赖一律剔除并记 warning，保证任务 DAG 无环；`report` 在**存在未完成任务**时归档为**草稿**（不合成最终报告、标记未完成项），全部完成才合成正式汇总；**拆解失败兜底**（`decomposeFallback`）——目标拆不出子任务时退化到各成员并行处理同一整体任务，避免建团后无任务可做。
+- **测试**：`lib/team-engine.test.mjs`（24 项）+ `lib/team-engine-stress.test.mjs`（高保真 harness 硬压 15 项：冷恢复有/无空闲成员、转派 CAS、停驻、多依赖串行顺序、多依赖并行分支、max 成员并发上限、空闲自动续领、report 草稿归档/正式汇总、resolvePlanDeps 无环防护、decomposeFallback 兜底、同一步不重复领任务、跨步幂等、CAS 防并发双领）+ `lib/register-face.test.mjs`（registerFace 重入不重复注册引擎工具），共 **42 项全过**；`node scripts/build-client.mjs` 产出 `lib/client.js`（268.5 KB）。
+- **文档**：新增 `docs/usage.md`（标准 7 步 + 一键 3 步配方、工具参考、attempt/依赖/冷恢复语义、token 防爆、活动面板、验收、已知边界）。
+
 ## [0.1.1] - 2026-08-28
 
 ### 修复
