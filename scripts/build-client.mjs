@@ -13,6 +13,7 @@ const main = readFileSync(join(root, 'src', 'client.main.js'), 'utf8')
 
 const tail = `
     exports.apply = apply;
+    exports.inject = ['settingsScope', 'slots', 'locale'];
     return module.exports;
   }
 });

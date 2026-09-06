@@ -2445,7 +2445,7 @@ function PixeSettingsSection(props) {
 
   return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 18, padding: 16, maxWidth: 560, minHeight: 260 } },
 
-    row(t('st.toolRoles'), t('st.toolRolesHint'), enabled, function (v) { if (scope) scope.set('enabled', v); }),
+    row(t('st.toolRoles'), t('st.toolRolesHint'), enabled, function (v) { if (scope) scope.set('enabled', v); setScopeValue({ ...value, enabled: v }); }),
 
     React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 } },
 
@@ -2463,7 +2463,7 @@ function PixeSettingsSection(props) {
 
           var active = (value.cardMode || 'full') === m;
 
-          return React.createElement('button', { key: m, onClick: function () { if (scope) scope.set('cardMode', m); }, 'aria-pressed': active,
+          return React.createElement('button', { key: m, onClick: function () { if (scope) scope.set('cardMode', m); setScopeValue({ ...value, cardMode: m }); }, 'aria-pressed': active,
 
             style: { cursor: 'pointer', padding: '5px 10px', borderRadius: 7, fontSize: 12, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: active ? '#2563eb' : 'var(--dsw-alias-bg-layer-1,#fff)', color: active ? '#fff' : 'var(--dsw-alias-label-primary)' } }, labels[m]);
 
@@ -2513,7 +2513,7 @@ function PixeSettingsSection(props) {
 
           value: typeof value.zoom === 'number' ? value.zoom : 1.35,
 
-          onChange: function (e) { if (scope) scope.set('zoom', Number(e.target.value)); },
+          onChange: function (e) { if (scope) scope.set('zoom', Number(e.target.value)); setScopeValue({ ...value, zoom: Number(e.target.value) }); },
 
           style: { width: 180, accentColor: '#2563eb' }
 
@@ -2527,7 +2527,7 @@ function PixeSettingsSection(props) {
 
     ),
 
-    row(t('st.officeAvatarBar'), t('st.officeAvatarBarHint'), value.showAvatarBar !== false, function (v) { if (scope) scope.set('showAvatarBar', v); }),
+    row(t('st.officeAvatarBar'), t('st.officeAvatarBarHint'), value.showAvatarBar !== false, function (v) { if (scope) scope.set('showAvatarBar', v); setScopeValue({ ...value, showAvatarBar: v }); }),
 
     React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 } },
 
@@ -2543,7 +2543,7 @@ function PixeSettingsSection(props) {
 
         value: typeof value.maxPerPage === 'number' ? value.maxPerPage : 8,
 
-        onChange: function (e) { var n = Number(e.target.value); if (scope && !isNaN(n)) scope.set('maxPerPage', Math.max(4, Math.min(16, Math.round(n)))); },
+        onChange: function (e) { var n = Number(e.target.value); if (scope && !isNaN(n)) scope.set('maxPerPage', Math.max(4, Math.min(16, Math.round(n)))); setScopeValue({ ...value, maxPerPage: Math.max(4, Math.min(16, Math.round(n))) }); },
 
         style: { width: 72, padding: '4px 8px', borderRadius: 7, border: '1px solid var(--dsw-alias-border-l1, #ccc)', background: 'var(--dsw-alias-bg-layer-1, #fff)', color: 'inherit', fontSize: 13, textAlign: 'center' }
 

@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.3-rc2] - 2026-09-06
+
+### 修复
+
+- **角色工具开关无反应**：客户端显式声明 `settingsScope` 依赖，确保设置页写入的是 DSH 真实 scope，而不是 localStorage 兜底；开关点击后乐观更新 UI，并让宿主 `scope.watch` 感知 `enabled` 变化。
+- **中英切换英文无效**：客户端 bundle 重新导出 `inject = ['settingsScope', 'slots', 'locale']`，确保 `locale` 服务注入到 `apply(ctx)`；`useSystemLang` 订阅与画布重绘链路因此能真正收到语言切换。
+
 ## [0.1.3-rc1] - 2026-09-06
 
 ### 修复
