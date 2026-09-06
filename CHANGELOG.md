@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.3-rc1] - 2026-09-06
+
+### 修复
+
+- **角色工具切换卡顿**：宿主 `settingsScope.watch` 原来在任意设置变化时都重注册 `agents_pixe_roles` / `agents_pixe_team` 工具；改为只在 `enabled` 开关真正变化时重注册，调 zoom/头像条等设置不再卡顿。
+- **中英适配**：设置页与浮层文案统一走 `safeT`，DSH 的 `props.t` 返回 raw key / undefined / 抛错时自动回退内部 zh/en 词典；语言切换会触发布局与画布重绘。
+
 ## [0.1.3] - 2026-09-06
 
 ### 修复
