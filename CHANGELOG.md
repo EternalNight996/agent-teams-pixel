@@ -4,6 +4,13 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.3-rc3] - 2026-09-06
+
+### 修复
+
+- **右侧浮层设置按钮跳错**：`openPixeSettings` 扩大搜索范围（`nav button` / `role="button"` / 各类 nav cell / 普通 button / a），同时匹配“角色办公室 / Role Office / agent-teams-pixel / 像素办公室”，并把等待次数从 15 提升到 50，避免跳回“通用设置”。
+- **+选人按钮空白/隐藏浮窗**：`RolePicker` 补上缺失的 `t` 变量（`safeT`），不再因 `t is not defined` 让选人面板渲染失败。
+
 ## [0.1.3-rc2] - 2026-09-06
 
 ### 修复
