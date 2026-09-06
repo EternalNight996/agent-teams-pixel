@@ -4,6 +4,12 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.3-rc4] - 2026-09-06
+
+### 修复
+
+- **右侧浮层设置按钮仍未跳转 Role Office**：`openPixeSettings` 改为遍历全部 DOM 节点查找“角色办公室 / Role Office / agent-teams-pixel / 像素办公室”，并自动向上找可点击元素（button/role=button/a/nav cell），不再局限于固定选择器。
+
 ## [0.1.3-rc3] - 2026-09-06
 
 ### 修复

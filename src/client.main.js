@@ -1228,11 +1228,18 @@ function openPixeSettings() {
     var timer = setInterval(function () {
       tries++;
       var target = null;
-      var cells = document.querySelectorAll('nav button, [role="button"], [class*="navCell"], [class*="nav_cell"], [class*="nav-cell"], button, a');
+      var cells = document.querySelectorAll('*');
       for (var i = 0; i < cells.length; i++) {
         var el = cells[i];
-        var navText = (el.textContent || '') + ' ' + (el.getAttribute ? (el.getAttribute('aria-label') || '') : '') + ' ' + (el.getAttribute ? (el.getAttribute('title') || '') : '');
-        if (navText.indexOf('角色办公室') >= 0 || navText.indexOf('Role Office') >= 0 || navText.indexOf('agent-teams-pixel') >= 0 || navText.indexOf('像素办公室') >= 0) { target = el; break; }
+        var navText = ((el.textContent || '') + ' ' + (el.getAttribute ? (el.getAttribute('aria-label') || '') : '') + ' ' + (el.getAttribute ? (el.getAttribute('title') || '') : '')).trim();
+        if (navText.indexOf('角色办公室') >= 0 || navText.indexOf('Role Office') >= 0 || navText.indexOf('agent-teams-pixel') >= 0 || navText.indexOf('像素办公室') >= 0) {
+          target = el;
+          if (el.closest) {
+            var clickable = el.closest('button,[role="button"],a,[class*="navCell"],[class*="nav_cell"],[class*="nav-cell"],[class*="settings"]');
+            if (clickable) target = clickable;
+          }
+          break;
+        }
       }
       if (target) {
         try { target.click(); } catch (e) {}
@@ -1241,6 +1248,7 @@ function openPixeSettings() {
       }
       else if (tries > 50) clearInterval(timer);
     }, 120);
+
   } catch (e) {}
 }
 /* AI 开关：开启前弹确认（会消耗 token），关闭直接关 */
