@@ -1787,6 +1787,232 @@ function RolePicker(props) {
   );
 }
 
+/* ---------- 团队活动主视图（shell.overlay 浮层内）：真·团队引擎状态 + 泳道 DAG ---------- */
+function teamTaskDepth(tasks) {
+  var byId = {}; tasks.forEach(function (t) { byId[t.id] = t; });
+  var depth = {};
+  function dOf(id) {
+    if (depth[id] !== undefined) return depth[id];
+    var t = byId[id]; if (!t) return 0;
+    var deps = (t.blockedBy || []).filter(function (x) { return byId[x]; });
+    depth[id] = deps.length === 0 ? 0 : 1 + Math.max.apply(null, deps.map(dOf));
+    return depth[id];
+  }
+  tasks.forEach(function (t) { dOf(t.id); });
+  return depth;
+}
+
+function TeamActivityPanel(props) {
+  var sid = props.sid;
+  var t = safeT((props && props.t) || _tFallback);
+  var [data, setData] = React.useState(null);
+  var [pinned, setPinned] = React.useState(null);
+  var [editing, setEditing] = React.useState(null);   // null | { mode:'create'|'edit', task?, subject, description, blockedBy, expectedRevision }
+  var [busy, setBusy] = React.useState(false);
+  var [toast, setToast] = React.useState(null);
+  function showToast(msg, ms) { setToast(msg); setTimeout(function () { setToast(null) }, ms || 2200) }
+
+  React.useEffect(function () {
+    if (!sid) { setData({ available: false, members: [], tasks: [] }); return; }
+    var alive = true;
+    function load() {
+      fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid))
+        .then(function (r) { return r.json(); })
+        .then(function (j) { if (alive) setData(j || { available: false, members: [], tasks: [] }); })
+        .catch(function () { if (alive) setData({ available: false, members: [], tasks: [], error: 'fetch failed' }); });
+    }
+    load();
+    var iv = setInterval(load, 3000);
+    return function () { alive = false; clearInterval(iv); };
+  }, [sid]);
+
+  function postJSON(path, body) {
+    return fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json() })
+  }
+
+  function toggleHalt() {
+    if (!sid || busy) return
+    setBusy(true)
+    var path = data.halted ? '/agents-pixe/teams/resume' : '/agents-pixe/teams/halt'
+    postJSON(path, { lead: sid }).then(function (j) {
+      setBusy(false)
+      if (j && j.ok) { showToast(data.halted ? '已恢复' : '已暂停派单'); /* 立刻刷新一次 */ fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid)).then(function (r) { return r.json() }).then(setData) }
+      else showToast('操作失败：' + (j && j.error || 'unknown'))
+    }).catch(function (e) { setBusy(false); showToast('操作失败：' + String((e && e.message) || e)) })
+  }
+
+  function openCreate() {
+    var blockedBy = pinned && Array.isArray(data.tasks) && data.tasks.find(function (x) { return x.id === pinned }) ? pinned : ''
+    setEditing({ mode: 'create', subject: '', description: '', blockedBy: blockedBy })
+  }
+  function openEdit(task) {
+    setEditing({ mode: 'edit', task: task, subject: task.subject || '', description: task.description || '', blockedBy: (task.blockedBy || []).join(','), expectedRevision: task.revision })
+  }
+  function cancelEdit() { setEditing(null) }
+  function submitEdit() {
+    if (!editing || busy) return
+    if (!editing.subject || !String(editing.subject).trim()) { showToast('主题不能为空'); return }
+    setBusy(true)
+    if (editing.mode === 'create') {
+      postJSON('/agents-pixe/teams/tasks/create', { lead: sid, subject: editing.subject, description: editing.description, blocked_by: editing.blockedBy }).then(function (j) {
+        setBusy(false); if (j && j.ok) { showToast('已建任务 ' + (j.task && j.task.id)); setEditing(null); fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid)).then(function (r) { return r.json() }).then(setData) }
+        else showToast('建任务失败：' + (j && j.error || 'unknown'))
+      }).catch(function (e) { setBusy(false); showToast('建任务失败：' + String((e && e.message) || e)) })
+    } else {
+      var task = editing.task
+      postJSON('/agents-pixe/teams/tasks/update', { lead: sid, task_id: task.id, expected_revision: editing.expectedRevision, action: 'edit', subject: editing.subject, description: editing.description, blocked_by: editing.blockedBy }).then(function (j) {
+        setBusy(false); if (j && j.ok) { showToast('已更新 ' + task.id); setEditing(null); fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid)).then(function (r) { return r.json() }).then(setData) }
+        else showToast('更新失败：' + (j && j.error || 'unknown'))
+      }).catch(function (e) { setBusy(false); showToast('更新失败：' + String((e && e.message) || e)) })
+    }
+  }
+  function deleteTask(task) {
+    if (!sid || busy) return
+    if (!confirm('删除任务 ' + task.id + '（' + task.subject + '）？')) return
+    setBusy(true)
+    postJSON('/agents-pixe/teams/tasks/delete', { lead: sid, task_id: task.id, expected_revision: task.revision }).then(function (j) {
+      setBusy(false); if (j && j.ok) { showToast('已删除 ' + task.id); setPinned(null); fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid)).then(function (r) { return r.json() }).then(setData) }
+      else showToast('删除失败：' + (j && j.error || 'unknown'))
+    }).catch(function (e) { setBusy(false); showToast('删除失败：' + String((e && e.message) || e)) })
+  }
+
+  if (!data) {
+    return React.createElement('div', { style: { padding: 16, fontSize: 13, opacity: 0.7 } }, '加载团队状态…');
+  }
+
+  var members = data.members || [];
+  var tasks = (data.tasks || []).filter(function (x) { return x.status !== 'deleted'; });
+
+  /* 无团队：给一个 + 任务 / 暂停 都不显示的极简空态，但仍允许暂停/恢复（halt flag 可独立存在） */
+  if (members.length === 0 && tasks.length === 0) {
+    return React.createElement('div', { style: { padding: 16, fontSize: 13, opacity: 0.8, lineHeight: 1.6 } },
+      '当前会话还没有活动团队。',
+      React.createElement('div', { style: { marginTop: 4, opacity: 0.75 } }, '在工作角色页签选人后，用 agents_pixe_team_create 建团，或直接说「用真团队引擎拆解 …」。'));
+  }
+
+  var roster = members.map(function (m) {
+    var st = m.status === 'running' ? '#16a34a' : (m.status === 'failed' ? '#ef4444' : (m.status === 'idle' ? '#64748b' : '#f59e0b'));
+    return React.createElement('span', { key: m.id || m.name, title: (m.name || '') + (m.provider ? ' · ' + m.provider : ''), style: { display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 14, fontSize: 12, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)' } },
+      React.createElement('span', { style: { width: 7, height: 7, borderRadius: 4, background: st, display: 'inline-block' } }),
+      m.name);
+  });
+
+  /* Quality-gate verdict：从 lastStep 计算本轮健康度，给面板一颗语义徽章 */
+  var last = data.lastStep || null
+  var verdict = (function () {
+    if (!last) return { kind: 'idle', text: '未运行', color: '#94a3b8' }
+    if (last.halted) return { kind: 'halted', text: '暂停派单', color: '#f59e0b' }
+    if (last.aborted) return { kind: 'warn', text: '最近一次被打断', color: '#f59e0b' }
+    var d = (last.dispatched || []).length
+    var r = (last.recovered || []).length
+    var parked = (last.parked || []).length
+    if (last.timedOut && r > 0) return { kind: 'warn', text: '冷恢复 ' + r + ' 项 / 仍有 ' + parked + ' 人停驻', color: '#f59e0b' }
+    if (last.timedOut) return { kind: 'warn', text: '等待超时（成员无状态变化）', color: '#f59e0b' }
+    if (d === 0 && parked === 0) return { kind: 'ok', text: '无就绪任务', color: '#3b82f6' }
+    return { kind: 'ok', text: '派发 ' + d + ' 项' + (parked ? ' · 停驻 ' + parked : ''), color: '#16a34a' }
+  })()
+
+  var pinnedTask = pinned ? tasks.find(function (x) { return x.id === pinned; }) : null;
+
+  return React.createElement('div', { style: { padding: 10, width: 660, maxWidth: 'calc(100vw - 24px)', maxHeight: 480, overflowY: 'auto' } },
+    /* 顶栏：标题 · 暂停/恢复 · +任务 */
+    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 } },
+      React.createElement('span', { style: { fontSize: 13, fontWeight: 700 } }, t('o.teamPanel') + ' · ' + members.length + ' 成员 · ' + tasks.length + ' 任务'),
+      React.createElement('span', { style: { marginLeft: 'auto', fontSize: 11, opacity: 0.6 } }, '3s 刷新')
+    ),
+    /* 工具条：Halt/Resume · +任务 */
+    React.createElement('div', { style: { display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center' } },
+      React.createElement('button', {
+        onClick: toggleHalt, disabled: busy, title: data.halted ? '恢复派单' : '暂停派单（halt 后 team_step 只刷新成员状态、不派单）',
+        style: { cursor: busy ? 'wait' : 'pointer', border: '1px solid ' + (data.halted ? '#16a34a' : 'var(--dsw-alias-border-l1,#ccc)'), background: data.halted ? 'rgba(22,163,74,0.12)' : 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '4px 10px', fontSize: 12, lineHeight: 1.3 }
+      }, data.halted ? '▶ 恢复' : '⏸ 暂停'),
+      React.createElement('button', {
+        onClick: openCreate, disabled: busy, title: '新增任务（按当前选中的任务 id 自动预填为依赖）',
+        style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '4px 10px', fontSize: 12, lineHeight: 1.3 }
+      }, '+ 任务'),
+      toast ? React.createElement('span', { style: { fontSize: 11, opacity: 0.8 } }, toast) : null
+    ),
+    /* 质量闸 verdict */
+    React.createElement('div', { style: { display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center', flexWrap: 'wrap' } },
+      React.createElement('span', { title: '最近一次 team_step 总结（halt 后写空、含原因）', style: { display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 10, fontSize: 11, border: '1px solid ' + verdict.color, color: verdict.color, background: 'var(--dsw-alias-bg-layer-1,#fff)' } },
+        React.createElement('span', { style: { width: 6, height: 6, borderRadius: 3, background: verdict.color, display: 'inline-block' } }),
+        verdict.text),
+      last && last.at ? React.createElement('span', { style: { fontSize: 10, opacity: 0.55 } }, new Date(last.at).toLocaleTimeString()) : null
+    ),
+    React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 } }, roster),
+    renderTeamDag(tasks, pinned, setPinned),
+    /* 内联编辑器（create / edit） */
+    editing
+      ? React.createElement('div', { style: { marginTop: 8, padding: 8, borderRadius: 8, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', fontSize: 12 } },
+          React.createElement('div', { style: { fontWeight: 700, marginBottom: 4 } }, editing.mode === 'create' ? '新增任务' : '编辑任务 ' + editing.task.id + '（rev ' + editing.expectedRevision + '）'),
+          React.createElement('input', { placeholder: '主题', value: editing.subject, onChange: function (e) { setEditing(function (prev) { return Object.assign({}, prev, { subject: e.target.value }) }) }, style: { width: '100%', boxSizing: 'border-box', marginBottom: 4, padding: '4px 6px', border: '1px solid var(--dsw-alias-border-l1,#ccc)', borderRadius: 4, background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit' } }),
+          React.createElement('textarea', { placeholder: '描述（可选）', value: editing.description, onChange: function (e) { setEditing(function (prev) { return Object.assign({}, prev, { description: e.target.value }) }) }, rows: 2, style: { width: '100%', boxSizing: 'border-box', marginBottom: 4, padding: '4px 6px', border: '1px solid var(--dsw-alias-border-l1,#ccc)', borderRadius: 4, background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', resize: 'vertical' } }),
+          React.createElement('input', { placeholder: '依赖任务 id（逗号分隔）', value: editing.blockedBy, onChange: function (e) { setEditing(function (prev) { return Object.assign({}, prev, { blockedBy: e.target.value }) }) }, style: { width: '100%', boxSizing: 'border-box', marginBottom: 6, padding: '4px 6px', border: '1px solid var(--dsw-alias-border-l1,#ccc)', borderRadius: 4, background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit' } }),
+          React.createElement('div', { style: { display: 'flex', gap: 6 } },
+            React.createElement('button', { onClick: submitEdit, disabled: busy, style: { cursor: 'pointer', border: '1px solid #7c3aed', background: 'rgba(124,58,237,0.12)', color: 'inherit', borderRadius: 6, padding: '3px 10px', fontSize: 12 } }, '保存'),
+            React.createElement('button', { onClick: cancelEdit, style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 6, padding: '3px 10px', fontSize: 12 } }, '取消')))
+      : null,
+    /* pinned 详情卡：原有 + 新增 编辑 / 删除 按钮 */
+    pinnedTask
+      ? React.createElement('div', { style: { marginTop: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', fontSize: 12 } },
+          React.createElement('div', { style: { display: 'flex', alignItems: 'center', marginBottom: 3 } },
+            React.createElement('span', { style: { fontWeight: 700 } }, pinnedTask.id + ' · ' + pinnedTask.subject),
+            React.createElement('button', { onClick: function () { openEdit(pinnedTask) }, disabled: busy, style: { marginLeft: 'auto', cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 6, padding: '2px 8px', fontSize: 11 } }, '编辑'),
+            React.createElement('button', { onClick: function () { deleteTask(pinnedTask) }, disabled: busy, style: { marginLeft: 4, cursor: 'pointer', border: '1px solid #ef4444', background: 'rgba(239,68,68,0.08)', color: '#ef4444', borderRadius: 6, padding: '2px 8px', fontSize: 11 } }, '删除')),
+          React.createElement('div', { style: { opacity: 0.8, lineHeight: 1.6 } },
+            '状态 ' + pinnedTask.status +
+            (pinnedTask.ownerName ? ' · 负责人 ' + pinnedTask.ownerName : '') +
+            (pinnedTask.blockedBy && pinnedTask.blockedBy.length ? ' · 依赖 ' + pinnedTask.blockedBy.join(', ') : '')))
+      : null
+  );
+}
+
+function renderTeamDag(tasks, pinned, onPin) {
+  var NW = 150, NH = 58, GX = 70, GY = 20, PAD = 24;
+  var depth = teamTaskDepth(tasks);
+  var cols = {};
+  tasks.forEach(function (t) { (cols[depth[t.id]] = cols[depth[t.id]] || []).push(t); });
+  var keys = Object.keys(cols).sort(function (a, b) { return a - b; });
+  var pos = {};
+  keys.forEach(function (k, ci) { cols[k].forEach(function (t, ri) { pos[t.id] = { x: PAD + ci * (NW + GX), y: PAD + ri * (NH + GY) }; }); });
+  var rows = keys.reduce(function (m, k) { return Math.max(m, cols[k].length); }, 0);
+  var W = keys.length * (NW + GX) - GX + PAD * 2;
+  var H = Math.max(1, rows) * (NH + GY) - GY + PAD * 2;
+  var statusColor = { pending: '#94a3b8', in_progress: '#16a34a', completed: '#3b82f6', failed: '#ef4444', claimed: '#f59e0b' };
+
+  var edges = [];
+  tasks.forEach(function (t) {
+    (t.blockedBy || []).forEach(function (d) {
+      var a = pos[d], b = pos[t.id];
+      if (!a || !b) return;
+      var mx = a.x + NW + (b.x - (a.x + NW)) / 2;
+      edges.push(React.createElement('path', { key: d + '>' + t.id, d: 'M ' + (a.x + NW) + ' ' + (a.y + NH / 2) + ' H ' + mx + ' V ' + (b.y + NH / 2) + ' H ' + b.x, fill: 'none', stroke: 'var(--dsw-alias-border-l1,#ccc)', strokeWidth: 1.5 }));
+    });
+  });
+
+  var nodes = tasks.map(function (t) {
+    var p = pos[t.id];
+    var on = pinned === t.id;
+    return React.createElement('div', {
+      key: t.id,
+      onClick: function () { onPin(on ? null : t.id); },
+      title: t.id + ' · ' + t.status + (t.ownerName ? ' · ' + t.ownerName : ''),
+      style: { position: 'absolute', left: p.x, top: p.y, width: NW, boxSizing: 'border-box', padding: '6px 8px', borderRadius: 6, cursor: 'pointer', background: 'var(--dsw-alias-bg-layer-1,#fff)', border: on ? '2px solid #7c3aed' : '1px solid var(--dsw-alias-border-l1,#ccc)', borderTop: '3px solid ' + (statusColor[t.status] || '#94a3b8'), fontSize: 12, overflow: 'hidden' }
+    },
+      React.createElement('div', { style: { opacity: 0.7, fontSize: 11 } }, t.id),
+      React.createElement('div', { style: { fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, t.subject),
+      t.ownerName ? React.createElement('div', { style: { opacity: 0.7, fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, t.ownerName) : null
+    );
+  });
+
+  return React.createElement('div', { style: { overflowX: 'auto' } },
+    React.createElement('div', { style: { position: 'relative', width: W, height: H } },
+      React.createElement('svg', { width: W, height: H }, edges),
+      nodes
+    )
+  );
+}
+
 /* ---------- 浮层面板（跟随当前会话 + 边界钳制 + 头像条） ---------- */
 function OfficeOverlay(props) {
   var useSessions = props && props.useSessions;
@@ -1807,6 +2033,7 @@ function OfficeOverlay(props) {
   var [pos, setPos] = React.useState({ dx: 0, dy: 0 });
   var [zoom, setZoom] = React.useState(zoomInit);
   var [pickerOpen, setPickerOpen] = React.useState(false);
+  var [teamPanelOpen, setTeamPanelOpen] = React.useState(false);
     var [showSettings, setShowSettings] = React.useState(false);
   var [page, setPage] = React.useState(0);
   var [teams, setTeams] = React.useState(TEAMS.list());
@@ -1996,14 +2223,17 @@ function OfficeOverlay(props) {
               t('o.tokensIn', { x: fmtTok(tok.in) }) + t('o.tokensOut', { x: fmtTok(tok.out) }))
           : null
       ),
-      React.createElement('button', { onClick: function () { setPickerOpen(!pickerOpen); }, title: t('o.pick'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 14, lineHeight: 1.3 } }, pickerOpen ? t('o.collapse') : t('o.add')),
+      React.createElement('button', { onClick: function () { setPickerOpen(!pickerOpen); setTeamPanelOpen(false); }, title: t('o.pick'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 14, lineHeight: 1.3 } }, pickerOpen ? t('o.collapse') : t('o.add')),
       React.createElement('button', { onClick: function () { setZoom(Math.max(0.5, zoom - 0.25)); }, title: t('o.zoomOut'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 12px', fontSize: 15, lineHeight: 1.3 } }, '−'),
       React.createElement('button', { onClick: function () { setZoom(Math.min(2.5, zoom + 0.25)); }, title: t('o.zoomIn'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 12px', fontSize: 15, lineHeight: 1.3 } }, '＋'),
-      React.createElement('button', { onClick: function () { setShowSettings(true); setPickerOpen(false); }, title: t('o.settings'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 17, lineHeight: 1.3 } }, '⚙️'),
+      React.createElement('button', { onClick: function () { setShowSettings(true); setPickerOpen(false); setTeamPanelOpen(false); }, title: t('o.settings'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 17, lineHeight: 1.3 } }, '⚙️'),
+      React.createElement('button', { onClick: function () { setTeamPanelOpen(!teamPanelOpen); setPickerOpen(false); setShowSettings(false); }, title: t('o.teamPanel'), style: { cursor: 'pointer', border: '1px solid ' + (teamPanelOpen ? '#7c3aed' : 'var(--dsw-alias-border-l1,#ccc)'), background: teamPanelOpen ? 'rgba(124,58,237,0.15)' : 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 14, lineHeight: 1.3 } }, t('o.teamPanel')),
       React.createElement('span', { onClick: function (e) { e.stopPropagation(); setCollapsed(true); }, title: t('o.fold'), style: { cursor: 'pointer', fontSize: 17, lineHeight: 1, padding: '6px 6px', alignSelf: 'center' } }, '—')
     ),
     pixBoundary('选人面板或办公室画布',
-        showSettings
+        teamPanelOpen
+          ? React.createElement(TeamActivityPanel, { sid: sid, t: t })
+          : showSettings
           ? React.createElement('div', { style: { padding: 10, width: Math.max(360, Math.round(520 * zoom)) + 'px', maxWidth: 'calc(100vw - 24px)', maxHeight: 460, overflowY: 'auto' } },
               React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 } },
                 React.createElement('span', { style: { fontSize: 13, fontWeight: 700 } }, t('st.nav')),

@@ -119,3 +119,52 @@ test('step：依赖未完成的任务不被领取（显式依赖）', async () =
   assert.equal(r.dispatched.length, 1)
   assert.equal(r.dispatched[0].taskId, b.id)
 })
+
+/* ---------- halt + lastStep + direct mutators（面板质量闸 + 写操作） ---------- */
+test('halt 状态下 step 只刷新成员状态不派单，且 lastStep.halted=true 留给面板读', async () => {
+  const f = buildFacade(makeMockSub())
+  await f.createTeam(caller, { roster: roster(['A', 'B']) })
+  await f.createTask(caller, { subject: 'T1' })
+  await f.createTask(caller, { subject: 'T2' })
+  f.setHaltedDirect(caller.id, true)
+  const r = await f.step(caller, { waitMs: 100 })
+  assert.equal(r.halted, true)
+  assert.equal(r.dispatched.length, 0)
+  assert.ok(r.lastStep && r.lastStep.halted === true, 'lastStep 标记 halted 供面板读')
+  const v = await f.view(caller)
+  assert.equal(v.halted, true)
+  assert.ok(v.lastStep && v.lastStep.halted === true, 'view 返回 halted + lastStep')
+})
+
+test('resume 后 step 恢复正常派单；setHaltedDirect 自身写落盘', async () => {
+  const f = buildFacade(makeMockSub())
+  await f.createTeam(caller, { roster: roster(['A']) })
+  await f.createTask(caller, { subject: 'T1' })
+  f.setHaltedDirect(caller.id, true)
+  const halted = await f.step(caller, { waitMs: 100 })
+  assert.equal(halted.dispatched.length, 0)
+  f.setHaltedDirect(caller.id, false)
+  const resumed = await f.step(caller, { waitMs: 100 })
+  assert.equal(resumed.dispatched.length, 1)
+  assert.equal(resumed.lastStep.halted, false)
+})
+
+test('addTaskDirect / editTaskDirect / deleteTaskDirect 走 CAS + lastStep + view 过滤 deleted', async () => {
+  const f = buildFacade(makeMockSub())
+  await f.createTeam(caller, { roster: roster(['A']) })
+  const t = await f.addTaskDirect(caller.id, { subject: '调研', description: '背景', blockedBy: [] })
+  assert.ok(t.id && t.status === 'pending', 'addTaskDirect 建任务（rev=1）')
+  /* 第一次 edit 用 t.revision 应当成功，CAS 拒绝旧 revision */
+  const t2 = await f.editTaskDirect(caller.id, { taskId: t.id, expectedRevision: t.revision, action: 'edit', subject: '调研-v2' })
+  assert.equal(t2.subject, '调研-v2')
+  assert.ok(t2.revision > t.revision, 'edit 成功 bump revision')
+  await assert.rejects(() => f.editTaskDirect(caller.id, { taskId: t.id, expectedRevision: t.revision, action: 'edit' }), /CAS conflict/)
+  /* delete → status deleted，不再 view 出来 */
+  await f.deleteTaskDirect(caller.id, t.id, t2.revision)
+  const v = await f.view(caller)
+  assert.equal(v.tasks.find((x) => x.id === t.id), undefined, 'view 已过滤 deleted')
+  /* 最后一次 step 写 lastStep */
+  await f.addTaskDirect(caller.id, { subject: 'after-delete' })
+  const r = await f.step(caller, { waitMs: 100 })
+  assert.ok(r.lastStep && Array.isArray(r.lastStep.dispatched), 'step 写 lastStep')
+})
