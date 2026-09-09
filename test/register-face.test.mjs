@@ -83,13 +83,13 @@ test('registerFace 重入后 dispose 仍有效：关配置恢复零注册', () =
   const { ctx, registered, fireWatch } = makeCtx()
   apply(ctx)
   fireWatch()
-  assert.equal(registered.length, 9, '应 9 个（roles+team+6 引擎+agent-teams 命令）')
+  assert.equal(registered.length, 9, '应 9 个（roles+team+6 引擎+teams 命令）')
   assert.equal(engineNames(registered).length, 6)
-  assert.ok(registered.includes('cmd:agent-teams'), '/agent-teams 命令已注册')
+  assert.ok(registered.includes('cmd:teams'), '/teams 命令已注册')
 })
 
-test('/agent-teams 命令确定性注册：斜杠命令命中触发团队协议', () => {
+test('/teams 命令确定性注册：斜杠命令命中触发团队协议', () => {
   const { ctx, registered } = makeCtx()
   apply(ctx)
-  assert.ok(registered.includes('cmd:agent-teams'), '注册了 agent-teams 命令')
+  assert.ok(registered.includes('cmd:teams'), '注册了 teams 命令')
 })
