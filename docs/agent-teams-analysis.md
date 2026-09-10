@@ -16,7 +16,63 @@ DSH 早期的角色工具是单回合的：领袖问「你看法」，每个成�
 只负责把引擎的 6 个工具 + 视图路由接到 DSH 编排层（`agents_pixe_team_create` 等）
 和办公室浮层（`/agents-pixe/teams/view`）。
 
-## 2. 核心数据模型（落盘形态）
+## 2. 全栈拓扑
+
+从用户在 DSH 对话框打 `/teams` 到像素办公室抽屉里看到泳道 DAG，端到端数据流：
+
+```mermaid
+flowchart LR
+  subgraph User["用户"]
+    U["DSH Web 对话框<br/>输入 /teams 研发团队 [任务]"]
+  end
+
+  subgraph DSH["DSH 宿主"]
+    CMD["commands service<br/>(/teams 斜杠命令)"]
+    LLM["LLM service<br/>(reasoningEffort off, maxTokens 2400)"]
+    SUB["subagents service<br/>(startContinuable / listChildren / sendMessage)"]
+    TOOL["tools service<br/>(agents_pixe_team_create 等 6 个)"]
+  end
+
+  subgraph Host["agent-teams-pixel 宿主 (lib/index.js)"]
+    FACE["registerFace()<br/>enabled === true 才注册"]
+    ROUTE["webServer routes<br/>/agents-pixe/teams/{view,halt,resume,tasks/*}"]
+    CLI["client.main.js<br/>TeamActivityPanel + 抽屉"]
+  end
+
+  subgraph Engine["lib/team-engine.js"]
+    FACADE["buildTeamFacade()<br/>createTeam / createTask / updateTask<br/>step / message / report / view"]
+    CAS["CAS expectedRevision<br/>(并发安全)"]
+  end
+
+  FS["~/.dsh/agents-pixe/teams/<br/>&lt;leadId&gt;.json + archive/<br/>+ &lt;leadId&gt;.inbox.json"]
+
+  U -->|1. 触发| CMD
+  CMD -->|2. 注入 prompt| LLM
+  LLM <-->|3. tool calls| TOOL
+  TOOL <--> FACE
+  FACE -->|4. spawn 子代理| SUB
+  FACE -->|5. facade 调用| FACADE
+  FACADE <-->|6. CAS| CAS
+  FACADE <-->|7. atomic rename| FS
+  SUB <-->|8. sendMessage / listChildren| FACADE
+  ROUTE -->|9. GET view| FACADE
+  FS -.->|10. 磁盘真相| ROUTE
+  ROUTE -->|11. 3s 轮询 JSON| CLI
+  CLI -->|12. 抽屉 UI| U
+  U -->|13. halt / resume / 创建任务| ROUTE
+  ROUTE -->|14. setHaltedDirect / addTaskDirect| FACADE
+```
+
+**数据流要点：**
+
+1. `/teams` 命令通过 `commands.register` 入宿主，DSH 调度到 LLM
+2. 模型在 `agents_pixe_team_create` / `task_create` / `team_step` / `task_update` / `team_report` 五个工具之间循环调用
+3. 工具最终走 `buildTeamFacade`，由 facade 直接管文件态
+4. 客户端**不调用**任何宿主工具，**只读** `/agents-pixe/teams/view` 的 GET 端点（POST 仅本地 CSRF 守）
+5. 子代理（spawnTeammate 起的成员）经 `subagents.sendMessage` 唤醒；成果直投 `<leadId>.inbox.json`
+6. 端到端**真相快照 = 磁盘 JSON**——前端轮询读到什么就是什么，不依赖子代理主动回调
+
+## 3. 核心数据模型（落盘形态）
 
 引擎把团队状态落到 `~/.dsh/agents-pixe/teams/<leadId>.json`（单文件、原子 rename）：
 
@@ -37,7 +93,7 @@ DSH 早期的角色工具是单回合的：领袖问「你看法」，每个成�
   这是多人 / 多会话同时改同一份文件时不互踩的关键。
 - **attempt 数组**：每次 claim/complete/reopen 都落 attempt 记录，便于冷停后恢复对账。
 
-## 3. 任务状态机
+## 4. 任务状态机
 
 ```
 pending ──claim──> in_progress ──complete──> completed
@@ -53,7 +109,7 @@ pending ──claim──> in_progress ──complete──> completed
 非法跳跃在 `transitionAllowed` 里硬卡死，UI 上看不到的状态转换直接抛 `BAD_TRANSITION`。
 这是规范里最值得回归测试的一块——状态机一旦写歪，调度器会进死锁。
 
-## 4. 调度器：`agents_pixe_team_step`
+## 5. 调度器：`agents_pixe_team_step`
 
 调度器每次调用做三件事，顺序硬编码：
 
@@ -65,13 +121,13 @@ pending ──claim──> in_progress ──complete──> completed
 
 `waitMs` 默认 2000ms，上限 60000ms。建议团队规模每成员留 5–10s 缓冲。
 
-## 5. 成员 ↔ 领袖通信
+## 6. 成员 ↔ 领袖通信
 
 - 成员发 `@lead` → 进 inbox，领袖下次 `team_step` 或 `team_report` 看到。
 - 领袖发成员名 → 该成员的 `sendMessage` 被唤醒，成员继续工作。
 - 成员 ↔ 成员不邻接（避免两人绕开领袖私自协作）——必须由领袖转达。
 
-## 6. i18n 中英切名
+## 7. i18n 中英切名
 
 `TEAM_PRESETS` 每条有 `name`（中文）/ `nameEn`（英文）。
 `findPreset(raw)` 同时匹配两者（精确 + 大小写无关子串兜底）。
@@ -81,7 +137,7 @@ pending ──claim──> in_progress ──complete──> completed
 DSH locale 通过 `agents-pixe.lang.v1` 这条 persist key 镜像到磁盘，
 宿主侧 `memberLang()` 读它决定输出语言。客户端负责把 `LOCALE_SVC.active` 写进去。
 
-## 7. 安全与回退
+## 8. 安全与回退
 
 - 引擎 facade 内部每个磁盘写都 `renameSync` 原子替换（不会半截损坏文件）。
 - 调度器最多并行的成员数由 `max_roles` 限制（默认 4，最大 8）——避免 token 失控。
@@ -89,7 +145,7 @@ DSH locale 通过 `agents-pixe.lang.v1` 这条 persist key 镜像到磁盘，
 - 引擎任何失败（冷启动缺 `subagents` / 磁盘满 / CAS 冲突）都 `console.warn` 暴露根因，
   不静默吞——因为团队任务的失败比单人失败难排查得多。
 
-## 8. 宿主接线（lib/index.js）
+## 9. 宿主接线（lib/index.js）
 
 ```
 apply()
@@ -111,7 +167,7 @@ apply()
 scope.watch 重入不重复注册：所有 dispose 都先调用旧 token，再注册新的。
 这保证用户改一次开关不会让工具列表里出现两份同名工具（dsh 会告警）。
 
-## 9. 相关文件
+## 10. 相关文件
 
 - 引擎实现：`lib/team-engine.js`（375 行，纯逻辑可单测）
 - 宿主接线：`lib/index.js`
