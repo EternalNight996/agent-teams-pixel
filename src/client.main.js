@@ -52,6 +52,9 @@ var LOCALE = {
     'r.applyChatN': '✅ 应用到对话（{n}）',
     'r.clearAll': '🗑 清空',
     'r.oneClick': '🚀 一键编排',
+    'r.loading': '正在从宿主加载角色清单…',
+    'r.loadFailed': '角色清单加载失败',
+    'r.reload': '重试',
     'r.oneClickTitle': '把当前团队送进 agents_pixe_team 编排，补一句任务即可发送',
     'r.newRole': '➕ 新建角色（AI）',
     'r.importMd': '📥 导入 md',
@@ -118,6 +121,10 @@ var LOCALE = {
     'st.cardModeFull': '完整卡',
     'st.cardModeRules': '仅规则',
     'st.cardModeDeliv': '仅交付物',
+    'st.memberCard': '成员种子粒度',
+    'st.memberCardHint': '建团队时给每个成员注入多少角色卡：专业核心三章 = 核心使命 + 关键规则 + 技术交付物（默认，显著省 token）；完整卡信息最全但更贵。',
+    'st.memberCardKey': '专业核心三章',
+    'st.memberCardFull': '完整卡',
     'st.tip1': '· 取卡粒度选「仅规则/仅交付物」后，模型调 agents_pixe_roles 默认就走该粒度，不用每次口头交代。',
     'st.tip2': '· agents_pixe_team 会开 N+2 个子代理（每个带完整卡独立执行），成本高，深度任务再用。',
     'st.tip3': '· 办公室浮层标题栏实时显示当前会话全局 token 计量（↑输入 ↓输出，含缓存读写）。',
@@ -191,6 +198,7 @@ var LOCALE = {
     'inst.teamFallback': '角色团队',
     'inst.team': '请以「{label}」团队协作回应（{names}）。',
     'inst.oneClick': '让「{name}」团队并行完成：',
+    'inst.oneClickOffice': '用我在像素办公室选中的角色组队并行完成：',
     /* inf — 无限滚动 */
     'inf.unitItem': '项',
     'inf.more': '继续下滑加载更多（{cur}/{total}）…',
@@ -232,6 +240,9 @@ var LOCALE = {
     'r.applyChatN': '✅ Apply ({n})',
     'r.clearAll': '🗑 Clear',
     'r.oneClick': '🚀 Orchestrate',
+    'r.loading': 'Loading the role index from the host…',
+    'r.loadFailed': 'Failed to load the role index',
+    'r.reload': 'Retry',
     'r.oneClickTitle': 'Send the current team into agents_pixe_team orchestration; add the goal and send',
     'r.newRole': '➕ New role (AI)',
     'r.importMd': '📥 Import md',
@@ -295,6 +306,10 @@ var LOCALE = {
     'st.cardModeFull': 'Full',
     'st.cardModeRules': 'Rules only',
     'st.cardModeDeliv': 'Deliverables only',
+    'st.memberCard': 'Member seed',
+    'st.memberCardHint': 'How much of each role card seeds a team member: professional core (mission + rules + deliverables, default, much cheaper) or the full card.',
+    'st.memberCardKey': 'Core only',
+    'st.memberCardFull': 'Full card',
     'st.tip1': '· When set to Rules only / Deliverables only, agents_pixe_roles defaults to that granularity — no need to spell it out each call.',
     'st.tip2': '· agents_pixe_team spins up N+2 subagents (each runs with a full card) — high cost; use for deep tasks.',
     'st.tip3': '· The office overlay title bar shows live session-wide token counts (↑ in ↓ out, incl. cache reads).',
@@ -354,6 +369,7 @@ var LOCALE = {
     'inst.teamFallback': 'role team',
     'inst.team': 'Collaborate as the "{label}" team ({names}).',
     'inst.oneClick': 'Have the "{name}" team run in parallel on:',
+    'inst.oneClickOffice': 'Have the roles I selected in the Pixel Office form a team and work in parallel on:',
     'inf.unitItem': 'items',
     'inf.more': 'Scroll to load more ({cur}/{total})…',
     'inf.allShown': 'Showing all {total} {label}',
@@ -456,8 +472,9 @@ function isDark() {
   return false;
 }
 
-/* ---------- 角色索引 ---------- */
-var INDEX = (function () {
+/* ---------- 角色索引（可重建：清单是懒加载来的） ---------- */
+var INDEX = { map: {}, enDivs: {}, zhDivs: {} };
+function REBUILD_INDEX() {
   var map = {};
   function push(roles, lang) {
     (roles || []).forEach(function (r) {
@@ -465,10 +482,12 @@ var INDEX = (function () {
       map[key] = { key: key, lang: lang, id: r.id, div: r.div, name: r.name, emoji: r.emoji, color: r.color, desc: r.desc, cname: r.cname || '' };
     });
   }
-  push(ROLES_DATA.en.roles, 'en');
-  push(ROLES_DATA.zh.roles, 'zh');
-  return { map: map, enDivs: ROLES_DATA.en.divisions || {}, zhDivs: ROLES_DATA.zh.divisions || {} };
-})();
+  push((ROLES_DATA.en || {}).roles || [], 'en');
+  push((ROLES_DATA.zh || {}).roles || [], 'zh');
+  INDEX = { map: map, enDivs: (ROLES_DATA.en || {}).divisions || {}, zhDivs: (ROLES_DATA.zh || {}).divisions || {} };
+  mergeCustomRoles(_CUSTOM_ROLES_CACHE);   // 清单重建后把自定义角色补回去
+}
+var _CUSTOM_ROLES_CACHE = [];
 
 /* 自定义角色（AI 生成 / 导入 md）合并进 INDEX：中英两种 key 都注册，办公室/团队/角色选择共用 */
 function mergeCustomRoles(list) {
@@ -479,6 +498,70 @@ function mergeCustomRoles(list) {
       INDEX.map[key] = { key: key, lang: lang, id: r.id, div: 'custom', name: r.name, cname: r.name, emoji: r.emoji || '🧑', color: r.color || '#8b5cf6', desc: r.description || '', full: r.full };
     });
   });
+}
+
+/* ---------- 角色清单存储：宿主一次性下发 + 版本化本地缓存（缓存优先，24h 内不发请求） ---------- */
+var ROLES_STORE = (function () {
+  var KEY = 'agents-pixe.rolesIndex.v1';
+  var TTL = 24 * 3600 * 1000;
+  var state = { loaded: false, error: null, version: '', at: 0 };
+  var subs = [];
+  function notify() { subs.forEach(function (f) { try { f(); } catch (e) {} }); }
+  function cached() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+  function accept(version, data, at) {
+    ROLES_DATA = data;
+    state.loaded = true; state.error = null; state.version = version || ''; state.at = at || Date.now();
+    REBUILD_INDEX();
+    try { localStorage.setItem(KEY, JSON.stringify({ version: state.version, at: state.at, data: data })); } catch (e) {}
+    notify();
+  }
+  function load() {
+    var c = cached();
+    if (c && c.data && c.data.en && c.data.zh) {
+      accept(c.version, c.data, c.at);
+      /* 缓存足够新 → 零请求；否则后台校验一次版本（失败也继续用缓存） */
+      if (Date.now() - (c.at || 0) < TTL) return;
+    }
+    try {
+      fetch('/agents-pixe/roles/index', { headers: { accept: 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (!j || j.ok !== true || !j.data) throw new Error((j && j.error) || '角色清单响应不合法');
+          if (!state.loaded || j.version !== state.version) accept(j.version, j.data, Date.now());
+        })
+        .catch(function (e) {
+          if (!state.loaded) { state.error = String((e && e.message) || e); notify(); }
+          else { try { console.warn('[agents-pixe] 角色清单刷新失败（继续用缓存）：', e && (e.message || e)); } catch (_) {} }
+        });
+    } catch (e) {
+      if (!state.loaded) { state.error = String((e && e.message) || e); notify(); }
+    }
+  }
+  return {
+    load: load,
+    get: function () { return state; },
+    retry: function () { state.error = null; notify(); load(); },
+    subscribe: function (cb) { if (typeof cb === 'function') subs.push(cb); return function () { subs = subs.filter(function (x) { return x !== cb; }); }; }
+  };
+})();
+ROLES_STORE.load();
+function useRolesStore() {
+  return React.useSyncExternalStore(ROLES_STORE.subscribe, ROLES_STORE.get);
+}
+/* 清单未加载完成时，**不得**用「查不到」当作「非法」去剪枝用户的选择（否则会误删已选角色） */
+function keyKnown(k) { return !!INDEX.map[k] || !ROLES_STORE.get().loaded; }
+/* 清单加载态 UI（工作角色页签与选人面板共用） */
+function RolesLoadHint(props) {
+  var t = safeT((props && props.t) || _tFallback);
+  var st = useRolesStore();
+  if (st.loaded) return null;
+  return React.createElement('div', { style: { padding: '18px 4px', fontSize: 13, opacity: 0.75, display: 'flex', gap: 10, alignItems: 'center' } },
+    React.createElement('span', null, st.error ? (t('r.loadFailed') + '：' + st.error) : t('r.loading')),
+    React.createElement('button', {
+      onClick: function () { ROLES_STORE.retry(); },
+      style: { cursor: 'pointer', borderRadius: 7, padding: '4px 10px', fontSize: 12, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit' }
+    }, t('r.reload'))
+  );
 }
 
 /* ---------- 无限滚动：哨兵 + IntersectionObserver（自动跟随任意祖先滚动容器，避免嵌套滚动条/留白） ---------- */
@@ -578,7 +661,7 @@ var STATE = (function () {
   }
   return {
     /* —— 草稿：全局（跨会话共享，新会话保留工作角色配置） —— */
-    getDraft: function () { return globalDraft.roles.slice().filter(function (k) { return INDEX.map[k]; }); },
+    getDraft: function () { return globalDraft.roles.slice().filter(keyKnown); },
     hasDraft: function (k) { return globalDraft.roles.indexOf(k) >= 0; },
     addDraft: function (k) { if (globalDraft.roles.indexOf(k) < 0) { globalDraft.roles.push(k); persist(); notify(); } },
     removeDraft: function (k) { var i = globalDraft.roles.indexOf(k); if (i >= 0) { globalDraft.roles.splice(i, 1); if (globalDraft.leader === k) globalDraft.leader = null; persist(); notify(); } },
@@ -590,7 +673,7 @@ var STATE = (function () {
     getName: function () { return globalDraft.name; },
     setName: function (n) { globalDraft.name = n || ''; persist(); notify(); },
     /* —— 已应用：按会话隔离（每个会话专属办公室） —— */
-    getActive: function (sid) { return sess(sid).active.slice().filter(function (k) { return INDEX.map[k]; }); },
+    getActive: function (sid) { return sess(sid).active.slice().filter(keyKnown); },
     getActiveLeader: function (sid) { return sess(sid).activeLeader; },
     apply: function (sid) { var st = sess(sid); st.active = globalDraft.roles.slice(); st.activeLeader = globalDraft.leader; lastApplied = { roles: globalDraft.roles.slice(), leader: globalDraft.leader }; persist(); notify(); },
     clearActive: function (sid) { var st = sess(sid); st.active = []; st.activeLeader = null; persist(); notify(); },
@@ -1682,10 +1765,16 @@ var TIMER_SVC = null;
 var LOCALE_SVC = null;
 /* settings 命名空间 scope（在 apply 里绑定为 agents-pixe，给办公室浮层实时读默认缩放/头像条/每页人数用） */
 var PIXE_SCOPE = null;
-/* 当宿主 settingsScope 不可用时，使用 localStorage 兜底，保证设置入口始终出现且开关可持久化。 */
+/* 设置作用域（客户端侧）。
+ * dsh ≥0.1.7 起客户端**不再有 settingsScope 服务**（宿主 settings 只剩表单服务
+ * configure/describe/update/replace/mutate），因此配置读写统一走宿主端点
+ * /agents-pixe/config：GET 读 live Config 快照 + revision，POST 走 settings.update(条目 id, patch, rev)。
+ * localStorage 只作离线镜像：宿主不可用时 UI 仍可切换，宿主恢复后以宿主值覆盖。
+ * （做法对照 memory-eternal：它同样不依赖 settingsScope，而是自带 API + settings.update。） */
 var _PIXE_FALLBACK_SCOPE = (function () {
   var KEY = 'agents-pixe.settings.v1';
   var data = {};
+  var revision;
   var listeners = [];
   try { data = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { data = {}; }
   function emit() {
@@ -1693,16 +1782,49 @@ var _PIXE_FALLBACK_SCOPE = (function () {
       try { listeners[i](); } catch (_) {}
     }
   }
+  function mirror() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (_) {} }
+  function applyHost(j) {
+    if (!j || j.ok !== true) return false;
+    if (j.revision !== undefined) revision = j.revision;
+    if (j.value && typeof j.value === 'object') { data = j.value; mirror(); emit(); return true; }
+    return false;
+  }
+  function refresh() {
+    try {
+      return fetch('/agents-pixe/config', { headers: { accept: 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { applyHost(j); return data; })
+        .catch(function (e) {
+          try { console.warn('[agents-pixe] 读宿主配置失败（暂用本地镜像）：', e && (e.message || e)); } catch (_) {}
+          return data;
+        });
+    } catch (e) { return Promise.resolve(data); }
+  }
+  refresh();
   return {
+    refresh: refresh,
     subscribe: function (cb) {
       if (typeof cb === 'function') listeners.push(cb);
       return function () { listeners = listeners.filter(function (x) { return x !== cb; }); };
     },
     getSnapshot: function () { return { value: data }; },
     set: function (key, val) {
-      data[key] = val;
-      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (_) {}
-      emit();
+      var patch = {};
+      patch[key] = val;
+      data[key] = val; mirror(); emit();   /* 乐观更新：UI 立刻响应 */
+      try {
+        fetch('/agents-pixe/config', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ patch: patch, expectedRevision: revision })
+        }).then(function (r) { return r.json(); }).then(function (j) {
+          if (!j || j.ok !== true) {
+            try { console.warn('[agents-pixe] 配置写回被拒（仅本地生效）：' + ((j && j.error) || '未知原因')); } catch (_) {}
+            return;
+          }
+          applyHost(j);
+        }).catch(function (e) { try { console.warn('[agents-pixe] 配置写回请求失败（仅本地生效）：', e && (e.message || e)); } catch (_) {} });
+      } catch (e) { try { console.warn('[agents-pixe] 配置写回异常（仅本地生效）：', e && (e.message || e)); } catch (_) {} }
     }
   };
 })();
@@ -1741,6 +1863,7 @@ function usePixeCfg() {
 
 /* ---------- 办公室内嵌选人 ---------- */
 function RolePicker(props) {
+  useRolesStore();   // 订阅：清单懒加载完成后自动重渲染（否则空列表要等下一次交互才刷新）
   var lang = useSystemLang();
   var t = safeT((props && props.t) || _tFallback);
   var [q, setQ] = React.useState('');
@@ -1775,7 +1898,9 @@ function RolePicker(props) {
       React.createElement('input', { value: q, onChange: function (e) { setQ(e.target.value); }, placeholder: t('p.searchPh'), style: { flex: 1, minWidth: 0, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--dsw-alias-border-l1, #ccc)', background: 'var(--dsw-alias-bg-layer-1, #fff)', color: 'inherit' } })
     ),
     flat.length === 0
-      ? React.createElement('div', { style: { fontSize: 13, opacity: 0.85, padding: 16, textAlign: 'center' } }, t('p.noMatch'))
+      ? React.createElement('div', { style: { fontSize: 13, opacity: 0.85, padding: 16, textAlign: 'center' } },
+          React.createElement(RolesLoadHint, { t: t }),
+          ROLES_STORE.get().loaded ? t('p.noMatch') : null)
       : React.createElement('div', { style: { flex: 1, minHeight: 0, overflowY: 'auto' } },
           flat.slice(0, pickInf.limit).map(function (item) {
             if (item.header) return React.createElement('div', { key: 'h:' + item.div, style: { fontSize: 12, fontWeight: 700, opacity: 0.92, margin: '10px 0 5px' } }, (item.meta && item.meta.label) || item.div);
@@ -2147,13 +2272,14 @@ function OfficeOverlay(props) {
   /* 一键团队编排：浮层拿不到 dsh setDraft（React 受控 textarea 会被覆盖），改用复制到剪贴板 + 跳转对话粘贴 */
   function oneClickTeam() {
     if (draftN === 0) return;
-    var name = STATE.getName() || _tFallback('o.currentTeam');
-    var instr = _tFallback('inst.oneClick', { name: name });
+    var name = STATE.getName() || '';
+    /* 未命名预设团队 → 走「用户选中的角色」：宿主会读办公室选人，只导入选中的角色卡 */
+    var instr = name ? _tFallback('inst.oneClick', { name: name }) : _tFallback('inst.oneClickOffice');
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       try { navigator.clipboard.writeText(instr); } catch (e) {}
     }
     fillInput(instr);
-    setTeamMsg(_tFallback('o.msgOk', { name: name }));
+    setTeamMsg(_tFallback('o.msgOk', { name: name || _tFallback('o.currentTeam') }));
     if (teamMsgTimer.current) clearTimeout(teamMsgTimer.current);
     teamMsgTimer.current = setTimeout(function () { setTeamMsg(''); }, 5000);
     jumpToChat(props);
@@ -2330,6 +2456,7 @@ function OfficeOverlay(props) {
 
 /* ---------- 工作角色页签（会话内） ---------- */
 function WorkingRolesView(props) {
+  useRolesStore();   // 订阅：清单懒加载完成后自动重渲染
   var inputActions = props && props.inputActions;
   var t = safeT((props && props.t) || _tFallback);
   var sid = props && props.sessionId;
@@ -2350,7 +2477,7 @@ function WorkingRolesView(props) {
   }
   function reloadCustom() {
     fetch('/agents-pixe/roles/custom').then(function (r) { return r.json(); }).then(function (d) {
-      if (d && Array.isArray(d.roles)) { setCustomRoles(d.roles); mergeCustomRoles(d.roles); }
+      if (d && Array.isArray(d.roles)) { setCustomRoles(d.roles); _CUSTOM_ROLES_CACHE = d.roles; mergeCustomRoles(d.roles); }
     }).catch(function () {});
   }
   React.useEffect(function () { reloadCustom(); }, []);
@@ -2509,8 +2636,9 @@ function WorkingRolesView(props) {
     var recs = selectedRecords();
     if (recs.length === 0) return;
     STATE.apply(sid);
-    var name = STATE.getName() || _tFallback('o.currentTeam');
-    var instr = _tFallback('inst.oneClick', { name: name });
+    var name = STATE.getName() || '';
+    /* 未命名预设团队 → 让宿主按「本会话选中的角色」组队（只导入选中的角色卡） */
+    var instr = name ? _tFallback('inst.oneClick', { name: name }) : _tFallback('inst.oneClickOffice');
     if (inputActions && typeof inputActions.setDraft === 'function') inputActions.setDraft(instr);
     else fillInput(instr);
     jumpToChat(props);
@@ -2529,6 +2657,7 @@ function WorkingRolesView(props) {
     React.createElement('div', { style: { padding: '14px 16px 10px', flexShrink: 0 } },
       React.createElement('div', { style: { fontSize: 16, fontWeight: 700, marginBottom: 2 } }, t('r.title')),
       React.createElement('div', { style: { fontSize: 12, opacity: 0.85, marginBottom: 10 } }, t('r.desc')),
+      React.createElement(RolesLoadHint, { t: t }),
       /* 新建角色（AI 生成）/ 导入 md */
       React.createElement('div', { style: { display: 'flex', gap: 8, marginBottom: 8 } },
         React.createElement('button', { onClick: function () { setRolePanel(rolePanel === 'create' ? '' : 'create'); }, style: btnBase }, t('r.newRole')),
@@ -2758,6 +2887,28 @@ function PixeSettingsSection(props) {
 
         }))),
 
+    React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 } },
+
+      React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 2 } },
+
+        React.createElement('span', { style: { fontWeight: 600 } }, t('st.memberCard')),
+
+        React.createElement('span', { style: { fontSize: 12, opacity: 0.6 } }, t('st.memberCardHint'))),
+
+      React.createElement('div', { style: { display: 'flex', gap: 6 } },
+
+        ['key', 'full'].map(function (m) {
+
+          var labels = { key: t('st.memberCardKey'), full: t('st.memberCardFull') };
+
+          var active = (value.memberCardMode || 'key') === m;
+
+          return React.createElement('button', { key: m, onClick: function () { if (scope) scope.set('memberCardMode', m); setScopeValue({ ...value, memberCardMode: m }); }, 'aria-pressed': active,
+
+            style: { cursor: 'pointer', padding: '5px 10px', borderRadius: 7, fontSize: 12, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: active ? '#2563eb' : 'var(--dsw-alias-bg-layer-1,#fff)', color: active ? '#fff' : 'var(--dsw-alias-label-primary)' } }, labels[m]);
+
+        }))),
+
     React.createElement('div', { style: { fontSize: 12, opacity: 0.55, lineHeight: 1.7 } },
 
       React.createElement('div', null, t('st.tip1')),
@@ -2945,8 +3096,9 @@ function apply(ctx) {
   });
 
   /* 设置分区：设置 → 角色办公室
-   * 参考 memory-eternal：settings.section 无条件注册，不依赖 settingsScope 是否可 bind。
-   * 有真实 scope 用它；没有则用 localStorage fallback，保证刷新后入口不消失。 */
+   * 参考 memory-eternal：settings.section 无条件注册。优先用宿主 settingsScope（老客户端有），
+   * 没有（dsh ≥0.1.7 已移除该客户端服务）就用 HTTP 支撑的 _PIXE_FALLBACK_SCOPE
+   * ——它读 /agents-pixe/config、写 settings.update，所以开关真的会落到宿主侧。 */
   var pixeScope = null;
   try {
     var settingsService = ctx.get('settingsScope');
@@ -2954,9 +3106,9 @@ function apply(ctx) {
       pixeScope = settingsService.bind({ namespace: 'agents-pixe' });
     }
   } catch (e) {
-    try { console.error('[agents-pixe] settingsScope 获取失败，使用 localStorage 兜底：\n', e && (e.stack || e.message || e)); } catch (_) {}
+    try { console.warn('[agents-pixe] settingsScope 不可用（dsh ≥0.1.7 的预期行为），改用宿主 /agents-pixe/config：\n', e && (e.stack || e.message || e)); } catch (_) {}
   }
-  if (!pixeScope) pixeScope = _PIXE_FALLBACK_SCOPE;
+  if (!pixeScope || typeof pixeScope.getSnapshot !== 'function') pixeScope = _PIXE_FALLBACK_SCOPE;
   PIXE_SCOPE = pixeScope;
   reg('agents-pixe: settings.section', function () {
     slots.inject('settings.section', safeSlotInject('settings.section', function () {

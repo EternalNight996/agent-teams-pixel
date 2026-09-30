@@ -29,7 +29,7 @@ test('自挂载声明齐全（dsh.bundle.patch + 插件行）', () => {
 })
 
 test('发布 files 覆盖运行时全部依赖', () => {
-  for (const f of ['lib/index.js', 'lib/client.js', 'lib/team-engine.js', 'lib/roles-full.json', 'cordis.patch.yml', 'README.md', 'docs']) {
+  for (const f of ['lib/index.js', 'lib/client.js', 'lib/team-engine.js', 'lib/roles.json', 'lib/roles-full.json', 'cordis.patch.yml', 'README.md', 'docs']) {
     assert.ok(pkg.files.includes(f), 'files 缺少 ' + f)
     assert.ok(existsSync(join(root, f)), f + ' 文件缺失')
   }

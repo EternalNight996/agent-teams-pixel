@@ -4,6 +4,171 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.6] - P2 专业门禁（角色卡 → 验收判据）+ 客户端角色清单懒加载
+
+### 新增：**专业门禁**（三方对比里两家都没有的能力）
+
+原生与 dsh-agent-teams 的审查只有**通用流程**（需求→实现→验证→审查→集成）；本项目把**领域判据**抽出来当门禁：
+
+- `agents_pixe_task_create` 支持 `kind="review"` + `review_of=<任务id>`：自动从角色卡抽「关键规则 / 技术交付物」生成**验收清单**（`acceptance_from` 指定取哪个角色的卡，默认 = 被审任务负责人 → 团队第一位成员；`acceptance` 可自定义覆盖）。建任务返回值会把清单逐条列出，模型/用户一眼可见判据。
+- `agents_pixe_task_update(action="complete")` 对 review 任务要求 `acceptance_results`（格式 `1:pass, 2:fail:原因`，或 JSON 数组）：
+  - **漏判**任何一条 → `ACCEPTANCE_UNVERIFIED`（点名缺第几条）——不允许跳过；
+  - 判定**超出清单范围**（判据被 edit 改过）→ 同样拒绝；
+  - 有任一 `fail` → `verdict=fail`，**被审任务自动打回 `in_progress`** 并记 `lastReviewFailures`（下游因此继续阻塞，不会带着缺陷往下走）；
+  - 全 `pass` → `verdict=pass`，正常完成。
+- `cardAcceptance(rec)`：从「关键规则/技术交付物」抽 bullet 条目（去重、限量 12 条、单条 ≤160 字、带来源标注如「代码审查员 · 关键规则」）；卡不含这两章则清单为空 → 退回通用流程。
+- 派单唤醒语自动带出审查规则；`edit` 可调整清单；**非 review 任务零行为变更**。
+
+### 变更：客户端角色清单懒加载（包体 -48%）
+
+- `lib/client.js` **不再内嵌**角色精简清单：**339 KB → 175.5 KB（-163 KB / -48%）**（实测内嵌块占原包体 46%）。
+- 新增宿主端点 `GET /agents-pixe/roles/index` → `{ ok, version, data }`（version = 文件 `mtime:size`）。**宿主是唯一真相源** → 客户端清单永不与 `roles-full.json` 漂移（旧方案是"构建期复制一份"，升级后可能不同步）。
+- 客户端 `ROLES_STORE`：**缓存优先 + 24h TTL 版本化校验**（命中即零请求；失败继续用缓存）；`RolesLoadHint` 提供「加载中／失败 + 重试」UI；`RolePicker` 与 `WorkingRolesView` 订阅 store 自动重渲染。
+- **安全不变式（有测试锁死）**：清单未加载完成前，`keyKnown(k)` 把「查不到」视为**合法**，不剪枝用户已选角色 —— 否则懒加载会在首屏误删选人并写回 localStorage。
+- `lib/roles.json` 加入发布 `files`（端点在运行时读它），冒烟测试同步断言。
+
+### 对齐进度：P1 剩余项**被宿主契约挡住**（取证）
+
+`ctx.tools.guard` 执行期拒绝越界编辑 / `agentTeams.tryMembership` 作用域化工具：**当前做不到**。取证：`subagents.startContinuable` 只返回 `{ childId, messageId }`（`@deepseek-ai/dsh-subagent@0.2.0-rc.2/lib/index.js:1710`），**不暴露成员 live Agent**，因此无法对成员做 `agent.ctx.tools.guard/register`；`listChildren` 返回的也只是视图（id/activity/label/…），没有 Agent。**现有替代**：协议层门禁（0.2.5 写域 + 0.2.6 专业门禁，都不可绕过）+ 成员 `toolFilter` 裁剪（0.2.3）。等宿主开放「childId → live Agent」再补执行期拦截。
+
+### 测试
+
+新增 `test/professional-gate.test.mjs`（11 项：清单归一/判定解析三态/真实卡抽条目/漏判与越界判定被拒/pass 与 fail 分流/fail 自动打回/被审未完成拒绝出结论/review_of 不存在/非 review 零变更/edit 改清单后旧判定被拒）+ `test/client-lazy-roles.test.mjs`（6 项：包体与内容不再内嵌清单/prelude 空壳与 build 不再注入/不剪枝安全不变式/缓存策略/宿主端点返回全量清单/files 含 roles.json）。**全套 146/146 通过。**
+
+## [0.2.5] - P1：任务写域（writeScopes）确定性硬拦
+
+对齐路线 §7.5 的 P1 首项 —— 也是本项目**明确超过 DSH 原生**的一项：原生的 `writeScopes` 只产出 advisory 的 `writeScopeWarnings`（提示，不拦），本项目做成**确定性门禁**。
+
+### 新增
+
+- **任务可声明写域 `writeScopes`**（逗号分隔的路径/目录前缀，数组或字符串都吃）：`agents_pixe_task_create` 的 `write_scopes`、`agents_pixe_task_update(action=edit)` 的 `write_scopes`、团队面板 HTTP 路由同样支持。
+- **完成即对账（硬拦）**：任务声明了写域后，`action=complete` **必须**上报 `changed_paths`（实际改动的文件路径），且全部落在域内：
+  - 缺 `changed_paths` → `SCOPE_UNVERIFIED`，任务留在 `in_progress`，错误里写明该带什么；
+  - 有越界路径 → `SCOPE_VIOLATION`，错误里**点名越界文件**，任务不完成；
+  - 全部在域内 → 正常完成，并记录 `lastScopeCheck{at,scopes,changed,ok}` 供审计。
+  - **不允许"悄悄越界再报完成"**：成员要么改回域内，要么让领袖用 `edit + write_scopes` **显式放宽**（放宽动作留痕在任务 `revision` 上）。
+- **路径判定**（`pathInScope`，大小写不敏感、兼容相对/绝对混用）：完全相等 / 以「域/」开头 / 以「/域」结尾 / 中间出现「/域/」四条命中任一即算在域内 —— 取舍是"少误伤正常工作，也不放过明显域外改动"。
+- **派单唤醒语自动带出规则**：`wakeTail` 在任务有写域时会写明「只允许改动 X、完成时必须带 changed_paths，越界或缺字段都会被拒绝」—— 成员不必靠猜。
+- `edit + write_scopes=""` = **取消写域**（传空串与"未传"区分）；未声明写域的任务**零行为变更**（不需要 `changed_paths`）。
+
+### 未做（诚实标注）
+
+- **执行期拦截**（`ctx.tools.guard` 在成员会话里直接拒绝越界编辑）：宿主契约允许（`guard` 经 `agent.ctx` 注册即只作用于该 agent，返回字符串即拒绝执行），但需要成员 live Agent 引用 + 动态任务→作用域映射；本版先做**协议层确定性门禁**（不可绕过，因为有 CAS + 状态机兜底），执行期 guard 留待后续。
+
+### 测试
+
+新增 `test/write-scope-gate.test.mjs`（9 项）：`normScopes`/`normPaths` 归一（含"未上报 vs 上报空"区分）；`pathInScope` 四条命中规则与两个域外反例；缺 `changed_paths` 拒绝且任务不完成；全在域内完成并记 `lastScopeCheck`；有越界路径拒绝并点名违例文件；领袖 `edit` 放宽后通过；`write_scopes=""` 取消写域；未声明写域零行为变更；写域随任务视图可见。**全套 129/129 通过。**
+
+## [0.2.4] - 角色导入作用域：只导入「用户选中的角色」
+
+用户口径：**不全部导入** —— 用户选了什么角色就导入什么角色；编排某支团队时只导入该团队用到的角色。
+
+### 变更
+
+- **`agents_pixe_team_create` / `agents_pixe_team` 的 `team` 改为可选**：**留空 = 用当前会话在像素办公室选中的角色**组队（读 `<DSH_HOME>/agents-pixe/persist.json` 的 `agents-pixe.state.v4` → `sessions[<sid>].active` / `activeLeader`），选中的 leader 自动排到名册第一位。选人是**按会话**读取的，逐次生效、不缓存。
+- **显式不做全库导入**（508 张卡是「可查询的库」，不是默认导入内容）。三种来源各自只导入自己那份：
+
+  | 来源 | 导入内容 | 实测断言 |
+  | --- | --- | --- |
+  | 办公室选人（`team` 留空） | 选中的 N 个角色 | spawn 次数 == N，且未选中角色的名字**不得**出现在任何种子里 |
+  | 预设团队（29 个） | 该预设自己的 roster（3–5 个） | spawn 次数 == min(roster, `max_roles`) |
+  | 角色名列表 | 列出的那几个 | spawn 次数 == 列出的数量 |
+
+- **无选中角色时不静默兜底**：返回可操作指引（「去办公室面板 ＋选人」或「显式传 `team`」），**0 张卡被导入**（不会退回预设、更不会全库）。
+- **建团返回值带来源与导入量**：`来源：办公室选人（只导入 2 张角色卡，未做全库导入）`；预设/列表同理。
+- **系统提示段**写明这条规则（`team` 可留空、**不要全库导入**）。
+- **客户端「🚀 一键编排」**：未命名预设团队时改用新文案「用我在像素办公室选中的角色组队并行完成：」（en: "Have the roles I selected in the Pixel Office form a team and work in parallel on:"）→ 直接走选人作用域，无需再手打团队名。zh/en 键集对齐。
+- 修正文档：`docs/usage.md` 的漂移警示里「办公室选人对齐**未实现**」一条，**0.2.4 起已实现**（改为留空 `team` 即用选人）。
+
+### 测试
+
+新增 `test/roster-scope.test.mjs`（8 项）：办公室选人 == spawn 数且未选中角色不得入种子（全库导入哨兵）；`activeLeader` 排首位；无选人时 0 次 spawn + 明确指引；预设团队只导入自己 roster 且受 `max_roles` 截断；角色名列表只导入列出项；一次性编排路径同样不兜底；`agents_pixe_roles` 空参不导入；选人按会话读取且逐会话生效。**全套 120/120 通过。**
+
+## [0.2.3] - P0「追平两家」三项：种子粒度 / 成员模型档 / 成员直达消息
+
+目标来自三方对比 §7.5 的 P0：**用最小改动追平原生与 dsh-agent-teams 在「token 成本 / 成员模型档 / 成员互通」上的差距**，不改架构、可一键回退。**契约先行**：动手前先用 `cordis_inspect_query` + `app.asar` 源码核实了 0.2.0-rc.2 的真实能力位。
+
+### 新增
+
+- **成员种子粒度 `memberCardMode`（默认 `key`）**：建团队时不再为每个成员注入整张角色卡，默认只注**专业核心三章**（核心使命 / 关键规则 / 技术交付物）+ 卡名与定位；卡结构不含这三章时**回退整卡**（宁可贵，不失专业人格）；超长章切 6K 字符上限。设置页新增「成员种子粒度」开关，可随时切回 `full`（行为与 0.2.2 一致）。
+  **实测（真实 508 张卡）**：命中三章 486 张（95.7%）；整卡合计 5,278,826 字符（≈2.64M tok）→ 种子 1,780,530 字符（≈890K tok），**压缩 66.3%**；平均每张 10,391 → 3,505 字符；样例「代码审查员」3,476 → 522 字符。**4 成员团队（领袖拆解 + 4 成员 + 汇总 = 6 次注入）≈ 31.2K → 10.5K token，单次编排省约 2 万 token。**
+- **成员 LLM 路由 `memberProvider` / `memberModel` / `memberReasoningEffort`**（默认全空 = 快照/继承领袖当前路由，与 dsh-agent-teams 同语义、不弹窗）：经 `subagents.startContinuable({ request: { agentOptions } })` / `subagents.start({ agentOptions })` 下发；成员上如实记录 `model` / `provider` / `reasoningEffort`，`agents_pixe_team_create` 的返回与面板都能看到「谁用的什么模型」。
+- **成员工具白名单 `memberToolAllow` / `memberToolDeny`**（默认全空 = **零行为变更**）：经 `request.toolFilter` 下发，宿主在**子会话自己的 ctx 里 `tools.restrict`** —— 这是「角色 → 权限」能力绑定的物理执行层（例如 `memberToolDeny='edit,write'` 让审查型成员物理上无法改文件）。
+  **防呆**：`allow` 会自动补回「交作业」必需工具（`agents_pixe_task_update` / `agents_pixe_team_message` / `agents_pixe_task_create` / `agents_pixe_roles`），`deny` 里出现必需工具会被剔除并 `console.warn` —— 否则成员无法回报，任务会永久卡在 `in_progress`。
+- **成员 ↔ 成员直达消息**：`agents_pixe_team_message(target="队友名")` 现在**成员之间也能用**，由引擎用**领袖 Agent 引用做邻接代理投递**（`leadAgents` 内存表，`createTeam`/`step`/`report`/`createTask`/`view` 任一处由领袖调用都会自愈登记）。内容带「【来自队友 X 的消息】」前缀，投递记入团队状态 `messages[]`，面板 `/agents-pixe/teams/view` 可读。
+  与「人工转达」的本质区别：**不占领袖 LLM 轮次、不进领袖上下文、立即唤醒目标成员**。领袖引用不在本进程（如重启后成员先发言）时返回可操作错误 `NO_TRANSPORT`，指引改发 `@lead`。
+- 设置页新增「成员种子粒度」行（zh/en 双语，键集对齐）；`/agents-pixe/settings` 诊断新增 `memberPolicy`（当前生效的种子粒度 / agentOptions / toolFilter）。
+
+### 更正（留痕）
+
+- 上一版对比文档 §7.1 曾断言「成员↔成员用 `subagents.sendMessage` 接线即可，~60 行」——**该断言是错的**。实测 `dsh-subagent@0.2.0-rc.2` 的契约原文是 *"Deliver one model-authored message to a **direct continuable child** or to the **sender's direct parent**"*，非直系会在 `deliverToChild` 处失败：兄弟子会话不邻接。真实实现改为「引擎代理投递」（见上），并已把该结论写回文档。
+- 另核实：跨进程后端（ACP）对 `agentOptions`/`toolFilter`/`persona` advertise 全 `false` 且会**抛 `UNSUPPORTED_CAPABILITY`**（不静默忽略）；in-process `spawn`/`fork` advertise 全 `true`。因此实现采用「带能力试一次 → 命中不支持就裸请求降级」，并把降级如实写进成员字段 `degraded`。
+
+### 测试
+
+新增 `test/member-uplift.test.mjs`（14 项）：种子粒度对**真实 508 张卡**的命中率/压缩率门禁；三章保留与叙事章节排除；缺章回退整卡；`full` 模式原样返回；spawn 带 `agentOptions`/`toolFilter`/`persona` 并如实记录；`UNSUPPORTED_CAPABILITY` 降级重试且非能力类错误不吞；成员→队友代理投递（发送者是领袖引用、目标是队友 id、内容标注来源、记入 `messages`）；成员→`@lead` 保持真实发送者且不代理；`NO_TRANSPORT` 报错与领袖调用后自愈；`allow`/`deny` 防呆；Config 新字段与默认值（含 schemastery 3.18.4 的 volatile 活引用解引用）。**全套 112/112 通过。**
+
+## [0.2.2] - 设置服务迁移（dsh ≥0.1.7 的真实断点）
+
+**这是「装了但没功能」的根因修复**：0.2.1 只解决了「插件能不能被装上/挂上」；装上之后，0.2.0-rc.2 上插件的「角色工具」开关仍然打不开、`agents_pixe_*` 工具永不注册。
+
+### 现象与取证
+
+改完 0.2.1 并挂进 desktop profile 后，实机查 `GET /agents-pixe/settings`：
+
+```json
+{ "hasScope": false, "registerErr": "settings.register is not a function", ... }
+```
+
+### 根因
+
+`@deepseek-ai/dsh-settings@0.2.0-rc.2` 的服务形状变了（与 memory-eternal 文档化的同一条演进）：
+
+| 宿主 | `ctx.settings` 形状 | 配置来源 | 写回方式 |
+| --- | --- | --- | --- |
+| dsh ≤0.1.5 | **设置命名空间注册表**：`register(ns, Config, {base})` → `SettingsScope`（get/watch/update） | `settings.yaml` | `scope.update()` |
+| dsh ≥0.1.7（含 0.2.0-rc.2） | **只剩表单服务**：`configure` / `describe` / `update` / `replace` / `mutate`（**没有 `register`**） | loader 按 schema 校验后把 Config 作为**活引用**传进 `apply(ctx, config)`；只有 `schema.meta.volatile` 为真的字段可投影、可写 | `settings.update(<loader 条目 id>, patch, revision)` |
+
+旧代码 `settings.register('agents-pixe', …)` 在新宿主直接抛 `is not a function` → `scope=null` → `registerFace()` 早退 → 工具永不注册，且 UI 上完全静默。
+
+### 修复（照 memory-eternal 的 `bindSettings` 做法）
+
+- **宿主 `lib/index.js`**：
+  - 新增 `export const Config`（`enabled` / `cardMode`），并逐字段打 `meta.volatile`（**不用链式 `.volatile()`**——schemastery 3.18.1 没有该方法，链式调用会在 import 期打挂整包）。
+  - 新增跨版本 `bindSettings(ctx, schema, config)`：有 `register` 走老路；否则用「活引用 + `plainConfig` 深解 volatile 引用 + `loader/volatile-update` 订阅 + `settings.update` 乐观重试」，对外仍是 `get()/watch()` 两个方法。
+  - 调 `settings.configure({auto:false}, ctx.fiber)`：本插件自带「角色办公室」设置页，避免宿主再自动生成一张重复表单。
+  - 新增 `GET/POST /agents-pixe/config`：客户端唯一可用的配置读写通道（GET 返回 live 值 + revision；POST 走 `settings.update`，revision 冲突自动取新值重试一次，并带 `localOnly` 跨源闸门）。
+  - 写成功后立刻 `syncFace()` 对一次开关，不等宿主 volatile 回流的时序。
+  - `/agents-pixe/settings` 诊断新增 `settingsLegacy` / `settingsEntryId` / `settingsWritable`。
+- **客户端 `src/client.main.js`**：`_PIXE_FALLBACK_SCOPE` 由「纯 localStorage」改为**宿主 HTTP 支撑**（读 `/agents-pixe/config`、写 `settings.update`），localStorage 降级为离线镜像；`settingsScope` 客户端服务在 dsh ≥0.1.7 已不存在，缺失不再按错误打印。`lib/client.js` 已重新构建。
+
+### 测试
+
+新增 `test/settings-compat.test.mjs`（11 项）：无 `register` 时 `apply` 不抛；`configure({auto:false})` 被调用；`enabled=true` 注册 8 工具、默认 false 时 0 工具；Config 全字段 volatile；GET/POST `/agents-pixe/config` 的 ns 必须是 loader 条目 id；revision 过期自动重试；跨源 403；写成功后工具立刻注册；**老宿主（有 `register`）行为完全不变**。
+
+## [0.2.1] - DSH 0.2.0-rc.2 兼容修复（门禁 + 挂载）
+
+### 修复（更新后插件「整体消失」的三个根因）
+
+- **peer 区间被 DSH 兼容门禁判死（主因）**：DSH 在安装/激活前用 `@deepseek-ai/dsh-app-boot` 的 `evaluatePluginCompatibility()` 对 `peerDependencies` 里所有 `@deepseek-ai/dsh*` 条目跑 `semver.satisfies(runtimeVersion, range, { includePrerelease: true })`。旧声明 `^0.1.0-rc.7 || ^0.1.1-rc.2` 的 caret 上界被规范化成 `<0.2.0-0`，**永远不满足 `0.2.0-rc.*`**，因此更新到 0.2.0-rc.2 后直接被拒。改为 `>=0.1.0-rc.2 <0.2.0 || >=0.2.0-rc.1 <0.3.0`（显式覆盖 0.2.0 的预发布 tuple，同时不牺牲 0.1.x），并补 `@deepseek-ai/cordis: ^4.0.1`。
+- **没挂进活跃 profile 的 bundles**：当前宿主是桌面壳（`desktopVersion 0.2.0-rc.2`），其 profile 是 `~/.dsh/profiles/desktop`，而本插件只出现在 `profiles/web` 的 `dependencies` 里、且 web 的 `bundles` 也漏了它。DSH 插件树完全由 `dsh.profile.bundles` 组合（`cordis.yml` 恒为 `[]`），不在 bundles 里就是**完全不存在**（装载记录 195 条里没有本插件行）。
+- **manifest 缺少商店/市场元数据**：补齐 `engines.dsh`、`dsh.compatibility`（含 `dshReleases` 兼容清单，显式声明 `0.2.0-rc.2` 兼容）、`dsh.marketplace`、`dsh.permissions`、`dsh.lifecycle`。
+
+### 新增
+
+- **原生 Agent Teams 共存路由**：宿主侧探测 `ctx.get('agentTeams')`（DSH 0.2.0-rc.2 起 `@deepseek-ai/dsh-experimental-agent-team` 真的挂载了，0.1.2 时「仅声明契约、未真正挂载」的前提已过时）。检测到原生能力时，系统提示段改为「**团队协作默认优先原生工具**」（点名 `spawn_teammate` / `send_message` / `list_agents` / `wait_agent` / `interrupt_agent` / `team_task_*`），并限定本项目只负责 4 项独有能力：508 张角色卡人格、29 个预设中文团队、像素办公室可视化、按章节取卡与自定义角色；明确要求**同一次编排两套不混用**。探测不到时行为与 0.1.x 一致；`ctx.get('agentTeams')` 抛错也不影响 `apply`。
+- **诊断端点扩充**：`/agents-pixe/settings` 新增 `nativeAgentTeams` / `nativeAgentTeamsTools` / `teamEngine` / `subagentsStart` / `subagentsContinuable`，用于区分「没挂进 profile」与「挂了但引擎降级」。
+- **兼容回归门禁 `test/dsh-0.2-compat.test.mjs`（8 项）**：按 DSH 同款规则复算全部 `@deepseek-ai/dsh*` peer 区间；用旧写法作为**反面锚点**（断言它必须不满足 0.2.0-rc.2，防回潮）；校验 `engines.dsh` / `dsh.compatibility.dsh` / `dshReleases` / `dsh.bundle.patch` 自洽；断言插件工具名与原生 Agent Teams 工具**零冲突**、且全部 `agents_pixe_` 前缀；断言原生在场时提示段给出「原生优先」路由。
+- **文档**：新增 [docs/dsh-0.2-compat.md](docs/dsh-0.2-compat.md)（根因、实测区间表、API 漂移核查、验证与部署命令、防复发 checklist）与 [docs/agent-teams-comparison.md](docs/agent-teams-comparison.md)（**三方对比**：DSH 原生 Agent Teams ↔ `dsh-agent-teams` ↔ 本项目，含 23 项能力、兼容策略对照、两种劣势分列、场景选型与收敛路线）。
+
+### 核查结论
+
+用真实的 `@deepseek-ai/dsh-llm@0.2.0-rc.2` + `@deepseek-ai/dsh-tools@0.2.0-rc.2` + `@deepseek-ai/cordis@4.0.4` 替换开发依赖后，**原有 78 项测试全绿**——`defineTool` / `BlockAssembler` / `createUserMessage` / `ctx.subagents.start|startContinuable|sendMessage|listChildren|getProvider` / `shell.overlay` / `settings.section` 全部仍在。本次「更新后问题」的性质是**门禁 + 挂载**，不是 API 断层。
+
+### 更正
+
+- 0.1.2 条目里声称的 `agents_pixe_team` 参数 `plan_only`（计划先行）在当前代码中**已不存在**（0.1.9-rc.1 的 host 重构中移除）。该条目仅作历史记录，**勿再按它调用**；如需人工闸门请用 `/agents-pixe/teams/halt` 暂停派单。
+
 ## [0.1.4] - 2026-09-06
 
 ### 稳定版

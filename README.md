@@ -2,19 +2,42 @@
 
 给 DeepSeek Harness 的 Web 主窗口加「**工作角色**」页签 + 对话区「**像素办公室**」浮层——255+ 位专家变成会走会聊的像素小人。**一条命令安装，不改 dsh 源码。**
 
-> 当前稳定版：**v0.1.4**（npm `agent-teams-pixel@0.1.4`，GitHub tag `v0.1.4`）
+> 当前版本：**v0.2.6**（npm `agent-teams-pixel@0.2.6`）。
+> v0.2.1 修 **DSH 0.2.0-rc.2 门禁与挂载**（peer 区间被判死 + 没挂进 profile + 缺 manifest 元数据）。
+> v0.2.2 修 **「装了但没功能」**：dsh ≥0.1.7 的 `ctx.settings` 已无 `register()`、客户端也没有 `settingsScope` —— 改为 `export const Config`（全字段 volatile）+ 跨版本 `bindSettings` + `GET/POST /agents-pixe/config`。
+> v0.2.3 做 **P0 追平**：成员种子默认只注角色卡的**专业核心三章**（真实 508 张卡实测**省 66.3% token**）、成员**模型/推理档**可配（默认快照领袖）、成员**互发消息直达**、成员**工具白名单**（角色→权限的物理层）。`memberCardMode=full` 可一键回退。
+> v0.2.4 定 **角色导入作用域**：**只导入用户选中的角色** —— `agents_pixe_team*` 的 `team` 留空即用「办公室当前会话选中的角色」组队；预设团队只导入自己的 roster，**不做全库导入**；没选人时给指引而不是兜底。
+> v0.2.5 补 **写域硬拦**：任务声明 `write_scopes` 后，完成必须上报 `changed_paths` 且全在域内，越界**拒绝完成并点名违例文件** —— 原生 DSH 的 `writeScopes` 只做 advisory 提示，这一项**本项目更强**。
+> v0.2.6 补 **专业门禁**：`kind="review"` + `review_of` 从**角色卡**抽「关键规则/技术交付物」成验收清单，完成必须逐条判定，任一 fail → 被审任务**自动打回**（下游继续阻塞）—— 判据来自 508 张卡的领域知识，**原生与 dsh-agent-teams 都只有通用流程**。同版把客户端角色清单改为宿主下发 + 缓存，**包体 339 KB → 175.5 KB（-48%）**。
+> 根因/取证/部署见 [docs/dsh-0.2-compat.md](docs/dsh-0.2-compat.md)；三方能力对比与超越路径见 [docs/agent-teams-comparison.md](docs/agent-teams-comparison.md)。
 
 ## ⚡ 安装
 
-官方 DSH CLI 一条命令安装：
+官方 DSH CLI 一条命令安装（**profile 要与你实际在用的宿主一致**）：
 
 ```sh
+# 桌面壳（DeepSeek Harness.exe）用 desktop
+dsh plugin --profile desktop add agent-teams-pixel
+
+# CLI 起的 Web（dsh web）用 web
 dsh plugin --profile web add agent-teams-pixel
 ```
 
 > ⚠️ 请一律用 `dsh plugin` 命令，**不要用 `npx @deepseek-ai/dsh`**——npx 对包名每次都会重新下载一份 dsh，装插件不该重装 dsh。
 >
-> 包内 `dsh.bundle.patch` 声明了 `cordis.patch.yml`，`dsh plugin add` 后插件行自动挂载，无需手改任何 profile 补丁文件。首次安装后**重启 dsh web** 生效（之后改 UI 均为热更新）。
+> 包内 `dsh.bundle.patch` 声明了 `cordis.patch.yml`，`dsh plugin add` 后插件行自动挂载，无需手改任何 profile 补丁文件。首次安装后**重启 dsh 生效**（之后改 UI 均为热更新）。
+>
+> 🔁 **升级 DSH 后插件「整体消失」**：多半是 profile 的 `dsh.profile.bundles` 里没挂它（DSH 插件树完全由 bundles 组合，不在 bundles = 不存在）或 peer 区间不覆盖新运行时。排查与修复见 [docs/dsh-0.2-compat.md](docs/dsh-0.2-compat.md)。
+
+### 🆚 与 DSH 原生 Agent Teams、dsh-agent-teams 的关系
+
+DSH `0.2.0-rc.2` 起内置了官方「智能体团队」（`@deepseek-ai/dsh-experimental-agent-team-profile`，默认已挂进 desktop profile）；社区另有编排能力很完整的 [`NanmiCoder/dsh-agent-teams`](https://github.com/NanmiCoder/dsh-agent-teams)（`@nanmicoder/dsh-agent-teams`，带计划审批与质量门禁）。
+
+本项目从 0.2.1 起会**探测 `ctx.get('agentTeams')`**：检测到原生能力时，系统提示段改为「**团队协作默认优先原生工具**」，本项目只负责另两方没有的部分——**508 张角色卡人格、29 个预设中文团队、像素办公室可视化、自定义角色、角色闲聊**，并要求同一次编排两套不混用；工具前缀（`agents_pixe_*`）与斜杠命令（`/teams`）都与它们不撞名，可以共存。
+
+**三方对比**（23 项能力 + 兼容策略对照 + 两种劣势分列 + 场景选型 + 收敛路线）见 [docs/agent-teams-comparison.md](docs/agent-teams-comparison.md)。
+
+
 
 安装完成后：聊天页出现「工作角色」页签，对话区出现可折叠的像素办公室浮层；模型选择器、会话模型完全不受影响。
 

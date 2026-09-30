@@ -21,7 +21,8 @@ agent-teams-pixel 要让「一个 DeepSeek Harness 会话」变成**领袖 + 多
 拆解为四个可执行的子决策：
 
 1. **成员模型**：驻留可续聊子 Agent = `subagents.startContinuable({provider, label, request:{prompt, parent}})`，状态经 `subagents.listChildren(leadId)` 刷新为 `running/idle/inactive`。
-2. **协调面**：宿主 `lib/index.js` 检测 `ctx.get('subagents')`，注册 6 个细粒度工具（`agents_pixe_team_create` / `agents_pixe_task_create` / `agents_pixe_task_update` / `agents_pixe_team_step` / `agents_pixe_team_message` / `agents_pixe_team_report`）；`agents_pixe_team` 升级为真引擎便捷入口（默认 `plan_only=true` 先出计划草案）；注册 `/agent-teams` 斜杠命令（确定性唤醒）+ 系统提示段。
+2. **协调面**：宿主 `lib/index.js` 检测 `ctx.get('subagents')`，注册 6 个细粒度工具（`agents_pixe_team_create` / `agents_pixe_task_create` / `agents_pixe_task_update` / `agents_pixe_team_step` / `agents_pixe_team_message` / `agents_pixe_team_report`）；`agents_pixe_team` 升级为真引擎便捷入口；注册 `/teams` 斜杠命令（确定性唤醒）+ 系统提示段。
+   > ⚠️ 本节原文声称「默认 `plan_only=true` 先出计划草案」——**该能力从未在代码中实现**（`git show fee1174:lib/index.js` 的 `agents_pixe_team` 参数块可证），属文档虚报，2026-09-30 核对后更正。当前唯一人工闸门是 `GET /agents-pixe/teams/halt`（暂停派单）。
 3. **持久化模型**：文件态 = `<DSH_HOME>/agents-pixe/teams/<leadId>.json`（团队/任务快照 = 磁盘真相）+ `<leadId>.inbox.json`（成员成果）+ `archive/`（完整团队记录）。
 4. **一致性模型**：任务用 `revision` + `expectedRevision` 做 **compare-and-set**（CAS），状态迁移走 **attempt 状态机**（`pending → in_progress → completed`，可 `reopen`/`release`/`reassign`/`delete`）；共享调度器按真实 `running/idle` 状态**原子领取**并唤醒空闲成员。**单 DSH 进程内串行**，不承诺跨进程一致。
 
@@ -72,7 +73,7 @@ agent-teams-pixel 要让「一个 DeepSeek Harness 会话」变成**领袖 + 多
 
 ### 风险 3：token 成本
 每个成员都是一条**独立 LLM 上下文**的续聊子 Agent；每唤醒一次 = 一轮完整 LLM 推理。N 名成员 × M 轮 ≈ N×M 次推理 + 汇总合成。
-- **缓解**：`agents_pixe_team` 默认 `plan_only=true` **先出计划草案、确认后才建团执行**；`report` 仅在**全部任务完成**时调用 LLM 汇总；引擎闲聊走**便宜快速模型 + 滚动小时预算门**（预算耗尽回退罐头台词）；`max_roles` 上限 6、默认 4。
+- **缓解**（2026-09-30 更正：原写的 `plan_only` 从未实现）：`report` 仅在**全部任务完成**时调用 LLM 汇总；引擎闲聊走**便宜快速模型 + 滚动小时预算门**（预算耗尽回退罐头台词）；`max_roles` 上限 8、默认 4；`GET /agents-pixe/teams/halt` 可随时暂停派单。**真正的「计划先行」需重新实现**（见下方决策复审 P4）。
 - **代价**：并行能力与 token 成本**线性正相关**——这是团队模式的固有物理约束，只能靠预算与计划先行缓解，不能消除。
 
 ## 验收（可执行断言）
@@ -80,13 +81,15 @@ agent-teams-pixel 要让「一个 DeepSeek Harness 会话」变成**领袖 + 多
 全部可复现，已在当前仓库跑通：
 
 ```bash
-node --test                        # 42/42 通过（依赖 ready / CAS 冲突 / 转派 / 状态机 / 停驻 / 冷恢复 / 归档）
-node --test test/team-engine-stress.test.mjs   # 15 项高保真压测：冷恢复、转派 CAS、停驻、依赖串并联、max 并发、空闲续领、report 归档、resolvePlanDeps 无环、decomposeFallback 兜底、同一步不重复领、跨步幂等、CAS 防双领
+node --test                                    # 98/98 通过（引擎 42 + 兼容门禁 9 + 设置兼容 11 + 冒烟/渲染/工具面等）
+node --test test/team-engine-stress.test.mjs   # 高保真压测：冷恢复、转派 CAS、停驻、依赖串并联、max 并发、空闲续领、report 归档、resolvePlanDeps 无环、decomposeFallback 兜底、同一步不重复领、跨步幂等、CAS 防双领
 node --test test/register-face.test.mjs        # registerFace 重入不重复注册引擎工具（6 个稳定，无叠加）
-node scripts/build-client.mjs      # 成功产出 lib/client.js（268.5 KB）
+node --test test/dsh-0.2-compat.test.mjs       # DSH 0.2.0-rc.2 兼容门禁（peer 区间/元数据/与原生零撞名）
+node --test test/settings-compat.test.mjs      # 设置服务跨版本兼容（无 register 的新宿主行为）
+node scripts/build-client.mjs                  # 成功产出 lib/client.js（375 KB）
 ```
 
-验证范围：`lib/team-engine.js`（引擎纯逻辑）、`lib/index.js`（工具注册 / `/agent-teams` 命令 / 视图端点）、`src/client.main.js`（TeamPanel + 轮询）。
+验证范围：`lib/team-engine.js`（引擎纯逻辑）、`lib/index.js`（工具注册 / `/teams` 命令 / 视图与配置端点）、`src/client.main.js`（TeamPanel + 轮询 + 设置面板）。
 
 ## Consequences
 
@@ -95,3 +98,28 @@ node scripts/build-client.mjs      # 成功产出 lib/client.js（268.5 KB）
 **变难了**：自己维护一层任务/attempt/调度模型，代码面更大，且分摊了**一致性保障的职责**（CAS 边界、冷恢复、转派非原子窗口都要自己扛）。**接受的前提**是桌面单进程操作者场景，一旦要跨进程/多写者，本设计需重议。
 
 **遗留观察项**：假设宿主未来真的 `mount` 了 `agentTeams`，届时重新对比本自建引擎 vs 官方服务，再决定是否迁移——本 ADR 的「已采纳」状态届时失效。
+
+---
+
+## 决策复审（2026-09-30）：触发条件已达成，本 ADR 的「已采纳」状态失效
+
+**触发**：宿主**已真实挂载** `ctx.agentTeams`（`@deepseek-ai/dsh-experimental-agent-team@0.2.0-rc.2`，随桌面壳 profile 默认开启）；同时社区 `dsh-agent-teams` 已到 `0.1.22` 并明确支持 `0.2.0-rc.2`。上文末尾写明的观察条件已满足，故在此复审。
+
+**逐项重估**：
+
+| 原判断 | 当时依据 | 现在的事实 | 复审判定 |
+| --- | --- | --- | --- |
+| 选项 B（驱动宿主 `agentTeams`）❌ 否决 —— 理由「**幽灵服务**」 | 该服务在部分 dsh 里只有契约、未真正挂载 | **0.2.0-rc.2 已真实挂载**：11 个方法，含 `tryMembership(agent)`（其文档明写「用于**作用域工具安装**与观察者」） | **前提失效**。不再需要「迁移或自建」的二分，而是可以**组合**：机制用宿主，人格用本项目 |
+| 选项 C（移植 dsh-agent-teams 引擎）❌ 否决 —— 理由「11 个工具 + 独立状态目录 + 与像素工具面冲突」 | 移植成本 > 收益 | DAT 现为 **14 个业务工具**，另有 `compatibility.json` + doctor + 质量门禁 + 计划审批 + 原生「团队协作」标签页；本项目自建引擎在 23 项对比里落后 17 项 | **否决仍成立，但理由变了**：不是「不值得移植」，而是**没必要再自建同构能力** —— 直接用或组合，别重写 |
+| 权衡 1（文件态真相源）/ 权衡 2（单进程串行） | ✅ 当时成立 | 对比原生「领袖会话日志 + 可回放」是短板；且 `reconcileProfilePlugins` 会把失联 bundle 从 `bundles` 剔除 | 降级为**老宿主/离线降级路径**，不再作为主路径 |
+| 风险 3 的「计划先行」缓解 | 文档宣称，**代码从未实现** | DAT 有 `approval:"required"`（草案落盘 → GUI 编辑 → 确认才建会话） | **补实现，或直接让位给 DAT** |
+
+**新推荐架构（三层分工，而不是三选一）**：
+
+1. **机制层** → DSH 原生（默认）或 dsh-agent-teams（要质量门禁 / 计划审批 / 成员互通 / 异构模型）
+2. **人格与判据层** → 本项目唯一护城河：508 张角色卡 → ① prompt 种子 ② 工具裁剪 ③ 写域约束 ④ **专业验收清单（质量门禁的判据）**
+3. **表现层** → 本项目像素办公室 + 团队面板，数据源改为**只读投影**机制层的任务/成员状态（去掉第二真相源）
+
+**行动项**：~~P0 追平（种子粒度 / 成员模型档 / 成员互通）~~ **已于 0.2.3 完成** → P1 写域硬拦 + 作用域化工具 → P2 角色卡能力绑定（专业验收判据）+ 计划先行 → P3 面板只读投影 → P4 兼容策略对齐 DAT（`compatibility.json` + `doctor`）。完整逐项路径见 [agent-teams-comparison.md](./agent-teams-comparison.md) §7。
+
+**失效声明**：本 ADR 原「选项 A 已采纳」不再是最优决策，原文作为历史记录保留。
