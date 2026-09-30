@@ -2,7 +2,8 @@
 
 给 DeepSeek Harness 的 Web 主窗口加「**工作角色**」页签 + 对话区「**像素办公室**」浮层——255+ 位专家变成会走会聊的像素小人。**一条命令安装，不改 dsh 源码。**
 
-> 当前版本：**v0.2.6**（npm `agent-teams-pixel@0.2.6`）。
+> 当前版本：**v0.2.7**（npm `agent-teams-pixel@0.2.7`）。
+> v0.2.7 修 **「页签 / 浮层 / 设置分区整块消失」**：客户端 `inject` 里长期留着已不存在的 `settingsScope` —— cordis 的 `inject` 是**硬依赖**，服务不存在就**永不调用 `apply()`**（全静默、无报错）。收紧为 `['slots','locale']`，并加 `test/client-inject-contract.test.mjs` 把「inject ⊆ 运行时服务目录」变成门禁。
 > v0.2.1 修 **DSH 0.2.0-rc.2 门禁与挂载**（peer 区间被判死 + 没挂进 profile + 缺 manifest 元数据）。
 > v0.2.2 修 **「装了但没功能」**：dsh ≥0.1.7 的 `ctx.settings` 已无 `register()`、客户端也没有 `settingsScope` —— 改为 `export const Config`（全字段 volatile）+ 跨版本 `bindSettings` + `GET/POST /agents-pixe/config`。
 > v0.2.3 做 **P0 追平**：成员种子默认只注角色卡的**专业核心三章**（真实 508 张卡实测**省 66.3% token**）、成员**模型/推理档**可配（默认快照领袖）、成员**互发消息直达**、成员**工具白名单**（角色→权限的物理层）。`memberCardMode=full` 可一键回退。

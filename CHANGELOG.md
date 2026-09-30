@@ -4,6 +4,36 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.7] - 修「页签 / 浮层 / 设置分区整块消失」：客户端 inject 里有个已不存在的服务
+
+### 症状
+
+安装后**完全没有画面**：工作角色页签、像素办公室浮层、设置里的「角色办公室」分区**全部不存在**，且无报错、无日志。
+
+### 根因（两个，第 2 个才是代码 bug）
+
+1. **插件当时并未装进活跃 profile**：`~/.dsh/profiles/desktop/package.json` 的 `dependencies` 与 `dsh.profile.bundles` 里都没有 `agent-teams-pixel`（plugin-manager 日志显示 16:35 有一次 `remove agent-teams-pixel`）。DSH 插件树只看 `bundles`，不在里面 = 不存在。
+2. **客户端半边声明了已不存在的服务**（真正的代码 bug）：bundle 尾部为
+   ```js
+   exports.inject = ['settingsScope', 'slots', 'locale'];
+   ```
+   而 dsh 0.2.0-rc.2 的**客户端服务目录**只有 `layout / locale / sessions / slots / theme / timer / uiWorkspace / workspaces` —— **没有 `settingsScope`**（0.1.x 时代有，更新后移除）。
+   cordis 的 `inject` 是**硬依赖**：任一服务不存在，就**永远不会调用插件的 `apply()`**。于是客户端半边既不注册 slot、也不注册设置分区 —— 正好对应「页签 + 浮层 + 配置图标全无且完全静默」。
+   *宿主半边不受影响：它的 `inject = ['tools','systemPrompt','llm','webServer','settings','subagents']` 在 0.2.0-rc.2 全部存在，所以 `/agents-pixe/*` 端点一直是好的 —— 这也是之前只查端点看不出问题的原因。*
+
+### 修复
+
+- `scripts/build-client.mjs`：客户端 `inject` 改为 `['slots', 'locale']`；其余客户端服务一律 `ctx.get()` 容错读取（缺服务只降级，不阻塞挂载）——`settingsScope` 的读取分支保留（老客户端可用），但**不再作为硬依赖**。
+- 新增 `test/client-inject-contract.test.mjs`（3 项门禁）：客户端/宿主 `inject` 的每一项都必须落在**运行时服务目录**内，且不得再出现 `settingsScope`；构建脚本与运行时容错策略一致。服务目录快照取自运行时只读查询（host/client `Service listService`），来源与日期写在测试注释里。
+
+### 教训（已写进防复发清单）
+
+`inject` 里的服务名是**硬依赖契约**：写错一个，插件就静默不挂载。第三方插件在 DSH 升级后**必须重新核对服务目录**，只测自己的 HTTP 端点是不够的。
+
+### 测试
+
+**全套 149/149 通过**（新增 3 项）。
+
 ## [0.2.6] - P2 专业门禁（角色卡 → 验收判据）+ 客户端角色清单懒加载
 
 ### 新增：**专业门禁**（三方对比里两家都没有的能力）

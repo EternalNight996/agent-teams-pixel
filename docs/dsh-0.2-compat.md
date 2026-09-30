@@ -103,6 +103,29 @@ A/B/C 修完并成功挂进 desktop profile 之后，插件**确实活着**了�
 5. **客户端不再有 `settingsScope` 服务**：`cordis_inspect_query client Service` 查无此服务（`no catalogued Service named "settingsScope"`），所以客户端不能靠 `settingsScope.bind({namespace})` 落盘。memory-eternal 的做法是**自带 HTTP API + 宿主侧 `settings.update`**；本项目照此新增 `GET/POST /agents-pixe/config`，客户端把 localStorage 降级为离线镜像。
 
 
+### 根因 E：客户端 `inject` 里的服务已不存在 → 客户端半边**永不挂载**（最隐蔽的一个）
+
+**症状**：装好之后「**工作角色页签 + 像素办公室浮层 + 设置里的角色办公室分区**」**全都没有**，而且**无报错、无日志、F12 也看不到线索**。
+
+**取证**：运行时只读查询客户端服务目录
+
+```
+cordis_inspect_query { platform: "client", provider: "Service", method: "listService" }
+→ layout / locale / sessions / slots / theme / timer / uiWorkspace / workspaces
+```
+
+**没有 `settingsScope`**（0.1.x 时代存在，0.2.0-rc.2 已移除）。而 bundle 尾部当时是：
+
+```js
+exports.inject = ['settingsScope', 'slots', 'locale'];
+```
+
+**cordis 的 `inject` 是硬依赖**：任一服务不存在，插件就**永远不会被 apply** —— 不注册 slot、不注册设置分区，全程静默。
+
+**为什么之前没被发现**：宿主半边 `inject` 里那 6 个服务（`tools`/`systemPrompt`/`llm`/`webServer`/`settings`/`subagents`）在 0.2.0-rc.2 **全部存在**，所以 `/agents-pixe/*` 端点一直是通的 —— 只查端点会得出「插件是好的」的错误结论。
+
+**修复**：客户端 `inject` 收紧为 `['slots', 'locale']`（都确认存在且启动期必需），其余客户端服务一律 `ctx.get()` 容错读取；新增 `test/client-inject-contract.test.mjs` 把「inject ⊆ 运行时服务目录」变成门禁。
+
 ## 3. 修复内容
 
 | 位置 | 变更 |
@@ -210,4 +233,6 @@ Copy-Item .\agent-teams-pixel-0.2.2.tgz $prof\ -Force
 4. **升级 DSH 后必查宿主服务契约再动代码**：`cordis_inspect_query` 的 `host Service <key>` 是权威形状来源（本次就是靠它一次拿到 `settings` 的真实方法表，从而定位根因 D）。第三方插件最容易断的四个面：`settings`、`tools`、`subagents`、客户端 slot。
 5. **profile 迁移要跟着做**：DSH 桌面壳从「web profile 里挂 dsh-desktop-shell」演进到「独立 desktop profile」时，第三方 bundle **不会自动跟过去**（`memory-eternal`、`dsh-ui-three-body`、`dshmarket`、`agent-teams-pixel` 都掉过）。
 6. **不要再把 bundle 只写进 `dependencies`**：DSH 插件树只看 `dsh.profile.bundles`；而 `reconcile()` 会把「在 dependencies 里但声明不出 `dsh.bundle`」的名字从 bundles 中剔除。装完插件后请顺手确认 `bundles` 里有它。
+7. **`inject` 是硬依赖契约，升级后必须逐项核对**：服务名写错/服务被移除 → 插件静默不挂载（无报错）。门禁见 `test/client-inject-contract.test.mjs`（客户端 + 宿主两侧都校验 inject ⊆ 运行时服务目录）。**只测自己的 HTTP 端点会漏掉这一类**（宿主半边好、客户端半边死，端点照样返回 200）。
+8. **排查顺序（UI 全无时）**：① `plugin_manager list_bundles` 看 `bundles` 里有没有它 → ② `list_plugins` 看 `include:agent-teams-pixel` 是否 active → ③ 查两侧服务目录核对 `inject` → ④ 再查端点。**不要从端点开始查。**
 
