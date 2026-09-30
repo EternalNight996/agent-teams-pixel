@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>样板 3 · 时间轴（执行进度甘特）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pixel-theme.css">
+<style>
+  .timeline-wrap { overflow: auto; }
+  .timeline { position: relative; }
+  .tl-svg { position: absolute; inset: 0; overflow: visible; }
+  .tl-label { position: absolute; display: flex; align-items: center; gap: 7px; font-size: 16px; }
+  .tl-bar { position: absolute; width: 118px; }
+  .tl-lane { position: absolute; left: 0; right: 0; border-bottom: 2px solid var(--px-ink); }
+  .tl-tick { position: absolute; top: 0; font-size: 13px; color: var(--dsw-alias-label-secondary); }
+</style>
+</head>
+<body>
+<div class="panel" id="app">
+  <div class="panel-head">
+    <h1 class="panel-title" id="title"></h1>
+    <span class="panel-goal" id="goal"></span>
+    <span class="panel-spacer"></span>
+    <div id="progress"></div>
+  </div>
+  <div class="panel-body">
+    <div id="legend"></div>
+    <div class="timeline-wrap px-grid-bg">
+      <div class="timeline" id="tl"></div>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+(function () {
+  var P = window.PX, D = P.DATA;
+  var LB = 170, BARW = 118, GAPX = 44, LANEH = 64, TOP = 40;
+
+  document.getElementById('title').textContent = '时间轴 · ' + D.teamName;
+  document.getElementById('goal').textContent = D.goal;
+  document.getElementById('progress').innerHTML = P.progressBar().html;
+  document.getElementById('legend').innerHTML = P.legend();
+
+  // 拓扑序（依赖在前）
+  var byId = {}; D.tasks.forEach(function (t) { byId[t.id] = t; });
+  var order = [], done = {}, visiting = {};
+  function visit(id) {
+    if (done[id] || !byId[id] || visiting[id]) return;
+    visiting[id] = true; (byId[id].deps || []).forEach(visit);
+    visiting[id] = false; done[id] = true; order.push(id);
+  }
+  D.tasks.forEach(function (t) { visit(t.id); });
+
+  var xOf = {}; order.forEach(function (id, i) { xOf[id] = i; });
+  var laneOf = {}; D.members.forEach(function (m, i) { laneOf[m.name] = i; });
+
+  var W = LB + order.length * (BARW + GAPX) + 30;
+  var H = TOP + D.members.length * LANEH + 10;
+  var tl = document.getElementById('tl');
+  tl.style.width = W + 'px';
+  tl.style.height = H + 'px';
+
+  var yOf = function (name) { return TOP + (laneOf[name] || 0) * LANEH + 12; };
+
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'tl-svg');
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+
+  // 泳道分隔线
+  D.members.forEach(function (m, i) {
+    var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('class', 'px-edge');
+    line.setAttribute('x1', 0); line.setAttribute('x2', W);
+    var y = TOP + (i + 1) * LANEH;
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    svg.appendChild(line);
+  });
+
+  // 依赖连线（跨泳道）
+  D.tasks.forEach(function (t) {
+    (t.deps || []).forEach(function (d) {
+      var a = byId[d], b = t;
+      if (!a) return;
+      var x1 = LB + xOf[d] * (BARW + GAPX) + BARW, y1 = yOf(a.assignee) + 20;
+      var x2 = LB + xOf[t.id] * (BARW + GAPX), y2 = yOf(t.assignee) + 20;
+      var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('class', 'px-edge');
+      p.setAttribute('data-from', d); p.setAttribute('data-to', t.id);
+      p.setAttribute('d', P.steppedPath(x1, y1, x2, y2));
+      svg.appendChild(p);
+    });
+  });
+  tl.appendChild(svg);
+
+  // 成员标签
+  D.members.forEach(function (m, i) {
+    var lab = document.createElement('div');
+    lab.className = 'tl-label';
+    lab.style.left = '8px'; lab.style.top = (TOP + i * LANEH + 8) + 'px';
+    lab.style.width = (LB - 16) + 'px';
+    lab.innerHTML = '<span class="px-avatar" style="width:24px;height:32px">' + P.avatar(m) + '</span>' +
+      '<span class="px-member-name">' + m.name + '</span>' +
+      '<span class="px-dot px-dot--' + (m.status === 'working' ? 'working' : 'idle') + '"></span>';
+    lab.setAttribute('data-member', m.name);
+    tl.appendChild(lab);
+  });
+
+  // 顶部刻度
+  order.forEach(function (id, i) {
+    var tick = document.createElement('div');
+    tick.className = 'tl-tick';
+    tick.style.left = (LB + i * (BARW + GAPX)) + 'px';
+    tick.textContent = id;
+    tl.appendChild(tick);
+  });
+
+  // 任务条
+  D.tasks.forEach(function (t) {
+    var n = P.taskNode(t);
+    n.className += ' tl-bar';
+    n.style.left = (LB + xOf[t.id] * (BARW + GAPX)) + 'px';
+    n.style.top = yOf(t.assignee) + 'px';
+    tl.appendChild(n);
+  });
+
+  P.bindHighlight(tl);
+  P.bindPin(tl);
+  P.bindMemberHighlight(tl);
+})();
+</script>
+</body>
+</html>

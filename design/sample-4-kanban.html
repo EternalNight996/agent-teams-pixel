@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>样板 4 · 看板（状态流转）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pixel-theme.css">
+<style>
+  .board { display: flex; gap: 12px; align-items: stretch; overflow: auto; }
+  .board-col { flex: 1; min-width: 210px; background: var(--dsw-alias-bg-layer-1); border: 2px solid var(--px-ink); padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+  .board-col-head { display: flex; align-items: center; gap: 6px; font-size: 17px; letter-spacing: .05em; padding-bottom: 6px; border-bottom: 2px solid var(--px-ink); }
+  .board-count { margin-left: auto; font-size: 15px; color: var(--dsw-alias-label-secondary); }
+  .board-card { background: var(--px-paper); border: 2px solid var(--px-ink); box-shadow: var(--px-shadow-soft); padding: 7px 8px; display: flex; flex-direction: column; gap: 5px; }
+  .board-card.is-lit { outline: 2px solid var(--px-cyan); outline-offset: 1px; }
+  .board-card.is-dim { filter: brightness(0.4) saturate(0.4); }
+  .board-card-owner { display: flex; align-items: center; gap: 6px; }
+  .board-deps { display: flex; flex-wrap: wrap; gap: 4px; }
+  .dep-chip { font-size: 13px; color: var(--dsw-alias-label-secondary); border: 1px dashed var(--dsw-alias-border-l1); padding: 0 5px; }
+  .dep-chip.is-miss { color: var(--px-amber); border-style: solid; border-color: var(--px-amber); }
+</style>
+</head>
+<body>
+<div class="panel" id="app">
+  <div class="panel-head">
+    <h1 class="panel-title" id="title"></h1>
+    <span class="panel-goal" id="goal"></span>
+    <span class="panel-spacer"></span>
+    <div id="progress"></div>
+  </div>
+  <div class="panel-body">
+    <div id="legend"></div>
+    <div class="board" id="board"></div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+(function () {
+  var P = window.PX, D = P.DATA;
+
+  document.getElementById('title').textContent = '看板 · ' + D.teamName;
+  document.getElementById('goal').textContent = D.goal;
+  document.getElementById('progress').innerHTML = P.progressBar().html;
+  document.getElementById('legend').innerHTML = P.legend();
+
+  // 列顺序 = 工作流状态
+  var cols = [
+    { key: 'open', label: '待办' },
+    { key: 'running', label: '进行中' },
+    { key: 'blocked', label: '阻塞' },
+    { key: 'completed', label: '已完成' },
+  ];
+  var byStatus = {};
+  D.tasks.forEach(function (t) { (byStatus[t.status] = byStatus[t.status] || []).push(t); });
+
+  var board = document.getElementById('board');
+  cols.forEach(function (c) {
+    var col = document.createElement('div');
+    col.className = 'board-col';
+    var st = P.statusInfo(c.key);
+    col.innerHTML = '<div class="board-col-head"><span class="px-dot px-dot--' + st.cls + '"></span>' + c.label +
+      '<span class="board-count">' + (byStatus[c.key] || []).length + '</span></div>';
+    (byStatus[c.key] || []).forEach(function (t) {
+      col.appendChild(card(t));
+    });
+    if (!(byStatus[c.key] || []).length) {
+      var e = document.createElement('div');
+      e.className = 'px-hint'; e.style.textAlign = 'center'; e.style.padding = '12px 0';
+      e.textContent = '（空）';
+      col.appendChild(e);
+    }
+    board.appendChild(col);
+  });
+
+  function card(t) {
+    var m = P.memberByName(t.assignee);
+    var st = P.statusInfo(t.status);
+    var el = document.createElement('div');
+    el.className = 'board-card px-node px-node--' + st.cls;
+    el.setAttribute('data-task', t.id);
+    el.title = t.id + ' · ' + P.kindLabel(t.kind) + ' · ' + P.statusLabel(t.status);
+    el.innerHTML =
+      '<div class="px-node-id">' + t.id + ' · <span class="px-badge px-badge--kind">' + P.kindLabel(t.kind) + '</span></div>' +
+      '<div class="px-node-subject">' + t.subject + '</div>' +
+      (m ? '<div class="board-card-owner"><span class="px-avatar" style="width:22px;height:29px">' + P.avatar(m) + '</span>' +
+        '<span class="px-member-name" style="font-size:15px">' + m.name + '</span>' +
+        '<span class="px-chip">' + t.model + '</span></div>' : '') +
+      '<div class="board-deps">' + (t.deps || []).map(function (d) {
+        var dt = D.tasks.find(function (x) { return x.id === d; });
+        var miss = !dt || dt.status !== 'completed';
+        return '<span class="dep-chip' + (miss ? ' is-miss' : '') + '">' + (miss ? '等待 ' : '✓ ') + d + '</span>';
+      }).join('') + '</div>';
+    return el;
+  }
+
+  P.bindHighlight(board);
+  P.bindPin(board);
+  P.bindMemberHighlight(document);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主视图 · 光之星座 · agent-teams-pixel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pixel-theme.css">
+<link rel="stylesheet" href="creative.css">
+<style>
+  .panel { max-width: 1240px; margin: 0 auto; }
+  .panel.is-collapsed .panel-toolbar, .panel.is-collapsed .panel-body { display: none; }
+  .rail { width: 250px; flex: none; display: flex; flex-direction: column; gap: 8px; transition: width 0.16s ease; }
+  .rail.is-closed { width: 0; overflow: hidden; opacity: 0; }
+  .rail-head { display: flex; align-items: center; gap: 8px; }
+  .rail-head h3 { margin: 0; font-size: 16px; letter-spacing: 0.08em; color: var(--dsw-alias-label-secondary); text-transform: uppercase; }
+  .icon-btn { cursor: pointer; border: 1px solid rgba(255,255,255,0.12); background: rgba(18,21,31,0.6); color: var(--dsw-alias-label-primary); font-family: var(--px-font); font-size: 15px; padding: 4px 11px; white-space: nowrap; }
+  .icon-btn:hover { color: #fff; border-color: rgba(255,255,255,0.25); }
+  .px-member { cursor: pointer; }
+  .px-member.is-on { border-color: var(--px-violet); box-shadow: inset 0 0 0 1px rgba(124,92,255,0.4); }
+  .px-switcher button.is-on { background: rgba(124,92,255,0.2); color: #fff; }
+  .detail-card { background: rgba(18,21,31,0.6); border: 1px solid rgba(255,255,255,0.09); box-shadow: var(--px-shadow-soft); padding: 10px; display: flex; flex-direction: column; gap: 7px; }
+  .detail-card h4 { margin: 0; font-size: 17px; }
+  .detail-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+  .detail-deps { display: flex; flex-wrap: wrap; gap: 4px; font-size: 13px; }
+  .detail-owner { display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="panel" id="panel">
+  <div class="panel-head">
+    <h1 class="panel-title" id="title"></h1>
+    <span class="panel-goal" id="goal"></span>
+    <span class="panel-spacer"></span>
+    <div id="progress"></div>
+    <button type="button" class="icon-btn" id="collapseBtn" title="收起为窄条">收起 ≫</button>
+  </div>
+  <div class="panel-toolbar">
+    <div class="px-switcher" id="statusFilter" role="tablist" aria-label="状态筛选"></div>
+    <div class="px-switcher" id="zoomCtl">
+      <button type="button" id="zoomOut" title="缩小">−</button>
+      <button type="button" id="zoomReset" title="复位">1:1</button>
+      <button type="button" id="zoomIn" title="放大">＋</button>
+    </div>
+    <span class="panel-spacer"></span>
+    <div id="legend"></div>
+  </div>
+  <div class="panel-body">
+    <div class="layout-row">
+      <div class="px-grid-bg" id="dag" style="flex:1; min-width:0;"></div>
+      <div class="rail" id="rail">
+        <div class="rail-head">
+          <h3 id="memberTitle"></h3>
+          <button type="button" class="icon-btn" id="railToggle" title="折叠成员栏">收</button>
+        </div>
+        <div id="members"></div>
+        <div id="detail"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+(function () {
+  var P = window.PX, D = P.DATA;
+  var panel = document.getElementById('panel');
+  var dagEl = document.getElementById('dag');
+  var membersEl = document.getElementById('members');
+  var detailEl = document.getElementById('detail');
+  var memberTitle = document.getElementById('memberTitle');
+  var railEl = document.getElementById('rail');
+
+  var STATUS = [
+    { k: 'all', label: '全部' },
+    { k: 'running', label: '进行中' },
+    { k: 'blocked', label: '阻塞' },
+    { k: 'open', label: '待办' },
+    { k: 'completed', label: '完成' },
+  ];
+  var state = { status: 'all', member: null, pinned: null, zoom: 1, collapsed: false };
+
+  document.getElementById('title').textContent = '主视图 · ' + D.teamName;
+  document.getElementById('goal').textContent = D.goal;
+  document.getElementById('progress').innerHTML = P.progressBar().html;
+  document.getElementById('legend').innerHTML = P.legend();
+
+  /* ---------- 状态筛选 ---------- */
+  var sf = document.getElementById('statusFilter');
+  STATUS.forEach(function (s, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.textContent = s.label;
+    b.setAttribute('data-status', s.k);
+    b.addEventListener('click', function () {
+      state.status = s.k;
+      sf.querySelectorAll('button').forEach(function (x) { x.classList.toggle('is-active', x === b); });
+      renderDag();
+    });
+    if (i === 0) b.classList.add('is-active');
+    sf.appendChild(b);
+  });
+
+  /* ---------- 成员栏 ---------- */
+  function renderMembers() {
+    memberTitle.textContent = '成员 ' + D.members.length;
+    membersEl.innerHTML = '';
+    D.members.forEach(function (m) {
+      var row = P.memberRow(m);
+      row.classList.toggle('is-on', state.member === m.name);
+      row.addEventListener('click', function () {
+        state.member = (state.member === m.name) ? null : m.name;
+        renderMembers(); renderDag();
+      });
+      membersEl.appendChild(row);
+    });
+  }
+
+  /* ---------- 详情卡 ---------- */
+  function renderDetail() {
+    detailEl.innerHTML = '';
+    if (!state.pinned) return;
+    var t = D.tasks.find(function (x) { return x.id === state.pinned; });
+    if (!t) return;
+    var m = P.memberByName(t.assignee);
+    var st = P.statusInfo(t.status);
+    var deps = (t.deps || []).map(function (d) {
+      var dt = D.tasks.find(function (x) { return x.id === d; });
+      var miss = !dt || dt.status !== 'completed';
+      return '<span class="dep-chip' + (miss ? ' is-miss' : '') + '">' + (miss ? '等待 ' : '✓ ') + d + '</span>';
+    }).join('');
+    var card = document.createElement('div');
+    card.className = 'detail-card';
+    card.innerHTML =
+      '<div class="px-node-id">' + t.id + ' · <span class="px-badge px-badge--kind">' + P.kindLabel(t.kind) + '</span>' +
+      ' <span class="px-badge px-badge--' + st.cls + '">' + P.statusLabel(t.status) + '</span></div>' +
+      '<h4>' + t.subject + '</h4>' +
+      (m ? '<div class="detail-owner"><span class="px-avatar" style="width:24px;height:32px">' + P.avatar(m) + '</span>' +
+        '<span class="px-member-name">' + m.name + '</span><span class="px-chip">' + t.model + '</span></div>' : '') +
+      '<div class="detail-deps">' + (deps || '<span class="px-hint">无依赖</span>') + '</div>';
+    detailEl.appendChild(card);
+  }
+
+  /* ---------- 主视图（泳道 DAG） ---------- */
+  function renderDag() {
+    dagEl.innerHTML = '';
+    var tasks = D.tasks.filter(function (t) {
+      var okStatus = state.status === 'all' || t.status === state.status;
+      var okMember = !state.member || t.assignee === state.member;
+      return okStatus && okMember;
+    });
+    if (tasks.length === 0) {
+      var e = document.createElement('div');
+      e.className = 'px-empty';
+      e.textContent = '没有匹配当前筛选的任务';
+      dagEl.appendChild(e);
+      return;
+    }
+
+    var NW = 150, NH = 70, GAPX = 84, GAPY = 26, PAD = 30;
+    var dep = P.depths(tasks);
+    var cols = {}; tasks.forEach(function (t) { (cols[dep[t.id]] = cols[dep[t.id]] || []).push(t); });
+    var keys = Object.keys(cols).sort(function (a, b) { return a - b; });
+    var pos = {};
+    keys.forEach(function (k, ci) { cols[k].forEach(function (t, ri) { pos[t.id] = { x: PAD + ci * (NW + GAPX), y: PAD + ri * (NH + GAPY) }; }); });
+    var rows = keys.reduce(function (m, k) { return Math.max(m, cols[k].length); }, 0);
+    var W = keys.length * (NW + GAPX) - GAPX + PAD * 2;
+    var H = rows * (NH + GAPY) - GAPY + PAD * 2;
+
+    dagEl.style.position = 'relative';
+    dagEl.style.overflow = 'auto';
+    dagEl.style.width = '100%';
+    dagEl.style.minHeight = (Math.min(H * state.zoom, 520)) + 'px';
+
+    var wrap = document.createElement('div');
+    wrap.style.position = 'relative';
+    wrap.style.width = (W * state.zoom) + 'px';
+    wrap.style.height = (H * state.zoom) + 'px';
+
+    var content = document.createElement('div');
+    content.style.position = 'absolute';
+    content.style.left = '0'; content.style.top = '0';
+    content.style.width = W + 'px'; content.style.height = H + 'px';
+    content.style.transformOrigin = '0 0';
+    content.style.transform = 'scale(' + state.zoom + ')';
+
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'dag-svg');
+    svg.setAttribute('width', W); svg.setAttribute('height', H);
+    tasks.forEach(function (t) {
+      (t.deps || []).forEach(function (d) {
+        var a = pos[d], b = pos[t.id];
+        if (!a || !b) return;
+        var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        p.setAttribute('class', 'px-edge');
+        p.setAttribute('data-from', d); p.setAttribute('data-to', t.id);
+        p.setAttribute('d', P.steppedPath(a.x + NW, a.y + NH / 2, b.x, b.y + NH / 2));
+        svg.appendChild(p);
+      });
+    });
+    content.appendChild(svg);
+
+    keys.forEach(function (k, ci) {
+      var s = document.createElement('div');
+      s.className = 'px-stage-label';
+      s.style.position = 'absolute'; s.style.left = (PAD + ci * (NW + GAPX)) + 'px'; s.style.top = '4px';
+      s.textContent = '阶段 ' + k;
+      content.appendChild(s);
+    });
+
+    tasks.forEach(function (t) {
+      var n = P.taskNode(t);
+      n.style.position = 'absolute';
+      n.style.left = pos[t.id].x + 'px'; n.style.top = pos[t.id].y + 'px';
+      n.style.width = NW + 'px';
+      if (state.pinned === t.id) n.classList.add('is-pinned');
+      n.addEventListener('mouseenter', function () { P.focusTask(dagEl, t.id); });
+      n.addEventListener('mouseleave', function () { P.focusTask(dagEl, state.pinned); });
+      n.addEventListener('click', function () {
+        state.pinned = (state.pinned === t.id) ? null : t.id;
+        renderDag(); renderDetail();
+      });
+      n.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { state.pinned = (state.pinned === t.id) ? null : t.id; renderDag(); renderDetail(); }
+        if (e.key === 'Escape') { state.pinned = null; renderDag(); renderDetail(); }
+      });
+      content.appendChild(n);
+    });
+    wrap.appendChild(content);
+    dagEl.appendChild(wrap);
+
+    // 运行中的边打「活」标
+    dagEl.querySelectorAll('.px-edge[data-from]').forEach(function (e) {
+      var ids = [e.getAttribute('data-from'), e.getAttribute('data-to')];
+      var active = ids.some(function (id) {
+        var t = D.tasks.find(function (x) { return x.id === id; });
+        return t && t.status === 'running';
+      });
+      e.classList.toggle('is-active', active);
+    });
+
+    if (state.pinned) P.focusTask(dagEl, state.pinned);
+  }
+
+  /* ---------- 缩放 ---------- */
+  function zoomBy(d) {
+    state.zoom = Math.min(2, Math.max(0.5, Math.round((state.zoom + d) * 100) / 100));
+    renderDag();
+  }
+  document.getElementById('zoomIn').addEventListener('click', function () { zoomBy(0.25); });
+  document.getElementById('zoomOut').addEventListener('click', function () { zoomBy(-0.25); });
+  document.getElementById('zoomReset').addEventListener('click', function () { state.zoom = 1; renderDag(); });
+
+  /* ---------- 折叠成员栏 / 折叠面板 ---------- */
+  document.getElementById('railToggle').addEventListener('click', function () {
+    railEl.classList.toggle('is-closed');
+    this.textContent = railEl.classList.contains('is-closed') ? '展' : '收';
+  });
+  document.getElementById('collapseBtn').addEventListener('click', function () {
+    state.collapsed = !state.collapsed;
+    panel.classList.toggle('is-collapsed', state.collapsed);
+    this.textContent = state.collapsed ? '展开 ≪' : '收起 ≫';
+  });
+
+  /* ---------- 键盘 ---------- */
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var keys = ['1', '2', '3', '4', '5'];
+    var idx = keys.indexOf(e.key);
+    if (idx >= 0) {
+      var btn = sf.querySelectorAll('button')[idx];
+      if (btn) btn.click();
+    }
+    if (e.key === 'Escape') { state.pinned = null; state.member = null; renderMembers(); renderDag(); renderDetail(); }
+  });
+
+  renderMembers();
+  renderDag();
+  renderDetail();
+})();
+</script>
+</body>
+</html>

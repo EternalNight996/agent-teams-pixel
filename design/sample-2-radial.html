@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>样板 2 · 径向图（指挥中枢）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pixel-theme.css">
+<style>
+  .layout { display: flex; gap: 12px; align-items: flex-start; }
+  .radial-wrap { flex: 1; min-width: 0; }
+  .radial-stage { position: relative; }
+  .radial-svg { position: absolute; inset: 0; overflow: visible; }
+  .radial-node { position: absolute; width: 148px; transform: translate(-50%, -50%); }
+  .center-node { position: absolute; transform: translate(-50%, -50%); width: 150px; text-align: center; }
+  .member-side { width: 250px; flex: none; display: flex; flex-direction: column; gap: 6px; }
+  .member-side h3 { margin: 0 0 2px; font-size: 16px; letter-spacing: .08em; color: var(--dsw-alias-label-secondary); text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="panel" id="app">
+  <div class="panel-head">
+    <h1 class="panel-title" id="title"></h1>
+    <span class="panel-goal" id="goal"></span>
+    <span class="panel-spacer"></span>
+    <div id="progress"></div>
+  </div>
+  <div class="panel-body">
+    <div id="legend"></div>
+    <div class="layout">
+      <div class="radial-wrap px-grid-bg" id="radial"></div>
+      <div class="member-side" id="members"></div>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+(function () {
+  var P = window.PX, D = P.DATA;
+  var W = 720, H = 720, CX = W / 2, CY = H / 2;
+
+  document.getElementById('title').textContent = '径向图 · ' + D.teamName;
+  document.getElementById('goal').textContent = D.goal;
+  document.getElementById('progress').innerHTML = P.progressBar().html;
+  document.getElementById('legend').innerHTML = P.legend();
+
+  var dep = P.depths(D.tasks);
+  var maxDep = Math.max.apply(null, D.tasks.map(function (t) { return dep[t.id]; }));
+  // 环半径：任务按深度落环，成员落最外环
+  var ringR = [CX - 60]; // 中心
+  var taskRingBase = 130, taskRingStep = (CX - 60 - taskRingBase) / Math.max(1, maxDep + 1);
+  var memberR = CX - 40;
+
+  var radial = document.getElementById('radial');
+  radial.style.position = 'relative';
+  radial.style.width = W + 'px';
+  radial.style.height = H + 'px';
+
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'radial-svg');
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+
+  // 圆心角分配：每个深度环上，任务按序均布
+  var pos = {}; // id -> {x,y}
+  var byDep = {};
+  D.tasks.forEach(function (t) { (byDep[dep[t.id]] = byDep[dep[t.id]] || []).push(t); });
+  Object.keys(byDep).forEach(function (k) {
+    var list = byDep[k];
+    var r = taskRingBase + Number(k) * taskRingStep;
+    list.forEach(function (t, i) {
+      var ang = -Math.PI / 2 + (i / list.length) * Math.PI * 2;
+      pos[t.id] = { x: CX + r * Math.cos(ang), y: CY + r * Math.sin(ang), r: r };
+    });
+  });
+
+  // 依赖边（径向直线）
+  D.tasks.forEach(function (t) {
+    (t.deps || []).forEach(function (d) {
+      var a = pos[d], b = pos[t.id];
+      if (!a || !b) return;
+      var p = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      p.setAttribute('class', 'px-edge');
+      p.setAttribute('data-from', d); p.setAttribute('data-to', t.id);
+      p.setAttribute('x1', a.x); p.setAttribute('y1', a.y);
+      p.setAttribute('x2', b.x); p.setAttribute('y2', b.y);
+      svg.appendChild(p);
+    });
+  });
+  radial.appendChild(svg);
+
+  // 中心：领袖
+  var lead = D.members[0];
+  var c = document.createElement('div');
+  c.className = 'center-node';
+  c.innerHTML = '<span class="px-avatar" style="width:44px;height:58px;display:block;margin:0 auto">' + P.avatar(lead) + '</span>' +
+    '<div class="px-node-subject">' + lead.name + '</div>' +
+    '<div class="px-chip">' + lead.model + '</div>';
+  c.style.left = CX + 'px'; c.style.top = CY + 'px';
+  radial.appendChild(c);
+
+  // 任务节点
+  D.tasks.forEach(function (t) {
+    var n = P.taskNode(t);
+    n.className += ' radial-node';
+    n.style.left = pos[t.id].x + 'px';
+    n.style.top = pos[t.id].y + 'px';
+    radial.appendChild(n);
+  });
+
+  // 成员（最外环，非领袖）
+  var others = D.members.slice(1);
+  others.forEach(function (m, i) {
+    var ang = -Math.PI / 2 + (i / others.length) * Math.PI * 2;
+    var x = CX + memberR * Math.cos(ang), y = CY + memberR * Math.sin(ang);
+    var row = P.memberRow(m);
+    row.className += ' radial-node';
+    row.style.position = 'absolute';
+    row.style.left = x + 'px'; row.style.top = y + 'px';
+    row.style.transform = 'translate(-50%, -50%)';
+    row.style.width = '170px';
+    radial.appendChild(row);
+  });
+
+  P.bindHighlight(radial);
+  P.bindPin(radial);
+  P.bindMemberHighlight(document);
+
+  // 径向图成员在环上，右侧不再重复成员列表，改为图例说明
+  var ms = document.getElementById('members');
+  var h = document.createElement('h3'); h.textContent = '拓扑'; ms.appendChild(h);
+  var hint = document.createElement('div');
+  hint.className = 'px-hint';
+  hint.textContent = '中心 = 领袖；内环 = 任务（按依赖深度分层）；外环 = 成员。连线 = 依赖方向，悬停任务高亮整条上下游链。';
+  ms.appendChild(hint);
+})();
+</script>
+</body>
+</html>

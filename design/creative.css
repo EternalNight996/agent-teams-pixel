@@ -1,0 +1,143 @@
+/* 光之星座 skin：覆盖 pixel-theme.css 的 :root 与组件外观，保留布局结构。
+   只在「材质/氛围/光即语义」三层发力，单一紫强调 + 语义 LED，克制。 */
+
+:root {
+  --dsw-alias-bg-base: #0a0c14;
+  --dsw-alias-bg-layer-1: #12151f;
+  --dsw-alias-bg-layer-2: #181c28;
+  --dsw-alias-bg-overlay: rgba(16, 18, 28, 0.82);
+  --dsw-alias-label-primary: #e8ecf6;
+  --dsw-alias-label-secondary: #8b94a8;
+  --dsw-alias-border-l1: #262c3a;
+  --dsw-alias-border-l2: #1a1f2b;
+  --px-ink: #0a0c14;
+  --px-line: #2c3346;
+  --px-grid: rgba(124, 92, 255, 0.07);
+  --px-paper: rgba(24, 28, 40, 0.72);
+  --px-paper-2: #1a1f2b;
+  --px-green: #16a34a;
+  --px-blue: #3b82f6;
+  --px-amber: #f59e0b;
+  --px-slate: #64748b;
+  --px-red: #ef4444;
+  --px-violet: #7c5cff;
+  --px-glow: rgba(124, 92, 255, 0.55);
+  --px-green-glow: rgba(22, 163, 74, 0.35);
+  --px-skin: #f5c98f;
+  --px-hair: #3a2d20;
+  --px-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 18px 50px rgba(0, 0, 0, 0.6);
+  --px-shadow-soft: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- 氛围层：深空 + 星尘 ---------- */
+body {
+  background:
+    radial-gradient(1100px 600px at 15% -12%, rgba(124, 92, 255, 0.14), transparent 60%),
+    radial-gradient(800px 500px at 110% 15%, rgba(56, 120, 255, 0.10), transparent 55%),
+    var(--dsw-alias-bg-base);
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.55), transparent 100%),
+    radial-gradient(1px 1px at 70% 58%, rgba(255, 255, 255, 0.35), transparent 100%),
+    radial-gradient(1px 1px at 40% 82%, rgba(255, 255, 255, 0.42), transparent 100%),
+    radial-gradient(1px 1px at 86% 22%, rgba(255, 255, 255, 0.30), transparent 100%),
+    radial-gradient(1px 1px at 55% 12%, rgba(255, 255, 255, 0.28), transparent 100%);
+  background-size: 420px 420px, 380px 380px, 460px 460px, 520px 520px, 360px 360px;
+  opacity: 0.5;
+}
+body > * { position: relative; z-index: 1; }
+
+/* ---------- 材质层：玻璃面板 ---------- */
+.panel {
+  background: var(--dsw-alias-bg-overlay);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--px-shadow);
+  backdrop-filter: blur(12px);
+}
+.panel-head {
+  background: rgba(24, 28, 40, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.panel-toolbar {
+  background: rgba(18, 21, 31, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.px-switcher {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(18, 21, 31, 0.6);
+  box-shadow: none;
+}
+.px-switcher button { border-right: 1px solid rgba(255, 255, 255, 0.08); color: var(--dsw-alias-label-secondary); }
+.px-switcher button:hover { color: var(--dsw-alias-label-primary); }
+.px-switcher button.is-active {
+  background: rgba(124, 92, 255, 0.20);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(124, 92, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.px-progress-track { background: rgba(10, 12, 20, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+/* ---------- 信息层：玻璃芯片 + LED ---------- */
+.px-node {
+  background: var(--px-paper);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 24px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+}
+/* 状态 = 顶部 2px LED 条 */
+.px-node--running { border-top: 2px solid var(--px-green); }
+.px-node--completed { border-top: 2px solid var(--px-blue); }
+.px-node--blocked { border-top: 2px solid var(--px-amber); }
+.px-node--failed { border-top: 2px solid var(--px-red); }
+.px-node--open { border-top: 2px solid var(--px-slate); }
+
+/* 运行中：一圈绿呼吸光（语义「活」） */
+.px-node--running { animation: px-breathe 2.2s ease-in-out infinite; }
+@keyframes px-breathe {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px var(--px-green-glow), 0 8px 24px rgba(0, 0, 0, 0.35); }
+  50% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px var(--px-green), 0 0 22px var(--px-green-glow), 0 8px 24px rgba(0, 0, 0, 0.35); }
+}
+
+/* 聚焦 / 固定：紫辉光（唯一强调） */
+.px-node.is-lit,
+.px-node.is-pinned {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px var(--px-violet), 0 0 18px var(--px-glow);
+  border-color: rgba(124, 92, 255, 0.7);
+}
+.px-node.is-dim { filter: brightness(0.42) saturate(0.4); }
+
+/* 成员：领袖头像加一圈淡紫辉光 */
+.px-member { background: rgba(18, 21, 31, 0.6); border: 1px solid rgba(255, 255, 255, 0.07); }
+.px-member.is-lead { border-color: rgba(124, 92, 255, 0.5); box-shadow: inset 0 0 0 1px rgba(124, 92, 255, 0.25); }
+
+/* 骨架 / 空 / 错误沿用像素主题，仅调玻璃底 */
+.px-skeleton .sk-line { background: rgba(255, 255, 255, 0.06); }
+
+/* ---------- 依赖边：光流（签名动作） ---------- */
+.px-edge { stroke: var(--px-line); stroke-width: 1.5; }
+/* 聚焦链：紫光沿链流 */
+.px-edge.is-lit {
+  stroke: var(--px-violet);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
+  animation: px-flow 0.9s linear infinite;
+}
+@keyframes px-flow { to { stroke-dashoffset: -24; } }
+/* 运行中的边：绿色静态 tint（语义「活」） */
+.px-edge.is-active { stroke: rgba(22, 163, 74, 0.75); }
+.px-edge.is-dim { stroke: #20263a; }
+
+/* 图例 / 提示沿用 */
+.px-hint { color: var(--dsw-alias-label-secondary); }
+
+/* ---------- 减动效 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .px-node--running { animation: none; }
+  .px-edge.is-lit { animation: none; stroke-dasharray: none; }
+  .view-root, .view-root.is-switching { transition: none; transform: none; opacity: 1; }
+  .px-skeleton .sk-line { animation: none; }
+}

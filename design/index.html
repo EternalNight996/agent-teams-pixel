@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>团队活动面板 · agent-teams-pixel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pixel-theme.css">
+<style>
+  .panel { max-width: 1240px; margin: 0 auto; }
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="panel-head">
+    <h1 class="panel-title" id="title"></h1>
+    <span class="panel-goal" id="goal"></span>
+    <span class="panel-spacer"></span>
+    <div id="progress"></div>
+  </div>
+  <div class="panel-toolbar">
+    <div class="px-switcher" id="switcher" role="tablist" aria-label="视图切换">
+      <button type="button" data-view="swimlane" role="tab" aria-selected="true">泳道</button>
+      <button type="button" data-view="radial" role="tab" aria-selected="false">径向</button>
+      <button type="button" data-view="timeline" role="tab" aria-selected="false">时间轴</button>
+      <button type="button" data-view="kanban" role="tab" aria-selected="false">看板</button>
+    </div>
+    <span class="panel-spacer"></span>
+    <div id="legend"></div>
+  </div>
+  <div class="panel-body">
+    <div class="view-root" id="view"></div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script src="views.js"></script>
+<script>
+(function () {
+  var P = window.PX, D = P.DATA;
+  var viewEl = document.getElementById('view');
+  var buttons = document.querySelectorAll('#switcher button');
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var current = null;
+
+  document.getElementById('title').textContent = '团队活动面板 · ' + D.teamName;
+  document.getElementById('goal').textContent = D.goal;
+  document.getElementById('progress').innerHTML = P.progressBar().html;
+  document.getElementById('legend').innerHTML = P.legend();
+
+  function setActive(name) {
+    buttons.forEach(function (b) {
+      var on = b.getAttribute('data-view') === name;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+  }
+
+  function switchTo(name, animate) {
+    if (name === current) return;
+    current = name;
+    setActive(name);
+    if (animate !== false && !reduce) {
+      viewEl.classList.add('is-switching');
+      setTimeout(function () {
+        P.renderView(name, viewEl);
+        viewEl.classList.remove('is-switching');
+      }, 120);
+    } else {
+      P.renderView(name, viewEl);
+    }
+  }
+
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () { switchTo(b.getAttribute('data-view')); });
+  });
+
+  document.addEventListener('keydown', function (e) {
+    var map = { '1': 'swimlane', '2': 'radial', '3': 'timeline', '4': 'kanban' };
+    if (map[e.key] && !e.metaKey && !e.ctrlKey && !e.altKey) switchTo(map[e.key]);
+  });
+
+  // 初始：骨架加载 → 默认泳道
+  viewEl.innerHTML = '<div class="px-skeleton"><div class="sk-line w80"></div><div class="sk-line w60"></div><div class="sk-line w80"></div><div class="sk-line w60"></div></div>';
+  setTimeout(function () { switchTo('swimlane', false); }, 300);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>样板 1 · 泳道 DAG（依赖流水线）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pixel-theme.css">
+<style>
+  .layout { display: flex; gap: 12px; align-items: flex-start; }
+  .dag-wrap { flex: 1; min-width: 0; }
+  .dag-stage { position: relative; }
+  .dag-svg { position: absolute; inset: 0; overflow: visible; }
+  .dag-node { position: absolute; width: 150px; }
+  .stage-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+  .member-side { width: 250px; flex: none; display: flex; flex-direction: column; gap: 6px; }
+  .member-side h3 { margin: 0 0 2px; font-size: 16px; letter-spacing: .08em; color: var(--dsw-alias-label-secondary); text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="panel" id="app">
+  <div class="panel-head">
+    <h1 class="panel-title" id="title"></h1>
+    <span class="panel-goal" id="goal"></span>
+    <span class="panel-spacer"></span>
+    <div id="progress"></div>
+  </div>
+  <div class="panel-body">
+    <div id="legend"></div>
+    <div class="layout">
+      <div class="dag-wrap px-grid-bg" id="dag"></div>
+      <div class="member-side" id="members"></div>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+<script>
+(function () {
+  var P = window.PX, D = P.DATA;
+  var NW = 150, NH = 70, GAPX = 84, GAPY = 26, PAD = 30;
+
+  document.getElementById('title').textContent = '泳道 DAG · ' + D.teamName;
+  document.getElementById('goal').textContent = D.goal;
+  document.getElementById('progress').innerHTML = P.progressBar().html;
+  document.getElementById('legend').innerHTML = P.legend();
+
+  // 按依赖深度分泳道（阶段列）
+  var dep = P.depths(D.tasks);
+  var cols = {}; D.tasks.forEach(function (t) { (cols[dep[t.id]] = cols[dep[t.id]] || []).push(t); });
+  var keys = Object.keys(cols).sort(function (a, b) { return a - b; });
+  var pos = {}; // id -> {x,y}
+  keys.forEach(function (k, ci) {
+    cols[k].forEach(function (t, ri) { pos[t.id] = { x: PAD + ci * (NW + GAPX), y: PAD + ri * (NH + GAPY) }; });
+  });
+
+  var rows = keys.reduce(function (m, k) { return Math.max(m, cols[k].length); }, 0);
+  var W = keys.length * (NW + GAPX) - GAPX + PAD * 2;
+  var H = rows * (NH + GAPY) - GAPY + PAD * 2;
+
+  var dag = document.getElementById('dag');
+  dag.style.position = 'relative';
+  dag.style.width = W + 'px';
+  dag.style.height = H + 'px';
+
+  // 依赖边（阶梯折线）
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'dag-svg');
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+  D.tasks.forEach(function (t) {
+    (t.deps || []).forEach(function (d) {
+      var a = pos[d], b = pos[t.id];
+      if (!a || !b) return;
+      var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('class', 'px-edge');
+      p.setAttribute('data-from', d); p.setAttribute('data-to', t.id);
+      p.setAttribute('d', P.steppedPath(a.x + NW, a.y + NH / 2, b.x, b.y + NH / 2));
+      svg.appendChild(p);
+    });
+  });
+  dag.appendChild(svg);
+
+  // 阶段标签
+  keys.forEach(function (k, ci) {
+    var s = document.createElement('div');
+    s.className = 'px-stage-label';
+    s.style.position = 'absolute'; s.style.left = (PAD + ci * (NW + GAPX)) + 'px'; s.style.top = '4px';
+    s.textContent = '阶段 ' + k;
+    dag.appendChild(s);
+  });
+
+  // 节点
+  D.tasks.forEach(function (t) {
+    var n = P.taskNode(t);
+    n.style.position = 'absolute';
+    n.style.left = pos[t.id].x + 'px';
+    n.style.top = pos[t.id].y + 'px';
+    n.style.width = NW + 'px';
+    dag.appendChild(n);
+  });
+
+  // 成员树
+  var ms = document.getElementById('members');
+  var h = document.createElement('h3'); h.textContent = '成员 ' + D.members.length; ms.appendChild(h);
+  D.members.forEach(function (m) { ms.appendChild(P.memberRow(m)); });
+
+  P.bindHighlight(dag);
+  P.bindPin(dag);
+  P.bindMemberHighlight(document);
+})();
+</script>
+</body>
+</html>
