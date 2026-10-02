@@ -4,6 +4,23 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.10] - P2 计划先行（信任闸门）：先出草案，人确认后才烧 token
+
+### 新增
+
+- `agents_pixe_team` 两个新参数：`plan_only=true` 只出「成员 + 分工」草案并落盘（**不创建任何成员、成员 token 为 0**）；`plan_confirm=true` 确认既有草案（沿用磁盘草案建团队 + 建任务，不重新拆解、不再花拆解 token）。
+- 引擎草案层：`writePlanDirect / readPlanDirect / discardPlanDirect / confirmPlanDirect`，草案 = `<DSH_HOME>/agents-pixe/teams/<lead>.plan.json`；`view()` 一次返回 `plan`（面板单请求渲染）。
+- 3 个端点：`GET /agents-pixe/teams/plan`、`POST /agents-pixe/teams/plan/confirm`、`POST /agents-pixe/teams/plan/discard`（localOnly 守；原生投影模式下统一拒绝）。
+- 确认保真：`blockedBy` 依赖、`writeScopes` 写域、`kind=review` + `reviewOf` 原样落到任务板。
+
+### 测试
+
+`node --test` **157/157**（新增 `test/plan-draft.test.mjs` 4 项：草案不 spawn、确认建团建任务保真且草案被消费、丢弃、无草案时明确报错）。
+
+### 未做
+
+面板上的「确认草案 / 编辑草案」交互（下一版）。
+
 ## [0.2.9] - P3：团队面板改为「原生团队只读投影」
 
 ### 变更
