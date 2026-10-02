@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>样板 5 · 团队面板 v3（草案确认 / 写向 / 消息流）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pixel-theme.css">
+<style>
+  .ops-src { display: flex; align-items: center; gap: 6px; }
+  .ops-banner { border: 2px solid var(--px-ink); background: var(--px-paper-2); padding: 7px 9px; font-size: 15px; display: flex; gap: 8px; align-items: center; }
+  .ops-banner.is-ro { border-color: var(--px-amber); }
+  .ops-grid { display: grid; grid-template-columns: minmax(220px, 1fr) 2fr; gap: 12px; }
+  .ops-col { background: var(--px-paper); border: 2px solid var(--px-ink); box-shadow: var(--px-shadow-soft); padding: 9px; display: flex; flex-direction: column; gap: 8px; }
+  .ops-col h3 { margin: 0; font-size: 16px; letter-spacing: .05em; border-bottom: 2px solid var(--px-ink); padding-bottom: 5px; }
+  .ops-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ops-btn { font-family: inherit; font-size: 15px; border: 2px solid var(--px-ink); background: var(--px-paper-2); color: var(--dsw-alias-label-primary); padding: 3px 9px; cursor: pointer; box-shadow: var(--px-shadow-soft); }
+  .ops-btn:hover { background: var(--px-violet); color: #fff; }
+  .ops-btn--go { background: var(--px-green); color: #04170b; }
+  .ops-btn--danger:hover { background: var(--px-red); }
+  .ops-btn[disabled] { opacity: .45; cursor: not-allowed; box-shadow: none; }
+  .ops-task { border: 2px solid var(--px-ink); background: var(--px-paper-2); padding: 7px 8px; display: flex; flex-direction: column; gap: 5px; }
+  .ops-task.is-conflict { border-color: var(--px-amber); }
+  .ops-task-sub { font-size: 16px; line-height: 1.2; }
+  .ops-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .ops-dim { color: var(--dsw-alias-label-secondary); font-size: 13px; }
+  .msg { border-left: 4px solid var(--px-line); padding: 5px 8px; display: flex; flex-direction: column; gap: 3px; background: var(--px-paper-2); }
+  .msg.is-peer { border-left-color: var(--px-cyan); }
+  .msg.is-lead { border-left-color: var(--px-amber); }
+  .msg-head { display: flex; gap: 6px; align-items: center; font-size: 14px; }
+  .msg-body { font-size: 15px; line-height: 1.35; }
+  .ops-log { font-size: 13px; color: var(--dsw-alias-label-secondary); min-height: 18px; }
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="panel-head">
+    <h1 class="panel-title">团队面板 v3 · 研发团队</h1>
+    <span class="panel-goal">重构支付模块（草案待确认）</span>
+    <span class="panel-spacer"></span>
+    <span class="ops-src"><span class="px-badge px-badge--idle" id="srcBadge">数据源：本插件引擎</span></span>
+  </div>
+
+  <div class="panel-toolbar">
+    <div class="px-switcher" id="tabs" role="tablist" aria-label="面板状态">
+      <button type="button" data-tab="plan" role="tab" aria-selected="true" class="is-active">① 草案确认</button>
+      <button type="button" data-tab="board" role="tab" aria-selected="false">② 执行 · 写向</button>
+      <button type="button" data-tab="msgs" role="tab" aria-selected="false">③ 消息流</button>
+    </div>
+    <span class="panel-spacer"></span>
+    <span class="px-hint" id="hint">确认前不创建成员、不花成员 token</span>
+  </div>
+
+  <div class="panel-body">
+    <!-- ① 草案确认 -->
+    <section data-view="plan">
+      <div class="ops-banner">🧾 <b>计划草案</b>（plan_only）· 领袖 架构师 · provider spawn · 确认后才建会话
+        <span class="panel-spacer"></span><span class="ops-dim">/agents-pixe/teams/plan</span></div>
+      <div class="ops-grid" style="margin-top:10px">
+        <div class="ops-col">
+          <h3>成员占位（3）</h3>
+          <div class="px-member is-lead"><span class="px-crown">👑</span><span class="px-member-name">架构师</span><span class="px-member-role">出架构方案</span></div>
+          <div class="px-member"><span class="px-member-name">审查员</span><span class="px-member-role">审风险 · 专业门禁</span></div>
+          <div class="px-member"><span class="px-member-name">性能工程师</span><span class="px-member-role">压测与基线</span></div>
+          <p class="px-hint" style="margin:0">成员一行 = 一张角色卡（默认只注专业核心三章，省 token）。</p>
+        </div>
+        <div class="ops-col">
+          <h3>任务 DAG（可编辑）</h3>
+          <div class="ops-task"><div class="ops-row"><span class="px-badge px-badge--open">task-1</span><span class="ops-task-sub">出架构方案</span></div>
+            <div class="ops-row"><span class="ops-dim">写域</span><span class="px-chip">docs/</span><span class="ops-dim">负责人 架构师</span></div></div>
+          <div class="ops-task"><div class="ops-row"><span class="px-badge px-badge--open">task-2</span><span class="ops-task-sub">压测并给出基线</span></div>
+            <div class="ops-row"><span class="ops-dim">依赖</span><span class="px-chip">task-1</span><span class="ops-dim">写域</span><span class="px-chip">bench/</span></div></div>
+          <div class="ops-task"><div class="ops-row"><span class="px-badge px-badge--kind">review</span><span class="ops-task-sub">审查架构与压测结论</span></div>
+            <div class="ops-row"><span class="ops-dim">审查对象</span><span class="px-chip">task-1</span><span class="ops-dim">判据来自角色卡（关键规则/交付物）</span></div></div>
+          <div class="ops-actions" style="margin-top:6px">
+            <button class="ops-btn ops-btn--go" data-act="confirm">✅ 确认并派单</button>
+            <button class="ops-btn" data-act="edit">✏️ 改分工 / 依赖</button>
+            <button class="ops-btn ops-btn--danger" data-act="discard">🗑 丢弃草案</button>
+          </div>
+          <div class="ops-log" id="planLog"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ② 执行 · 写向 -->
+    <section data-view="board" hidden>
+      <div class="ops-banner is-ro" id="roBanner">⚠️ <b>原生团队只读投影</b>：任务板真相在宿主，写操作请切到「可写」或用原生工具 team_task_*。</div>
+      <div class="ops-actions" style="margin:8px 0">
+        <button class="ops-btn" id="modeBtn">切到「可写」演示</button>
+        <button class="ops-btn" data-act="dispatch" disabled>🚀 派单给空闲成员</button>
+        <button class="ops-btn" data-act="create" disabled>＋ 任务</button>
+        <button class="ops-btn" data-act="halt" disabled>⏸ 暂停派单</button>
+      </div>
+      <div class="ops-grid">
+        <div class="ops-col">
+          <h3>成员（原生 agentTeams.listMembers）</h3>
+          <div class="px-member is-lead"><span class="px-crown">👑</span><span class="px-member-name">lead</span><span class="px-member-role">running</span><span class="px-member-model px-chip">deepseek-v4</span></div>
+          <div class="px-member"><span class="px-member-name">审查员</span><span class="px-member-role">idle</span><span class="px-member-model px-chip">flash</span></div>
+          <div class="px-member"><span class="px-member-name">性能工程师</span><span class="px-member-role">running</span><span class="px-member-model px-chip">flash</span></div>
+          <p class="px-hint" style="margin:0">写向动作走 <code>agentTeams.createTask / sendMessage / interrupt</code>；面板不再维护第二份任务板。</p>
+        </div>
+        <div class="ops-col">
+          <h3>任务（原生 listTasks）</h3>
+          <div class="ops-task"><div class="ops-row"><span class="px-badge px-badge--working">task-1</span><span class="ops-task-sub">出架构方案</span><span class="ops-dim">架构师</span></div>
+            <div class="ops-row"><span class="ops-dim">写域 docs/</span></div></div>
+          <div class="ops-task is-conflict"><div class="ops-row"><span class="px-badge px-badge--working">task-2</span><span class="ops-task-sub">压测并给出基线</span><span class="ops-dim">性能工程师</span></div>
+            <div class="ops-row"><span class="px-badge px-badge--blocked">写域与 task-3 重叠</span></div></div>
+          <div class="ops-task"><div class="ops-row"><span class="px-badge px-badge--done">task-3</span><span class="ops-task-sub">补压测脚本</span><span class="ops-dim">性能工程师</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ③ 消息流 -->
+    <section data-view="msgs" hidden>
+      <div class="ops-banner">💬 成员消息（引擎 messages / 原生 mailbox）· 回执状态可见 · 邻接投递不占领袖 LLM 轮次</div>
+      <div class="ops-col" style="margin-top:10px; gap:8px">
+        <div class="msg is-lead"><div class="msg-head"><span class="px-badge px-badge--kind">lead → 审查员</span><span class="ops-dim">17:12:04</span><span class="px-badge px-badge--done">已送达</span></div>
+          <div class="msg-body">task-1 的架构方案已落 docs/arch.md，请按角色卡「关键规则」逐条审。</div></div>
+        <div class="msg is-peer"><div class="msg-head"><span class="px-badge px-badge--kind">审查员 → 性能工程师</span><span class="ops-dim">17:13:20</span><span class="px-badge px-badge--done">已送达</span></div>
+          <div class="msg-body">压测基线请补 P99 与失败率，否则我的第 3 条判据判不了。</div></div>
+        <div class="msg"><div class="msg-head"><span class="px-badge px-badge--kind">性能工程师 → lead</span><span class="ops-dim">17:14:02</span><span class="px-badge px-badge--open">已入队</span></div>
+          <div class="msg-body">基线已出（P99 42ms / 失败率 0.3%），bench/baseline.json。</div></div>
+        <div class="ops-log" id="msgLog"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  var tabs = document.querySelectorAll('#tabs button');
+  var views = document.querySelectorAll('[data-view]');
+  var hint = document.getElementById('hint');
+  var hints = { plan: '确认前不创建成员、不花成员 token', board: '原生任务板：读投影 / 写向（走 agentTeams）', msgs: '消息与回执：谁发给谁、送没送到，一眼可见' };
+  var log = document.getElementById('planLog');
+  var modal = 'ro';
+  function show(name) {
+    tabs.forEach(function (b) { var on = b.getAttribute('data-tab') === name; b.classList.toggle('is-active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+    views.forEach(function (v) { v.hidden = v.getAttribute('data-view') !== name; });
+    hint.textContent = hints[name];
+  }
+  tabs.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-tab')); }); });
+  document.querySelectorAll('[data-act]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var act = btn.getAttribute('data-act');
+      if (act === 'confirm') { log.textContent = 'POST /teams/plan/confirm → 已建 3 名成员 + 3 个任务（草案已消费）'; document.getElementById('srcBadge').textContent = '数据源：本插件引擎（执行中）'; }
+      else if (act === 'edit') { log.textContent = '草案编辑：改分工/依赖后再确认（写回 <lead>.plan.json）'; }
+      else if (act === 'discard') { log.textContent = 'POST /teams/plan/discard → 草案已删除，未创建任何成员'; }
+      else if (act === 'halt') { log.textContent = 'POST /teams/halt → 暂停派单（原生团队走 interrupt/暂停语义）'; }
+      else if (act === 'dispatch') { log.textContent = '派单：agentTeams.createTask + sendMessage（唤醒空闲成员）'; }
+      else if (act === 'create') { log.textContent = '＋任务：agentTeams.createTask（带写域，冲突由宿主提示）'; }
+    });
+  });
+  var modeBtn = document.getElementById('modeBtn');
+  var roBanner = document.getElementById('roBanner');
+  modeBtn.addEventListener('click', function () {
+    modal = modal === 'ro' ? 'rw' : 'ro';
+    var rw = modal === 'rw';
+    roBanner.className = 'ops-banner' + (rw ? '' : ' is-ro');
+    roBanner.innerHTML = rw
+      ? '✅ <b>可写模式</b>：任务创建/派单/暂停走宿主 agentTeams（面板不再自建任务板）。'
+      : '⚠️ <b>原生团队只读投影</b>：任务板真相在宿主，写操作请切到「可写」或用原生工具 team_task_*。';
+    modeBtn.textContent = rw ? '切到「只读投影」演示' : '切到「可写」演示';
+    document.querySelectorAll('[data-act="dispatch"],[data-act="create"],[data-act="halt"]').forEach(function (b) { b.disabled = !rw; });
+    document.getElementById('srcBadge').textContent = rw ? '数据源：原生团队（可写）' : '数据源：原生团队（只读）';
+  });
+  show('plan');
+})();
+</script>
+</body>
+</html>
