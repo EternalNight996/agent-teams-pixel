@@ -4,6 +4,23 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.9] - P3：团队面板改为「原生团队只读投影」
+
+### 变更
+
+- 面板数据源优先取宿主**原生 Agent Teams** 的真相：`ctx.agentTeams.listMembers/listTasks`（lead 会话 → live Agent 走 `ctx.agents`）。原生队里有真实成员（>1）或任务时，`GET /agents-pixe/teams/view` 返回 `source:'native'` + 原生成员/任务 + `readOnly:true`。
+- 没有原生团队（或老宿主没有 `agentTeams`）时**回落**本插件引擎快照，返回 `source:'engine'`，行为与 0.2.8 一致——不抢显示、不回归。
+- 原生投影生效时，5 个写端点（`tasks/create|update|delete`、`halt`、`resume`）一律 `{ok:false}` + 只读提示：任务板真相在宿主，本项目不再维护第二份。
+- 客户端：来源为原生时标题栏显示「原生团队（只读）」，隐藏「暂停/恢复」「+ 任务」按钮。
+
+### 未做（有意）
+
+`agents_pixe_team` 工具本身**不降级**：系统提示段自 0.2.3 起已优先引导原生工具，而角色卡人格/预设团队是本项目护城河，老宿主仍靠它兜底。
+
+### 测试
+
+`node --test` **153/153**（新增 `test/native-projection.test.mjs` 4 项：原生映射、回落引擎、写端点拒绝、无 live Agent 回落）。
+
 ## [0.2.8] - 角色工具默认开启：装完即用，不再需要先开开关
 
 ### 变更

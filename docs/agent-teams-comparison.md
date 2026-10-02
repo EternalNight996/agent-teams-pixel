@@ -238,7 +238,7 @@
 | **P2（剩余）** | 计划先行草案（对齐 DAT 的 `approval:"required"`）；fail 自动开 repair 任务 | 补齐「信任闸门」与自动修复闭环 |
 | **P2 ✅ 已完成（0.2.6）** | 角色卡 → **专业验收判据**（review 任务 acceptance + 逐条判定 + fail 自动打回） | ✅ 形成两家都没有的「专业门禁」 |
 | ⬜ **P1 被宿主契约挡住（已取证）** | `ctx.tools.guard` 执行期拦截 / `tryMembership` 作用域化工具：`startContinuable` 只返回 `{childId,messageId}`，拿不到成员 live Agent → `agent.ctx.tools.*` 不可达 | 已有替代：协议层硬拦（写域 + 专业门禁，不可绕过）+ 成员 `toolFilter` 裁剪 |
-| **P3** | 面板改**只读投影**原生/DAT 的任务板；`agents_pixe_team` 降级为老宿主兜底 | 去掉第二真相源，停止重复实现上游能力 |
+| **P3 ✅ 已完成（0.2.9）** | 面板改**只读投影**原生任务板（`view` 端点优先原生 `listMembers/listTasks`，无原生团队才回落引擎；原生生效时写端点拒绝）；`agents_pixe_team` 保留给老宿主 | 去掉第二真相源 |
 | **P4** | 兼容策略对齐 DAT（`compatibility.json` 单一真相源 + `doctor` bin） | 把「升级就挂」变成可验证流程 |
 | **P5** | 若上游把角色库纳入 `agent-preset-registry`，评估以 preset 形式贡献上游 | 长期免维护 |
 
