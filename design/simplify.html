@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>交互简化对照稿 · agent-teams-pixel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pixel-theme.css">
+<style>
+  /* 只放本对照稿新增的排版；面板 chrome / 徽章 / chip 一律复用 pixel-theme.css */
+  .sim-wrap { max-width: 1340px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .sim-hero .panel-body { gap: 10px; }
+  .sim-lead { margin: 0; font-size: 17px; line-height: 1.5; }
+  .sim-lead b { color: var(--px-violet); }
+  .sim-note { margin: 0; font-size: 14px; color: var(--dsw-alias-label-secondary); }
+  .sim-note code { color: var(--px-cyan); }
+
+  .sim-grid { display: flex; gap: 16px; align-items: flex-start; }
+  .sim-grid[data-mode="before"] #before { flex: 1; }
+  .sim-grid[data-mode="before"] #after { display: none; }
+  .sim-grid[data-mode="after"] #before { display: none; }
+  .sim-grid[data-mode="after"] #after { flex: 1; }
+  .sim-grid[data-mode="side"] #before { width: 640px; flex: none; }
+  .sim-grid[data-mode="side"] #after { flex: 1; min-width: 0; }
+
+  .sim-panel-head { font-size: 17px; letter-spacing: 0.04em; }
+  .sim-tag { border: 2px solid var(--px-ink); box-shadow: var(--px-shadow-soft); padding: 0 7px; font-size: 14px; }
+  .sim-tag--bad { background: var(--px-amber); color: #1c1001; }
+  .sim-tag--good { background: var(--px-violet); color: #fff; }
+
+  /* ---------- 现状面板（静态复刻，只用于量密度） ---------- */
+  .before-cols { display: flex; gap: 8px; align-items: stretch; }
+  .before-divs { width: 118px; flex: none; display: flex; flex-direction: column; gap: 2px; }
+  .before-div { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border: 2px solid transparent; font-size: 14px; cursor: pointer; background: none; color: inherit; font-family: inherit; text-align: left; width: 100%; }
+  .before-div:hover { border-color: var(--dsw-alias-border-l1); }
+  .before-div i { width: 8px; height: 8px; flex: none; }
+  .before-div span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .before-cards { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+  .before-rail { width: 236px; flex: none; border-left: 2px solid var(--px-ink); padding-left: 8px; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+  .rail-label { font-size: 14px; color: var(--dsw-alias-label-secondary); letter-spacing: 0.04em; }
+  .rail-row { display: flex; gap: 5px; align-items: center; }
+  .chip-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+  /* pixel-theme 的 .px-chip 是给 span 写的；用在 button 上要补字体与手型 */
+  button.px-chip { font-family: inherit; cursor: pointer; }
+  button.px-chip:hover { border-color: var(--px-violet); }
+  .mini-input { flex: 1; min-width: 0; background: var(--dsw-alias-bg-layer-1); border: 2px solid var(--dsw-alias-border-l1); color: inherit; font-family: inherit; font-size: 14px; padding: 2px 6px; }
+  .sim-btn { font-family: inherit; font-size: 14px; padding: 3px 9px; border: 2px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); color: inherit; cursor: pointer; box-shadow: var(--px-shadow-soft); }
+  .sim-btn:hover { border-color: var(--dsw-alias-label-secondary); }
+  .sim-btn--primary { background: var(--px-violet); border-color: var(--px-ink); color: #fff; font-size: 16px; padding: 5px 14px; }
+  .sim-btn--dup { background: var(--px-blue); border-color: var(--px-ink); color: #fff; font-size: 15px; padding: 4px 12px; }
+  .sim-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+  .rcard { position: relative; width: 92px; border: 2px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); padding: 6px 3px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; font-family: inherit; color: inherit; font-size: 13px; line-height: 1.25; }
+  .rcard:hover { border-color: var(--px-blue); }
+  .rcard em { font-style: normal; font-size: 20px; }
+  .rcard span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ---------- 简化后面板（可交互的目标态） ---------- */
+  .after-cols { display: flex; gap: 12px; align-items: flex-start; }
+  .after-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  .after-rail { width: 268px; flex: none; display: flex; flex-direction: column; gap: 8px; border-left: 2px solid var(--px-ink); padding-left: 10px; }
+  .agrid { display: flex; flex-wrap: wrap; gap: 7px; align-content: flex-start; }
+  .acard { position: relative; width: 128px; border: 2px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); color: inherit; font-family: inherit; padding: 8px 6px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; text-align: center; }
+  .acard:hover { border-color: var(--px-blue); }
+  .acard.is-on { border-color: var(--px-blue); background: rgba(59, 130, 246, 0.14); }
+  .acard.is-lead { border-color: var(--px-amber); }
+  .acard:focus-visible { outline: 2px solid var(--px-violet); outline-offset: 2px; }
+  .acard em { font-style: normal; font-size: 24px; line-height: 1; }
+  .acard .nm { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+  .acard .dv { font-size: 12px; color: var(--dsw-alias-label-secondary); }
+  .acard .state { font-size: 12px; color: var(--dsw-alias-label-secondary); }
+  .acard.is-on .state { color: var(--px-blue); }
+  .acard .mk { position: absolute; top: 1px; right: 1px; display: flex; gap: 2px; opacity: 0; }
+  .acard:hover .mk, .acard:focus-visible .mk, .acard.is-lead .mk { opacity: 1; }
+  .mkbtn { border: 2px solid var(--px-ink); background: var(--dsw-alias-bg-layer-2); color: inherit; font-family: inherit; font-size: 13px; line-height: 1; padding: 0 3px; cursor: pointer; }
+  .mkbtn--on { background: var(--px-amber); color: #1c1001; }
+
+  .rail-title { font-size: 16px; letter-spacing: 0.05em; }
+  .lead-card { display: flex; align-items: center; gap: 8px; border: 2px solid var(--px-amber); background: rgba(245, 158, 11, 0.12); padding: 6px 8px; }
+  .lead-card .who { display: flex; flex-direction: column; min-width: 0; }
+  .lead-card .who b { font-size: 16px; }
+  .lead-card .who i { font-style: normal; font-size: 13px; color: var(--dsw-alias-label-secondary); }
+  .member-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .what-next { border: 2px dashed var(--dsw-alias-border-l1); padding: 7px 9px; font-size: 14px; color: var(--dsw-alias-label-secondary); line-height: 1.5; }
+  .what-next b { color: var(--dsw-alias-label-primary); }
+
+  .drawer { border: 2px solid var(--px-violet); background: var(--dsw-alias-bg-layer-1); padding: 8px 10px; display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+  .drawer .rail-label { width: 100%; }
+
+  .kbd { display: inline-block; border: 2px solid var(--px-ink); background: var(--dsw-alias-bg-layer-2); box-shadow: var(--px-shadow-soft); padding: 0 6px; font-size: 14px; }
+  .sim-log { border: 2px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); padding: 7px 9px; min-height: 92px; font-size: 14px; display: flex; flex-direction: column; gap: 3px; }
+  .sim-log div { display: flex; gap: 8px; }
+  .sim-log i { font-style: normal; color: var(--dsw-alias-label-secondary); flex: none; }
+
+  .sim-meter { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .sim-stat { border: 2px solid var(--px-ink); background: var(--dsw-alias-bg-layer-1); box-shadow: var(--px-shadow-soft); padding: 3px 10px; font-size: 15px; }
+  .sim-stat b { font-size: 19px; color: var(--px-amber); }
+  .sim-stat--good b { color: var(--px-green); }
+  .sim-stat--key b { color: var(--px-violet); }
+
+  table.sim-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.sim-table th, table.sim-table td { border: 2px solid var(--px-ink); padding: 5px 9px; text-align: left; vertical-align: top; }
+  table.sim-table th { background: var(--dsw-alias-bg-layer-2); }
+  table.sim-table td.bad { color: var(--px-amber); }
+  table.sim-table td.good { color: var(--px-green); }
+
+  .ov-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .ov-box { flex: 1; min-width: 300px; border: 2px solid var(--px-ink); background: var(--dsw-alias-bg-layer-1); }
+  .ov-head { display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: var(--dsw-alias-bg-layer-2); border-bottom: 2px solid var(--px-ink); font-size: 15px; }
+  .ov-body { padding: 8px; display: flex; flex-wrap: wrap; gap: 6px; min-height: 58px; align-content: flex-start; }
+  .ov-dot { width: 9px; height: 9px; background: var(--px-green); display: inline-block; flex: none; }
+
+  .sim-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 40; border: 2px solid var(--px-ink); background: var(--px-violet); color: #fff; box-shadow: var(--px-shadow); padding: 8px 16px; font-size: 16px; max-width: 90vw; }
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sim-toast { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="sim-wrap">
+
+  <header class="panel sim-hero">
+    <div class="panel-head">
+      <h1 class="panel-title">交互简化对照稿 · 工作角色</h1>
+      <span class="panel-goal">同一个能力，两种交互密度</span>
+      <span class="panel-spacer"></span>
+      <div class="px-switcher" id="mode" role="tablist" aria-label="对照模式">
+        <button type="button" data-mode="side" class="is-active" role="tab" aria-selected="true">并排</button>
+        <button type="button" data-mode="before" role="tab" aria-selected="false">现状</button>
+        <button type="button" data-mode="after" role="tab" aria-selected="false">简化后</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <p class="sim-lead">把「三处选人、五个入口、四十个控件」收敛成 <b>一个入口、一个主按钮、三次点击内开工</b>。每多一个控件，都要回答：它替用户省掉了哪一步。</p>
+      <p class="sim-note">口径：右栏是<b>设计目标态</b>（P0-2 / P0-3 / P0-5 / P0-9 仍是方案），左栏是当前 0.2.10 的控件密度复刻。真实落地状态见 <code>docs/ui-interaction-simplify.md</code> 的状态列。</p>
+      <div class="sim-meter" id="meter" aria-live="polite"></div>
+    </div>
+  </header>
+
+  <div class="sim-grid" id="grid" data-mode="side">
+
+    <!-- ============ 现状 ============ -->
+    <section class="panel" id="before" aria-label="现状：工作角色页签">
+      <div class="panel-head">
+        <h2 class="panel-title sim-panel-head">现状 · 工作角色</h2>
+        <span class="panel-goal">0.2.10 · 默认首屏</span>
+        <span class="panel-spacer"></span>
+        <span class="sim-tag sim-tag--bad">控件密集</span>
+      </div>
+      <div class="panel-toolbar">
+        <button type="button" class="sim-btn" data-shell data-why="一次生成完整角色卡，属于低频重操作，却常驻首屏">➕ 新建角色（AI）</button>
+        <button type="button" class="sim-btn" data-shell data-why="低频操作，与「新建角色」并列占位">📥 导入 md</button>
+        <input class="mini-input" data-shell placeholder="搜索角色…" style="max-width:130px" aria-label="现状搜索角色">
+        <button type="button" class="sim-btn sim-btn--primary" data-shell data-why="与右侧「应用到对话」是同一个目标的两种措辞">🚀 一键编排</button>
+        <button type="button" class="sim-btn sim-btn--dup" data-shell data-why="同一动作在本页签出现 3 次（这里、右栏底部、浮层）">✅ 应用到对话</button>
+      </div>
+      <div class="panel-body">
+        <div class="before-cols">
+          <div class="before-divs" id="beforeDivs" role="group" aria-label="角色分部"></div>
+          <div class="before-cards" id="beforeCards"></div>
+          <div class="before-rail">
+            <div class="rail-title">👥 团队编排（0）</div>
+            <div class="rail-label">推荐团队（一键复用）</div>
+            <div class="chip-wrap" id="beforePresets"></div>
+            <div class="rail-row">
+              <input class="mini-input" data-shell placeholder="团队名，保存当前" aria-label="现状团队名">
+              <button type="button" class="sim-btn" data-shell data-why="要保存就得先想名字，默认路径上的一次额外决策">保存</button>
+            </div>
+            <div class="rail-label" style="border:2px dashed var(--dsw-alias-border-l1); padding:5px 7px;">还没有成员，从中间卡片「＋ 加入」</div>
+            <button type="button" class="sim-btn sim-btn--dup" data-shell data-why="与顶部「应用到对话」完全重复">✅ 应用到对话</button>
+            <button type="button" class="sim-btn" data-shell>🗑 清空</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 简化后 ============ -->
+    <section class="panel" id="after" aria-label="简化后：组建">
+      <div class="panel-head">
+        <h2 class="panel-title sim-panel-head">简化后 · 组建</h2>
+        <span class="panel-goal">目标态 · 可交互</span>
+        <span class="panel-spacer"></span>
+        <span class="sim-tag sim-tag--good">单主按钮</span>
+      </div>
+      <div class="panel-toolbar">
+        <input class="mini-input" id="aSearch" data-shell placeholder="搜索角色…（按 / 聚焦）" style="max-width:220px" aria-label="搜索角色">
+        <button type="button" class="sim-btn" id="aMore" data-shell aria-expanded="false" aria-controls="aDrawer" title="低频操作收进这里">⋯ 更多</button>
+        <span class="panel-spacer"></span>
+        <button type="button" class="sim-btn sim-btn--primary" id="aStart" data-shell>🚀 开工</button>
+      </div>
+      <div class="panel-body">
+        <div class="drawer" id="aDrawer" hidden>
+          <span class="rail-label">更多（低频，默认不占首屏）</span>
+          <button type="button" class="sim-btn" data-shell>➕ 新建角色（AI）</button>
+          <button type="button" class="sim-btn" data-shell>📥 导入 md</button>
+          <button type="button" class="sim-btn" data-shell>💾 保存团队</button>
+          <button type="button" class="sim-btn" data-shell>📝 只填入成员清单</button>
+          <button type="button" class="sim-btn" data-shell>📊 本次用量</button>
+          <button type="button" class="sim-btn" data-shell id="aClear">🗑 清空</button>
+        </div>
+        <div class="after-cols">
+          <div class="after-main">
+            <div class="agrid" id="aCards"></div>
+            <div>
+              <div class="rail-label" style="margin-bottom:5px;">推荐团队</div>
+              <div class="chip-wrap" id="aPresetsTop"></div>
+              <div class="chip-wrap" id="aPresetsRest" hidden style="margin-top:5px;"></div>
+              <button type="button" class="sim-btn" id="aAll" data-shell style="margin-top:6px;">全部 29 ▾</button>
+            </div>
+          </div>
+          <div class="after-rail">
+            <div class="rail-title" id="aRailTitle">队伍 · 0 人</div>
+            <div class="rail-label">领袖（在角色卡上点 👑 即可指定，不用跨区域）</div>
+            <div id="aLeader"></div>
+            <div class="rail-label">成员</div>
+            <div class="member-chips" id="aMembers"></div>
+            <div class="what-next" id="aNext"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ 键盘与事件 ============ -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title sim-panel-head">键盘等价路径</h2>
+      <span class="panel-goal">在右栏「简化后」面板里直接按，日志会实时记录</span>
+      <span class="panel-spacer"></span>
+      <span class="sim-tag sim-tag--key" id="stepTag">已用 0 步</span>
+    </div>
+    <div class="panel-body">
+      <div class="sim-meter">
+        <span class="kbd">/</span><span class="rail-label">聚焦搜索</span>
+        <span class="kbd">↑ ↓ ← →</span><span class="rail-label">在角色卡间移动</span>
+        <span class="kbd">Space</span><span class="rail-label">加选 / 取消</span>
+        <span class="kbd">Enter</span><span class="rail-label">开工</span>
+        <span class="kbd">Esc</span><span class="rail-label">清空搜索</span>
+      </div>
+      <div class="sim-log" id="log" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ============ 浮层标题栏 ============ -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title sim-panel-head">像素办公室浮层 · 标题栏 6 → 3</h2>
+      <span class="panel-goal">点右边那个 ⋯ 看收纳效果</span>
+    </div>
+    <div class="panel-body">
+      <div class="ov-row">
+        <div class="ov-box">
+          <div class="ov-head">现状 · 6 个按钮，其中 − ＋ &#8212; 三个形近符号并列</div>
+          <div class="ov-body">
+            <span class="ov-dot"></span><span>像素办公室（3）</span>
+            <span class="panel-spacer"></span>
+            <button type="button" class="sim-btn" data-why="「选人」与「🤝 团队」两个入口做同一件事">选人</button>
+            <button type="button" class="sim-btn">−</button>
+            <button type="button" class="sim-btn">＋</button>
+            <button type="button" class="sim-btn">⚙️</button>
+            <button type="button" class="sim-btn">🤝 团队</button>
+            <button type="button" class="sim-btn" title="折叠（就是它与 −/＋ 撞脸）">&#8212;</button>
+          </div>
+        </div>
+        <div class="ov-box">
+          <div class="ov-head">简化后 · 3 个控件（缩放改 Ctrl + 滚轮，已落地）</div>
+          <div class="ov-body">
+            <span class="ov-dot"></span><span>像素办公室（3）</span>
+            <span class="panel-spacer"></span>
+            <button type="button" class="sim-btn" title="折叠成窄条">&#8212; 收起</button>
+            <button type="button" class="sim-btn" id="ovTeam">🤝 团队</button>
+            <button type="button" class="sim-btn" id="ovMore" aria-expanded="false">⋯</button>
+          </div>
+          <div class="ov-body" id="ovDrawer" hidden style="border-top:2px solid var(--px-ink);">
+            <button type="button" class="sim-btn">缩放 −</button>
+            <button type="button" class="sim-btn">缩放 ＋</button>
+            <button type="button" class="sim-btn">⚙️ 设置</button>
+            <button type="button" class="sim-btn">📊 本次用量（↑12.4k ↓3.1k）</button>
+          </div>
+        </div>
+      </div>
+      <p class="sim-note" style="margin-top:10px;">注：缩放按钮去掉后，<b>Ctrl + 滚轮</b> 已是源码里的真实能力（<code>src/client.main.js</code> 的滚轮 effect，已落地）。</p>
+    </div>
+  </section>
+
+  <!-- ============ 对照表 ============ -->
+  <section class="panel">
+    <div class="panel-head"><h2 class="panel-title sim-panel-head">对照表</h2></div>
+    <div class="panel-body">
+      <table class="sim-table">
+        <thead><tr><th style="width:22%">维度</th><th style="width:39%">现状</th><th style="width:39%">简化后</th></tr></thead>
+        <tbody>
+          <tr><td>可见控件（本稿实测）</td><td class="bad" id="cmpShellBefore">45 个外壳</td><td class="good" id="cmpShellAfter">10 个外壳</td></tr>
+          <tr><td>同一动作的渲染点</td><td class="bad">「应用到对话」×3、「一键编排」×2</td><td class="good">各 ×1（单主按钮「🚀 开工」）</td></tr>
+          <tr><td>预设团队</td><td class="bad">29 个一次铺满，选人之前先做「选团队还是选人」的决策</td><td class="good">首屏 6 个 +「全部 29 ▾」</td></tr>
+          <tr><td>设领袖</td><td class="bad">中栏点卡片 → 右栏找人 → 点「设领袖」（跨区域 2 步）</td><td class="good">卡片上点 👑（1 步，就地）</td></tr>
+          <tr><td>键盘</td><td class="bad">0 处映射，主体交互无 aria-label</td><td class="good">/ ↑↓←→ Space Enter Esc 全链路</td></tr>
+          <tr><td>最短开工路径</td><td class="bad">5 步、跨 3 个区域</td><td class="good">3 步（选人 → 👑 → 开工）</td></tr>
+          <tr><td>破坏性操作</td><td class="bad">原生 confirm() 打断，无撤销</td><td class="good">内联确认 + 3 秒撤销（P0-9 待做）</td></tr>
+          <tr><td>文案</td><td class="bad">提示里写「首选…那里最稳」，把实现缺陷摆给用户</td><td class="good">只说会发生什么</td></tr>
+        </tbody>
+      </table>
+      <p class="sim-note">口径说明：文档 §1 的「40 个控件」按<b>默认首屏</b>计（不含分类栏与角色卡）；本稿为了并排对照，把分类栏与卡片一并计入，所以实测值更大。<b>两边都用同一把尺子量，差值才是结论。</b></p>
+    </div>
+  </section>
+
+</div>
+
+<script src="shared.js"></script>
+<script>
+(function () {
+  var PX = window.PX;
+
+  /* ---------- 数据（与 lib/index.js 的 TEAM_PRESETS 同源，取前 6 + 全集 29） ---------- */
+  var PRESETS = ['研发团队', '科学团队', '航天科研团队', '营销团队', '安全团队', '设计团队', '财务团队', '游戏开发团队', '供应链团队', '测试质量团队', '产品团队', '销售团队', '地理信息团队', '法律合规团队', '人力资源团队', 'AI大模型团队', '智能体编排团队', 'SRE运维团队', '数据工程团队', '区块链Web3团队', '空间计算团队', '跨境电商团队', '短视频直播团队', '内容媒体团队', '企业战略团队', '付费广告团队', '移动应用团队', '物联网团队', '客户成功团队'];
+  var ROLES = [
+    { id: 'pm', name: '高级项目经理', div: '产品', emoji: '🧭', color: '#7c3aed' },
+    { id: 'arch', name: '软件架构师', div: '工程', emoji: '🏛️', color: '#3b82f6' },
+    { id: 'backend', name: '后端架构师', div: '工程', emoji: '🗄️', color: '#22d3ee' },
+    { id: 'frontend', name: '前端开发工程师', div: '工程', emoji: '🎨', color: '#ec4899' },
+    { id: 'reviewer', name: '代码审查员', div: '工程', emoji: '🔍', color: '#f59e0b' },
+    { id: 'product', name: '产品经理', div: '产品', emoji: '📋', color: '#16a34a' },
+    { id: 'ux', name: 'UX 架构师', div: '设计', emoji: '🧩', color: '#a855f7' },
+    { id: 'tester', name: '接口测试工程师', div: '测试', emoji: '🧪', color: '#ef4444' },
+    { id: 'sec', name: '安全工程师', div: '安全', emoji: '🛡️', color: '#64748b' },
+    { id: 'data', name: '数据工程师', div: '数据', emoji: '📊', color: '#0ea5e9' },
+    { id: 'doc', name: '技术文档官', div: '文档', emoji: '📚', color: '#eab308' },
+    { id: 'devops', name: 'DevOps 工程师', div: '工程', emoji: '⚙️', color: '#14b8a6' }
+  ];
+  var TEAM = ['pm', 'arch', 'backend', 'frontend', 'reviewer'];   /* 研发团队 */
+  var DIVS = [
+    { key: '全部', n: 12, c: '#8b93a3' }, { key: '产品', n: 2, c: '#7c3aed' },
+    { key: '工程', n: 4, c: '#3b82f6' }, { key: '设计', n: 1, c: '#a855f7' },
+    { key: '测试', n: 1, c: '#ef4444' }, { key: '安全', n: 1, c: '#64748b' },
+    { key: '文档', n: 1, c: '#eab308' }
+  ];
+
+  var state = { sel: [], leader: null, focus: -1, all: false, steps: 0 };
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- 渲染：现状（静态复刻，只为量密度） ---------- */
+  $('beforeDivs').innerHTML = DIVS.map(function (d) {
+    return '<button type="button" class="before-div" data-shell data-why="分类栏常驻占位，搜索已能做同样的事"><i style="background:' + d.c + '"></i><span>' + d.key + '</span>' + d.n + '</button>';
+  }).join('');
+  $('beforeCards').innerHTML = ROLES.map(function (r) {
+    return '<button type="button" class="rcard" data-why="卡片本身没问题：问题是旁边还站着 45 个外壳控件"><em>' + r.emoji + '</em><span>' + r.name + '</span></button>';
+  }).join('');
+  $('beforePresets').innerHTML = PRESETS.map(function (p) {
+    return '<button type="button" class="px-chip" data-shell data-why="29 个预设一次铺满，用户还没选人就得先做选择">⭐ ' + p + '</button>';
+  }).join('');
+
+  /* ---------- 渲染：简化后（可交互） ---------- */
+  function roleById(id) { for (var i = 0; i < ROLES.length; i++) if (ROLES[i].id === id) return ROLES[i]; return null; }
+
+  function renderCards() {
+    $('aCards').innerHTML = ROLES.map(function (r, i) {
+      var on = state.sel.indexOf(r.id) >= 0;
+      var lead = state.leader === r.id;
+      return '<div class="acard' + (on ? ' is-on' : '') + (lead ? ' is-lead' : '') + '" data-id="' + r.id + '" data-i="' + i + '" tabindex="' + ((state.focus < 0 ? i === 0 : i === state.focus) ? 0 : -1) + '" role="button" aria-pressed="' + on + '">' +
+        '<span class="mk"><button type="button" class="mkbtn' + (lead ? ' mkbtn--on' : '') + '" data-lead="' + r.id + '" title="设为领袖">👑</button>' +
+        (on ? '<button type="button" class="mkbtn" data-drop="' + r.id + '" title="移出队伍">✕</button>' : '') + '</span>' +
+        '<em>' + r.emoji + '</em><span class="nm">' + r.name + '</span><span class="dv">' + r.div + '</span>' +
+        '<span class="state">' + (lead ? '👑 领袖' : (on ? '已在队伍' : '＋ 加入')) + '</span></div>';
+    }).join('');
+  }
+
+  function renderPresets() {
+    var top = PRESETS.slice(0, 6).map(function (p) {
+      return '<button type="button" class="px-chip" data-shell data-team="' + p + '">⭐ ' + p + '</button>';
+    }).join('');
+    var rest = PRESETS.slice(6).map(function (p) {
+      return '<button type="button" class="px-chip" data-shell data-team="' + p + '">⭐ ' + p + '</button>';
+    }).join('');
+    $('aPresetsTop').innerHTML = top;
+    $('aPresetsRest').innerHTML = rest;
+  }
+
+  function renderRail() {
+    var lead = state.leader ? roleById(state.leader) : null;
+    $('aRailTitle').textContent = '队伍 · ' + state.sel.length + ' 人';
+    $('aLeader').innerHTML = lead
+      ? '<div class="lead-card"><span class="px-avatar">' + PX.avatar({ color: lead.color, name: lead.name }) + '</span>' +
+        '<span class="who"><b>' + lead.name + '</b><i>领袖 · 统筹分工与汇总</i></span></div>'
+      : '<div class="what-next">还没指定领袖。鼠标移到任意角色卡上，点右上角 👑。</div>';
+    $('aMembers').innerHTML = state.sel.filter(function (id) { return id !== state.leader; }).map(function (id) {
+      var r = roleById(id);
+      return '<span class="px-chip">' + r.emoji + ' ' + r.name + '</span>';
+    }).join('') || '<span class="rail-label">（空）</span>';
+    var name = lead ? '「' + lead.name + '」领队' : '自动选首位为领袖';
+    $('aNext').innerHTML = state.sel.length === 0
+      ? '先选 1 个以上角色。选好后这里会写清<b>将发生什么</b>，不用猜。'
+      : '将把 <b>' + state.sel.length + ' 人</b>（' + name + '）送进 <b>agents_pixe_team</b> 编排指令，补一句任务即可发送。';
+  }
+
+  function renderStart() {
+    var lead = state.leader ? roleById(state.leader) : (state.sel.length ? roleById(state.sel[0]) : null);
+    var btn = $('aStart');
+    btn.textContent = state.sel.length === 0 ? '🚀 开工（先选人）'
+      : '🚀 开工（' + state.sel.length + ' 人 · ' + (lead ? lead.name : '自动领袖') + '）';
+    btn.disabled = state.sel.length === 0;
+  }
+
+  function renderAll() { renderCards(); renderRail(); renderStart(); updateMeter(); }
+
+  /* ---------- 实测计数（同一把尺子量两边） ---------- */
+  function countCtl(root) {
+    var all = root.querySelectorAll('button, input'), shell = 0, total = 0;
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].closest('[hidden]')) continue;      /* 折叠起来的不算可见控件 */
+      total++;
+      if (all[i].hasAttribute('data-shell')) shell++;
+    }
+    return { shell: shell, total: total };
+  }
+  function updateMeter() {
+    var b = countCtl($('before')), a = countCtl($('after'));
+    $('meter').innerHTML =
+      '<span class="sim-stat">现状：可见控件 <b>' + b.total + '</b> 个（外壳 ' + b.shell + '）</span>' +
+      '<span class="sim-stat sim-stat--good">简化后：可见控件 <b>' + a.total + '</b> 个（外壳 ' + a.shell + '）</span>' +
+      '<span class="sim-stat sim-stat--key">文档口径（默认首屏）40 → ≤12</span>' +
+      '<span class="sim-stat sim-stat--key">已用 <b>' + state.steps + '</b> 步</span>';
+    $('cmpShellBefore').textContent = b.shell + ' 个外壳 / ' + b.total + ' 个可见控件';
+    $('cmpShellAfter').textContent = a.shell + ' 个外壳 / ' + a.total + ' 个可见控件';
+    $('stepTag').textContent = '已用 ' + state.steps + ' 步';
+  }
+
+  /* ---------- 日志 + toast ---------- */
+  var logLines = [];
+  function log(kind, text) {
+    logLines.unshift({ kind: kind, text: text, at: new Date().toLocaleTimeString('zh-CN', { hour12: false }) });
+    if (logLines.length > 7) logLines.pop();
+    $('log').innerHTML = logLines.map(function (l) {
+      return '<div><i>' + l.at + '</i><i>' + l.kind + '</i><span>' + l.text + '</span></div>';
+    }).join('');
+  }
+  var toastTimer = null;
+  function toast(msg) {
+    var el = $('toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'sim-toast';
+      el.id = 'toast';
+      el.setAttribute('role', 'status');
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.hidden = false;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.hidden = true; }, 2600);
+  }
+
+  /* ---------- 交互 ---------- */
+  function step(n) { state.steps += (n || 1); updateMeter(); }
+
+  function toggle(id) {
+    var i = state.sel.indexOf(id);
+    var r = roleById(id);
+    if (i >= 0) {
+      state.sel.splice(i, 1);
+      if (state.leader === id) state.leader = null;
+      log('🖱 点击', '取消 ' + r.name);
+    } else {
+      state.sel.push(id);
+      log('🖱 点击', '加选 ' + r.name);
+    }
+    renderAll();
+  }
+
+  $('aCards').addEventListener('click', function (e) {
+    var mk = e.target.closest('[data-lead]');
+    if (mk) { step(); state.leader = mk.getAttribute('data-lead'); log('🖱 点击', '设领袖 ' + roleById(state.leader).name + '（就地 1 步）'); renderAll(); return; }
+    var drop = e.target.closest('[data-drop]');
+    if (drop) { step(); toggle(drop.getAttribute('data-drop')); return; }
+    var card = e.target.closest('.acard');
+    if (card) { step(); state.focus = Number(card.getAttribute('data-i')); toggle(card.getAttribute('data-id')); }
+  });
+  $('aCards').addEventListener('focusin', function (e) {
+    var card = e.target.closest('.acard');
+    if (!card) return;
+    var i = Number(card.getAttribute('data-i'));
+    if (i === state.focus) return;
+    state.focus = i;
+    /* 就地改 tabindex，不重建 DOM（重建会把刚拿到焦点的元素换掉，焦点环直接消失） */
+    var cards = $('aCards').querySelectorAll('.acard');
+    for (var k = 0; k < cards.length; k++) {
+      cards[k].tabIndex = Number(cards[k].getAttribute('data-i')) === i ? 0 : -1;
+    }
+  });
+
+  function loadTeam(name) {
+    state.sel = TEAM.slice();
+    state.leader = 'pm';
+    renderAll();
+    log('🖱 点击', '载入预设「' + name + '」' + TEAM.length + ' 人');
+    toast('已载入「' + name + '」：' + TEAM.length + ' 人，' + roleById('pm').name + ' 领队');
+  }
+
+  document.addEventListener('click', function (e) {
+    var team = e.target.closest('[data-team]');
+    if (team) { step(); loadTeam(team.getAttribute('data-team')); return; }
+    var why = e.target.closest('[data-why]');
+    if (why) {
+      /* 只有「简化后」面板里的点击才算开工步数；现状面板的点击是在花你的耐心，不算步数 */
+      if (why.closest('#after')) step();
+      log('💡 说明', why.getAttribute('data-why'));
+      toast('现状：' + why.getAttribute('data-why'));
+    }
+  });
+
+  $('aMore').addEventListener('click', function () {
+    step();
+    var d = $('aDrawer');
+    d.hidden = !d.hidden;
+    this.setAttribute('aria-expanded', String(!d.hidden));
+    log('🖱 点击', (d.hidden ? '收起' : '展开') + '「⋯ 更多」（可见控件随之变化）');
+    updateMeter();
+  });
+  $('aAll').addEventListener('click', function () {
+    step();
+    state.all = !state.all;
+    $('aPresetsRest').hidden = !state.all;
+    this.textContent = state.all ? '收起 ▴' : '全部 29 ▾';
+    log('🖱 点击', (state.all ? '展开' : '收起') + '全部预设');
+    updateMeter();
+  });
+  $('aClear').addEventListener('click', function () {
+    step(); state.sel = []; state.leader = null; renderAll(); log('🖱 点击', '清空队伍');
+  });
+  $('ovMore').addEventListener('click', function () {
+    var d = $('ovDrawer');
+    d.hidden = !d.hidden;
+    this.setAttribute('aria-expanded', String(!d.hidden));
+  });
+  $('ovTeam').addEventListener('click', function () { toast('打开团队面板：草案 / 看板 / 消息'); });
+
+  function start() {
+    if (state.sel.length === 0) { toast('先选 1 个以上角色'); return; }
+    step();
+    var lead = state.leader ? roleById(state.leader) : roleById(state.sel[0]);
+    log('🚀 开工', state.sel.length + ' 人 · ' + lead.name + ' 领队（第 ' + state.steps + ' 步）');
+    toast('开工：' + state.sel.length + ' 人送进编排指令，共 ' + state.steps + ' 步');
+  }
+  $('aStart').addEventListener('click', start);
+
+  /* ---------- 键盘等价路径（规则与源码一致：输入框/按钮不抢键） ---------- */
+  function inAfter() {
+    var el = $('after');
+    return !!el && !el.closest('[hidden]') && el.offsetParent !== null;
+  }
+  document.addEventListener('keydown', function (e) {
+    if (!inAfter()) return;
+    var tag = String((e.target && e.target.tagName) || '').toUpperCase();
+    var typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+    if (e.key === '/' && !typing) { e.preventDefault(); $('aSearch').focus(); log('⌨ /', '焦点进入搜索框'); return; }
+    if (e.key === 'Escape') {
+      if (typing || document.activeElement === $('aSearch')) { $('aSearch').value = ''; $('aSearch').blur(); log('⌨ Esc', '清空搜索'); }
+      return;
+    }
+    if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (tag === 'BUTTON' || tag === 'A') return;
+    if (e.key === 'Enter') { e.preventDefault(); start(); return; }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); move(1); return; }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); move(-1); return; }
+    if (e.key === ' ' || e.key === 'Spacebar') {
+      if (state.focus < 0 || !ROLES[state.focus]) return;
+      e.preventDefault();
+      var r = ROLES[state.focus];
+      var k = state.focus;
+      toggle(r.id);
+      /* toggle() 会重建卡片 DOM，把刚聚焦的元素换掉；键盘用户需要把焦点接回来 */
+      var back = $('aCards').querySelector('.acard[data-i="' + k + '"]');
+      if (back) back.focus();
+      log('⌨ Space', (state.sel.indexOf(r.id) >= 0 ? '加选 ' : '取消 ') + r.name);
+      step();
+    }
+  });
+  function move(d) {
+    /* 还没聚焦时按 ↑/↓ 应该落到第一张（-1 + 1 = 0），而不是第二张 */
+    var base = state.focus < 0 ? -1 : state.focus;
+    var k = Math.max(0, Math.min(ROLES.length - 1, base + d));
+    state.focus = k;
+    renderCards();
+    var el = $('aCards').querySelector('.acard[data-i="' + k + '"]');
+    if (el) { el.focus(); log('⌨ ↑↓', '焦点移到 ' + ROLES[k].name); }
+    /* 移动焦点不算「开工步数」：步数只统计真的改变队伍构成的动作 */
+  }
+
+  /* ---------- 对照模式 ---------- */
+  document.querySelectorAll('#mode button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var m = b.getAttribute('data-mode');
+      $('grid').setAttribute('data-mode', m);
+      document.querySelectorAll('#mode button').forEach(function (x) {
+        var on = x === b;
+        x.classList.toggle('is-active', on);
+        x.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      updateMeter();
+    });
+  });
+
+  /* ---------- 首屏：预置「研发团队」演示 3 步开工 ---------- */
+  renderPresets();
+  state.sel = ['pm', 'arch', 'frontend'];
+  state.leader = 'pm';
+  renderAll();
+  log('·', '首屏预置 3 人（研发团队子集）。试试点卡片、点 👑、按 Space，或直接「🚀 开工」。');
+})();
+</script>
+</body>
+</html>

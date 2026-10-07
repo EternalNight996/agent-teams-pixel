@@ -40,6 +40,9 @@ var LOCALE = {
     'r.rolesUnit': '个角色',
     'r.teamPanel': '👥 团队编排（{n}）',
     'r.recTeams': '推荐团队（一键复用）',
+    'r.presetMore': '全部 {n} 个 ▾',
+    'r.presetLess': '收起 ▴',
+    'r.keysHint': '键盘：/ 搜索 · Enter 开工 · Esc 清空 · ↑↓ 选卡 · Space 加选',
     'r.savedTeams': '已保存团队',
     'r.saveTeamPh': '团队名，保存当前',
     'r.leaderCard': '领袖 · 统筹分工与汇总',
@@ -104,7 +107,7 @@ var LOCALE = {
     'o.oneClickLeader': '🚀 一键团队编排（👑{name} 领队）',
     'o.oneClickFirst': '🚀 一键团队编排（{name} 领队）',
     'o.oneClickAuto': '🚀 一键团队编排（自动领袖）',
-    'o.oneClickHint': '一点就把「{name}」送进 agent 编排指令，补一句任务即可发送（首选「工作角色」页签的 🚀 一键编排，那里最稳）。',
+    'o.oneClickHint': '一点就把「{name}」送进编排指令，补一句任务即可发送。',
     'o.msgOk': '✅ 已生成「{name}」编排指令，并已复制；到对话框「黏贴」后补一句任务再发送',
     'o.currentTeam': '当前团队',
     'o.leaderTag': '领袖',
@@ -112,6 +115,140 @@ var LOCALE = {
     'o.outputting': '✍️ 正在输出…',
     'o.foldCanvas': '拖拽缩放',
     'o.teamPanel': '🤝 团队',
+    /* tp — 团队面板（重新设计版：双栏 + 计划闸门 + 状态机文案） */
+    'tp.title': '团队',
+    'tp.entry': '像素团队 ({members})',
+    'tp.viewTeam': '查看团队',
+    'tp.more': '更多',
+    'tp.moreHint': '低频操作收在这里：',
+    'tp.tabOffice': '办公室',
+    'tp.tabTeam': '团队',
+    'tp.entryTitle': '打开像素团队面板（本插件的团队，与宿主的「智能体团队」相互独立，各算各的）',
+    'tp.badge': '{members} 名成员 · {done}/{total} 完成',
+    'tp.badgeStaged': '{members} 名成员 · {tasks} 项计划待确认',
+    'tp.report': '最终报告',
+    'tp.reportCopy': '复制',
+    'tp.reportCopied': '已复制',
+    'tp.reportArchived': '已归档',
+    'tp.reportChars': '字',
+    'tp.oneShotHint': '一次性编排的历史快照（成员已结束，不可派单或暂停）',
+    'tp.roster': '当前阵容',
+    'tp.rosterEmpty': '还没选人。去「工作角色」页签勾几个角色，或点上面的 ⋯ → 选人。',
+    'tp.rosterCleared': '已清空选人与阵容',
+    'tp.clearTitle': '清空选人与阵容（不影响聊天记录）',
+    'tp.pendingTeam': '待建队',
+    'tp.langLabel': '语言',
+    'tp.isLeader': '本会话领袖',
+    'tp.statTitle': '运行统计',
+    'tp.buildTeam': '🚀 用它开工',
+    'tp.buildTeamMsg': '用真团队引擎拆解：',
+    'tp.gotoPick': '👥 选人',
+    'tp.setLeader': '设为领袖',
+    'tp.loading': '正在读取团队状态…',
+    'tp.emptyTitle': '当前会话还没有活动团队。',
+    'tp.emptyHint': '选好了人还没开工。点「用它开工」会把这句指令填进输入框，补上你的目标后发送即可。',
+    'o.firstRun': '第一次用？三步：选人 → 应用到对话 → 让它开工',
+    'o.firstRunPick': '➕ 选人',
+    'o.noSession': '⚠ 还没确定当前会话：选人 / 应用到对话暂不可用。打开一次「工作角色」页签再回来即可绑定。',
+    'tp.readOnlyNative': '原生团队（只读）',
+    'tp.headSum': '{members} 名成员 · {done}/{total} 完成 · {msgs} 条消息',
+    'tp.halt': '⏸ 暂停派单',
+    'tp.haltConfirm': '再点一次确认暂停',
+    'tp.haltTitle': '暂停后 team_step 只刷新成员状态、不派单',
+    'tp.resume': '▶ 恢复派单',
+    'tp.toastHalted': '已暂停派单',
+    'tp.toastResumed': '已恢复派单',
+    'tp.toastFail': '操作失败：{err}',
+    'tp.progress': '总进度',
+    'tp.legendRunning': '进行中 {n}',
+    'tp.legendBlocked': '等待依赖 {n}',
+    'tp.legendDelivered': '已交付 {n}',
+    'tp.segmentsHint': '段数 = 任务数 {n}',
+    'tp.captain': '队长',
+    'tp.captainRole': '拆解 · 派发 · 汇总',
+    'tp.dispatched': '已派发 {tasks} 项任务给 {members} 名成员',
+    'tp.captainWorking': '派单中',
+    'tp.captainDone': '已收齐',
+    'tp.members': '{n} 名成员',
+    'tp.delivered': '已交付',
+    'tp.nextRunning': '正在做 {id}',
+    'tp.nextWaiting': '等待依赖解锁 {id}',
+    'tp.nextSettled': '任务均已经结',
+    'tp.nextIdle': '暂无在办任务',
+    'tp.taskDeps': '任务依赖',
+    'tp.dagHint': '从左到右 = 完成前置后解锁 · 点击查看详情',
+    'tp.filterByMember': '已按「{name}」过滤 · 点击任务取消',
+    'tp.noTasks': '队长正在拆解目标…',
+    'tp.detailHint': '点上面任意任务卡看详情。',
+    'tp.detailCompleted': '已完成并交付',
+    'tp.detailRunning': '正在执行，完成后解锁下游',
+    'tp.detailWaitingOn': '等待 {ids} 完成后开工',
+    'tp.detailReady': '无前置，可立即开工',
+    'tp.detailReadyDeps': '前置已完成，可立即开工',
+    'tp.unlocks': '完成后解锁 {ids}',
+    'tp.noDownstream': '无下游任务',
+    'tp.unclaimed': '未指派',
+    'tp.statusOpen': '待办',
+    'tp.statusRunning': '进行中',
+    'tp.statusBlocked': '等待依赖',
+    'tp.statusCompleted': '已交付',
+    'tp.statusFailed': '失败',
+    'tp.statusCancelled': '已取消',
+    'tp.sum.staged': '{n} 项计划等待确认',
+    'tp.sum.waitingBreakdown': '队长正在拆解目标…',
+    'tp.sum.waitingSchedule': '等待调度',
+    'tp.sum.allDelivered': '全部 {n} 项任务已交付',
+    'tp.sum.blockedAndRunning': '进行中 {run}，等待依赖 {blocked}',
+    'tp.sum.running': '正在执行 {ids}',
+    'tp.sum.ready': '就绪待派：{ids}',
+    'tp.sum.blocked': '等待依赖：{ids}',
+    'tp.sum.failedSettled': '{n} 项失败已结算',
+    'tp.planTitle': '执行前计划审查',
+    'tp.planBadge': '待确认',
+    'tp.planSub': '{members} 名成员 · {tasks} 项任务 · {deps} 条依赖',
+    'tp.planHint': '成员尚未创建、任务尚未调度。可直接调整计划，也可返回对话告诉队长哪里要改。',
+    'tp.flowReview': '审查计划',
+    'tp.flowSpawn': '创建成员',
+    'tp.flowRun': '开始执行',
+    'tp.planMembers': '成员与模型路由',
+    'tp.planTasks': '任务与依赖',
+    'tp.planTaskCount': '{tasks} 项任务 · {deps} 条依赖',
+    'tp.planNoDeps': '无依赖',
+    'tp.planDep': '依赖 {ids}',
+    'tp.planAddPh': '新任务名称',
+    'tp.planAdd': '添加任务',
+    'tp.planNeedName': '先填任务名',
+    'tp.planReady': '计划检查完毕?',
+    'tp.planReadyHint': '确认后将创建 {members} 名成员并调度 {tasks} 项任务。',
+    'tp.approve': '确认并启动团队',
+    'tp.approving': '正在创建成员…',
+    'tp.continue': '返回对话修改',
+    'tp.continueHint': '请修改这份计划：',
+    'tp.discard': '放弃本次计划',
+    'tp.discardArmed': '确认放弃',
+    'tp.discardConfirm': '再点一次确认放弃：草案归档，轮次中止，不会自动重建。',
+    'tp.toastApproved': '已确认并启动：创建 {members} 名成员，调度 {tasks} 项任务',
+    'tp.toastDiscarded': '已放弃本次计划',
+    'tp.toastTaskAdded': '已加入计划：{id}',
+    'tp.preview': '计划预览',
+    'tp.previewHint': '确认前不创建子会话、不领取任务、不花成员 token。',
+    'tp.cardMembers': '{n} 名成员',
+    'tp.confirmHint': '确认草案并启动团队',
+    'tp.confirmFallback': '面板不能直接建成员（宿主 spawn 需要真实会话上下文）：已把确认指令填进输入框，发送即可启动。面板里改过的分工请在发送时补一句。原因：{err}',
+    'tp.resetView': '重置位置与缩放',
+    'tp.applyNone': '✅ 应用到对话（先选人）',
+    'tp.applyTitle': '把当前草稿置为本会话的活动名册，并把成员清单填进输入框，随后跳到对话',
+    'tp.applied': '已应用 {n} 人到对话',
+    /* tv — 团队工具在对话里的专用卡片（tool.call.toolview，key = wire 工具名） */
+    'tv.preparing': '准备中…',
+    'tv.team': '团队编排',
+    'tv.roles': '取角色卡',
+    'tv.task': '任务板',
+    'tv.openPanel': '查看团队',
+    'tv.raw': '原始参数与结果',
+    'tv.noTeam': '本会话还没有团队快照',
+    'tv.rolesHint': '角色卡已返回给模型；正文不在这里重复展开，避免又把 JSON 摊开。',
+    'tv.noArgs': '（无参数）',
     /* st — 设置分区（PixeSettingsSection） */
     'st.nav': '角色办公室',
     'st.toolRoles': '角色工具',
@@ -228,6 +365,9 @@ var LOCALE = {
     'r.rolesUnit': 'roles',
     'r.teamPanel': '👥 Team ({n})',
     'r.recTeams': 'Preset teams (one-click)',
+    'r.presetMore': 'All {n} ▾',
+    'r.presetLess': 'Less ▴',
+    'r.keysHint': 'Keys: / search · Enter start · Esc clear · ↑↓ move · Space pick',
     'r.savedTeams': 'Saved teams',
     'r.saveTeamPh': 'Team name (save current)',
     'r.leaderCard': 'Lead · Coordinates & synthesizes',
@@ -290,7 +430,7 @@ var LOCALE = {
     'o.oneClickLeader': '🚀 Orchestrate (👑{name})',
     'o.oneClickFirst': '🚀 Orchestrate ({name})',
     'o.oneClickAuto': '🚀 Orchestrate (auto-lead)',
-    'o.oneClickHint': 'Sends "{name}" into the agent orchestration instruction; add the goal and send. (The Working Roles tab\'s 🚀 Orchestrate is the most reliable path.)',
+    'o.oneClickHint': 'Sends "{name}" into the orchestration instruction; add the goal and send.',
     'o.msgOk': '✅ Generated orchestration for "{name}" and copied to clipboard — paste it in the composer and add the goal',
     'o.currentTeam': 'Current team',
     'o.leaderTag': 'Lead',
@@ -298,6 +438,139 @@ var LOCALE = {
     'o.outputting': '✍️ generating…',
     'o.foldCanvas': 'Drag to resize',
     'o.teamPanel': '🤝 Team',
+    /* tp — 团队面板（重新设计版：双栏 + 计划闸门 + 状态机文案） */
+    'tp.title': 'Team',
+    'tp.viewTeam': 'View team',
+    'tp.more': 'More',
+    'tp.moreHint': 'Low-frequency controls:',
+    'tp.tabOffice': 'Office',
+    'tp.tabTeam': 'Team',
+    'tp.entryTitle': 'Open the pixel team panel (this plugin team; independent of the host agent teams)',
+    'tp.entry': 'Pixel team ({members})',
+    'tp.badge': '{members} members · {done}/{total} done',
+    'tp.badgeStaged': '{members} members · {tasks} planned',
+    'tp.report': 'Final report',
+    'tp.reportCopy': 'Copy',
+    'tp.reportCopied': 'Copied',
+    'tp.reportArchived': 'Archived',
+    'tp.reportChars': 'chars',
+    'tp.oneShotHint': 'Read-only snapshot of a one-shot run (members finished; no dispatch or pause)',
+    'tp.roster': 'Current roster',
+    'tp.rosterEmpty': 'Nobody picked yet. Use the Working Roles tab, or ⋯ then pick roles.',
+    'tp.rosterCleared': 'Selection and roster cleared',
+    'tp.clearTitle': 'Clear selection and roster (the chat log is untouched)',
+    'tp.pendingTeam': 'Not spawned',
+    'tp.langLabel': 'lang',
+    'tp.isLeader': 'Leader',
+    'tp.statTitle': 'Run stats',
+    'tp.buildTeam': '🚀 Put them to work',
+    'tp.buildTeamMsg': 'Use the real team engine to decompose: ',
+    'tp.gotoPick': '👥 Pick roles',
+    'tp.setLeader': 'Make leader',
+    'tp.loading': 'Loading team state…',
+    'tp.emptyTitle': 'No active team in this session yet.',
+    'tp.emptyHint': 'Roster ready, no work started yet. "Put them to work" drops the instruction into the composer: add your goal and send.',
+    'o.firstRun': 'First time? Three steps: pick roles → apply to chat → put them to work',
+    'o.firstRunPick': '➕ Pick roles',
+    'o.noSession': '⚠ No current session resolved yet: picking roles and Apply to chat are unavailable. Open the Working Roles tab once, then come back.',
+    'tp.readOnlyNative': 'Native team (read-only)',
+    'tp.headSum': '{members} members · {done}/{total} done · {msgs} messages',
+    'tp.halt': '⏸ Pause dispatch',
+    'tp.haltConfirm': 'Click again to confirm',
+    'tp.haltTitle': 'While paused, team_step only refreshes member state and dispatches nothing',
+    'tp.resume': '▶ Resume dispatch',
+    'tp.toastHalted': 'Dispatch paused',
+    'tp.toastResumed': 'Dispatch resumed',
+    'tp.toastFail': 'Failed: {err}',
+    'tp.progress': 'Overall progress',
+    'tp.legendRunning': 'Running {n}',
+    'tp.legendBlocked': 'Waiting {n}',
+    'tp.legendDelivered': 'Delivered {n}',
+    'tp.segmentsHint': 'segments = tasks ({n})',
+    'tp.captain': 'Captain',
+    'tp.captainRole': 'Decompose · dispatch · synthesize',
+    'tp.dispatched': 'Dispatched {tasks} tasks to {members} members',
+    'tp.captainWorking': 'Dispatching',
+    'tp.captainDone': 'All in',
+    'tp.members': '{n} members',
+    'tp.delivered': 'Delivered',
+    'tp.nextRunning': 'Working on {id}',
+    'tp.nextWaiting': 'Waiting on {id}',
+    'tp.nextSettled': 'All tasks settled',
+    'tp.nextIdle': 'No open task',
+    'tp.taskDeps': 'Task dependencies',
+    'tp.dagHint': 'Left to right = unlocked after prerequisites · click for details',
+    'tp.filterByMember': 'Filtered by {name} · click a task to clear',
+    'tp.noTasks': 'The captain is decomposing the goal…',
+    'tp.detailHint': 'Click a task card above for details.',
+    'tp.detailCompleted': 'Completed and delivered',
+    'tp.detailRunning': 'Running; unlocks downstream when done',
+    'tp.detailWaitingOn': 'Waiting for {ids} to finish',
+    'tp.detailReady': 'No prerequisites, ready to start',
+    'tp.detailReadyDeps': 'Prerequisites done, ready to start',
+    'tp.unlocks': 'Unlocks {ids} when done',
+    'tp.noDownstream': 'No downstream task',
+    'tp.unclaimed': 'unassigned',
+    'tp.statusOpen': 'Pending',
+    'tp.statusRunning': 'Running',
+    'tp.statusBlocked': 'Waiting',
+    'tp.statusCompleted': 'Delivered',
+    'tp.statusFailed': 'Failed',
+    'tp.statusCancelled': 'Cancelled',
+    'tp.sum.staged': '{n} planned tasks awaiting confirmation',
+    'tp.sum.waitingBreakdown': 'The captain is decomposing the goal…',
+    'tp.sum.waitingSchedule': 'Waiting to be scheduled',
+    'tp.sum.allDelivered': 'All {n} tasks delivered',
+    'tp.sum.blockedAndRunning': 'Running {run}, waiting on {blocked}',
+    'tp.sum.running': 'Running {ids}',
+    'tp.sum.ready': 'Ready to dispatch: {ids}',
+    'tp.sum.blocked': 'Waiting on: {ids}',
+    'tp.sum.failedSettled': '{n} failed and settled',
+    'tp.planTitle': 'Pre-flight plan review',
+    'tp.planBadge': 'Pending',
+    'tp.planSub': '{members} members · {tasks} tasks · {deps} dependencies',
+    'tp.planHint': 'No member has been created and nothing is scheduled yet. Edit the plan here, or go back to the chat and tell the captain what to change.',
+    'tp.flowReview': 'Review plan',
+    'tp.flowSpawn': 'Create members',
+    'tp.flowRun': 'Start running',
+    'tp.planMembers': 'Members and model routing',
+    'tp.planTasks': 'Tasks and dependencies',
+    'tp.planTaskCount': '{tasks} tasks · {deps} dependencies',
+    'tp.planNoDeps': 'no dependency',
+    'tp.planDep': 'depends on {ids}',
+    'tp.planAddPh': 'New task name',
+    'tp.planAdd': 'Add task',
+    'tp.planNeedName': 'Enter a task name first',
+    'tp.planReady': 'Ready to check the plan?',
+    'tp.planReadyHint': 'Confirming creates {members} members and schedules {tasks} tasks.',
+    'tp.approve': 'Confirm and start team',
+    'tp.approving': 'Creating members…',
+    'tp.continue': 'Back to chat to edit',
+    'tp.continueHint': 'Please revise this plan: ',
+    'tp.discard': 'Discard this plan',
+    'tp.discardArmed': 'Confirm discard',
+    'tp.discardConfirm': 'Click again to discard: the draft is archived, the round stops, and it is not rebuilt automatically.',
+    'tp.toastApproved': 'Confirmed: created {members} members and scheduled {tasks} tasks',
+    'tp.toastDiscarded': 'Plan discarded',
+    'tp.toastTaskAdded': 'Added to plan: {id}',
+    'tp.preview': 'Plan preview',
+    'tp.previewHint': 'Nothing is created, claimed, or billed before confirmation.',
+    'tp.cardMembers': '{n} members',
+    'tp.confirmHint': 'Confirm the draft and start the team',
+    'tp.confirmFallback': 'The panel cannot spawn members directly (the host needs a real session context): the confirm instruction is now in the composer, just send it. If you edited the plan here, add a line about it. Reason: {err}',
+    'tp.resetView': 'Reset position and zoom',
+    'tp.applyNone': '✅ Apply (pick first)',
+    'tp.applyTitle': 'Make this draft the active roster for the session, put the member list in the composer, then jump to the chat',
+    'tp.applied': 'Applied {n} members to the chat',
+    'tv.preparing': 'preparing…',
+    'tv.team': 'Team orchestration',
+    'tv.roles': 'Role cards',
+    'tv.task': 'Task board',
+    'tv.openPanel': 'View team',
+    'tv.raw': 'Raw arguments and result',
+    'tv.noTeam': 'No team snapshot for this session yet',
+    'tv.rolesHint': 'Role cards were returned to the model; the body is not expanded here, to avoid dumping JSON again.',
+    'tv.noArgs': '(no args)',
     'st.nav': 'Role Office',
     'st.toolRoles': 'Role tools',
     'st.toolRolesHint': 'When on, registers agents_pixe_roles (role cards) and agents_pixe_team (real team orchestration: lead decomposes → member subagents run in parallel → synthesize; costs more tokens). Off by default — zero cost.',
@@ -632,58 +905,104 @@ function schedulePersistSync() {
   } catch (e) {}
 })();
 
-/* ---------- 状态：draft 全局（工作角色选人配置），active 按会话隔离（每个会话专属办公室） ---------- */
+/* ---------- 状态：**按会话完全隔离** ----------
+ * 每个会话各有一份草稿（draft）与一份已生效名册（active），两者恒等：
+ *   active 是给宿主读的别名（宿主按 persist.json 的 sessions[sid].active 组队）；
+ *   draft  是给界面读的。A 会话选人不会碰 B 会话。
+ *
+ * 历史坑：v4 早期 draft 是**全局**的（跨会话共享），于是「A 选 5 个 → 切到 B → B 的页签显示同样 5 个，
+ * 一勾就把 A 的阵容写进 B」。现在每个会话一份；旧数据里的全局草稿只在「本次加载的首个会话」播种一次。 */
 var STATE = (function () {
-  var KEY = 'agents-pixe.state.v4';
-  var globalDraft = { roles: [], leader: null, name: '' };
-  var lastApplied = { roles: [], leader: null };   // 最近应用快照：仅「客户端重启后首个会话」继承，重启不清空
+  var KEY = 'agents-pixe.state.v4';   /* 键名不变：宿主按这个名字读 sessions[sid].active */
+  var legacyDraft = null;             /* 旧版全局草稿，仅用于给首个会话播种 */
+  var lastApplied = { roles: [], leader: null };
   var bySession = {};
-  var bootInherited = false;   // 页面加载后是否已完成首次继承（不持久化，每次加载重置）
+  var bootInherited = false;          /* 本次加载是否已给首个会话播过种 */
   try {
     var saved = JSON.parse(localStorage.getItem(KEY)) || {};
-    if (saved.draft) globalDraft = saved.draft;
+    if (saved.draft && Array.isArray(saved.draft.roles) && saved.draft.roles.length) legacyDraft = saved.draft;
     if (saved.lastApplied) lastApplied = saved.lastApplied;
     if (saved.sessions) bySession = saved.sessions;
   } catch (e) {}
   var listeners = [];
   function notify() { listeners.forEach(function (f) { try { f(); } catch (e) {} }); }
-  function persist() { try { localStorage.setItem(KEY, JSON.stringify({ draft: globalDraft, lastApplied: lastApplied, sessions: bySession })); schedulePersistSync(); } catch (e) {} }
+  function persist() { try { localStorage.setItem(KEY, JSON.stringify({ lastApplied: lastApplied, sessions: bySession })); schedulePersistSync(); } catch (e) {} }
   function sess(sid) {
     sid = String(sid || '');
-    var isNew = !bySession[sid];
-    if (isNew) {
-      // 仅客户端重启后的「首个真实会话」继承最近应用快照；其余新会话（切对话）从空开始
-      var inherit = !!sid && !bootInherited && lastApplied.roles.length > 0;
-      bySession[sid] = { active: inherit ? lastApplied.roles.slice() : [], activeLeader: inherit ? lastApplied.leader : null };
+    var st = bySession[sid];
+    if (!st) {
+      /* 新会话的种子：只在「本次加载的首个会话」沿用最近一次工作配置，其余新会话从空开始，
+       * 这样切会话既不会串味，也不会每次开新对话都从头选一遍。 */
+      var seed = null;
+      if (sid && !bootInherited) {
+        if (lastApplied.roles.length) seed = { roles: lastApplied.roles.slice(), leader: lastApplied.leader, name: '' };
+        else if (legacyDraft) seed = { roles: legacyDraft.roles.slice(), leader: legacyDraft.leader, name: legacyDraft.name || '' };
+      }
+      var roles = seed ? seed.roles : [];
+      st = bySession[sid] = {
+        draft: { roles: roles.slice(), leader: seed ? seed.leader : null, name: seed ? seed.name : '' },
+        active: roles.slice(),
+        activeLeader: seed ? seed.leader : null
+      };
+      if (seed) legacyDraft = null;
     }
+    /* 旧数据迁移：早期只有 active 没有 draft —— 拿 active 当草稿，行为不变 */
+    if (!st.draft) st.draft = { roles: (st.active || []).slice(), leader: st.activeLeader || null, name: '' };
+    if (!Array.isArray(st.active)) st.active = st.draft.roles.slice();
     if (sid) bootInherited = true;
-    return bySession[sid];
+    return st;
   }
+  function sync(st) {
+    st.active = st.draft.roles.slice();
+    st.activeLeader = st.draft.leader;
+    lastApplied = { roles: st.draft.roles.slice(), leader: st.draft.leader };
+  }
+  /* 统一写入口：没有实际变化就既不落盘也不通知（避免无谓重渲染）。
+   * **没有会话可写时宁可不写** —— 写进「空 sid」桶的话，界面（读真实会话）与宿主都看不到，
+   * 表现成「点了没反应」，是最难查的一类 bug（本会话历史上真的出现过这个桶）。 */
+  function mut(sid, fn) {
+    var key = String(sid || ACTIVE_SID || '');
+    if (!key) return;
+    var st = sess(key);
+    if (fn(st.draft) === false) return;
+    sync(st); persist(); notify();
+  }
+  /* 取当前会话：显式 sid 优先，其次当前活跃会话（读操作共用同一套回落，避免读写落到不同的桶） */
+  function cur(sid) { return sess(sid || ACTIVE_SID); }
   return {
-    /* —— 草稿：全局（跨会话共享，新会话保留工作角色配置） —— */
-    getDraft: function () { return globalDraft.roles.slice().filter(keyKnown); },
-    hasDraft: function (k) { return globalDraft.roles.indexOf(k) >= 0; },
-    addDraft: function (k) { if (globalDraft.roles.indexOf(k) < 0) { globalDraft.roles.push(k); persist(); notify(); } },
-    removeDraft: function (k) { var i = globalDraft.roles.indexOf(k); if (i >= 0) { globalDraft.roles.splice(i, 1); if (globalDraft.leader === k) globalDraft.leader = null; persist(); notify(); } },
-    toggleDraft: function (k) { if (this.hasDraft(k)) this.removeDraft(k); else this.addDraft(k); },
-    clearDraft: function () { globalDraft.roles = []; globalDraft.leader = null; globalDraft.name = ''; persist(); notify(); },
-    getLeader: function () { return globalDraft.leader; },
-    setLeader: function (k) { if (globalDraft.roles.indexOf(k) >= 0) { globalDraft.leader = k; persist(); notify(); } },
-    clearLeader: function () { globalDraft.leader = null; persist(); notify(); },
-    getName: function () { return globalDraft.name; },
-    setName: function (n) { globalDraft.name = n || ''; persist(); notify(); },
-    /* —— 已应用：按会话隔离（每个会话专属办公室） —— */
-    getActive: function (sid) { return sess(sid).active.slice().filter(keyKnown); },
-    getActiveLeader: function (sid) { return sess(sid).activeLeader; },
-    apply: function (sid) { var st = sess(sid); st.active = globalDraft.roles.slice(); st.activeLeader = globalDraft.leader; lastApplied = { roles: globalDraft.roles.slice(), leader: globalDraft.leader }; persist(); notify(); },
-    clearActive: function (sid) { var st = sess(sid); st.active = []; st.activeLeader = null; persist(); notify(); },
+    /* —— 每个会话自己的草稿；不传 sid 时落到当前会话 —— */
+    getDraft: function (sid) { return cur(sid).draft.roles.slice().filter(keyKnown); },
+    hasDraft: function (k, sid) { return cur(sid).draft.roles.indexOf(k) >= 0; },
+    addDraft: function (k, sid) { mut(sid, function (d) { if (d.roles.indexOf(k) >= 0) return false; d.roles.push(k); }); },
+    removeDraft: function (k, sid) { mut(sid, function (d) { var i = d.roles.indexOf(k); if (i < 0) return false; d.roles.splice(i, 1); if (d.leader === k) d.leader = null; }); },
+    toggleDraft: function (k, sid) { if (this.hasDraft(k, sid)) this.removeDraft(k, sid); else this.addDraft(k, sid); },
+    clearDraft: function (sid) { mut(sid, function (d) { if (!d.roles.length && !d.leader && !d.name) return false; d.roles = []; d.leader = null; d.name = ''; }); },
+    getLeader: function (sid) { return cur(sid).draft.leader; },
+    setLeader: function (k, sid) { mut(sid, function (d) { if (d.roles.indexOf(k) < 0 || d.leader === k) return false; d.leader = k; }); },
+    clearLeader: function (sid) { mut(sid, function (d) { if (!d.leader) return false; d.leader = null; }); },
+    getName: function (sid) { return cur(sid).draft.name; },
+    setName: function (n, sid) { mut(sid, function (d) { d.name = n || ''; }); },
+    /* —— 已生效名册：宿主读的就是这份，与本会话草稿恒等 —— */
+    getActive: function (sid) { return cur(sid).active.slice().filter(keyKnown); },
+    getActiveLeader: function (sid) { return cur(sid).activeLeader; },
+    apply: function (sid) {
+      var key = String(sid || ACTIVE_SID || '');
+      if (!key) return;
+      var st = sess(key); sync(st); persist(); notify();
+    },
+    /* 清空 = 草稿与名册同时归零（两处分开清过就会剩一个幽灵名册给宿主） */
+    clearActive: function (sid) {
+      var st = sess(sid);
+      if (!st.active.length && !st.activeLeader && !st.draft.roles.length) return;
+      st.draft.roles = []; st.draft.leader = null; sync(st); persist(); notify();
+    },
     hydrate: function (raw) {
       try {
-        var saved = JSON.parse(raw);
-        if (saved.draft) globalDraft = saved.draft;
-        if (saved.lastApplied) lastApplied = saved.lastApplied;
-        if (saved.sessions) bySession = saved.sessions;
-        bootInherited = false;   // 水合后重置：让当前会话重新继承 lastApplied（否则早前的空访问已抢占继承资格）
+        var s2 = JSON.parse(raw);
+        if (s2.draft && Array.isArray(s2.draft.roles) && s2.draft.roles.length) legacyDraft = s2.draft;
+        if (s2.lastApplied) lastApplied = s2.lastApplied;
+        if (s2.sessions) bySession = s2.sessions;
+        bootInherited = false;   /* 水合后重置：让当前会话重新播种 */
         persist(); notify();
       } catch (e) {}
     },
@@ -691,11 +1010,22 @@ var STATE = (function () {
   };
 })();
 
-function selectedRecords() {
-  return STATE.getDraft().map(function (k) { return INDEX.map[k]; }).filter(Boolean);
+function selectedRecords(sid) {
+  return STATE.getDraft(sid).map(function (k) { return INDEX.map[k]; }).filter(Boolean);
 }
 function activeRecords(sid) {
   return STATE.getActive(sid).map(function (k) { return INDEX.map[k]; }).filter(Boolean);
+}
+/* 订阅「当前会话的阵容」：返回快照是字符串（useSyncExternalStore 要求引用稳定，
+ * 直接返回数组会每次都判定成「变了」→ 无限重渲染）。 */
+function useActiveKeys(sid) {
+  return React.useSyncExternalStore(
+    STATE.subscribe,
+    function () { return sid ? (STATE.getActive(sid) || []).join('|') : ''; }
+  );
+}
+function rosterOfKeys(keysCsv) {
+  return String(keysCsv || '').split('|').filter(Boolean).map(function (k) { return INDEX.map[k]; }).filter(Boolean);
 }
 
 /* 跳转到「对话」页签：优先注入的 setView，回退 DOM 点击页签按钮 */
@@ -721,6 +1051,21 @@ function fillInput(text) {
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     return true;
   } catch (e) { return false; }
+}
+
+/* 把文本写进对话输入框：**优先宿主官方 API**（props.inputActions.setDraft），DOM 抓取只作兜底。
+ *
+ * 为什么要改：fillInput 依赖 `document.querySelector('textarea')` +
+ * `window.HTMLTextAreaElement.prototype` 的 value setter。宿主只要换一次输入框实现
+ * （换成 contenteditable、换 class、放进 shadow root），它就会**静默返回 false** ——
+ * 用户看到的就是「点了『应用到对话』什么都没发生」，而且控制台没有报错。
+ * 工作角色页签一直用的是 inputActions，所以只有浮窗这条路会静默失败。 */
+function writeComposer(inputActions, text) {
+  if (!text) return false;
+  try {
+    if (inputActions && typeof inputActions.setDraft === 'function') { inputActions.setDraft(text); return true; }
+  } catch (e) { /* 落到 DOM 兜底 */ }
+  return fillInput(text);
 }
 
 /* ---------- 已保存团队（全局复用） ---------- */
@@ -1722,6 +2067,23 @@ function OfficeCanvas(props) {
     return function () { cancelAnimationFrame(raf); };
   }, [roles, leader, zoom, working, page, activity, done, sessionId, lang]);
 
+  /* Ctrl + 滚轮缩放（原生监听 + passive:false；React 的 onWheel 在根节点是 passive，拦不住默认行为）。
+   * 不按 Ctrl/Meta 时完全不拦截，普通滚动照旧。onZoom 传的是 setZoom（引用稳定），
+   * 用函数式更新，避免 effect 反复重订阅与闭包过期。 */
+  React.useEffect(function () {
+    var canvas = canvasRef.current;
+    if (!canvas) return;
+    function onWheel(e) {
+      if (!e.ctrlKey && !e.metaKey) return;
+      if (typeof props.onZoom !== 'function') return;
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      var step = e.deltaY > 0 ? -0.25 : 0.25;
+      props.onZoom(function (z) { return Math.max(0.5, Math.min(2.5, (typeof z === 'number' ? z : 1) + step)); });
+    }
+    canvas.addEventListener('wheel', onWheel, { passive: false });
+    return function () { canvas.removeEventListener('wheel', onWheel); };
+  }, [props.onZoom]);
+
   function hitTest(x, y) {
     for (var i = 0; i < PERSON_BOXES.length; i++) {
       var b = PERSON_BOXES[i];
@@ -1867,8 +2229,8 @@ function RolePicker(props) {
   var lang = useSystemLang();
   var t = safeT((props && props.t) || _tFallback);
   var [q, setQ] = React.useState('');
-  var [selected, setSelected] = React.useState(STATE.getDraft());
-  React.useEffect(function () { return STATE.subscribe(function () { setSelected(STATE.getDraft()); }); }, []);
+  var [selected, setSelected] = React.useState(STATE.getDraft(props.sid));
+  React.useEffect(function () { return STATE.subscribe(function () { setSelected(STATE.getDraft(props.sid)); }); }, []);
   var roles = lang === 'zh' ? ROLES_DATA.zh.roles : ROLES_DATA.en.roles;
   var divs = lang === 'zh' ? ROLES_DATA.zh.divisions : ROLES_DATA.en.divisions;
   var query = q.trim().toLowerCase();
@@ -1885,7 +2247,7 @@ function RolePicker(props) {
   function RoleRow(rr) {
     var rec = rr.rec; var key = lang + ':' + rec.id; var on = selected.indexOf(key) >= 0;
     return React.createElement('div', {
-      onClick: function () { STATE.toggleDraft(key); },
+      onClick: function () { STATE.toggleDraft(key, props.sid); },
       style: { display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', cursor: 'pointer', borderRadius: 8, background: on ? 'rgba(59,130,246,0.14)' : 'transparent', border: on ? '1px solid rgba(59,130,246,0.55)' : '1px solid transparent', marginBottom: 4 }
     },
       React.createElement('span', { style: { fontSize: 18, width: 24, textAlign: 'center', flexShrink: 0 } }, rec.emoji),
@@ -1912,7 +2274,132 @@ function RolePicker(props) {
   );
 }
 
-/* ---------- 团队活动主视图（shell.overlay 浮层内）：真·团队引擎状态 + 泳道 DAG ---------- */
+/* ================= 团队视图共享 store =================
+ * 会话头入口 / 回合尾卡 / 浮层面板三处读同一份快照：一个会话只有一个轮询器。
+ * 三条纪律：① 页面隐藏时不轮询；② 内容签名不变就不通知订阅者（不重建 DOM）；
+ * ③ 没有订阅者就停表（关掉面板不烧请求）。 */
+var TEAM_STORE = (function () {
+  var cache = {};      /* sid -> { data, sig, at, error } */
+  var subs = {};       /* sid -> [fn] */
+  var timer = null;
+  /* 分档自适应频率（不降频的话，一个常驻会话就是每小时 900 次 /teams/view，
+   * 参考项目自己也点过这个「轮询风暴」）：
+   *   ACTIVE  有草案待确认、或有未结算任务 —— 状态随时在变，值得 4 秒一次；
+   *   SETTLED 有团队但已全部结算 —— 成了历史，15 秒确认一次没有新动静就够；
+   *   IDLE    本会话还没有团队 —— 30 秒。
+   * 注意：上一轮把「任务结束后团队信息永久保留」做成默认行为之后，
+   * 如果还按「有团队就 4 秒」，绝大多数会话会永远停在最高频率 —— 所以这里必须分档。 */
+  var ACTIVE_MS = 4000;
+  var SETTLED_MS = 15000;
+  var IDLE_MS = 30000;
+  var interval = ACTIVE_MS;
+  var visBound = false;
+
+  function isLiveStatus(s) {
+    return s === 'pending' || s === 'claimed' || s === 'in_progress' || s === 'running';
+  }
+  function needOf(d) {
+    if (!d) return IDLE_MS;
+    if (d.plan) return ACTIVE_MS;
+    var tasks = (d.tasks || []).filter(function (x) { return x.status !== 'deleted'; });
+    if (tasks.some(function (x) { return isLiveStatus(String(x.status || '')); })) return ACTIVE_MS;
+    return (tasks.length || (d.members || []).length) ? SETTLED_MS : IDLE_MS;
+  }
+  function rate() {
+    var next = IDLE_MS;   /* 取所有会话里最急的那个 */
+    Object.keys(cache).forEach(function (k) { next = Math.min(next, needOf(cache[k] && cache[k].data)); });
+    if (next === interval && timer) return;
+    interval = next;
+    if (timer) { clearInterval(timer); timer = null; }
+    if (anySubs()) timer = setInterval(tick, interval);
+  }
+  function sigOf(d) {
+    if (!d) return '';
+    var ms = (d.members || []).map(function (m) { return (m.id || m.name) + ':' + m.status; }).join('|');
+    var ts = (d.tasks || []).map(function (t) { return t.id + ':' + t.status + ':' + t.revision + ':' + (t.ownerName || ''); }).join('|');
+    return ms + '#' + ts + '#' + (d.halted ? 'H' : '') + '#' + (d.plan ? 'P' : '') + '#' + ((d.lastStep && d.lastStep.at) || '');
+  }
+  function emit(sid) { (subs[sid] || []).forEach(function (fn) { try { fn(); } catch (e) {} }); }
+  function anySubs() { return Object.keys(subs).some(function (k) { return (subs[k] || []).length > 0; }); }
+  function tick() {
+    if (typeof document !== 'undefined' && document.hidden) return;   /* 后台标签页不轮询 */
+    Object.keys(subs).forEach(function (sid) { if ((subs[sid] || []).length) load(sid); });
+  }
+  /* 回到前台立刻补一次：否则后台期间的变化要等下一个 tick 才看到 */
+  function bindVisibility() {
+    if (visBound || typeof document === 'undefined' || !document.addEventListener) return;
+    visBound = true;
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) tick(); });
+  }
+  function load(sid) {
+    if (!sid) return Promise.resolve(null);
+    return fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid))
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var data = j || null;
+        var sig = sigOf(data);
+        var prev = cache[sid];
+        cache[sid] = { data: data, sig: sig, at: Date.now(), error: null };
+        if (!prev || prev.sig !== sig) emit(sid);      /* 内容变了才通知，避免定时无谓重建 DOM */
+        rate();
+        return data;
+      })
+      .catch(function (e) {
+        var prev = cache[sid] || {};
+        cache[sid] = { data: prev.data || { available: false, members: [], tasks: [] }, sig: prev.sig || '', at: Date.now(), error: String((e && e.message) || e) };
+        emit(sid);
+        return null;
+      });
+  }
+  return {
+    get: function (sid) { return sid && cache[sid] ? cache[sid].data : null; },
+    error: function (sid) { return sid && cache[sid] ? cache[sid].error : null; },
+    refresh: function (sid) { return load(sid); },
+    subscribe: function (sid, fn) {
+      if (!sid) return function () {};
+      (subs[sid] = subs[sid] || []).push(fn);
+      bindVisibility();
+      if (!timer) timer = setInterval(tick, interval);
+      if (!cache[sid]) load(sid);
+      return function () {
+        subs[sid] = (subs[sid] || []).filter(function (x) { return x !== fn; });
+        if (!anySubs() && timer) { clearInterval(timer); timer = null; }
+      };
+    }
+  };
+})();
+
+function useTeamView(sid) {
+  var [v, setV] = React.useState(function () { return TEAM_STORE.get(sid); });
+  React.useEffect(function () {
+    if (!sid) { setV(null); return; }
+    setV(TEAM_STORE.get(sid));
+    return TEAM_STORE.subscribe(sid, function () { setV(TEAM_STORE.get(sid)); });
+  }, [sid]);
+  return v;
+}
+
+/* 面板开关总线：会话头入口 / 回合尾卡 → 浮层面板（跨 slot 通信，两处不共享 React 树） */
+var PANEL_CTL = (function () {
+  var listeners = [];
+  var last = null;
+  /* 'team' / 'office' 打开浮层并切视图；'pick' 直接进入选人（团队面板空态里的
+   * 「去选人」按钮要能把用户送到能做事的地方，而不是让他自己找页签）。 */
+  return {
+    open: function (view) { last = view || 'team'; listeners.forEach(function (fn) { try { fn(last); } catch (e) {} }); },
+    peek: function () { return last; },
+    subscribe: function (fn) {
+      listeners.push(fn);
+      return function () { listeners = listeners.filter(function (x) { return x !== fn; }); };
+    }
+  };
+})();
+
+function pixePost(path, body) {
+  return fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+}
+
+/* ---------- 团队活动主视图 ---------- */
 function teamTaskDepth(tasks) {
   var byId = {}; tasks.forEach(function (t) { byId[t.id] = t; });
   var depth = {};
@@ -1927,217 +2414,823 @@ function teamTaskDepth(tasks) {
   return depth;
 }
 
-function TeamActivityPanel(props) {
-  var sid = props.sid;
-  var t = safeT((props && props.t) || _tFallback);
-  var [data, setData] = React.useState(null);
-  var [pinned, setPinned] = React.useState(null);
-  var [editing, setEditing] = React.useState(null);   // null | { mode:'create'|'edit', task?, subject, description, blockedBy, expectedRevision }
-  var [busy, setBusy] = React.useState(false);
-  var [toast, setToast] = React.useState(null);
-  function showToast(msg, ms) { setToast(msg); setTimeout(function () { setToast(null) }, ms || 2200) }
+/* 任务态：completed / running / failed / blocked / open（面板颜色与文案都读这一处） */
+function taskStateOf(task, byId) {
+  var st = String((task && task.status) || 'pending');
+  if (st === 'completed') return 'completed';
+  if (st === 'failed') return 'failed';
+  if (st === 'cancelled') return 'cancelled';
+  if (st === 'in_progress' || st === 'running') return 'running';
+  var deps = (task.blockedBy || []).filter(function (x) { return byId[x]; });
+  var waiting = deps.filter(function (d) { return byId[d] && byId[d].status !== 'completed'; });
+  return waiting.length ? 'blocked' : 'open';
+}
 
-  React.useEffect(function () {
-    if (!sid) { setData({ available: false, members: [], tasks: [] }); return; }
-    var alive = true;
-    function load() {
-      fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid))
-        .then(function (r) { return r.json(); })
-        .then(function (j) { if (alive) setData(j || { available: false, members: [], tasks: [] }); })
-        .catch(function () { if (alive) setData({ available: false, members: [], tasks: [], error: 'fetch failed' }); });
-    }
-    load();
-    var iv = setInterval(load, 3000);
-    return function () { alive = false; clearInterval(iv); };
-  }, [sid]);
+function taskStateLabel(state, t) {
+  var map = {
+    completed: 'tp.statusCompleted', running: 'tp.statusRunning', failed: 'tp.statusFailed',
+    blocked: 'tp.statusBlocked', open: 'tp.statusOpen', cancelled: 'tp.statusCancelled'
+  };
+  return t(map[state] || 'tp.statusOpen');
+}
+function taskStateColor(state) {
+  return state === 'completed' ? 'var(--px-blue,#3b82f6)'
+    : state === 'running' ? 'var(--px-green,#16a34a)'
+    : state === 'failed' ? 'var(--px-red,#ef4444)'
+    : state === 'blocked' ? 'var(--px-amber,#f59e0b)'
+    : 'var(--dsw-alias-label-secondary,#64748b)';
+}
+function fmtIds(ids) { return (ids || []).join('、'); }
 
-  function postJSON(path, body) {
-    return fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json() })
-  }
+/* 文案即状态机：界面任何时刻都有一句话解释现状（十态） */
+function teamSummary(team, t) {
+  var tasks = (team && team.tasks) || [];
+  var plan = team && team.plan;
+  if (plan) return { tone: 'staged', text: t('tp.sum.staged', { n: (plan.tasks || []).length }) };
+  if (!tasks.length) return { tone: 'idle', text: t('tp.sum.waitingBreakdown') };
+  var byId = {}; tasks.forEach(function (x) { byId[x.id] = x; });
+  var states = tasks.map(function (x) { return taskStateOf(x, byId); });
+  var running = tasks.filter(function (x, i) { return states[i] === 'running'; });
+  var blocked = tasks.filter(function (x, i) { return states[i] === 'blocked'; });
+  var failed = tasks.filter(function (x, i) { return states[i] === 'failed'; });
+  var open = tasks.filter(function (x, i) { return states[i] === 'open'; });
+  var done = tasks.filter(function (x, i) { return states[i] === 'completed'; });
+  if (done.length === tasks.length) return { tone: 'done', text: t('tp.sum.allDelivered', { n: done.length }) };
+  if (failed.length && !running.length) return { tone: 'warn', text: t('tp.sum.failedSettled', { n: failed.length }) };
+  if (running.length && blocked.length) return { tone: 'run', text: t('tp.sum.blockedAndRunning', { run: fmtIds(running.map(function (x) { return x.id; })), blocked: fmtIds(blocked.map(function (x) { return x.id; })) }) };
+  if (running.length) return { tone: 'run', text: t('tp.sum.running', { ids: fmtIds(running.map(function (x) { return x.id; })) }) };
+  if (blocked.length && !open.length) return { tone: 'warn', text: t('tp.sum.blocked', { ids: fmtIds(blocked.map(function (x) { return x.id; })) }) };
+  if (open.length) return { tone: 'ready', text: t('tp.sum.ready', { ids: fmtIds(open.map(function (x) { return x.id; })) }) };
+  return { tone: 'idle', text: t('tp.sum.waitingSchedule') };
+}
 
-  function toggleHalt() {
-    if (!sid || busy) return
-    setBusy(true)
-    var path = data.halted ? '/agents-pixe/teams/resume' : '/agents-pixe/teams/halt'
-    postJSON(path, { lead: sid }).then(function (j) {
-      setBusy(false)
-      if (j && j.ok) { showToast(data.halted ? '已恢复' : '已暂停派单'); /* 立刻刷新一次 */ fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid)).then(function (r) { return r.json() }).then(setData) }
-      else showToast('操作失败：' + (j && j.error || 'unknown'))
-    }).catch(function (e) { setBusy(false); showToast('操作失败：' + String((e && e.message) || e)) })
-  }
-
-  function openCreate() {
-    var blockedBy = pinned && Array.isArray(data.tasks) && data.tasks.find(function (x) { return x.id === pinned }) ? pinned : ''
-    setEditing({ mode: 'create', subject: '', description: '', blockedBy: blockedBy })
-  }
-  function openEdit(task) {
-    setEditing({ mode: 'edit', task: task, subject: task.subject || '', description: task.description || '', blockedBy: (task.blockedBy || []).join(','), expectedRevision: task.revision })
-  }
-  function cancelEdit() { setEditing(null) }
-  function submitEdit() {
-    if (!editing || busy) return
-    if (!editing.subject || !String(editing.subject).trim()) { showToast('主题不能为空'); return }
-    setBusy(true)
-    if (editing.mode === 'create') {
-      postJSON('/agents-pixe/teams/tasks/create', { lead: sid, subject: editing.subject, description: editing.description, blocked_by: editing.blockedBy }).then(function (j) {
-        setBusy(false); if (j && j.ok) { showToast('已建任务 ' + (j.task && j.task.id)); setEditing(null); fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid)).then(function (r) { return r.json() }).then(setData) }
-        else showToast('建任务失败：' + (j && j.error || 'unknown'))
-      }).catch(function (e) { setBusy(false); showToast('建任务失败：' + String((e && e.message) || e)) })
-    } else {
-      var task = editing.task
-      postJSON('/agents-pixe/teams/tasks/update', { lead: sid, task_id: task.id, expected_revision: editing.expectedRevision, action: 'edit', subject: editing.subject, description: editing.description, blocked_by: editing.blockedBy }).then(function (j) {
-        setBusy(false); if (j && j.ok) { showToast('已更新 ' + task.id); setEditing(null); fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid)).then(function (r) { return r.json() }).then(setData) }
-        else showToast('更新失败：' + (j && j.error || 'unknown'))
-      }).catch(function (e) { setBusy(false); showToast('更新失败：' + String((e && e.message) || e)) })
-    }
-  }
-  function deleteTask(task) {
-    if (!sid || busy) return
-    if (!confirm('删除任务 ' + task.id + '（' + task.subject + '）？')) return
-    setBusy(true)
-    postJSON('/agents-pixe/teams/tasks/delete', { lead: sid, task_id: task.id, expected_revision: task.revision }).then(function (j) {
-      setBusy(false); if (j && j.ok) { showToast('已删除 ' + task.id); setPinned(null); fetch('/agents-pixe/teams/view?lead=' + encodeURIComponent(sid)).then(function (r) { return r.json() }).then(setData) }
-      else showToast('删除失败：' + (j && j.error || 'unknown'))
-    }).catch(function (e) { setBusy(false); showToast('删除失败：' + String((e && e.message) || e)) })
-  }
-
-  if (!data) {
-    return React.createElement('div', { style: { padding: 16, fontSize: 13, opacity: 0.7 } }, '加载团队状态…');
-  }
-
-  var members = data.members || [];
-  var tasks = (data.tasks || []).filter(function (x) { return x.status !== 'deleted'; });
-  /* P3：来源是宿主原生团队时，面板只是只读投影 —— 写操作一律走原生工具，按钮隐藏。 */
-  var isNative = data.source === 'native';
-
-  /* 无团队：给一个 + 任务 / 暂停 都不显示的极简空态，但仍允许暂停/恢复（halt flag 可独立存在） */
-  if (members.length === 0 && tasks.length === 0) {
-    return React.createElement('div', { style: { padding: 16, fontSize: 13, opacity: 0.8, lineHeight: 1.6 } },
-      '当前会话还没有活动团队。',
-      React.createElement('div', { style: { marginTop: 4, opacity: 0.75 } }, '在工作角色页签选人后，用 agents_pixe_team_create 建团，或直接说「用真团队引擎拆解 …」。'));
-  }
-
-  var roster = members.map(function (m) {
-    var st = m.status === 'running' ? '#16a34a' : (m.status === 'failed' ? '#ef4444' : (m.status === 'idle' ? '#64748b' : '#f59e0b'));
-    return React.createElement('span', { key: m.id || m.name, title: (m.name || '') + (m.provider ? ' · ' + m.provider : ''), style: { display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 14, fontSize: 12, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)' } },
-      React.createElement('span', { style: { width: 7, height: 7, borderRadius: 4, background: st, display: 'inline-block' } }),
-      m.name);
-  });
-
-  /* Quality-gate verdict：从 lastStep 计算本轮健康度，给面板一颗语义徽章 */
-  var last = data.lastStep || null
-  var verdict = (function () {
-    if (!last) return { kind: 'idle', text: '未运行', color: '#94a3b8' }
-    if (last.halted) return { kind: 'halted', text: '暂停派单', color: '#f59e0b' }
-    if (last.aborted) return { kind: 'warn', text: '最近一次被打断', color: '#f59e0b' }
-    var d = (last.dispatched || []).length
-    var r = (last.recovered || []).length
-    var parked = (last.parked || []).length
-    if (last.timedOut && r > 0) return { kind: 'warn', text: '冷恢复 ' + r + ' 项 / 仍有 ' + parked + ' 人停驻', color: '#f59e0b' }
-    if (last.timedOut) return { kind: 'warn', text: '等待超时（成员无状态变化）', color: '#f59e0b' }
-    if (d === 0 && parked === 0) return { kind: 'ok', text: '无就绪任务', color: '#3b82f6' }
-    return { kind: 'ok', text: '派发 ' + d + ' 项' + (parked ? ' · 停驻 ' + parked : ''), color: '#16a34a' }
-  })()
-
-  var pinnedTask = pinned ? tasks.find(function (x) { return x.id === pinned; }) : null;
-
-  return React.createElement('div', { style: { padding: 10, width: '100%', height: '100%', boxSizing: 'border-box', overflowY: 'auto' } },
-    /* 顶栏：标题 · 暂停/恢复 · +任务 */
-    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 } },
-      React.createElement('span', { style: { fontSize: 13, fontWeight: 700 } }, t('o.teamPanel') + ' · ' + members.length + ' 成员 · ' + tasks.length + ' 任务' + (isNative ? ' · 原生团队（只读）' : '')),
-      React.createElement('span', { style: { marginLeft: 'auto', fontSize: 11, opacity: 0.6 } }, '3s 刷新')
+/* 分段进度：一段 = 一任务，颜色 = 状态 */
+function ProgressSegments(props) {
+  var tasks = props.tasks; var t = props.t; var byId = props.byId;
+  var states = tasks.map(function (x) { return taskStateOf(x, byId); });
+  var n = function (s) { return states.filter(function (x) { return x === s; }).length; };
+  return React.createElement('div', null,
+    React.createElement('div', { style: { fontSize: 12, opacity: 0.75, letterSpacing: '0.04em', marginBottom: 4 } }, t('tp.progress')),
+    React.createElement('div', { style: { display: 'flex', gap: 3, marginBottom: 5 } },
+      tasks.map(function (x, i) {
+        return React.createElement('i', { key: x.id, title: x.id + ' · ' + taskStateLabel(states[i], t), style: { flex: 1, height: 12, background: taskStateColor(states[i]), border: '1px solid var(--dsw-alias-border-l1,#ccc)', display: 'block' } });
+      })
     ),
-    /* 工具条：Halt/Resume · +任务 */
-    React.createElement('div', { style: { display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center' } },
-      isNative ? null : React.createElement('button', {
-        onClick: toggleHalt, disabled: busy, title: data.halted ? '恢复派单' : '暂停派单（halt 后 team_step 只刷新成员状态、不派单）',
-        style: { cursor: busy ? 'wait' : 'pointer', border: '1px solid ' + (data.halted ? '#16a34a' : 'var(--dsw-alias-border-l1,#ccc)'), background: data.halted ? 'rgba(22,163,74,0.12)' : 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '4px 10px', fontSize: 12, lineHeight: 1.3 }
-      }, data.halted ? '▶ 恢复' : '⏸ 暂停'),
-      isNative ? null : React.createElement('button', {
-        onClick: openCreate, disabled: busy, title: '新增任务（按当前选中的任务 id 自动预填为依赖）',
-        style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '4px 10px', fontSize: 12, lineHeight: 1.3 }
-      }, '+ 任务'),
-      toast ? React.createElement('span', { style: { fontSize: 11, opacity: 0.8 } }, toast) : null
-    ),
-    /* 质量闸 verdict */
-    React.createElement('div', { style: { display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center', flexWrap: 'wrap' } },
-      React.createElement('span', { title: '最近一次 team_step 总结（halt 后写空、含原因）', style: { display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 10, fontSize: 11, border: '1px solid ' + verdict.color, color: verdict.color, background: 'var(--dsw-alias-bg-layer-1,#fff)' } },
-        React.createElement('span', { style: { width: 6, height: 6, borderRadius: 3, background: verdict.color, display: 'inline-block' } }),
-        verdict.text),
-      last && last.at ? React.createElement('span', { style: { fontSize: 10, opacity: 0.55 } }, new Date(last.at).toLocaleTimeString()) : null
-    ),
-    React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 } }, roster),
-    renderTeamDag(tasks, pinned, setPinned),
-    /* 内联编辑器（create / edit） */
-    editing
-      ? React.createElement('div', { style: { marginTop: 8, padding: 8, borderRadius: 8, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', fontSize: 12 } },
-          React.createElement('div', { style: { fontWeight: 700, marginBottom: 4 } }, editing.mode === 'create' ? '新增任务' : '编辑任务 ' + editing.task.id + '（rev ' + editing.expectedRevision + '）'),
-          React.createElement('input', { placeholder: '主题', value: editing.subject, onChange: function (e) { setEditing(function (prev) { return Object.assign({}, prev, { subject: e.target.value }) }) }, style: { width: '100%', boxSizing: 'border-box', marginBottom: 4, padding: '4px 6px', border: '1px solid var(--dsw-alias-border-l1,#ccc)', borderRadius: 4, background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit' } }),
-          React.createElement('textarea', { placeholder: '描述（可选）', value: editing.description, onChange: function (e) { setEditing(function (prev) { return Object.assign({}, prev, { description: e.target.value }) }) }, rows: 2, style: { width: '100%', boxSizing: 'border-box', marginBottom: 4, padding: '4px 6px', border: '1px solid var(--dsw-alias-border-l1,#ccc)', borderRadius: 4, background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', resize: 'vertical' } }),
-          React.createElement('input', { placeholder: '依赖任务 id（逗号分隔）', value: editing.blockedBy, onChange: function (e) { setEditing(function (prev) { return Object.assign({}, prev, { blockedBy: e.target.value }) }) }, style: { width: '100%', boxSizing: 'border-box', marginBottom: 6, padding: '4px 6px', border: '1px solid var(--dsw-alias-border-l1,#ccc)', borderRadius: 4, background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit' } }),
-          React.createElement('div', { style: { display: 'flex', gap: 6 } },
-            React.createElement('button', { onClick: submitEdit, disabled: busy, style: { cursor: 'pointer', border: '1px solid #7c3aed', background: 'rgba(124,58,237,0.12)', color: 'inherit', borderRadius: 6, padding: '3px 10px', fontSize: 12 } }, '保存'),
-            React.createElement('button', { onClick: cancelEdit, style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 6, padding: '3px 10px', fontSize: 12 } }, '取消')))
-      : null,
-    /* pinned 详情卡：原有 + 新增 编辑 / 删除 按钮 */
-    pinnedTask
-      ? React.createElement('div', { style: { marginTop: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', fontSize: 12 } },
-          React.createElement('div', { style: { display: 'flex', alignItems: 'center', marginBottom: 3 } },
-            React.createElement('span', { style: { fontWeight: 700 } }, pinnedTask.id + ' · ' + pinnedTask.subject),
-            React.createElement('button', { onClick: function () { openEdit(pinnedTask) }, disabled: busy, style: { marginLeft: 'auto', cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 6, padding: '2px 8px', fontSize: 11 } }, '编辑'),
-            React.createElement('button', { onClick: function () { deleteTask(pinnedTask) }, disabled: busy, style: { marginLeft: 4, cursor: 'pointer', border: '1px solid #ef4444', background: 'rgba(239,68,68,0.08)', color: '#ef4444', borderRadius: 6, padding: '2px 8px', fontSize: 11 } }, '删除')),
-          React.createElement('div', { style: { opacity: 0.8, lineHeight: 1.6 } },
-            '状态 ' + pinnedTask.status +
-            (pinnedTask.ownerName ? ' · 负责人 ' + pinnedTask.ownerName : '') +
-            (pinnedTask.blockedBy && pinnedTask.blockedBy.length ? ' · 依赖 ' + pinnedTask.blockedBy.join(', ') : '')))
-      : null
+    React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: 11, opacity: 0.8, alignItems: 'center' } },
+      React.createElement('span', null, '● ' + t('tp.legendRunning', { n: n('running') })),
+      React.createElement('span', null, '● ' + t('tp.legendBlocked', { n: n('blocked') })),
+      React.createElement('span', null, '● ' + t('tp.legendDelivered', { n: n('completed') })),
+      React.createElement('span', { style: { marginLeft: 'auto', opacity: 0.7 } }, t('tp.segmentsHint', { n: tasks.length }))
+    )
   );
 }
 
-function renderTeamDag(tasks, pinned, onPin) {
-  var NW = 150, NH = 58, GX = 70, GY = 20, PAD = 24;
+/* 成员树：头像 + 名字 + 角色/路由 chip + 交付计数 + 一行下一步 + 任务 chip */
+function MemberTree(props) {
+  var members = props.members; var tasks = props.tasks; var byId = props.byId;
+  var t = props.t; var plan = props.plan; var onPick = props.onPick; var picked = props.picked;
+  var roleOf = {};
+  ((plan && plan.members) || []).forEach(function (m) { if (m && m.name) roleOf[m.name] = m.role || ''; });
+  return React.createElement('div', { style: { position: 'relative', paddingLeft: 14, marginTop: 6 } },
+    React.createElement('div', { style: { position: 'absolute', left: 4, top: 0, bottom: 22, width: 1, background: 'var(--dsw-alias-border-l1,#ccc)' } }),
+    members.map(function (m) {
+      var mine = tasks.filter(function (x) { return (x.ownerName || '') === m.name; });
+      var myDone = mine.filter(function (x) { return taskStateOf(x, byId) === 'completed'; }).length;
+      var cur = mine.filter(function (x) { return taskStateOf(x, byId) === 'running'; })[0];
+      var wait = mine.filter(function (x) { return taskStateOf(x, byId) === 'blocked'; })[0];
+      var next = cur ? t('tp.nextRunning', { id: cur.id })
+        : wait ? t('tp.nextWaiting', { id: wait.id })
+        : (mine.length && myDone === mine.length) ? t('tp.nextSettled')
+        : t('tp.nextIdle');
+      var dot = m.status === 'running' ? 'var(--px-green,#16a34a)' : (m.status === 'failed' ? 'var(--px-red,#ef4444)' : (m.status === 'idle' ? 'var(--dsw-alias-label-secondary,#64748b)' : 'var(--px-amber,#f59e0b)'));
+      var sel = picked === m.name;
+      return React.createElement('div', {
+        key: m.id || m.name,
+        onClick: function () { onPick(sel ? null : m.name); },
+        title: m.name + (m.provider ? ' · ' + m.provider : ''),
+        style: { position: 'relative', display: 'flex', alignItems: 'center', gap: 8, padding: '5px 7px', marginBottom: 6, border: '1px solid ' + (sel ? 'var(--px-violet,#7c3aed)' : 'var(--dsw-alias-border-l2,#ddd)'), background: 'var(--dsw-alias-bg-layer-1,#fff)', cursor: 'pointer' }
+      },
+        React.createElement('span', { style: { position: 'absolute', left: -11, top: '50%', width: 9, height: 1, background: 'var(--dsw-alias-border-l1,#ccc)' } }),
+        React.createElement('span', { style: { width: 8, height: 8, borderRadius: 4, background: dot, flexShrink: 0 } }),
+        React.createElement('span', { style: { flex: 1, minWidth: 0 } },
+          React.createElement('span', { style: { fontSize: 13, fontWeight: 600 } }, m.name),
+          roleOf[m.name] ? React.createElement('span', { style: { marginLeft: 6, fontSize: 11, opacity: 0.8 } }, roleOf[m.name]) : null,
+          React.createElement('div', { style: { fontSize: 11, opacity: 0.72, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, next),
+          mine.length ? React.createElement('div', { style: { display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 3 } },
+            mine.map(function (x) {
+              var st = taskStateOf(x, byId);
+              return React.createElement('span', { key: x.id, style: { fontSize: 10, padding: '0 5px', border: '1px solid ' + taskStateColor(st), color: taskStateColor(st) } }, x.id);
+            })
+          ) : null
+        ),
+        React.createElement('span', { style: { fontSize: 11, opacity: 0.75, textAlign: 'right', flexShrink: 0 } },
+          t('tp.delivered'), React.createElement('br', null), myDone + '/' + mine.length)
+      );
+    })
+  );
+}
+
+/* 依赖图：按依赖深度分列 + 详情卡（点任务 → 高亮负责成员 + 出详情） */
+function DAGraph(props) {
+  var tasks = props.tasks; var byId = props.byId; var t = props.t;
+  var pinned = props.pinned; var onPin = props.onPin; var picked = props.picked;
+  if (!tasks.length) return React.createElement('div', { style: { padding: 16, fontSize: 12, opacity: 0.75, border: '1px dashed var(--dsw-alias-border-l1,#ccc)' } }, t('tp.noTasks'));
+  var NW = 158, NH = 58, GX = 66, GY = 18, PAD = 18;
   var depth = teamTaskDepth(tasks);
   var cols = {};
-  tasks.forEach(function (t) { (cols[depth[t.id]] = cols[depth[t.id]] || []).push(t); });
-  var keys = Object.keys(cols).sort(function (a, b) { return a - b; });
+  tasks.forEach(function (x) { (cols[depth[x.id]] = cols[depth[x.id]] || []).push(x); });
+  var keys = Object.keys(cols).sort(function (a, b) { return Number(a) - Number(b); });
   var pos = {};
-  keys.forEach(function (k, ci) { cols[k].forEach(function (t, ri) { pos[t.id] = { x: PAD + ci * (NW + GX), y: PAD + ri * (NH + GY) }; }); });
-  var rows = keys.reduce(function (m, k) { return Math.max(m, cols[k].length); }, 0);
+  keys.forEach(function (k, ci) { cols[k].forEach(function (x, ri) { pos[x.id] = { x: PAD + ci * (NW + GX), y: PAD + ri * (NH + GY) }; }); });
+  var rows = keys.reduce(function (m, k) { return Math.max(m, cols[k].length); }, 1);
   var W = keys.length * (NW + GX) - GX + PAD * 2;
-  var H = Math.max(1, rows) * (NH + GY) - GY + PAD * 2;
-  var statusColor = { pending: '#94a3b8', in_progress: '#16a34a', completed: '#3b82f6', failed: '#ef4444', claimed: '#f59e0b' };
+  var H = rows * (NH + GY) - GY + PAD * 2;
 
+  var focusSet = null;
+  if (pinned && byId[pinned]) {
+    focusSet = {}; focusSet[pinned] = true;
+    (byId[pinned].blockedBy || []).forEach(function (d) { focusSet[d] = true; });
+  }
   var edges = [];
-  tasks.forEach(function (t) {
-    (t.blockedBy || []).forEach(function (d) {
-      var a = pos[d], b = pos[t.id];
+  tasks.forEach(function (x) {
+    (x.blockedBy || []).forEach(function (d) {
+      var a = pos[d], b = pos[x.id];
       if (!a || !b) return;
+      var lit = focusSet && focusSet[x.id] && focusSet[d];
       var mx = a.x + NW + (b.x - (a.x + NW)) / 2;
-      edges.push(React.createElement('path', { key: d + '>' + t.id, d: 'M ' + (a.x + NW) + ' ' + (a.y + NH / 2) + ' H ' + mx + ' V ' + (b.y + NH / 2) + ' H ' + b.x, fill: 'none', stroke: 'var(--dsw-alias-border-l1,#ccc)', strokeWidth: 1.5 }));
+      edges.push(React.createElement('path', {
+        key: d + '>' + x.id,
+        d: 'M ' + (a.x + NW) + ' ' + (a.y + NH / 2) + ' C ' + mx + ' ' + (a.y + NH / 2) + ', ' + mx + ' ' + (b.y + NH / 2) + ', ' + b.x + ' ' + (b.y + NH / 2),
+        fill: 'none',
+        stroke: lit ? 'var(--px-violet,#7c3aed)' : 'var(--dsw-alias-border-l1,#ccc)',
+        strokeWidth: lit ? 2.5 : 1.5
+      }));
     });
-  });
-
-  var nodes = tasks.map(function (t) {
-    var p = pos[t.id];
-    var on = pinned === t.id;
-    return React.createElement('div', {
-      key: t.id,
-      onClick: function () { onPin(on ? null : t.id); },
-      title: t.id + ' · ' + t.status + (t.ownerName ? ' · ' + t.ownerName : ''),
-      style: { position: 'absolute', left: p.x, top: p.y, width: NW, boxSizing: 'border-box', padding: '6px 8px', borderRadius: 6, cursor: 'pointer', background: 'var(--dsw-alias-bg-layer-1,#fff)', border: on ? '2px solid #7c3aed' : '1px solid var(--dsw-alias-border-l1,#ccc)', borderTop: '3px solid ' + (statusColor[t.status] || '#94a3b8'), fontSize: 12, overflow: 'hidden' }
-    },
-      React.createElement('div', { style: { opacity: 0.7, fontSize: 11 } }, t.id),
-      React.createElement('div', { style: { fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, t.subject),
-      t.ownerName ? React.createElement('div', { style: { opacity: 0.7, fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, t.ownerName) : null
-    );
   });
 
   return React.createElement('div', { style: { overflowX: 'auto' } },
     React.createElement('div', { style: { position: 'relative', width: W, height: H } },
       React.createElement('svg', { width: W, height: H }, edges),
-      nodes
+      tasks.map(function (x) {
+        var p = pos[x.id];
+        var st = taskStateOf(x, byId);
+        var on = pinned === x.id;
+        var dim = (focusSet && !focusSet[x.id]) || (picked && (x.ownerName || '') !== picked);
+        return React.createElement('div', {
+          key: x.id,
+          role: 'button',
+          tabIndex: 0,
+          'aria-pressed': on,
+          onClick: function () { onPin(on ? null : x.id); },
+          onFocus: function () { onPin(x.id); },
+          title: x.id + ' · ' + taskStateLabel(st, t) + (x.ownerName ? ' · ' + x.ownerName : ''),
+          style: {
+            position: 'absolute', left: p.x, top: p.y, width: NW, height: NH, boxSizing: 'border-box', padding: '5px 7px', cursor: 'pointer',
+            background: 'var(--dsw-alias-bg-layer-1,#fff)',
+            border: '1px solid ' + (on ? 'var(--px-violet,#7c3aed)' : 'var(--dsw-alias-border-l1,#ccc)'),
+            borderTop: '3px solid ' + taskStateColor(st),
+            opacity: dim ? 0.4 : 1,
+            overflow: 'hidden'
+          }
+        },
+          React.createElement('div', { style: { fontSize: 11, opacity: 0.7, display: 'flex', gap: 6 } },
+            x.id, x.ownerName ? React.createElement('span', { style: { marginLeft: 'auto' } }, x.ownerName) : null),
+          React.createElement('div', { style: { fontSize: 12, fontWeight: 600, lineHeight: 1.25, maxHeight: 32, overflow: 'hidden' } }, x.subject)
+        );
+      })
     )
   );
+}
+
+function TaskDetail(props) {
+  var t = props.t; var task = props.task; var byId = props.byId; var tasks = props.tasks;
+  if (!task) return React.createElement('div', { style: { fontSize: 12, opacity: 0.7 } }, t('tp.detailHint'));
+  var st = taskStateOf(task, byId);
+  var unlocks = tasks.filter(function (x) { return (x.blockedBy || []).indexOf(task.id) >= 0; }).map(function (x) { return x.id; });
+  var waitingOn = (task.blockedBy || []).filter(function (d) { return byId[d] && byId[d].status !== 'completed'; });
+  var why = st === 'completed' ? t('tp.detailCompleted')
+    : st === 'running' ? t('tp.detailRunning')
+    : st === 'blocked' ? t('tp.detailWaitingOn', { ids: fmtIds(waitingOn) })
+    : (task.blockedBy || []).length ? t('tp.detailReadyDeps') : t('tp.detailReady');
+  return React.createElement('div', { style: { border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', padding: '8px 10px', fontSize: 12, lineHeight: 1.6 } },
+    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 } },
+      React.createElement('b', { style: { flex: 1, minWidth: 0 } }, task.id + ' ' + task.subject),
+      React.createElement('span', { style: { border: '1px solid ' + taskStateColor(st), color: taskStateColor(st), fontSize: 11, padding: '0 6px', flexShrink: 0 } }, taskStateLabel(st, t))
+    ),
+    React.createElement('div', { style: { opacity: 0.8 } }, (task.ownerName || t('tp.unclaimed')) + ' · ' + why),
+    task.description ? React.createElement('div', { style: { opacity: 0.7, marginTop: 2 } }, task.description) : null,
+    React.createElement('div', { style: { opacity: 0.7, marginTop: 2 } }, unlocks.length ? t('tp.unlocks', { ids: fmtIds(unlocks) }) : t('tp.noDownstream'))
+  );
+}
+
+/* 计划闸门：草案确认（0.2.10 已有 plan/confirm · plan/discard 端点，这里补 UI） */
+function PlanGate(props) {
+  var t = props.t; var plan = props.plan; var sid = props.sid;
+  var [draft, setDraft] = React.useState(function () { return { tasks: (plan.tasks || []).slice(), members: (plan.members || []).slice() }; });
+  var [openM, setOpenM] = React.useState(true);
+  var [openT, setOpenT] = React.useState(true);
+  var [busy, setBusy] = React.useState(false);
+  var [armed, setArmed] = React.useState(false);
+  var [newTask, setNewTask] = React.useState('');
+  var [msg, setMsg] = React.useState('');
+
+  React.useEffect(function () {
+    setDraft({ tasks: (plan.tasks || []).slice(), members: (plan.members || []).slice() });
+  }, [plan.at, plan.leadId]);
+
+  function addTask() {
+    var v = newTask.trim();
+    if (!v) { setMsg(t('tp.planNeedName')); return; }
+    var id = 'task-' + (draft.tasks.length + 1);
+    setDraft(function (p) { return Object.assign({}, p, { tasks: p.tasks.concat([{ id: id, subject: v.slice(0, 60), description: v, blockedBy: [], writeScopes: [], kind: 'work' }]) }); });
+    setNewTask(''); setMsg(t('tp.toastTaskAdded', { id: id }));
+  }
+  /* 面板确认走 HTTP，而 HTTP 里**没有真实 Agent** —— 宿主 spawn 续聊成员必须有它
+   * （实测：假 parent 会让宿主报 `Cannot read properties of undefined (reading 'header')`）。
+   * 所以这里用「先试 HTTP（这样面板里改过的分工能带过去）→ 失败就降级为把确认指令填进输入框」，
+   * 而不是留一个点了必然报错的按钮。 */
+  function approveFallback(reason) {
+    try { writeComposer(props && props.inputActions, t('tp.confirmHint')); } catch (e) {}
+    setMsg(t('tp.confirmFallback', { err: reason }));
+    try { jumpToChat(props); } catch (e) {}
+  }
+  function approve() {
+    if (busy) return;
+    setBusy(true); setMsg(t('tp.approving'));
+    var edited = Object.assign({}, plan, { tasks: draft.tasks, members: draft.members });
+    pixePost('/agents-pixe/teams/plan/confirm', { lead: sid, plan: edited }).then(function (j) {
+      setBusy(false);
+      if (j && j.ok) { setMsg(t('tp.toastApproved', { members: (j.members || []).length, tasks: (j.tasks || []).length })); TEAM_STORE.refresh(sid); }
+      else approveFallback((j && j.error) || 'unknown');
+    }).catch(function (e) { setBusy(false); approveFallback(String((e && e.message) || e)); });
+  }
+  function discard() {
+    if (!armed) { setArmed(true); return; }
+    setArmed(false);
+    pixePost('/agents-pixe/teams/plan/discard', { lead: sid }).then(function () {
+      setMsg(t('tp.toastDiscarded')); TEAM_STORE.refresh(sid);
+    }).catch(function (e) { setMsg(t('tp.toastFail', { err: String((e && e.message) || e) })); });
+  }
+  function backToChat() {
+    writeComposer(props && props.inputActions, t('tp.continueHint'));
+    jumpToChat(props);
+  }
+
+  var deps = draft.tasks.reduce(function (n, x) { return n + ((x.blockedBy || []).length ? 1 : 0); }, 0);
+  var btn = { cursor: 'pointer', borderRadius: 6, padding: '4px 10px', fontSize: 12, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', fontFamily: 'inherit' };
+
+  return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 8, width: '100%', maxWidth: 430 } },
+    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7 } },
+      React.createElement('b', { style: { fontSize: 14, flex: 1 } }, t('tp.planTitle')),
+      React.createElement('span', { style: { fontSize: 11, padding: '1px 7px', background: 'var(--px-blue,#3b82f6)', color: '#071124' } }, t('tp.planBadge'))),
+    React.createElement('div', { style: { fontSize: 11, opacity: 0.78 } }, t('tp.planSub', { members: draft.members.length, tasks: draft.tasks.length, deps: deps })),
+    React.createElement('div', { style: { fontSize: 11, opacity: 0.7 } }, t('tp.planHint')),
+    /* 三步 stepper */
+    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 11 } },
+      [t('tp.flowReview'), t('tp.flowSpawn'), t('tp.flowRun')].map(function (label, i) {
+        return React.createElement('span', { key: label, style: { display: 'inline-flex', alignItems: 'center', gap: 4, color: i === 0 ? 'var(--px-blue,#3b82f6)' : 'var(--dsw-alias-label-secondary,#888)' } },
+          React.createElement('i', { style: { width: 17, height: 17, border: '1px solid ' + (i === 0 ? 'var(--px-blue,#3b82f6)' : 'var(--dsw-alias-border-l1,#ccc)'), display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontStyle: 'normal' } }, String(i + 1)),
+          label,
+          i < 2 ? React.createElement('s', { style: { display: 'inline-block', width: 14, height: 1, background: 'var(--dsw-alias-border-l2,#ddd)', marginLeft: 3 } }) : null);
+      })
+    ),
+    /* 成员与模型路由 */
+    React.createElement('div', { style: { border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)' } },
+      React.createElement('div', { onClick: function () { setOpenM(!openM); }, style: { display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', fontSize: 12 } },
+        React.createElement('span', null, openM ? '▾' : '▸'), React.createElement('b', { style: { flex: 1 } }, t('tp.planMembers')),
+        React.createElement('span', { style: { fontSize: 11, opacity: 0.7 } }, t('tp.cardMembers', { n: draft.members.length }))),
+      openM ? React.createElement('div', { style: { borderTop: '1px solid var(--dsw-alias-border-l2,#ddd)' } },
+        draft.members.map(function (m, i) {
+          return React.createElement('div', { key: (m.name || i) + '', style: { display: 'flex', gap: 7, alignItems: 'center', padding: '5px 8px', fontSize: 12, borderBottom: '1px solid var(--dsw-alias-border-l2,#eee)' } },
+            React.createElement('span', { style: { flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, m.name),
+            React.createElement('span', { style: { fontSize: 11, opacity: 0.7 } }, m.role || ''),
+            React.createElement('span', { style: { fontSize: 11, opacity: 0.6 } }, plan.provider || ''));
+        })
+      ) : null),
+    /* 任务与依赖 */
+    React.createElement('div', { style: { border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)' } },
+      React.createElement('div', { onClick: function () { setOpenT(!openT); }, style: { display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', fontSize: 12 } },
+        React.createElement('span', null, openT ? '▾' : '▸'), React.createElement('b', { style: { flex: 1 } }, t('tp.planTasks')),
+        React.createElement('span', { style: { fontSize: 11, opacity: 0.7 } }, t('tp.planTaskCount', { tasks: draft.tasks.length, deps: deps }))),
+      openT ? React.createElement('div', { style: { borderTop: '1px solid var(--dsw-alias-border-l2,#ddd)' } },
+        draft.tasks.map(function (x, i) {
+          return React.createElement('div', { key: x.id || i, style: { display: 'flex', gap: 7, alignItems: 'center', padding: '5px 8px', fontSize: 12, borderBottom: '1px solid var(--dsw-alias-border-l2,#eee)' } },
+            React.createElement('span', { style: { flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, (x.id ? x.id + ' ' : '') + (x.subject || '')),
+            React.createElement('span', { style: { fontSize: 11, opacity: 0.65 } }, (x.blockedBy || []).length ? t('tp.planDep', { ids: fmtIds(x.blockedBy) }) : t('tp.planNoDeps')));
+        })
+      ) : null,
+      React.createElement('div', { style: { display: 'flex', gap: 6, padding: '6px 8px' } },
+        React.createElement('input', { value: newTask, onChange: function (e) { setNewTask(e.target.value); }, placeholder: t('tp.planAddPh'), style: { flex: 1, minWidth: 0, padding: '3px 7px', fontSize: 12, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', fontFamily: 'inherit' } }),
+        React.createElement('button', { type: 'button', onClick: addTask, style: btn }, t('tp.planAdd')))),
+    /* 收尾：三出口 */
+    React.createElement('div', { style: { border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', padding: 8 } },
+      React.createElement('div', { style: { fontSize: 12, fontWeight: 700 } }, t('tp.planReady')),
+      React.createElement('div', { style: { fontSize: 11, opacity: 0.72, margin: '2px 0 7px' } }, t('tp.planReadyHint', { members: draft.members.length, tasks: draft.tasks.length })),
+      React.createElement('button', { type: 'button', onClick: approve, disabled: busy, style: Object.assign({}, btn, { width: '100%', background: busy ? '#94a3b8' : 'var(--px-blue,#3b82f6)', borderColor: 'var(--px-ink,#333)', color: '#071124', fontWeight: 700, cursor: busy ? 'wait' : 'pointer' }) }, busy ? t('tp.approving') : t('tp.approve')),
+      React.createElement('div', { style: { display: 'flex', gap: 6, marginTop: 7, alignItems: 'center' } },
+        React.createElement('button', { type: 'button', onClick: backToChat, style: Object.assign({}, btn, { flex: 1 }) }, t('tp.continue')),
+        React.createElement('button', { type: 'button', onClick: discard, style: Object.assign({}, btn, { borderColor: 'var(--px-red,#ef4444)', color: 'var(--px-red,#ef4444)' }) }, armed ? t('tp.discardArmed') : t('tp.discard'))),
+      armed ? React.createElement('div', { style: { fontSize: 11, color: 'var(--px-red,#ef4444)', marginTop: 6 } }, t('tp.discardConfirm')) : null,
+      msg ? React.createElement('div', { style: { fontSize: 11, opacity: 0.8, marginTop: 6 } }, msg) : null)
+  );
+}
+
+/* 当前阵容的**详细**列表：只要选了角色就实时显示。
+ * 每行给到：序号/领袖冠、主题色、角色名、分部、描述；点开还有 id / 语言 / 设为领袖。
+ * 抽成组件是因为两处都要用：还没建队时的主视图，以及已有宿主团队时的补充区块。 */
+function RosterList(props) {
+  var t = props.t;
+  var roster = props.roster || [];
+  var leaderKey = props.leaderKey;
+  var openKey = props.openKey;
+  var onOpen = props.onOpen;
+  var onSetLeader = props.onSetLeader;
+  if (!roster.length) return React.createElement('div', { style: { marginTop: 4, fontSize: 12, opacity: 0.7 } }, t('tp.rosterEmpty'));
+  var divs = (systemLang() === 'en' ? INDEX.enDivs : INDEX.zhDivs) || {};
+  return React.createElement('div', { style: { marginTop: 6, display: 'flex', flexDirection: 'column', gap: 5 } },
+    roster.map(function (r, i) {
+      var isLead = !!leaderKey && r.key === leaderKey;
+      var open = openKey === r.key;
+      var lbl = (divs[r.div] && divs[r.div].label) || r.div || '';
+      return React.createElement('div', {
+        key: r.key,
+        /* 可聚焦 + 支持回车/空格：只做 onClick 的话键盘与读屏用户根本进不来
+         * （这是我上一轮自己指出、这一轮补上的可达性缺口）。 */
+        role: 'button',
+        tabIndex: 0,
+        'aria-expanded': open,
+        onClick: function () { if (onOpen) onOpen(open ? null : r.key); },
+        onKeyDown: function (ev) {
+          if (!ev) return;
+          if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') { ev.preventDefault(); if (onOpen) onOpen(open ? null : r.key); }
+        },
+        title: r.desc || r.name,
+        style: { border: '1px solid ' + (open ? 'var(--px-violet,#7c3aed)' : 'var(--dsw-alias-border-l2,#ddd)'), background: 'var(--dsw-alias-bg-layer-1,#fff)', padding: '5px 7px', cursor: onOpen ? 'pointer' : 'default' }
+      },
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7 } },
+          React.createElement('span', { style: { width: 16, textAlign: 'center', flexShrink: 0, fontSize: 12 } }, isLead ? '👑' : String(i + 1)),
+          React.createElement('span', { style: { width: 8, height: 8, borderRadius: 4, background: r.color || '#888', flexShrink: 0 } }),
+          React.createElement('span', { style: { fontSize: 13, fontWeight: 600, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, (r.emoji || '') + ' ' + r.name),
+          lbl ? React.createElement('span', { style: { fontSize: 10, border: '1px solid var(--dsw-alias-border-l1,#ccc)', padding: '0 5px', opacity: 0.85, flexShrink: 0 } }, lbl) : null,
+          React.createElement('span', { style: { fontSize: 10, color: isLead ? 'var(--px-green,#16a34a)' : 'var(--px-amber,#f59e0b)', border: '1px solid ' + (isLead ? 'var(--px-green,#16a34a)' : 'var(--px-amber,#f59e0b)'), padding: '0 5px', flexShrink: 0 } }, isLead ? t('tp.isLeader') : t('tp.pendingTeam'))),
+        r.desc ? React.createElement('div', { style: { fontSize: 11, opacity: 0.75, marginTop: 3, marginLeft: 23, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: open ? 'pre-wrap' : 'nowrap' } }, r.desc) : null,
+        open ? React.createElement('div', { style: { fontSize: 11, opacity: 0.7, marginTop: 4, marginLeft: 23, lineHeight: 1.8, wordBreak: 'break-all' } },
+          React.createElement('div', null, 'id: ' + r.id),
+          React.createElement('div', null, t('tp.langLabel') + ': ' + r.lang),
+          (!isLead && onSetLeader) ? React.createElement('button', {
+            type: 'button',
+            onClick: function (ev) { if (ev && ev.stopPropagation) ev.stopPropagation(); onSetLeader(r.key); },
+            style: { marginTop: 3, cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '1px 8px', fontSize: 11 }
+          }, t('tp.setLeader')) : null) : null);
+    }));
+}
+
+/* 面板主体：左看人 / 右看事；有草案时左栏换成计划闸门 */
+function TeamPanel(props) {
+  var sid = props.sid;
+  var t = safeT((props && props.t) || _tFallback);
+  var data = useTeamView(sid);
+  var [pinned, setPinned] = React.useState(null);
+  var [picked, setPicked] = React.useState(null);
+  var [busy, setBusy] = React.useState(false);
+  var [toast, setToast] = React.useState(null);
+  var [armedHalt, setArmedHalt] = React.useState(false);
+  var [reportOpen, setReportOpen] = React.useState(false);
+  var [copied, setCopied] = React.useState(false);
+  /* 当前会话的阵容（选人即生效，所以这份就是「刚勾的那几个」） */
+  var activeKeys = useActiveKeys(sid);
+  useRolesStore();   /* 角色索引是异步加载的：不订阅的话，索引到位前阵容 chips 会短暂显示成空 */
+  var roster = rosterOfKeys(activeKeys);   /* 详细列表两处共用（无团队时的主视图 / 有团队时的补充区块） */
+  var [rosterOpen, setRosterOpen] = React.useState(null);
+  var [rosterShown, setRosterShown] = React.useState(false);
+  function showToast(msg, ms) { setToast(msg); setTimeout(function () { setToast(null) }, ms || 2400); }
+  /* 有可派发/在跑的任务才谈得上暂停；已归档的团队、一次性快照都没有可暂停的东西。 */
+  function isDispatchable(x) {
+    var s = String((x && x.status) || '');
+    return s === 'pending' || s === 'claimed' || s === 'in_progress' || s === 'running';
+  }
+  /* 「用它开工」：把**一句人话**填进对话框，剩下交给模型。
+   * 用户不需要知道工具名 —— 面板里出现的每个字都应该是用户语言。 */
+  function buildTeam() {
+    if (!sid) return;
+    try { writeComposer(props && props.inputActions, t('tp.buildTeamMsg')); } catch (e) {}
+    try { jumpToChat(props); } catch (e) {}
+  }
+
+  if (!data) return React.createElement('div', { style: { padding: 16, fontSize: 13, opacity: 0.7 } }, t('tp.loading'));
+
+  var members = data.members || [];
+  var tasks = (data.tasks || []).filter(function (x) { return x.status !== 'deleted'; });
+  var plan = data.plan || null;
+  var isNative = data.source === 'native';
+  var byId = {}; tasks.forEach(function (x) { byId[x.id] = x; });
+
+  if (!plan && members.length === 0 && tasks.length === 0) {
+    /* 还没有宿主团队时，这里显示**当前选中的阵容**：选人实时反映到团队界面。
+     * 只写一句「还没有活动团队」等于把用户刚勾的人藏起来，那正是以前的问题。 */
+    var btnLike = { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '3px 9px', fontSize: 12 };
+    return React.createElement('div', { style: { padding: 10, fontSize: 13, lineHeight: 1.7, display: 'flex', flexDirection: 'column', gap: 8 } },
+      React.createElement('div', { style: { border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', padding: '7px 9px' } },
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' } },
+          React.createElement('b', { style: { fontSize: 13 } }, t('tp.roster')),
+          React.createElement('span', { style: { fontSize: 11, opacity: 0.72 } }, t('tp.cardMembers', { n: roster.length })),
+          roster.length
+            ? React.createElement('button', { type: 'button', onClick: function () { STATE.clearDraft(sid); showToast(t('tp.rosterCleared')); }, style: Object.assign({}, btnLike, { marginLeft: 'auto' }) }, t('cm.clear'))
+            : null,
+          roster.length
+            ? React.createElement('button', {
+                type: 'button',
+                onClick: function () {
+                  var recs = selectedRecords(sid);
+                  if (!recs.length) return;
+                  try { writeComposer(props && props.inputActions, shortInstruction(recs, STATE.getLeader(sid), STATE.getName(sid))); } catch (e) {}
+                  try { jumpToChat(props); } catch (e) {}
+                },
+                style: Object.assign({}, btnLike, { background: 'var(--px-blue,#2563eb)', borderColor: 'var(--px-ink,#1b2130)', color: '#fff', fontWeight: 700 })
+              }, t('r.applyChat'))
+            : null),
+        React.createElement(RosterList, {
+          t: t, roster: roster, leaderKey: STATE.getActiveLeader(sid),
+          openKey: rosterOpen, onOpen: setRosterOpen,
+          onSetLeader: function (k) { STATE.setLeader(k, sid); },
+        })),
+      /* 空态必须给「下一步」。以前这里是一句让用户去调工具名的话（agents_pixe_team_create…），
+       * 那是给开发者看的，不是给用户看的。现在给真按钮 + 一句人话。 */
+      React.createElement('div', { style: { display: 'flex', gap: 6, flexWrap: 'wrap' } },
+        roster.length
+          ? React.createElement('button', { type: 'button', onClick: buildTeam, style: Object.assign({}, btnLike, { background: 'var(--px-violet,#7c3aed)', borderColor: 'var(--px-violet,#7c3aed)', color: '#fff', fontWeight: 700, padding: '5px 12px' }) }, t('tp.buildTeam'))
+          : null,
+        React.createElement('button', { type: 'button', onClick: function () { PANEL_CTL.open('pick'); }, style: Object.assign({}, btnLike, { padding: '5px 12px' }) }, t('tp.gotoPick'))),
+      React.createElement('div', { style: { fontSize: 12, opacity: 0.75 } }, t('tp.emptyHint')));
+  }
+
+  function toggleHalt() {
+    if (!sid || busy) return;
+    if (!data.halted && !armedHalt) { setArmedHalt(true); return; }   /* 暂停是破坏性动作：二次确认 */
+    setArmedHalt(false); setBusy(true);
+    pixePost(data.halted ? '/agents-pixe/teams/resume' : '/agents-pixe/teams/halt', { lead: sid }).then(function (j) {
+      setBusy(false);
+      if (j && j.ok) { showToast(data.halted ? t('tp.toastResumed') : t('tp.toastHalted')); TEAM_STORE.refresh(sid); }
+      else showToast(t('tp.toastFail', { err: (j && j.error) || 'unknown' }));
+    }).catch(function (e) { setBusy(false); showToast(t('tp.toastFail', { err: String((e && e.message) || e) })); });
+  }
+
+  var sum = teamSummary(data, t);
+  var done = tasks.filter(function (x) { return taskStateOf(x, byId) === 'completed'; }).length;
+  var msgs = (data.messages || []).length;
+  var detailTask = pinned && byId[pinned] ? byId[pinned] : null;
+
+  var btn = { cursor: 'pointer', borderRadius: 6, padding: '3px 9px', fontSize: 12, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', fontFamily: 'inherit' };
+  var bannerTone = sum.tone === 'warn' ? 'var(--px-amber,#f59e0b)' : sum.tone === 'staged' ? 'var(--px-blue,#3b82f6)' : sum.tone === 'done' ? 'var(--px-blue,#3b82f6)' : 'var(--px-green,#16a34a)';
+
+  return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 } },
+    /* 面板头：标题 + 状态 + 摘要 + 停止（二次确认）+ 消息 */
+    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7, padding: '6px 8px', borderBottom: '1px solid var(--dsw-alias-border-l1,#ccc)', flexWrap: 'wrap' } },
+      React.createElement('span', { style: { width: 8, height: 8, borderRadius: 4, background: bannerTone, display: 'inline-block' } }),
+      React.createElement('b', { style: { fontSize: 13 } }, (plan && plan.teamName) || data.teamName || t('tp.title')),
+      isNative ? React.createElement('span', { style: { fontSize: 11, opacity: 0.7 } }, t('tp.readOnlyNative')) : null,
+      React.createElement('span', { style: { marginLeft: 'auto', fontSize: 11, opacity: 0.7 } }, t('tp.headSum', { members: members.length, done: done, total: tasks.length, msgs: msgs })),
+      /* 暂停/恢复只在「有可派发的东西」或「已经暂停」时出现：
+       * 已归档的团队和一次性快照都没有可暂停的对象，给按钮只会误导。
+       * 一次性快照还要额外说清它是只读历史。 */
+      data.oneShot ? React.createElement('span', { style: { fontSize: 11, opacity: 0.7 } }, t('tp.oneShotHint')) : null,
+      (isNative || data.oneShot || !(tasks.some(isDispatchable) || data.halted)) ? null
+        : React.createElement('button', { type: 'button', onClick: toggleHalt, disabled: busy, title: t('tp.haltTitle'),
+            style: Object.assign({}, btn, { borderColor: data.halted ? 'var(--px-green,#16a34a)' : (armedHalt ? 'var(--px-amber,#f59e0b)' : 'var(--dsw-alias-border-l1,#ccc)'), color: armedHalt ? 'var(--px-amber,#f59e0b)' : 'inherit' }) },
+            data.halted ? t('tp.resume') : (armedHalt ? t('tp.haltConfirm') : t('tp.halt')))
+    ),
+    /* 全局一句话摘要 */
+    React.createElement('div', { style: { padding: '5px 8px', fontSize: 12, background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', borderBottom: '1px solid var(--dsw-alias-border-l2,#eee)' } },
+      React.createElement('span', { style: { color: bannerTone } }, '● ' + sum.text),
+      toast ? React.createElement('span', { style: { marginLeft: 10, opacity: 0.75 } }, toast) : null
+    ),
+    /* 主体 */
+    React.createElement('div', { style: { flex: '1 1 auto', minHeight: 0, overflow: 'auto', padding: 8 } },
+      plan
+        ? React.createElement('div', { style: { display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' } },
+            React.createElement(PlanGate, { t: t, plan: plan, sid: sid, inputActions: props.inputActions }),
+            React.createElement('div', { style: { flex: 1, minWidth: 260, display: 'flex', flexDirection: 'column', gap: 8 } },
+              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8 } },
+                React.createElement('b', { style: { fontSize: 13 } }, t('tp.preview')),
+                React.createElement('span', { style: { fontSize: 11, opacity: 0.7 } }, t('tp.previewHint'))),
+              React.createElement(DAGraph, {
+                tasks: (plan.tasks || []).map(function (x) { return Object.assign({}, x, { status: 'pending' }); }),
+                byId: (function () { var m = {}; (plan.tasks || []).forEach(function (x) { m[x.id] = Object.assign({}, x, { status: 'pending' }); }); return m; })(),
+                t: t, pinned: pinned, onPin: setPinned, picked: null
+              }),
+              React.createElement(TaskDetail, { t: t, task: (plan.tasks || []).filter(function (x) { return x.id === pinned; })[0] || null, byId: (function () { var m = {}; (plan.tasks || []).forEach(function (x) { m[x.id] = x; }); return m; })(), tasks: plan.tasks || [] })
+            ))
+        : React.createElement('div', { style: { display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' } },
+            /* 左栏：人 */
+            React.createElement('div', { style: { width: 330, flex: '1 1 300px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 9 } },
+              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', padding: '6px 8px' } },
+                React.createElement('span', { style: { fontSize: 18 } }, '🧭'),
+                React.createElement('span', { style: { flex: 1, minWidth: 0 } },
+                  React.createElement('b', { style: { fontSize: 13 } }, t('tp.captain')),
+                  React.createElement('div', { style: { fontSize: 11, opacity: 0.72 } }, members.length && tasks.length ? t('tp.dispatched', { tasks: tasks.length, members: members.length }) : t('tp.captainRole'))),
+                React.createElement('span', { style: { fontSize: 11, padding: '1px 6px', border: '1px solid ' + bannerTone, color: bannerTone } }, done === tasks.length && tasks.length ? t('tp.captainDone') : t('tp.captainWorking'))),
+              React.createElement(ProgressSegments, { tasks: tasks, byId: byId, t: t }),
+              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7, marginTop: 4 } },
+                React.createElement('b', { style: { fontSize: 13, flex: 1 } }, t('tp.members', { n: members.length }))),
+              React.createElement(MemberTree, { members: members, tasks: tasks, byId: byId, t: t, plan: plan, onPick: setPicked, picked: picked })
+            ),
+            /* 右栏：事 */
+            React.createElement('div', { style: { flex: '2 1 380px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 } },
+              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' } },
+                React.createElement('b', { style: { fontSize: 13 } }, t('tp.taskDeps')),
+                React.createElement('span', { style: { marginLeft: 'auto', fontSize: 11, opacity: 0.7 } }, picked ? t('tp.filterByMember', { name: picked }) : t('tp.dagHint'))),
+              React.createElement(DAGraph, { tasks: tasks, byId: byId, t: t, pinned: pinned, onPin: setPinned, picked: picked }),
+              React.createElement(TaskDetail, { t: t, task: detailTask, byId: byId, tasks: tasks })
+            )),
+      /* 当前阵容：已有宿主团队时也实时显示（只要有角色就显示，与是否建队无关） */
+      roster.length
+        ? React.createElement('div', { style: { marginTop: 8, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)' } },
+            React.createElement('div', {
+              role: 'button', tabIndex: 0, 'aria-expanded': !!rosterShown,
+              onClick: function () { setRosterShown(!rosterShown); },
+              onKeyDown: function (ev) { if (ev && (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar')) { ev.preventDefault(); setRosterShown(!rosterShown); } },
+              style: { display: 'flex', alignItems: 'center', gap: 7, padding: '5px 8px', fontSize: 12, cursor: 'pointer', userSelect: 'none' }
+            },
+              React.createElement('span', null, (rosterShown ? '▾ ' : '▸ ') + '🧑‍🤝‍🧑 ' + t('tp.roster')),
+              React.createElement('span', { style: { fontSize: 11, opacity: 0.72 } }, t('tp.cardMembers', { n: roster.length }))),
+            rosterShown ? React.createElement('div', { style: { padding: '0 8px 7px', borderTop: '1px solid var(--dsw-alias-border-l2,#eee)' } },
+              React.createElement(RosterList, {
+                t: t, roster: roster, leaderKey: STATE.getActiveLeader(sid),
+                openKey: rosterOpen, onOpen: setRosterOpen,
+                onSetLeader: function (k) { STATE.setLeader(k, sid); },
+              })) : null)
+        : null,
+      /* 最终报告：团队结束后真正有价值的东西。它一直写在状态里，但 view 不返回（本轮补上），
+       * 界面上任何地方都看不到 —— 用户只能翻聊天记录找。默认收起，需要时展开。 */
+      (data.lastReport && String(data.lastReport).trim())
+        ? React.createElement('div', { style: { marginTop: 8, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)' } },
+            React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7, padding: '5px 8px', fontSize: 12, flexWrap: 'wrap' } },
+              React.createElement('span', { onClick: function () { setReportOpen(!reportOpen); }, style: { cursor: 'pointer', userSelect: 'none' } }, (reportOpen ? '▾ ' : '▸ ') + '📄 ' + t('tp.report')),
+              data.archivedAt ? React.createElement('span', { style: { fontSize: 11, opacity: 0.7, border: '1px solid var(--dsw-alias-border-l1,#ccc)', padding: '0 6px' } }, t('tp.reportArchived')) : null,
+              React.createElement('span', { style: { marginLeft: 'auto', fontSize: 11, opacity: 0.65 } }, String(data.lastReport).length + ' ' + t('tp.reportChars')),
+              React.createElement('button', {
+                type: 'button',
+                onClick: function () {
+                  try {
+                    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(String(data.lastReport));
+                    setCopied(true); setTimeout(function () { setCopied(false); }, 1600);
+                  } catch (e) {}
+                },
+                style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '2px 8px', fontSize: 11 }
+              }, copied ? t('tp.reportCopied') : t('tp.reportCopy'))),
+            reportOpen
+              ? React.createElement('pre', { style: { margin: 0, padding: '7px 9px', borderTop: '1px solid var(--dsw-alias-border-l2,#eee)', maxHeight: 320, overflow: 'auto', fontSize: 12, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' } }, String(data.lastReport))
+              : null)
+        : null
+    )
+  );
+}
+
+/* ================= 跟随会话的两个入口 =================
+ * 参考 dsh-agent-teams 的模式：入口属于会话，不属于通用工作区。
+ * 没有团队时两处都返回 null（完全不占位）；有团队才出现。 */
+function teamOf(data) {
+  if (!data) return null;
+  var members = data.members || [];
+  var tasks = (data.tasks || []).filter(function (x) { return x.status !== 'deleted'; });
+  if (!members.length && !tasks.length && !data.plan) return null;
+  return { members: members, tasks: tasks, plan: data.plan || null, halted: !!data.halted, raw: data };
+}
+function teamCounts(team) {
+  var byId = {}; team.tasks.forEach(function (x) { byId[x.id] = x; });
+  var done = team.tasks.filter(function (x) { return taskStateOf(x, byId) === 'completed'; }).length;
+  var running = team.tasks.some(function (x) { return taskStateOf(x, byId) === 'running'; });
+  var live = !!team.plan || team.tasks.some(function (x) { var s = taskStateOf(x, byId); return s === 'running' || s === 'blocked' || s === 'open'; });
+  /* 草案态下 members/tasks 都是空的（成员还没创建），计数必须改读计划里的名册与任务，
+   * 否则会话头会显示「团队 (0)」、折叠徽章会显示「0 名成员 · 0/0 完成」——
+   * 这是「真跑一次 plan_only」才暴露出来的：纯静态读代码看不出来。 */
+  var plan = team.plan || null;
+  var staged = !!plan;
+  var nMembers = staged ? ((plan.members || []).length || (plan.roster || []).length) : team.members.length;
+  var nTasks = staged ? (plan.tasks || []).length : team.tasks.length;
+  /* 草案态没有真成员，只有计划名册；卡片上的名字行要能照常显示 */
+  var names = staged ? (plan.members || []).map(function (m) { return m.name; }) : team.members.map(function (m) { return m.name; });
+  return { done: done, running: running, live: live, byId: byId, staged: staged, nMembers: nMembers, nTasks: nTasks, names: names };
+}
+
+function SessionTeamEntry(props) {
+  var t = safeT((props && props.t) || _tFallback);
+  var sid = (props && (props.sessionId || props.sid)) || ACTIVE_SID;
+  var data = useTeamView(sid);
+  var team = teamOf(data);
+  if (!team) return null;
+  var c = teamCounts(team);
+  var dot = c.running ? '#22c55e' : (team.halted ? '#f59e0b' : '#94a3b8');
+  return React.createElement('button', {
+    type: 'button',
+    title: t('tp.entryTitle'),
+    onClick: function () { PANEL_CTL.open('team'); },
+    style: { display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', fontFamily: 'inherit', borderRadius: 7, padding: '4px 10px', fontSize: 12, lineHeight: 1.4 }
+  },
+    React.createElement('span', { style: { width: 7, height: 7, borderRadius: 4, background: dot, display: 'inline-block', flexShrink: 0 } }),
+    '🧩 ' + t('tp.entry', { members: c.nMembers }));
+}
+
+function TurnTailTeamCard(props) {
+  var t = safeT((props && props.t) || _tFallback);
+  var sid = (props && (props.sessionId || props.sid)) || ACTIVE_SID;
+  var data = useTeamView(sid);
+  var team = teamOf(data);
+  if (!team) return null;
+  var c = teamCounts(team);
+  var sum = teamSummary(team.raw, t);
+  /* 任务全部结算后**不隐藏**：用户要的是「任务结束后团队信息保留着，持续显示」。
+   * 但也不该每回合都甩一张大卡 —— 结算后退化成一行，信息在、不占地方。 */
+  if (!c.live) {
+    return React.createElement('div', {
+      style: { display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', border: '1px solid var(--dsw-alias-border-l2,#eee)', background: 'var(--dsw-alias-bg-layer-1,#fff)', padding: '4px 9px', margin: '4px 0', fontSize: 12, opacity: 0.9 }
+    },
+      React.createElement('span', { style: { width: 7, height: 7, borderRadius: 4, background: c.done === c.nTasks && c.nTasks > 0 ? '#3b82f6' : '#94a3b8', display: 'inline-block', flexShrink: 0 } }),
+      React.createElement('b', { style: { fontSize: 12 } }, '🧩 ' + t('tp.title')),
+      React.createElement('span', { style: { opacity: 0.72 } }, t('tp.cardMembers', { n: c.nMembers })),
+      React.createElement('span', { style: { opacity: 0.72 } }, '· ' + sum.text),
+      React.createElement('button', {
+        type: 'button',
+        onClick: function () { PANEL_CTL.open('team'); },
+        style: { marginLeft: 'auto', cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '2px 8px', fontSize: 11 }
+      }, t('tp.viewTeam'))
+    );
+  }
+  return React.createElement('div', {
+    style: { border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', padding: '7px 9px', margin: '6px 0', display: 'flex', flexDirection: 'column', gap: 6 }
+  },
+    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' } },
+      React.createElement('b', { style: { fontSize: 13 } }, '🧩 ' + t('tp.title')),
+      React.createElement('span', { style: { fontSize: 11, opacity: 0.72 } }, t('tp.cardMembers', { n: c.nMembers })),
+      React.createElement('span', { style: { fontSize: 11, opacity: 0.72 } }, '· ' + sum.text),
+      React.createElement('button', {
+        type: 'button',
+        onClick: function () { PANEL_CTL.open('team'); },
+        style: { marginLeft: 'auto', cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '3px 9px', fontSize: 12 }
+      }, t('tp.viewTeam'))
+    ),
+    React.createElement('div', { style: { display: 'flex', gap: 6, flexWrap: 'wrap' } },
+      /* 草案态：没有真成员，只有计划名册 —— 名字行照常显示，别让卡片看起来是空的 */
+      c.staged
+        ? c.names.map(function (nm) {
+            return React.createElement('span', {
+              key: nm, title: nm,
+              style: { display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, border: '1px dashed var(--dsw-alias-border-l1,#ccc)', padding: '1px 7px', opacity: 0.85 }
+            },
+              React.createElement('span', { style: { width: 6, height: 6, borderRadius: 3, background: '#94a3b8', display: 'inline-block' } }),
+              nm);
+          })
+        : team.members.map(function (m) {
+            var mine = team.tasks.filter(function (x) { return (x.ownerName || '') === m.name; });
+            var myDone = mine.filter(function (x) { return taskStateOf(x, c.byId) === 'completed'; }).length;
+            var col = m.status === 'running' ? '#22c55e' : (m.status === 'failed' ? '#ef4444' : '#64748b');
+            return React.createElement('span', {
+              key: m.id || m.name, title: m.name + (mine.length ? ' · ' + myDone + '/' + mine.length : ''),
+              style: { display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, border: '1px solid var(--dsw-alias-border-l1,#ccc)', padding: '1px 7px' }
+            },
+              React.createElement('span', { style: { width: 6, height: 6, borderRadius: 3, background: col, display: 'inline-block' } }),
+              m.name);
+          })
+    )
+  );
+}
+
+/* ================= 团队工具的对话内卡片（tool.call.toolview） =================
+ * 设计取舍：**不解析工具参数**去拼视图，直接读 TEAM_STORE 的实时快照。理由：
+ *   ① 不必依赖宿主内部 block 的形状（那是随版本会变的东西，猜错就静默不渲染）；
+ *   ② 显示的是「现在进行到哪」，而不是一次性的 JSON 快照；
+ *   ③ 原始参数/结果仍可展开，需要查证时够用。
+ * 注册 key = wire 工具名（本机实测 keyDomain 开放，agents_pixe_* 未被占用）。
+ * 一律套 pixBoundary：这里的任何意外都不允许把聊天渲染带崩。 */
+var PIXE_TOOL_KEYS = [
+  'agents_pixe_team', 'agents_pixe_team_create', 'agents_pixe_team_step',
+  'agents_pixe_team_message', 'agents_pixe_team_report',
+  'agents_pixe_task_create', 'agents_pixe_task_update', 'agents_pixe_roles'
+];
+
+function pixeToolKind(name) {
+  var n = String(name || '');
+  if (n === 'agents_pixe_roles') return 'roles';
+  if (n === 'agents_pixe_task_create' || n === 'agents_pixe_task_update') return 'task';
+  return 'team';
+}
+/* 容错取值：block 形状随宿主版本可能不同，取不到就返回空，绝不 throw */
+function pixeToolRaw(props) {
+  var out = { args: null, text: '' };
+  try {
+    var b = props && props.block;
+    if (!b) return out;
+    var a = b.input || b.args || b.arguments || b.parameters || (b.call && (b.call.input || b.call.args)) || null;
+    if (a && typeof a === 'object') out.args = a;
+    var txt = '';
+    if (typeof b.text === 'string') txt = b.text;
+    else if (typeof b.content === 'string') txt = b.content;
+    else if (Array.isArray(b.content)) txt = b.content.map(function (x) { return typeof x === 'string' ? x : ((x && x.text) || ''); }).join('\n');
+    else if (typeof b.result === 'string') txt = b.result;
+    out.text = String(txt).slice(0, 4000);
+  } catch (e) {}
+  return out;
+}
+
+function PixeToolView(props) {
+  var t = safeT((props && props.t) || _tFallback);
+  var name = String((props && props.toolName) || '');
+  var kind = pixeToolKind(name);
+  var sid = (props && (props.sessionId || props.sid)) || ACTIVE_SID;
+  var data = useTeamView(sid);                       /* hook：无条件调用 */
+  var [open, setOpen] = React.useState(false);
+  var raw = pixeToolRaw(props);
+
+  var box = { border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', margin: '4px 0', fontSize: 12 };
+  var mkHead = function (icon, label) {
+    return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7, padding: '5px 9px', flexWrap: 'wrap' } },
+      React.createElement('span', null, icon + ' ' + label),
+      React.createElement('span', { style: { opacity: 0.6 } }, name),
+      React.createElement('button', {
+        type: 'button',
+        onClick: function () { PANEL_CTL.open('team'); },
+        style: { marginLeft: 'auto', cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '2px 8px', fontSize: 11 }
+      }, t('tv.openPanel')));
+  };
+
+  if (props && props.phase === 'preparing') {
+    return React.createElement('div', { style: box }, mkHead('⏳', t('tv.team')),
+      React.createElement('div', { style: { padding: '0 9px 7px', opacity: 0.7 } }, t('tv.preparing')));
+  }
+
+  var kindLabel = kind === 'roles' ? t('tv.roles') : (kind === 'task' ? t('tv.task') : t('tv.team'));
+  var kindIcon = kind === 'roles' ? '📇' : (kind === 'task' ? '📌' : '🧩');
+
+  var body = null;
+  if (kind === 'roles') {
+    body = React.createElement('div', { style: { padding: '0 9px 8px', opacity: 0.75 } }, t('tv.rolesHint'));
+  } else if (kind === 'task') {
+    body = React.createElement('div', { style: { padding: '0 9px 8px', opacity: 0.8 } },
+      data ? teamSummary(data, t).text : t('tv.noTeam'));
+  } else {
+    var team = teamOf(data);
+    if (!team) {
+      body = React.createElement('div', { style: { padding: '0 9px 8px', opacity: 0.7 } }, t('tv.noTeam'));
+    } else {
+      var byId = {}; team.tasks.forEach(function (x) { byId[x.id] = x; });
+      var done = team.tasks.filter(function (x) { return taskStateOf(x, byId) === 'completed'; }).length;
+      body = React.createElement('div', { style: { padding: '0 9px 8px', display: 'flex', flexDirection: 'column', gap: 6 } },
+        React.createElement('div', { style: { opacity: 0.85 } }, '● ' + teamSummary(team.raw, t).text),
+        team.tasks.length ? React.createElement('div', { style: { display: 'flex', gap: 3 } },
+          team.tasks.map(function (x) {
+            return React.createElement('i', {
+              key: x.id, title: x.id + ' · ' + taskStateLabel(taskStateOf(x, byId), t),
+              style: { flex: 1, height: 9, background: taskStateColor(taskStateOf(x, byId)), border: '1px solid var(--dsw-alias-border-l1,#ccc)', display: 'block' }
+            });
+          })
+        ) : null,
+        React.createElement('div', { style: { display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' } },
+          team.members.map(function (m) {
+            var col = m.status === 'running' ? '#22c55e' : (m.status === 'failed' ? '#ef4444' : '#64748b');
+            return React.createElement('span', { key: m.id || m.name, style: { fontSize: 11, border: '1px solid var(--dsw-alias-border-l1,#ccc)', padding: '0 6px', display: 'inline-flex', alignItems: 'center', gap: 4 } },
+              React.createElement('span', { style: { width: 6, height: 6, borderRadius: 3, background: col, display: 'inline-block' } }), m.name);
+          }),
+          React.createElement('span', { style: { marginLeft: 'auto', opacity: 0.7, fontSize: 11 } },
+            t('tp.headSum', { members: team.members.length, done: done, total: team.tasks.length, msgs: ((team.raw && team.raw.messages) || []).length }))
+        )
+      );
+    }
+  }
+
+  return React.createElement('div', { style: box },
+    mkHead(kindIcon, kindLabel),
+    body,
+    React.createElement('div', { style: { borderTop: '1px solid var(--dsw-alias-border-l2,#eee)', padding: '4px 9px' } },
+      React.createElement('span', { onClick: function () { setOpen(!open); }, style: { cursor: 'pointer', opacity: 0.7, userSelect: 'none' } }, (open ? '▾ ' : '▸ ') + t('tv.raw')),
+      open ? React.createElement('pre', { style: { marginTop: 5, maxHeight: 220, overflow: 'auto', fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-all', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', padding: 6 } },
+        (raw.args ? JSON.stringify(raw.args, null, 2) : t('tv.noArgs')) + (raw.text ? '\n\n--- result ---\n' + raw.text : '')) : null)
+  );
+}
+
+/* ---------- 浮层布局记忆 ----------
+ * 位置 / 缩放 / 折叠态 / 当前视图落 localStorage（按 profile 共用一份，不按会话区分：面板位置是人的习惯，不是会话的属性）。
+ * 读的时候顺手把位置夹回可视区：换显示器或改分辨率后，旧坐标可能整块跑到屏幕外。 */
+var _OVERLAY_KEY = 'agents-pixe.overlay.v1';
+function readOverlayLayout() {
+  var out = {};
+  try {
+    out = JSON.parse(localStorage.getItem(_OVERLAY_KEY) || 'null') || {};
+  } catch (e) { out = {}; }
+  try {
+    var W = (typeof window !== 'undefined' && window.innerWidth) || 1280;
+    var H = (typeof window !== 'undefined' && window.innerHeight) || 800;
+    if (typeof out.dx === 'number' && isFinite(out.dx)) out.dx = Math.max(16 - W, Math.min(16, out.dx)); else delete out.dx;
+    if (typeof out.dy === 'number' && isFinite(out.dy)) out.dy = Math.max(16 - H, Math.min(16, out.dy)); else delete out.dy;
+    if (typeof out.zoom !== 'number' || !isFinite(out.zoom)) delete out.zoom;
+    else out.zoom = Math.max(0.5, Math.min(2.5, out.zoom));
+  } catch (e) {}
+  return out;
+}
+function writeOverlayLayout(patch) {
+  try {
+    var next = Object.assign({}, readOverlayLayout(), patch);
+    localStorage.setItem(_OVERLAY_KEY, JSON.stringify(next));
+  } catch (e) { /* 隐私模式 / quota：布局记不住不影响功能，静默降级 */ }
 }
 
 /* ---------- 浮层面板（跟随当前会话 + 边界钳制 + 头像条） ---------- */
@@ -2145,7 +3238,26 @@ function OfficeOverlay(props) {
   var useSessions = props && props.useSessions;
   var t = safeT((props && props.t) || _tFallback);
     useSystemLang();
-  var sid = useSessions ? useSessions(function (s) { return s && s.current; }) : undefined;
+  /* 当前会话 id 必须来自**宿主真实快照的形状**。
+   *
+   * 曾经写成 `useSessions(s => s.current)` —— 那是臆造的字段：快照只有
+   * `{ byId, phase, projectionsBySession }`，**没有 current**，于是永远 undefined，
+   * 浮层退化成「会话盲」：办公室恒显示 0 人、点角色被写入口拒绝（静默无反应）、
+   * 「应用到对话」永远置灰 —— 用户看到的正是「点击角色与应用到对话 无效」。
+   *
+   * 正确写法照抄宿主自己（它在 shell 里找主会话就是这么写的）：
+   *   Object.values(s.byId).find(x => (x.retainedBy.mainView ?? 0) > 0)?.id */
+  function pickMainSession(s) {
+    if (!s || !s.byId || typeof s.byId !== 'object') return undefined;
+    var keys = Object.keys(s.byId);
+    for (var i = 0; i < keys.length; i++) {
+      var rec = s.byId[keys[i]];
+      var rb = rec && rec.retainedBy;
+      if (rb && (rb.mainView || 0) > 0) return rec.id || keys[i];
+    }
+    return undefined;
+  }
+  var sid = useSessions ? useSessions(pickMainSession) : undefined;
   if (!sid) sid = ACTIVE_SID;
   var pixeCfg = usePixeCfg();
   var zoomInit = (typeof pixeCfg.zoom === 'number') ? pixeCfg.zoom : 1.35;
@@ -2156,16 +3268,19 @@ function OfficeOverlay(props) {
   var prevRunningRef = React.useRef(false);
   var [activity, setActivity] = React.useState('');
   var [snap, setSnap] = React.useState({ roles: [], leader: null });
-  var [collapsed, setCollapsed] = React.useState(false);
-  var [pos, setPos] = React.useState({ dx: 0, dy: 0 });
-  var [zoom, setZoom] = React.useState(zoomInit);
+  var [savedLayout] = React.useState(function () { return readOverlayLayout(); });   /* 只读一次，作为初值 */
+  var [collapsed, setCollapsed] = React.useState(savedLayout.collapsed === true);
+  var [pos, setPos] = React.useState({ dx: savedLayout.dx || 0, dy: savedLayout.dy || 0 });
+  var [zoom, setZoom] = React.useState(typeof savedLayout.zoom === 'number' ? savedLayout.zoom : zoomInit);
   var [pickerOpen, setPickerOpen] = React.useState(false);
-  var [teamPanelOpen, setTeamPanelOpen] = React.useState(false);
+  var [view, setView] = React.useState(savedLayout.view === 'team' ? 'team' : 'office');   /* office | team：标题栏两档切换 */
+  var [moreOpen, setMoreOpen] = React.useState(false);       /* ⋯ 低频操作（选人 / 缩放 / 设置） */
     var [showSettings, setShowSettings] = React.useState(false);
+  var [allPresets, setAllPresets] = React.useState(false);   /* 预设团队递进披露：默认只露 6 个 */
   var [page, setPage] = React.useState(0);
   var [teams, setTeams] = React.useState(TEAMS.list());
-  var [draftN, setDraftN] = React.useState(sid ? STATE.getDraft().length : 0);
-  var [draftLeader, setDraftLeader] = React.useState(sid ? STATE.getLeader() : null);
+  var [draftN, setDraftN] = React.useState(sid ? STATE.getDraft(sid).length : 0);
+  var [draftLeader, setDraftLeader] = React.useState(sid ? STATE.getLeader(sid) : null);
   var [aiOn, setAiOn] = React.useState(CHAT_AI.isOn());
   var [tok, setTok] = React.useState({ in: 0, out: 0, cachePct: 0, turns: 0, steps: 0 });
   var [teamMsg, setTeamMsg] = React.useState('');
@@ -2191,6 +3306,35 @@ function OfficeOverlay(props) {
     return function () { if (dragCleanup.current) dragCleanup.current(); if (resizeCleanup.current) resizeCleanup.current(); };
   }, []);
 
+  /* 团队快照：与会话头入口 / 回合尾卡共享同一个轮询器（TEAM_STORE 按 sid 去重） */
+  var tv = useTeamView(sid);
+
+  /* 会话头入口 / 回合尾卡 → 展开浮层并切到团队视图（跨 slot 通信） */
+  React.useEffect(function () {
+    return PANEL_CTL.subscribe(function (target) {
+      setCollapsed(false);
+      if (target === 'pick') { setView('office'); setPickerOpen(true); setShowSettings(false); setMoreOpen(false); return; }
+      setView(target === 'team' ? 'team' : 'office');
+      setPickerOpen(false); setShowSettings(false); setMoreOpen(false);
+    });
+  }, []);
+
+  /* 选人入口只有一个：任何地方点「选人」都必须走这里。
+   *
+   * 为什么必须切 view：主体渲染分支是 `view === 'team' ? TeamPanel : showSettings ? … : pickerOpen ? 选人 : 画布`
+   * ——**团队页签优先**。只置 pickerOpen 而不切视图，在「团队」页签上选人面板永远不会被渲染，
+   * 用户看到的就是「点了没反应」（抽屉还会顺手关掉，更像没反应）。 */
+  function gotoPicker() {
+    setView('office'); setShowSettings(false); setMoreOpen(false); setPickerOpen(true);
+  }
+
+  /* 布局记忆：折叠态与视图立即写；位置/缩放防抖写（拖拽期间每帧都写会把 localStorage 打爆） */
+  React.useEffect(function () { writeOverlayLayout({ collapsed: collapsed, view: view }); }, [collapsed, view]);
+  React.useEffect(function () {
+    var id = setTimeout(function () { writeOverlayLayout({ dx: pos.dx, dy: pos.dy, zoom: zoom }); }, 400);
+    return function () { clearTimeout(id); };
+  }, [pos.dx, pos.dy, zoom]);
+
   /* 切换会话自动关闭 AI（避免跨会话误耗 token） */
   React.useEffect(function () {
     if (prevSidRef.current && prevSidRef.current !== sid) CHAT_AI.set(false);
@@ -2198,9 +3342,11 @@ function OfficeOverlay(props) {
   }, [sid]);
 
   React.useEffect(function () {
-    ACTIVE_SID = sid;
+    /* 只在拿到**真实**会话 id 时才写全局：否则浮层这一次 undefined 会把
+     * 工作角色页签刚设好的 ACTIVE_SID 冲掉，两个组件的会话来源互相打架。 */
+    if (sid) ACTIVE_SID = sid;
     function refresh() { setSnap({ roles: sid ? activeRecords(sid) : [], leader: sid ? STATE.getActiveLeader(sid) : null }); }
-    function refreshDraft() { setDraftN(sid ? STATE.getDraft().length : 0); setDraftLeader(sid ? STATE.getLeader() : null); }
+    function refreshDraft() { setDraftN(sid ? STATE.getDraft(sid).length : 0); setDraftLeader(sid ? STATE.getLeader(sid) : null); }
     refresh(); refreshDraft();
     var u1 = STATE.subscribe(refresh);
     var u2 = STATE.subscribe(refreshDraft);
@@ -2260,37 +3406,69 @@ function OfficeOverlay(props) {
 
   function loadTeamIntoDraft(t) {
     if (!sid) return;
-    STATE.clearDraft();
+    STATE.clearDraft(sid);
     var leaderKey = null;
     function toKey(idOrKey) { return String(idOrKey).indexOf(':') >= 0 ? idOrKey : systemLang() + ':' + idOrKey; }
     (t.roles || []).forEach(function (r) {
       var key = toKey(r);
-      if (INDEX.map[key]) { STATE.addDraft(key); if (toKey(t.leader) === key) leaderKey = key; }
+      if (INDEX.map[key]) { STATE.addDraft(key, sid); if (toKey(t.leader) === key) leaderKey = key; }
     });
-    STATE.setLeader(leaderKey);
-    STATE.setName(t.name);
+    STATE.setLeader(leaderKey, sid);
+    STATE.setName(t.name, sid);
   }
 
   /* 一键团队编排：浮层拿不到 dsh setDraft（React 受控 textarea 会被覆盖），改用复制到剪贴板 + 跳转对话粘贴 */
   function oneClickTeam() {
     if (draftN === 0) return;
-    var name = STATE.getName() || '';
+    var name = STATE.getName(sid) || '';
     /* 未命名预设团队 → 走「用户选中的角色」：宿主会读办公室选人，只导入选中的角色卡 */
     var instr = name ? _tFallback('inst.oneClick', { name: name }) : _tFallback('inst.oneClickOffice');
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       try { navigator.clipboard.writeText(instr); } catch (e) {}
     }
-    fillInput(instr);
+    writeComposer(props && props.inputActions, instr);
     setTeamMsg(_tFallback('o.msgOk', { name: name || _tFallback('o.currentTeam') }));
     if (teamMsgTimer.current) clearTimeout(teamMsgTimer.current);
     teamMsgTimer.current = setTimeout(function () { setTeamMsg(''); }, 5000);
     jumpToChat(props);
   }
 
+  /* 「应用到对话」常驻动作（标题栏）：不管面板当前停在哪个画面都能用
+   * （办公室 / 团队 / 选人 / 设置）。语义与工作角色页签顶部那颗一致：
+   * 把当前草稿置为本会话的活动名册 → 把成员清单填进输入框 → 跳到对话。
+   * 注意与 oneClickTeam 的区别：那颗走的是「编排指令」，这颗走的是「成员清单」。 */
+  function applyDraftToChat() {
+    if (draftN === 0) return;
+    try { STATE.apply(sid || ACTIVE_SID); } catch (e) {}
+    var recs = selectedRecords(sid);
+    if (recs.length > 0) writeComposer(props && props.inputActions, shortInstruction(recs, STATE.getLeader(sid), STATE.getName(sid)));
+    setPickerOpen(false); setShowSettings(false); setMoreOpen(false);
+    setTeamMsg(t('tp.applied', { n: recs.length }));
+    if (teamMsgTimer.current) clearTimeout(teamMsgTimer.current);
+    teamMsgTimer.current = setTimeout(function () { setTeamMsg(''); }, 4000);
+    jumpToChat(props);
+  }
+
+  /* 清空选人：草稿 + 本会话 active 一起清。
+   * 以前只清草稿 —— 于是「清了人，办公室还站着旧人，宿主还照旧按旧名册组队」。
+   * syncActive() 会自动同步一次，这里再显式清一次兜底（ACTIVE_SID 尚未绑定时不会自动同步）。 */
+  function clearSelection() {
+    try { STATE.clearDraft(sid); } catch (e) {}
+    try { STATE.clearActive(sid || ACTIVE_SID); } catch (e) {}
+    setTeamMsg(t('tp.rosterCleared'));
+    if (teamMsgTimer.current) clearTimeout(teamMsgTimer.current);
+    teamMsgTimer.current = setTimeout(function () { setTeamMsg(''); }, 3000);
+  }
+
   var roles = snap.roles;
   var leader = snap.leader;
-  var draftRoles = selectedRecords();
+  var draftRoles = selectedRecords(sid);
   var draftLeaderRec = draftLeader ? INDEX.map[draftLeader] : null;
+  /* 「团队」这一屏什么时候存在：办公室有人（有队伍可看），**或者**本会话已经有宿主团队（成员/任务/草案）。
+   * 后半句不能漏 —— 清空选人后如果直接隐藏入口，那份已完成的团队信息（含最终报告）就再也打不开了。
+   * 用派生视图而不是改 state：人再选上时，用户原先停在「团队」的偏好会自动恢复。 */
+  var hasTeamView = roles.length > 0 || !!(tv && (((tv.members || []).length) || ((tv.tasks || []).length) || tv.plan));
+  var effView = hasTeamView ? view : 'office';
 
   function onTitleDown(e) {
     if (e.button !== 0) return;
@@ -2325,53 +3503,120 @@ function OfficeOverlay(props) {
     resizeCleanup.current = onUp;
   }
 
-  var base = { position: 'absolute', right: 16 - pos.dx, bottom: 16 - pos.dy };
+  /* ⚠️ 关键：`shell.overlay` 这一层**默认点击穿透**（DSH slot 文档原文：
+   * "click-through until your entry opts into pointer events"）。
+   * 占用者必须自己把 pointer-events 拿回来，否则整块浮层看得见、点不动 ——
+   * 症状是「浮窗里每个按钮都像失效了」，而且**没有任何报错**。
+   * 这是长期被误判成「选人按钮坏了」的真正原因。 */
+  var base = { position: 'absolute', right: 16 - pos.dx, bottom: 16 - pos.dy, pointerEvents: 'auto' };
 
   if (collapsed) {
+    /* 折叠徽章带计数：把「重新打开面板」的成本压到一次点击，且不打开也知道进度。
+     * 计数统一走 teamOf + teamCounts —— 草案态下 members/tasks 是空的，
+     * 直接数 tv.members 会得到「0 名成员 · 0/0 完成」（真跑 plan_only 才暴露的 bug）。 */
+    var tvTeam = teamOf(tv);
+    var tc = tvTeam ? teamCounts(tvTeam) : null;
+    var hasTeam = !!tvTeam;
     return React.createElement('div', {
-      style: { position: 'absolute', right: 16, bottom: 16, background: 'var(--dsw-alias-bg-layer-2, #2b2f3a)', color: 'var(--dsw-alias-label-primary)', borderRadius: 14, padding: '6px 12px', cursor: 'pointer', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', fontSize: 13, userSelect: 'none', display: 'flex', alignItems: 'center', gap: 6 },
-      onClick: function () { setCollapsed(false); }
-    }, t('o.collapsed', { n: roles.length }));
+      style: { position: 'absolute', right: 16, bottom: 16, pointerEvents: 'auto', background: 'var(--dsw-alias-bg-layer-2, #2b2f3a)', color: 'var(--dsw-alias-label-primary)', borderRadius: 14, padding: '6px 12px', cursor: 'pointer', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', fontSize: 13, userSelect: 'none', display: 'flex', alignItems: 'center', gap: 6 },
+      title: hasTeam ? t('tp.entryTitle') : t('o.fold'),
+      onClick: function () { setCollapsed(false); if (hasTeam) setView('team'); }
+    },
+      React.createElement('span', { style: { width: 9, height: 9, borderRadius: 5, background: (tc && tc.running) || running ? '#22c55e' : '#94a3b8', display: 'inline-block', flexShrink: 0 } }),
+      hasTeam
+        ? (tc.staged
+            ? t('tp.badgeStaged', { members: tc.nMembers, tasks: tc.nTasks })
+            : t('tp.badge', { members: tc.nMembers, done: tc.done, total: tc.nTasks }))
+        : t('o.collapsed', { n: roles.length }));
   }
 
   return React.createElement('div', {
-    style: Object.assign({ background: 'var(--dsw-alias-bg-overlay, #fff)', color: 'var(--dsw-alias-label-primary)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.35)', border: '1px solid var(--dsw-alias-border-l1, #ddd)', maxWidth: 'calc(100vw - 24px)', maxHeight: 'calc(100vh - 24px)' }, base)
+    style: Object.assign({ background: 'var(--dsw-alias-bg-overlay, #fff)', color: 'var(--dsw-alias-label-primary)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.35)', border: '1px solid var(--dsw-alias-border-l1, #ddd)', minWidth: effView === 'team' ? Math.min(900, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 48) + 'px' : undefined, maxWidth: 'calc(100vw - 24px)', maxHeight: 'calc(100vh - 24px)' }, base)
   },
     React.createElement('div', {
       onMouseDown: onTitleDown,
-      style: { padding: '8px 12px', cursor: 'move', userSelect: 'none', display: 'flex', alignItems: 'center', gap: 6, background: 'var(--dsw-alias-bg-layer-2, #f5f5f5)', borderBottom: '1px solid var(--dsw-alias-border-l2, #eee)', fontSize: 13, fontWeight: 600 }
+      style: { padding: '8px 12px', cursor: 'move', userSelect: 'none', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'var(--dsw-alias-bg-layer-2, #f5f5f5)', borderBottom: '1px solid var(--dsw-alias-border-l2, #eee)', fontSize: 13, fontWeight: 600 }
     },
       React.createElement('span', { style: { flex: 1, display: 'flex', alignItems: 'center', gap: 6 } },
         React.createElement('span', { style: { width: 8, height: 8, borderRadius: 4, background: running ? '#22c55e' : '#94a3b8', display: 'inline-block', flexShrink: 0 } }),
-        t('o.title', { n: roles.length }),
-        (tok.turns > 0 || tok.in > 0)
-          ? React.createElement('span', { title: t('o.tip'), style: { fontSize: 11, fontWeight: 500, opacity: 0.75, flexShrink: 0 } },
-              (tok.turns > 0 ? t('o.tokensTurns', { turns: tok.turns, steps: tok.steps }) : '') +
-              (tok.cachePct > 0 ? t('o.tokensCache', { pct: tok.cachePct }) : '') +
-              t('o.tokensIn', { x: fmtTok(tok.in) }) + t('o.tokensOut', { x: fmtTok(tok.out) }))
-          : null
+        t('o.title', { n: roles.length })
       ),
-      React.createElement('button', { onClick: function () { setPickerOpen(!pickerOpen); setTeamPanelOpen(false); }, title: t('o.pick'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 14, lineHeight: 1.3 } }, pickerOpen ? t('o.collapse') : t('o.add')),
-      React.createElement('button', { onClick: function () { setZoom(Math.max(0.5, zoom - 0.25)); }, title: t('o.zoomOut'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 12px', fontSize: 15, lineHeight: 1.3 } }, '−'),
-      React.createElement('button', { onClick: function () { setZoom(Math.min(2.5, zoom + 0.25)); }, title: t('o.zoomIn'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 12px', fontSize: 15, lineHeight: 1.3 } }, '＋'),
-      React.createElement('button', { onClick: function () { setShowSettings(true); setPickerOpen(false); setTeamPanelOpen(false); }, title: t('o.settings'), style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 17, lineHeight: 1.3 } }, '⚙️'),
-      React.createElement('button', { onClick: function () { setTeamPanelOpen(!teamPanelOpen); setPickerOpen(false); setShowSettings(false); }, title: t('o.teamPanel'), style: { cursor: 'pointer', border: '1px solid ' + (teamPanelOpen ? '#7c3aed' : 'var(--dsw-alias-border-l1,#ccc)'), background: teamPanelOpen ? 'rgba(124,58,237,0.15)' : 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 14, lineHeight: 1.3 } }, t('o.teamPanel')),
+      /* 两档视图切换：取代原来平铺的「选人 / − / ＋ / ⚙️ / 🤝团队」5 个按钮。
+       * 办公室 0 人且本会话没有宿主团队时，整组切换**不出现** —— 一个只有一个选项的切换器是噪音，
+       * 而且「团队」那一屏当时也确实没什么可看的。 */
+      hasTeamView
+        ? React.createElement('span', { style: { display: 'inline-flex', border: '1px solid var(--dsw-alias-border-l1,#ccc)', borderRadius: 7, overflow: 'hidden', flexShrink: 0 } },
+            [['office', '🏢 ', 'tp.tabOffice'], ['team', '🤝 ', 'tp.tabTeam']].map(function (v) {
+              var on = effView === v[0];
+              return React.createElement('button', {
+                key: v[0], type: 'button', 'aria-pressed': on, title: t(v[2]),
+                onClick: function () { setView(v[0]); setPickerOpen(false); setShowSettings(false); setMoreOpen(false); },
+                style: { cursor: 'pointer', border: 'none', background: on ? 'var(--px-violet,#7c3aed)' : 'var(--dsw-alias-bg-layer-1,#fff)', color: on ? '#fff' : 'inherit', fontFamily: 'inherit', fontSize: 13, padding: '6px 12px', lineHeight: 1.3 }
+              }, v[1] + t(v[2]));
+            })
+          )
+        : null,
+      /* 「应用到对话」常驻：面板停在哪个画面都在，没选人时置灰（不是隐藏 —— 隐藏了用户就不知道有这个动作） */
+      React.createElement('button', {
+        type: 'button',
+        disabled: draftN === 0,
+        title: draftN === 0 ? t('tp.applyNone') : t('tp.applyTitle'),
+        onClick: applyDraftToChat,
+        style: {
+          flexShrink: 0, fontFamily: 'inherit', lineHeight: 1.3, borderRadius: 7, padding: '6px 12px', fontSize: 13,
+          cursor: draftN === 0 ? 'not-allowed' : 'pointer',
+          border: '1px solid ' + (draftN === 0 ? 'var(--dsw-alias-border-l1,#ccc)' : 'var(--px-ink,#1b2130)'),
+          background: draftN === 0 ? 'var(--dsw-alias-bg-layer-2,#f5f5f5)' : 'var(--px-blue,#2563eb)',
+          color: draftN === 0 ? 'inherit' : '#fff',
+          opacity: draftN === 0 ? 0.5 : 1
+        }
+      }, draftN === 0 ? t('tp.applyNone') : t('r.applyChatN', { n: draftN })),
+      /* 清空：**有选人才出现**（破坏性动作不该常驻；没东西可清时它只是噪音）。
+       * 清的是选人与阵容，不是聊天记录。 */
+      draftN === 0 ? null : React.createElement('button', {
+        type: 'button',
+        title: t('tp.clearTitle'),
+        onClick: clearSelection,
+        style: {
+          flexShrink: 0, fontFamily: 'inherit', lineHeight: 1.3, borderRadius: 7, padding: '6px 10px', fontSize: 13,
+          cursor: 'pointer',
+          border: '1px solid var(--dsw-alias-border-l1,#ccc)',
+          background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit'
+        }
+      }, '🗑 ' + t('cm.clear')),
+      React.createElement('button', { type: 'button', 'aria-expanded': moreOpen, onClick: function () { setMoreOpen(!moreOpen); setPickerOpen(false); setShowSettings(false); }, title: t('tp.more'),
+        style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: moreOpen ? 'rgba(124,58,237,0.15)' : 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', borderRadius: 7, padding: '6px 14px', fontSize: 16, lineHeight: 1.3 } }, '⋯'),
       React.createElement('span', { onClick: function (e) { e.stopPropagation(); setCollapsed(true); }, title: t('o.fold'), style: { cursor: 'pointer', fontSize: 17, lineHeight: 1, padding: '6px 6px', alignSelf: 'center' } }, '—')
     ),
+    /* ⋯ 低频操作：默认不占首屏，展开后仍是一行 */
+    moreOpen
+      ? React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', padding: '6px 10px', borderBottom: '1px solid var(--dsw-alias-border-l2,#eee)', background: 'var(--dsw-alias-bg-layer-1,#fff)', fontSize: 12 } },
+          React.createElement('span', { style: { opacity: 0.7 } }, t('tp.moreHint')),
+          React.createElement('button', { type: 'button', onClick: function () { if (pickerOpen) { setPickerOpen(false); } else { gotoPicker(); } }, style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '3px 9px', fontSize: 12 } }, pickerOpen ? t('o.collapse') : t('o.add')),
+          React.createElement('button', { type: 'button', onClick: function () { setZoom(Math.max(0.5, zoom - 0.25)); }, style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '3px 9px', fontSize: 12 } }, t('o.zoomOut')),
+          React.createElement('button', { type: 'button', onClick: function () { setZoom(Math.min(2.5, zoom + 0.25)); }, style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '3px 9px', fontSize: 12 } }, t('o.zoomIn')),
+          React.createElement('button', { type: 'button', onClick: function () { setShowSettings(true); setPickerOpen(false); setMoreOpen(false); }, style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '3px 9px', fontSize: 12 } }, '⚙️ ' + t('o.settings')),
+          React.createElement('button', { type: 'button', title: t('tp.resetView'), onClick: function () { setPos({ dx: 0, dy: 0 }); setZoom(zoomInit); setMoreOpen(false); }, style: { cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-2,#f5f5f5)', color: 'inherit', fontFamily: 'inherit', borderRadius: 6, padding: '3px 9px', fontSize: 12 } }, '↺ ' + t('tp.resetView')),
+          /* 运行统计：这些数字对「用插件的人」没有可操作性，所以从标题栏搬到这里。
+           * 标题栏留给「我在哪、我能做什么」。 */
+          (tok.turns > 0 || tok.in > 0)
+            ? React.createElement('div', { style: { flexBasis: '100%', marginTop: 6, paddingTop: 6, borderTop: '1px dashed var(--dsw-alias-border-l1,#ccc)', fontSize: 11, opacity: 0.75, lineHeight: 1.7 } },
+                React.createElement('div', { style: { fontWeight: 700, opacity: 0.9 } }, '📊 ' + t('tp.statTitle')),
+                React.createElement('div', { title: t('o.tip') },
+                  (tok.turns > 0 ? t('o.tokensTurns', { turns: tok.turns, steps: tok.steps }) : '') +
+                  (tok.cachePct > 0 ? t('o.tokensCache', { pct: tok.cachePct }) : '') +
+                  t('o.tokensIn', { x: fmtTok(tok.in) }) + t('o.tokensOut', { x: fmtTok(tok.out) })))
+            : null)
+      : null,
+    /* 拿不到当前会话时**必须看得见**：以前这里是静默的 ——
+     * 点角色、应用到对话全都不生效，界面上却没有一个字解释为什么。 */
+    !sid
+      ? React.createElement('div', { style: { padding: '4px 10px', fontSize: 11, background: 'rgba(239,68,68,0.14)', color: 'var(--px-red,#ef4444)', borderBottom: '1px solid var(--dsw-alias-border-l2,#eee)' } }, t('o.noSession'))
+      : null,
     pixBoundary('选人面板或办公室画布',
-        teamPanelOpen
-          /* 团队抽屉：从浮层标题栏下拉展开，宽高 100% 跟随浮层；
-           * 抽屉头部带 × 关闭（与浮层标题栏的 🤝 团队 按钮形成开/关对照） */
-          ? React.createElement('div', { style: { display: 'flex', flexDirection: 'column', width: '100%', maxWidth: Math.round(520 * zoom) + 'px', height: '70%', minHeight: 280, maxHeight: 'calc(100vh - 120px)', marginBottom: 6, borderRadius: 8, border: '1px solid rgba(124,58,237,0.45)', background: 'var(--dsw-alias-bg-overlay, #fff)', boxShadow: '0 4px 20px rgba(0,0,0,0.18)', overflow: 'hidden' } },
-              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', background: 'rgba(124,58,237,0.10)', borderBottom: '1px solid rgba(124,58,237,0.30)', fontSize: 12, fontWeight: 700, color: '#7c3aed' } },
-                React.createElement('span', null, '🤝 ' + t('o.teamPanel')),
-                React.createElement('span', { style: { marginLeft: 'auto', cursor: 'pointer', padding: '0 6px', borderRadius: 4, fontSize: 14, lineHeight: 1 } ,
-                  onClick: function () { setTeamPanelOpen(false) }, title: '关闭抽屉'
-                }, '✕')
-              ),
-              React.createElement('div', { style: { flex: '1 1 auto', minHeight: 0, overflow: 'auto' } },
-                React.createElement(TeamActivityPanel, { sid: sid, t: t })
-              )
+        effView === 'team'
+          ? React.createElement('div', { style: { display: 'flex', flexDirection: 'column', width: '100%', minWidth: 0, height: '100%', minHeight: 460, maxHeight: 'calc(100vh - 110px)', border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-overlay,#fff)', overflow: 'hidden' } },
+              React.createElement(TeamPanel, { sid: sid, t: t, inputActions: props && props.inputActions })
             )
           : showSettings
           ? React.createElement('div', { style: { padding: 10, width: Math.max(360, Math.round(520 * zoom)) + 'px', maxWidth: 'calc(100vw - 24px)', maxHeight: 460, overflowY: 'auto' } },
@@ -2383,9 +3628,12 @@ function OfficeOverlay(props) {
             )
           : pickerOpen
       ? React.createElement('div', { style: { padding: 10, width: Math.max(360, Math.round(520 * zoom)) + 'px', maxWidth: 'calc(100vw - 24px)', maxHeight: 460, overflowY: 'auto' } },
-          React.createElement('div', { style: { fontSize: 12, fontWeight: 700, opacity: 0.92, marginBottom: 6 } }, t('o.recTeams')),
+          React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 } },
+            React.createElement('span', { style: { fontSize: 12, fontWeight: 700, opacity: 0.92 } }, t('o.recTeams')),
+            React.createElement('span', { onClick: function () { setAllPresets(!allPresets); }, style: { marginLeft: 'auto', cursor: 'pointer', fontSize: 11, opacity: 0.8, userSelect: 'none' } }, allPresets ? t('r.presetLess') : t('r.presetMore', { n: PRESETS.length }))
+          ),
           React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 } },
-            PRESETS.map(function (p) { return React.createElement('span', { key: p.name, onClick: function () { loadTeamIntoDraft(p); }, style: { cursor: 'pointer', flexGrow: 1, textAlign: 'center', borderRadius: 14, padding: '3px 10px', fontSize: 12, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit' } }, '⭐ ' + presetLabel(p)); })
+            (allPresets ? PRESETS : PRESETS.slice(0, 6)).map(function (p) { return React.createElement('span', { key: p.name, onClick: function () { loadTeamIntoDraft(p); }, style: { cursor: 'pointer', flexGrow: 1, textAlign: 'center', borderRadius: 14, padding: '3px 10px', fontSize: 12, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit' } }, '⭐ ' + presetLabel(p)); })
           ),
           teams.length > 0
             ? React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 } },
@@ -2396,7 +3644,7 @@ function OfficeOverlay(props) {
           React.createElement('button', { disabled: draftN === 0, onClick: oneClickTeam,
             style: { cursor: draftN === 0 ? 'default' : 'pointer', padding: '7px 12px', borderRadius: 8, fontSize: 13, fontWeight: 700, marginBottom: 8, border: 'none', background: draftN === 0 ? 'rgba(120,120,120,0.2)' : '#7c3aed', color: draftN === 0 ? 'rgba(120,120,120,0.6)' : '#fff' } },
             draftN === 0 ? t('o.oneClickNone') : (draftLeaderRec ? t('o.oneClickLeader', { name: draftLeaderRec.name }) : (draftRoles[0] ? t('o.oneClickFirst', { name: draftRoles[0].name }) : t('o.oneClickAuto')))),
-          React.createElement('div', { style: { fontSize: 11, opacity: 0.6, marginBottom: 8 } }, teamMsg || t('o.oneClickHint', { name: STATE.getName() || t('o.currentTeam') })),
+          React.createElement('div', { style: { fontSize: 11, opacity: 0.6, marginBottom: 8 } }, teamMsg || t('o.oneClickHint', { name: STATE.getName(sid) || t('o.currentTeam') })),
           draftLeaderRec
             ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 8, marginBottom: 4, border: '1px solid rgba(234,179,8,0.5)', background: 'rgba(234,179,8,0.1)', fontSize: 12 } },
                 React.createElement('span', { style: { fontSize: 15 } }, '👑'),
@@ -2415,22 +3663,30 @@ function OfficeOverlay(props) {
             React.createElement('button', {
               onClick: function () {
                 STATE.apply(sid || ACTIVE_SID);
-                var recs = selectedRecords();
-                if (recs.length > 0) fillInput(shortInstruction(recs, STATE.getLeader(), STATE.getName()));
+                var recs = selectedRecords(sid);
+                if (recs.length > 0) writeComposer(props && props.inputActions, shortInstruction(recs, STATE.getLeader(sid), STATE.getName(sid)));
                 setPickerOpen(false);
                 jumpToChat(props);
               },
               style: { flex: 1, background: '#2563eb', color: '#fff', fontWeight: 700, fontSize: 13, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer', boxShadow: '0 2px 8px rgba(37,99,235,0.4)' }
             }, t('r.applyChat')),
             React.createElement('button', {
-              onClick: function () { STATE.clearDraft(); },
+              onClick: clearSelection,
               disabled: draftN === 0,
               style: { padding: '8px 14px', borderRadius: 8, border: '1px solid var(--dsw-alias-border-l1,#ccc)', background: 'var(--dsw-alias-bg-layer-1,#fff)', color: 'inherit', cursor: draftN > 0 ? 'pointer' : 'not-allowed', opacity: draftN > 0 ? 1 : 0.4, fontSize: 13 }
             }, t('cm.clear'))
           ),
-          React.createElement(RolePicker, { t: t })
+          React.createElement(RolePicker, { t: t, sid: sid })
         )
-      : React.createElement(OfficeCanvas, { t: t, roles: roles, leader: leader, zoom: zoom, working: running, done: done, page: page, activity: activity, sessionId: sid, onOpenRole: openRoleDetail, maxPerPage: maxPerPage })
+      : React.createElement('div', { style: { display: 'flex', flexDirection: 'column' } },
+          /* 首次使用引导：办公室画面在「一个人都没选」时是块空画布，
+           * 新用户看不出要先做什么。三步一句话，选了人就自动消失。 */
+          roles.length === 0
+            ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', padding: '6px 10px', fontSize: 12, background: 'rgba(124,58,237,0.08)', borderBottom: '1px solid var(--dsw-alias-border-l2,#eee)' } },
+                React.createElement('span', null, '👋 ' + t('o.firstRun')),
+                React.createElement('button', { type: 'button', onClick: gotoPicker, style: { cursor: 'pointer', border: '1px solid var(--px-violet,#7c3aed)', background: 'var(--px-violet,#7c3aed)', color: '#fff', fontFamily: 'inherit', borderRadius: 6, padding: '2px 9px', fontSize: 12 } }, t('o.firstRunPick')))
+            : null,
+          React.createElement(OfficeCanvas, { t: t, roles: roles, leader: leader, zoom: zoom, working: running, done: done, page: page, activity: activity, sessionId: sid, onOpenRole: openRoleDetail, onZoom: setZoom, maxPerPage: maxPerPage }))
     ),
     /* 头像条 + 翻页按钮同行：◀ [全员 emoji] ▶（每页人数来自 settings.maxPerPage） */
     showAvatarBar && roles.length > 0
@@ -2461,7 +3717,9 @@ function WorkingRolesView(props) {
   useRolesStore();   // 订阅：清单懒加载完成后自动重渲染
   var inputActions = props && props.inputActions;
   var t = safeT((props && props.t) || _tFallback);
-  var sid = props && props.sessionId;
+  /* 会话 id 缺失时回落到当前活跃会话：不回落到「空 sid」桶 ——
+   * 那里的选择界面和宿主都读不到，表现成「点了没反应」。 */
+  var sid = (props && props.sessionId) || ACTIVE_SID;
   var lang = useSystemLang();
   var [q, setQ] = React.useState('');
   var [div, setDiv] = React.useState('all');
@@ -2520,13 +3778,18 @@ function WorkingRolesView(props) {
     };
     reader.readAsText(file);
   }
-  var [selected, setSelected] = React.useState(selectedRecords());
-  var [leader, setLeader] = React.useState(STATE.getLeader());
+  var [selected, setSelected] = React.useState(selectedRecords(sid));
+  var [leader, setLeader] = React.useState(STATE.getLeader(sid));
   var [teams, setTeams] = React.useState(TEAMS.list());
-  var [teamName, setTeamName] = React.useState(STATE.getName());
+  var [teamName, setTeamName] = React.useState(STATE.getName(sid));
   var [saveName, setSaveName] = React.useState('');
   var [memberSearch, setMemberSearch] = React.useState('');
   var [collapsedDivs, setCollapsedDivs] = React.useState({});
+  var [allPresets, setAllPresets] = React.useState(false);   /* 预设团队递进披露：默认只露 6 个 */
+  var [focusIdx, setFocusIdx] = React.useState(-1);          /* 键盘焦点所在角色卡下标（-1 = 无） */
+  var searchRef = React.useRef(null);
+  var cardRefs = React.useRef({});
+  var keyRef = React.useRef(null);
   var [aiOn, setAiOn] = React.useState(CHAT_AI.isOn());
   var [models, setModels] = React.useState([]);
   var [cfg, setCfg] = React.useState(CHAT_CFG.get());
@@ -2554,7 +3817,7 @@ function WorkingRolesView(props) {
 
   React.useEffect(function () {
     ACTIVE_SID = sid;
-    var u1 = STATE.subscribe(function () { setSelected(selectedRecords()); setLeader(STATE.getLeader()); setTeamName(STATE.getName()); });
+    var u1 = STATE.subscribe(function () { setSelected(selectedRecords(sid)); setLeader(STATE.getLeader(sid)); setTeamName(STATE.getName(sid)); });
     var u2 = TEAMS.subscribe(function () { setTeams(TEAMS.list()); });
     var u3 = CHAT_AI.subscribe(function () { setAiOn(CHAT_AI.isOn()); });
     var u4 = CHAT_CFG.subscribe(function () { setCfg(CHAT_CFG.get()); });
@@ -2604,47 +3867,106 @@ function WorkingRolesView(props) {
 
   function toggleRole(rec) {
     var key = lang + ':' + rec.id;
-    if (STATE.hasDraft(key)) STATE.removeDraft(key); else STATE.addDraft(key);
+    if (STATE.hasDraft(key, sid)) STATE.removeDraft(key, sid); else STATE.addDraft(key, sid);
   }
   function makeLeader(key) { STATE.setLeader(key); }
-  function clearAll() { STATE.clearDraft(); }
+  function clearAll() { STATE.clearDraft(sid); STATE.clearActive(sid); }
   function loadTeam(t) {
-    STATE.clearDraft();
+    STATE.clearDraft(sid);
     var leaderKey = null;
     function toKey(idOrKey) { return String(idOrKey).indexOf(':') >= 0 ? idOrKey : lang + ':' + idOrKey; }
     (t.roles || []).forEach(function (r) {
       var key = toKey(r);
-      if (INDEX.map[key]) { STATE.addDraft(key); if (toKey(t.leader) === key) leaderKey = key; }
+      if (INDEX.map[key]) { STATE.addDraft(key, sid); if (toKey(t.leader) === key) leaderKey = key; }
     });
-    STATE.setLeader(leaderKey);
-    STATE.setName(t.name);
+    STATE.setLeader(leaderKey, sid);
+    STATE.setName(t.name, sid);
   }
   function saveCurrent() {
     var nm = saveName.trim();
-    if (!nm || STATE.getDraft().length === 0) return;
-    TEAMS.save(nm, STATE.getLeader(), STATE.getDraft());
-    STATE.setName(nm);
+    if (!nm || STATE.getDraft(sid).length === 0) return;
+    TEAMS.save(nm, STATE.getLeader(sid), STATE.getDraft(sid));
+    STATE.setName(nm, sid);
     setSaveName('');
   }
-  function removeTeam(name) { TEAMS.remove(name); if (STATE.getName() === name) STATE.setName(''); }
+  function removeTeam(name) { TEAMS.remove(name); if (STATE.getName(sid) === name) STATE.setName('', sid); }
   function applyToChat() {
     STATE.apply(sid);
-    var recs = selectedRecords();
-    if (inputActions && recs.length > 0) inputActions.setDraft(shortInstruction(recs, STATE.getLeader(), STATE.getName()));
+    var recs = selectedRecords(sid);
+    if (inputActions && recs.length > 0) inputActions.setDraft(shortInstruction(recs, STATE.getLeader(sid), STATE.getName(sid)));
     jumpToChat(props);
   }
   /* 一键团队编排：把当前选中团队送进 agents_pixe_team 指令（setDraft 可靠路径） */
   function oneClickTeam() {
-    var recs = selectedRecords();
+    var recs = selectedRecords(sid);
     if (recs.length === 0) return;
     STATE.apply(sid);
-    var name = STATE.getName() || '';
+    var name = STATE.getName(sid) || '';
     /* 未命名预设团队 → 让宿主按「本会话选中的角色」组队（只导入选中的角色卡） */
     var instr = name ? _tFallback('inst.oneClick', { name: name }) : _tFallback('inst.oneClickOffice');
     if (inputActions && typeof inputActions.setDraft === 'function') inputActions.setDraft(instr);
     else fillInput(instr);
     jumpToChat(props);
   }
+
+  /* ---------- 键盘等价路径 ----------
+   * / 聚焦搜索 · Enter 开工 · Esc 清搜索 · ↑↓←→ 移动角色卡 · Space 选中/取消
+   * window 监听 + keyRef：闭包始终来自最新一次渲染，不会读到过期的 selected / shown。
+   * 三条护栏：① 焦点在输入控件里一律不抢键；② 带 Ctrl/Meta/Alt 的组合键不抢；
+   * ③ 页签不可见（被隐藏，零尺寸）时直接退出，避免在聊天视图里误吞按键。 */
+  function pixVisible() {
+    var el = listRef.current;
+    if (!el || !el.isConnected) return false;
+    var r = typeof el.getBoundingClientRect === 'function' ? el.getBoundingClientRect() : null;
+    if (!r || r.width <= 0 || r.height <= 0) return false;      /* display:none / 零尺寸 */
+    if (typeof window !== 'undefined' && window.getComputedStyle) {
+      var cs = window.getComputedStyle(el);
+      if (cs && (cs.display === 'none' || cs.visibility === 'hidden' || cs.pointerEvents === 'none')) return false;
+    }
+    return true;
+  }
+  function moveCardFocus(i) {
+    var n = shown.length;
+    if (n === 0) return;
+    var k = Math.max(0, Math.min(n - 1, i));
+    setFocusIdx(k);
+    var el = cardRefs.current[k];
+    if (el && typeof el.focus === 'function') el.focus();
+    if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'nearest' });
+  }
+  function onGlobalKey(e) {
+    if (!e || !pixVisible()) return;
+    var tag = String((e.target && e.target.tagName) || '').toUpperCase();
+    var typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+    if (e.key === '/' && !typing) { e.preventDefault(); if (searchRef.current) searchRef.current.focus(); return; }
+    if (e.key === 'Escape') {
+      /* 只在「焦点就在搜索框里」或「根本没在输入」时清搜索；
+       * 否则（例如在团队名输入框按 Esc）不越权动别人的输入 */
+      var inSearch = !!(searchRef.current && document.activeElement === searchRef.current);
+      if (inSearch) { if (q) setQ(''); else searchRef.current.blur(); return; }
+      if (!typing && q) setQ('');
+      return;
+    }
+    if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+    /* 按钮/链接自带 Enter 与 Space 语义，不抢（否则按一次会触发两次） */
+    if (tag === 'BUTTON' || tag === 'A') return;
+    if (e.key === 'Enter') { if (selected.length > 0) { e.preventDefault(); oneClickTeam(); } return; }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); moveCardFocus(focusIdx + 1); return; }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); moveCardFocus(focusIdx - 1); return; }
+    if (e.key === ' ' || e.key === 'Spacebar') {
+      if (focusIdx < 0 || !shown[focusIdx]) return;   /* 没有焦点卡时不吃 Space，保留默认滚动等行为 */
+      e.preventDefault();
+      toggleRole(shown[focusIdx]);
+    }
+  }
+  /* 不在渲染期写 ref（并发渲染下渲染体不保证只跑一次）：交给 layout effect 每次提交后同步最新处理器。
+   * keydown 监听只注册一次，事件里始终读 keyRef.current。 */
+  React.useLayoutEffect(function () { keyRef.current = onGlobalKey; });
+  React.useEffect(function () {
+    function onKey(e) { if (keyRef.current) keyRef.current(e); }
+    window.addEventListener('keydown', onKey);
+    return function () { window.removeEventListener('keydown', onKey); };
+  }, []);
 
   var btnBase = { cursor: 'pointer', borderRadius: 7, padding: '5px 10px', fontSize: 12, border: '1px solid var(--dsw-alias-border-l1, #ccc)', background: 'var(--dsw-alias-bg-layer-1, #fff)', color: 'var(--dsw-alias-label-primary)' };
   var chipBase = { cursor: 'pointer', borderRadius: 14, padding: '3px 10px', fontSize: 12, border: '1px solid var(--dsw-alias-border-l1, #ccc)', background: 'var(--dsw-alias-bg-layer-1, #fff)', color: 'var(--dsw-alias-label-primary)', display: 'inline-flex', alignItems: 'center', gap: 4 };
@@ -2696,7 +4018,7 @@ function WorkingRolesView(props) {
           )
         : null,
       React.createElement('div', { style: { display: 'flex', gap: 8, alignItems: 'center' } },
-        React.createElement('input', { value: q, onChange: function (e) { setQ(e.target.value); }, placeholder: t('r.searchRoles'), style: { flex: 1, maxWidth: 340, padding: '7px 12px', borderRadius: 8, border: '1px solid var(--dsw-alias-border-l1, #ccc)', background: 'var(--dsw-alias-bg-layer-1, #fff)', color: 'inherit' } }),
+        React.createElement('input', { ref: searchRef, value: q, onChange: function (e) { setQ(e.target.value); }, placeholder: t('r.searchRoles'), title: t('r.keysHint'), style: { flex: 1, maxWidth: 340, padding: '7px 12px', borderRadius: 8, border: '1px solid var(--dsw-alias-border-l1, #ccc)', background: 'var(--dsw-alias-bg-layer-1, #fff)', color: 'inherit' } }),
         React.createElement('div', { style: { flex: 1 } }),
         React.createElement('button', { onClick: oneClickTeam, title: t('r.oneClickTitle'), disabled: selected.length === 0, style: { background: selected.length === 0 ? 'rgba(120,120,120,0.25)' : '#7c3aed', color: selected.length === 0 ? 'rgba(120,120,120,0.6)' : '#ffffff', fontWeight: 700, fontSize: 13, padding: '8px 14px', borderRadius: 8, border: 'none', cursor: selected.length === 0 ? 'default' : 'pointer', flexShrink: 0 } }, t('r.oneClick')),
         React.createElement('button', { onClick: applyToChat, style: { background: '#2563eb', color: '#ffffff', fontWeight: 700, fontSize: 13, padding: '8px 18px', borderRadius: 8, border: 'none', cursor: 'pointer', boxShadow: '0 2px 8px rgba(37,99,235,0.4)', flexShrink: 0 } }, t('r.applyChatN', { n: selected.length }))
@@ -2718,10 +4040,21 @@ function WorkingRolesView(props) {
           ? React.createElement('div', { style: { padding: 24, textAlign: 'center', fontSize: 13, opacity: 0.85 } }, t('r.noMatch'))
           : React.createElement('div', {},
               React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8, alignContent: 'flex-start' } },
-                shown.slice(0, roleInf.limit).map(function (r) {
+                shown.slice(0, roleInf.limit).map(function (r, i) {
                   var key = lang + ':' + r.id;
-                  var on = STATE.hasDraft(key);
-                  return React.createElement('div', { key: key, onClick: function () { toggleRole(r); }, title: r.desc, style: { width: 150, boxSizing: 'border-box', borderRadius: 10, padding: '10px 8px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, border: on ? '1px solid rgba(59,130,246,0.6)' : '1px solid var(--dsw-alias-border-l1, #eee)', background: on ? 'rgba(59,130,246,0.12)' : 'var(--dsw-alias-bg-layer-1, #fff)' } },
+                  var on = STATE.hasDraft(key, sid);
+                  var focused = i === focusIdx;
+                  return React.createElement('div', {
+                    key: key,
+                    ref: function (el) { if (el) cardRefs.current[i] = el; else delete cardRefs.current[i]; },
+                    /* 漫游 tabindex：Tab 只落到一张卡（首张或当前焦点卡），卡间移动交给 ↑↓←→。
+                     * 带 focusIdx 越界兜底：搜索/切分部把列表变短后，仍然有一张卡可 Tab 进入。 */
+                    tabIndex: (focusIdx < 0 || focusIdx >= shown.length ? i === 0 : focused) ? 0 : -1,
+                    onFocus: function () { setFocusIdx(i); },
+                    onBlur: function () { setFocusIdx(function (p) { return p === i ? -1 : p; }); },
+                    onClick: function () { setFocusIdx(i); toggleRole(r); },
+                    title: r.desc,
+                    style: { width: 150, boxSizing: 'border-box', borderRadius: 10, padding: '10px 8px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, outline: focused ? '2px solid #7c3aed' : 'none', outlineOffset: 1, border: on ? '1px solid rgba(59,130,246,0.6)' : '1px solid var(--dsw-alias-border-l1, #eee)', background: on ? 'rgba(59,130,246,0.12)' : 'var(--dsw-alias-bg-layer-1, #fff)' } },
                     React.createElement('span', { style: { fontSize: 26, lineHeight: 1 } }, r.emoji),
                     React.createElement('span', { style: { fontSize: 12, fontWeight: 600, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' } }, r.name),
                     React.createElement('span', { style: { fontSize: 11, opacity: 0.75, textAlign: 'center' } }, r.cname || ''),
@@ -2734,9 +4067,12 @@ function WorkingRolesView(props) {
       ),
       React.createElement('div', { style: { width: 300, minHeight: 0, flexShrink: 0, borderLeft: '1px solid var(--dsw-alias-border-l1, #eee)', padding: '10px 12px', overflowY: 'auto', display: 'flex', flexDirection: 'column' } },
         React.createElement('div', { style: { fontSize: 14, fontWeight: 700, marginBottom: 8 } }, t('r.teamPanel', { n: selected.length })),
-        React.createElement('div', { style: { fontSize: 12, fontWeight: 700, opacity: 0.92, marginBottom: 6 } }, t('r.recTeams')),
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 } },
+          React.createElement('span', { style: { fontSize: 12, fontWeight: 700, opacity: 0.92 } }, t('r.recTeams')),
+          React.createElement('span', { onClick: function () { setAllPresets(!allPresets); }, style: { marginLeft: 'auto', cursor: 'pointer', fontSize: 11, opacity: 0.8, userSelect: 'none' } }, allPresets ? t('r.presetLess') : t('r.presetMore', { n: PRESETS.length }))
+        ),
         React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 } },
-          PRESETS.map(function (p) { return React.createElement('span', { key: p.name, onClick: function () { loadTeam(p); }, style: chipBase }, '⭐ ' + presetLabel(p)); })
+          (allPresets ? PRESETS : PRESETS.slice(0, 6)).map(function (p) { return React.createElement('span', { key: p.name, onClick: function () { loadTeam(p); }, style: chipBase }, '⭐ ' + presetLabel(p)); })
         ),
         teams.length > 0
           ? React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 } },
@@ -2758,7 +4094,7 @@ function WorkingRolesView(props) {
                 React.createElement('div', { style: { fontSize: 13, fontWeight: 700 } }, leaderRec.name),
                 React.createElement('div', { style: { fontSize: 11, opacity: 0.85 } }, t('r.leaderCard'))
               ),
-              React.createElement('button', { onClick: function () { STATE.clearLeader(); }, style: btnBase }, t('cm.cancel'))
+              React.createElement('button', { onClick: function () { STATE.clearLeader(sid); }, style: btnBase }, t('cm.cancel'))
             )
           : React.createElement('div', { style: { fontSize: 12, opacity: 0.85, padding: '8px 10px', borderRadius: 8, border: '1px dashed var(--dsw-alias-border-l2, #ccc)', marginBottom: 8 } }, t('r.leaderHint')),
         selected.length === 0
@@ -2782,16 +4118,17 @@ function WorkingRolesView(props) {
                           React.createElement('span', { style: { fontSize: 15, width: 22, textAlign: 'center' } }, m.emoji),
                           React.createElement('span', { style: { flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, m.name),
                           React.createElement('button', { onClick: function () { makeLeader(m.key); }, style: Object.assign({}, btnBase, { padding: '2px 7px', fontSize: 11 }) }, t('r.setLeader')),
-                          React.createElement('button', { onClick: function () { STATE.removeDraft(m.key); }, style: Object.assign({}, btnBase, { padding: '2px 7px', fontSize: 11 }) }, '✕')
+                          React.createElement('button', { onClick: function () { STATE.removeDraft(m.key, sid); }, style: Object.assign({}, btnBase, { padding: '2px 7px', fontSize: 11 }) }, '✕')
                         );
                       })
                     );
                   })
             ),
         React.createElement('div', { style: { flex: 1 } }),
+        /* 底部只留「清空」：主 CTA 统一在顶部一个渲染点
+         * （去掉重复的「应用到对话」，见 docs/ui-interaction-simplify.md P0-1） */
         React.createElement('div', { style: { display: 'flex', gap: 8, marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--dsw-alias-border-l1, #eee)' } },
-          React.createElement('button', { onClick: applyToChat, style: { flex: 1, background: '#2563eb', color: '#ffffff', fontWeight: 700, fontSize: 13, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer', boxShadow: '0 2px 8px rgba(37,99,235,0.4)' } }, t('r.applyChat')),
-          React.createElement('button', { onClick: clearAll, style: btnBase }, t('cm.clear'))
+          React.createElement('button', { onClick: clearAll, disabled: selected.length === 0, style: Object.assign({}, btnBase, { flex: 1, opacity: selected.length ? 1 : 0.5, cursor: selected.length ? 'pointer' : 'not-allowed' }) }, t('cm.clear'))
         )
       )
     )
@@ -3083,6 +4420,48 @@ function apply(ctx) {
         function (props) { return React.createElement(WorkingRolesView, props); }
       );
     }));
+  });
+
+  /* 入口跟随会话（重新设计 P0-1 / P0-2）：
+   * 会话头动作 + 回合尾卡，两处都只在「本会话名下真有团队」时渲染，无团队时返回 null 不占位。
+   * 数据源与会话面板共用 TEAM_STORE（按 sid 去重，一个会话只跑一个轮询器）。 */
+  reg('agents-pixe: session header entry', function () {
+    slots.inject('conversation.session.header.actions', safeSlotInject('conversation.session.header.actions', function () {
+      return slots.register(
+        { name: 'conversation.session.header.actions', id: 'agents-pixe-team-entry', order: 50,
+          locale: LOCALE_NS,
+          inject: safeInject(function (sessionId) { return { t: t, sessionId: sessionId }; }, {}) },
+        function (props) { return React.createElement(SessionTeamEntry, props); }
+      );
+    }));
+  });
+
+  reg('agents-pixe: turn tail team card', function () {
+    slots.inject('conversation.chat.turnTail', safeSlotInject('conversation.chat.turnTail', function () {
+      return slots.register(
+        { name: 'conversation.chat.turnTail', id: 'agents-pixe-team-card', order: 50,
+          locale: LOCALE_NS,
+          inject: safeInject(function (sessionId) { return { t: t, sessionId: sessionId }; }, {}) },
+        function (props) { return React.createElement(TurnTailTeamCard, props); }
+      );
+    }));
+  });
+
+  /* 对话内的团队工具卡片（P1-2）：key = wire 工具名。
+   * 本机实测 tool.call.toolview 的 keyDomain 开放、agents_pixe_* 未被占用（占用键会被本插件替换掉别人的视图，这里不碰）。
+   * 每个 key 独立注册、独立容错：一个失败不影响其它。 */
+  reg('agents-pixe: team tool views', function () {
+    var offs = [];
+    PIXE_TOOL_KEYS.forEach(function (toolKey) {
+      offs.push(slots.inject('tool.call.toolview', safeSlotInject('tool.call.toolview', function () {
+        return slots.register(
+          { name: 'tool.call.toolview', key: toolKey, locale: LOCALE_NS,
+            inject: safeInject(function () { return { t: t }; }, {}) },
+          function (props) { return pixBoundary('团队工具卡片', React.createElement(PixeToolView, props)); }
+        );
+      })));
+    });
+    return function () { offs.forEach(function (off) { try { if (typeof off === 'function') off(); } catch (e) {} }); };
   });
 
   reg('agents-pixe: shell.overlay', function () {

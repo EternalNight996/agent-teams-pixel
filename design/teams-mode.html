@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>团队 UI 重新设计 · 参考 dsh-agent-teams 模式</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pixel-theme.css">
+<style>
+  /* 本稿只加排版；面板 chrome / 徽章 / chip / 节点一律复用 pixel-theme.css */
+  .tm-wrap { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .tm-lead { margin: 0; font-size: 17px; line-height: 1.55; }
+  .tm-lead b { color: var(--px-violet); }
+  .tm-note { margin: 0; font-size: 14px; color: var(--dsw-alias-label-secondary); line-height: 1.55; }
+  .tm-note code { color: var(--px-cyan); }
+
+  /* ---------- 模拟宿主应用框 ---------- */
+  .app { display: flex; gap: 12px; align-items: stretch; min-height: 560px; }
+  .app-chat { width: 392px; flex: none; display: flex; flex-direction: column; border: 2px solid var(--px-ink); background: var(--dsw-alias-bg-base); }
+  .app-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  /* 会话头 */
+  .chat-head { display: flex; align-items: center; gap: 6px; padding: 7px 9px; border-bottom: 2px solid var(--px-ink); background: var(--dsw-alias-bg-layer-2); flex-wrap: wrap; }
+  .chat-title { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+  .chat-head .spacer { flex: 1; }
+  .entry-btn { display: inline-flex; align-items: center; gap: 5px; border: 2px solid var(--px-ink); background: var(--px-violet); color: #fff; font-family: inherit; font-size: 14px; padding: 2px 9px; cursor: pointer; box-shadow: var(--px-shadow-soft); }
+  .entry-btn:hover { filter: brightness(1.12); }
+
+  /* 对话 */
+  .chat-body { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+  .bubble { border: 2px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); padding: 7px 9px; font-size: 14px; line-height: 1.5; }
+  .bubble--me { border-color: var(--px-blue); background: rgba(59,130,246,0.12); }
+  .turn-card { border: 2px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); padding: 8px 9px; box-shadow: var(--px-shadow-soft); }
+  .turn-card-top { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+  .turn-card-top b { font-size: 15px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .turn-avatars { display: flex; flex-wrap: wrap; gap: 7px; }
+  .turn-member { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 56px; }
+  .turn-member span { font-size: 11px; color: var(--dsw-alias-label-secondary); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chat-empty-hint { border: 2px dashed var(--dsw-alias-border-l1); padding: 7px 9px; font-size: 13px; color: var(--dsw-alias-label-secondary); }
+
+  /* ---------- 面板 ---------- */
+  .tm-panel { flex: 1; min-width: 0; }
+  .badge-state { border: 2px solid var(--px-ink); box-shadow: var(--px-shadow-soft); padding: 0 8px; font-size: 14px; }
+  .badge-state--run { background: var(--px-green); color: #04170b; }
+  .badge-state--staged { background: var(--px-blue); color: #071124; }
+  .badge-state--done { background: #3a4152; color: var(--dsw-alias-label-primary); }
+
+  .p-body { display: flex; gap: 12px; align-items: flex-start; }
+  .p-left { width: 340px; flex: none; display: flex; flex-direction: column; gap: 9px; }
+  .p-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+
+  .captain { display: flex; align-items: center; gap: 8px; border: 2px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); padding: 7px 9px; }
+  .captain .who { flex: 1; min-width: 0; }
+  .captain .who b { font-size: 16px; }
+  .captain .who div { font-size: 13px; color: var(--dsw-alias-label-secondary); }
+
+  .prog-title { font-size: 14px; color: var(--dsw-alias-label-secondary); letter-spacing: 0.04em; }
+  .prog-seg { display: flex; gap: 3px; margin: 5px 0; }
+  .prog-seg i { flex: 1; height: 12px; border: 2px solid var(--px-ink); display: block; }
+  .seg--running { background: var(--px-green); }
+  .seg--completed { background: var(--px-blue); }
+  .seg--blocked { background: var(--px-amber); }
+  .seg--open { background: var(--px-slate); }
+  .prog-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; color: var(--dsw-alias-label-secondary); align-items: center; }
+  .prog-legend span { display: inline-flex; align-items: center; gap: 4px; }
+  .prog-legend i { width: 8px; height: 8px; display: inline-block; }
+
+  .banner { border: 2px solid var(--px-green); background: rgba(22,163,74,0.12); padding: 5px 8px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+  .banner--staged { border-color: var(--px-blue); background: rgba(59,130,246,0.12); }
+
+  .roster-head { display: flex; align-items: center; gap: 7px; font-size: 15px; }
+  .roster-head b { flex: 1; }
+  .link-btn { background: none; border: none; color: var(--px-cyan); font-family: inherit; font-size: 13px; cursor: pointer; padding: 0; }
+  .tree { position: relative; padding-left: 16px; margin-top: 6px; }
+  .tree::before { content: ''; position: absolute; left: 5px; top: 0; bottom: 26px; width: 2px; background: var(--dsw-alias-border-l1); }
+  .m-row { position: relative; display: flex; align-items: center; gap: 8px; border: 2px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); padding: 5px 7px; margin-bottom: 6px; cursor: pointer; }
+  .m-row::before { content: ''; position: absolute; left: -13px; top: 50%; width: 11px; height: 2px; background: var(--dsw-alias-border-l1); }
+  .m-row.is-sel { border-color: var(--px-violet); }
+  .m-row .mwho { flex: 1; min-width: 0; }
+  .m-row .mname { font-size: 15px; }
+  .m-row .mnext { font-size: 12px; color: var(--dsw-alias-label-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .m-count { font-size: 13px; color: var(--dsw-alias-label-secondary); text-align: right; flex: none; }
+  .m-tasks { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+  .tchip { border: 2px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-2); font-size: 12px; padding: 0 5px; }
+  .tchip.is-running { border-color: var(--px-green); color: var(--px-green); }
+  .tchip.is-blocked { border-color: var(--px-amber); color: var(--px-amber); }
+  .tchip.is-completed { border-color: var(--px-blue); color: var(--px-blue); }
+
+  /* 依赖图 */
+  .dag-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .dag-head b { font-size: 16px; }
+  .dag-sum { margin-left: auto; font-size: 13px; color: var(--dsw-alias-label-secondary); }
+  .dag-wrap { position: relative; border: 2px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); padding: 12px; overflow: hidden; }
+  .dag-wrap svg { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+  .dag-wrap path { fill: none; stroke: var(--px-line); stroke-width: 2; }
+  .dag-wrap path.is-lit { stroke: var(--px-violet); stroke-width: 3; }
+  .dag-cols { position: relative; display: flex; gap: 34px; align-items: flex-start; }
+  .dag-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  .dag-col-head { font-size: 12px; letter-spacing: 0.08em; color: var(--dsw-alias-label-secondary); text-transform: uppercase; }
+  .dag-node { z-index: 1; }
+  .dag-node.is-dim { filter: brightness(0.45) saturate(0.4); }
+  .dag-node .who { font-size: 12px; color: var(--dsw-alias-label-secondary); }
+
+  .detail { border: 2px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); padding: 8px 10px; font-size: 14px; line-height: 1.6; }
+  .detail-top { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
+  .detail-top b { font-size: 15px; flex: 1; min-width: 0; }
+  .detail .meta { color: var(--dsw-alias-label-secondary); font-size: 13px; }
+
+  /* 计划编辑器（staged 态） */
+  .stepper { display: flex; align-items: center; gap: 5px; margin: 8px 0; }
+  .stepper div { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--dsw-alias-label-secondary); }
+  .stepper i { width: 19px; height: 19px; border: 2px solid var(--dsw-alias-border-l1); display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 12px; }
+  .stepper div.is-now { color: var(--px-blue); }
+  .stepper div.is-now i { border-color: var(--px-blue); color: var(--px-blue); }
+  .stepper s { text-decoration: none; flex: 1; height: 2px; background: var(--dsw-alias-border-l2); min-width: 12px; }
+
+  .sec { border: 2px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); }
+  .sec-head { display: flex; align-items: center; gap: 6px; padding: 6px 8px; cursor: pointer; font-size: 14px; }
+  .sec-head b { flex: 1; }
+  .sec-head span { font-size: 12px; color: var(--dsw-alias-label-secondary); }
+  .sec-body { border-top: 2px solid var(--dsw-alias-border-l2); }
+  .prow { display: flex; align-items: center; gap: 8px; padding: 5px 8px; font-size: 14px; border-bottom: 2px solid var(--dsw-alias-border-l2); }
+  .prow:last-child { border-bottom: none; }
+  .prow .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .prow .sub { font-size: 12px; color: var(--dsw-alias-label-secondary); }
+  .prow .model { font-size: 12px; color: var(--px-cyan); }
+  .prow .arrow { color: var(--dsw-alias-label-secondary); }
+  .add-row { display: flex; gap: 6px; padding: 7px 8px; }
+  .finish { border: 2px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); padding: 8px; }
+  .finish .q { font-size: 14px; margin-bottom: 2px; }
+  .finish .hint { font-size: 12px; color: var(--dsw-alias-label-secondary); margin-bottom: 7px; }
+  .btn { font-family: inherit; font-size: 14px; border: 2px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-2); color: inherit; cursor: pointer; padding: 5px 10px; box-shadow: var(--px-shadow-soft); }
+  .btn--primary { width: 100%; background: var(--px-blue); border-color: var(--px-ink); color: #071124; font-weight: 700; }
+  .btn--danger { border-color: var(--px-red); color: var(--px-red); background: rgba(239,68,68,0.10); }
+  .finish-actions { display: flex; gap: 6px; margin-top: 7px; align-items: center; }
+  .finish-actions .grow { flex: 1; }
+
+  .collapsed-badge { display: inline-flex; align-items: center; gap: 7px; border: 2px solid var(--px-ink); background: var(--dsw-alias-bg-layer-2); box-shadow: var(--px-shadow); padding: 7px 12px; font-size: 15px; cursor: pointer; }
+  .collapsed-badge i { width: 9px; height: 9px; background: var(--px-green); display: inline-block; }
+
+  table.tm-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.tm-table th, table.tm-table td { border: 2px solid var(--px-ink); padding: 5px 9px; text-align: left; vertical-align: top; }
+  table.tm-table th { background: var(--dsw-alias-bg-layer-2); }
+  td.ok { color: var(--px-green); }
+  td.warn { color: var(--px-amber); }
+  td.no { color: var(--px-red); }
+
+  .tm-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 40; border: 2px solid var(--px-ink); background: var(--px-violet); color: #fff; box-shadow: var(--px-shadow); padding: 8px 16px; font-size: 16px; max-width: 92vw; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="tm-wrap">
+
+  <header class="panel">
+    <div class="panel-head">
+      <h1 class="panel-title">团队 UI 重新设计</h1>
+      <span class="panel-goal">参考 dsh-agent-teams 模式 · 落点已按本机 Slot / Service 实测校准</span>
+      <span class="panel-spacer"></span>
+      <div class="px-switcher" id="mode" role="tablist" aria-label="面板状态">
+        <button type="button" data-mode="run" class="is-active" role="tab" aria-selected="true">运行中</button>
+        <button type="button" data-mode="staged" role="tab" aria-selected="false">计划待确认</button>
+        <button type="button" data-mode="collapsed" role="tab" aria-selected="false">折叠徽章</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <p class="tm-lead">入口从<b>四个散点</b>收敛成<b>跟随会话的一个入口</b>：会话头按钮 + 回合尾卡片，都打开同一个面板。面板双栏：左看人，右看事。</p>
+      <p class="tm-note">点任务卡会高亮负责成员，点成员会高亮他的任务；「计划待确认」态里三出口都有（确认并启动 / 返回对话修改 / 放弃本次计划，后者二次确认）。</p>
+    </div>
+  </header>
+
+  <div class="app">
+    <!-- ================= 会话侧 ================= -->
+    <section class="app-chat" aria-label="模拟会话">
+      <div class="chat-head">
+        <span class="chat-title">库存链路重构</span>
+        <span class="px-chip">4 个子智能体</span>
+        <span class="panel-spacer"></span>
+        <button type="button" class="entry-btn" id="entryBtn">🧩 团队 (4)</button>
+      </div>
+      <div class="chat-body">
+        <div class="bubble bubble--me">让「库存重构小队」并行完成：把下单链路的库存预留拆成可验证的分工。</div>
+        <div class="bubble">已建队。星野拆接口、阿岩写库存模块、小满接下单页、校验官独立验收。我在本轮让出轮次，等 t3 交付后立即核对。</div>
+        <div class="turn-card" id="turnCard">
+          <div class="turn-card-top">
+            <b>库存重构小队</b>
+            <span class="px-chip">4 名成员</span>
+            <button type="button" class="entry-btn" id="turnOpen">查看团队</button>
+          </div>
+          <div class="turn-avatars" id="turnAvatars"></div>
+        </div>
+        <div class="chat-empty-hint">回合尾卡片只在回合结束、且本会话名下真有团队时出现。没有团队时这里什么都没有（入口不占位）。</div>
+      </div>
+    </section>
+
+    <!-- ================= 面板侧 ================= -->
+    <div class="app-panel">
+      <section class="panel tm-panel" id="panel" aria-label="团队面板">
+        <div class="panel-head">
+          <span class="px-dot px-dot--working" id="panelDot"></span>
+          <h2 class="panel-title" style="font-size:17px;">库存重构小队</h2>
+          <span class="badge-state badge-state--run" id="stateBadge">进行中</span>
+          <span class="panel-spacer"></span>
+          <span class="tm-note" id="headSum">4 名成员 · 3/6 完成 · 2 条消息</span>
+          <button type="button" class="btn" id="foldBtn" title="折叠成徽章">收起</button>
+        </div>
+        <div class="panel-body">
+          <div class="p-body">
+            <!-- 左栏：人 -->
+            <div class="p-left">
+              <div class="captain">
+                <span class="px-avatar" id="captainArt"></span>
+                <span class="who"><b>队长</b><div id="captainSum">已派发 6 项任务给 4 名成员</div></span>
+                <span class="px-badge px-badge--working" id="captainBadge">已收齐</span>
+              </div>
+
+              <div>
+                <div class="prog-title">总进度</div>
+                <div class="prog-seg" id="segs"></div>
+                <div class="prog-legend" id="legend"></div>
+              </div>
+
+              <div class="banner" id="banner"><i class="px-dot px-dot--working" style="flex:none"></i><span id="bannerText"></span></div>
+
+              <div class="roster-head"><b id="rosterTitle">4 名成员</b><button type="button" class="link-btn" id="rosterToggle">收起</button></div>
+              <div class="tree" id="tree"></div>
+            </div>
+
+            <!-- 右栏：事 -->
+            <div class="p-right">
+              <div class="dag-head">
+                <b id="rightTitle">任务依赖</b>
+                <span class="dag-sum" id="rightSum">从左到右 = 完成前置后解锁 · 点击查看详情</span>
+              </div>
+              <div class="dag-wrap" id="dagWrap">
+                <svg id="dagSvg"></svg>
+                <div class="dag-cols" id="dagCols"></div>
+              </div>
+              <div class="detail" id="detail"></div>
+            </div>
+          </div>
+
+          <!-- 计划编辑器（staged 态专用，替换左栏内容） -->
+          <div class="p-body" id="planBody" hidden>
+            <div class="p-left" style="width:400px">
+              <div class="captain">
+                <span class="px-avatar" id="planArt"></span>
+                <span class="who"><b>执行前计划审查</b><div>4 名成员 · 6 项任务 · 3 条依赖</div></span>
+                <span class="px-badge px-badge--done">待确认</span>
+              </div>
+              <p class="tm-note" style="margin:0">成员尚未创建、任务尚未调度。可直接调整计划，也可返回对话告诉队长哪里要改。</p>
+
+              <div class="stepper">
+                <div class="is-now"><i>1</i>审查计划</div><s></s>
+                <div><i>2</i>创建成员</div><s></s>
+                <div><i>3</i>开始执行</div>
+              </div>
+
+              <div class="sec">
+                <div class="sec-head" data-sec="members"><span id="secChevM">▾</span><b>成员与模型路由</b><span>4 名成员</span></div>
+                <div class="sec-body" id="secMembers"></div>
+              </div>
+
+              <div class="sec">
+                <div class="sec-head" data-sec="tasks"><span id="secChevT">▾</span><b>任务与依赖</b><span>6 项任务 · 3 条依赖</span></div>
+                <div class="sec-body" id="secTasks"></div>
+                <div class="add-row">
+                  <input class="mini-input" id="newTaskName" placeholder="新任务名称" aria-label="新任务名称">
+                  <button type="button" class="btn" id="addTask">添加任务</button>
+                </div>
+              </div>
+
+              <div class="finish">
+                <div class="q">计划检查完毕?</div>
+                <div class="hint" id="finishHint">确认后将创建 4 名成员并调度 6 项任务。</div>
+                <button type="button" class="btn btn--primary" id="approveBtn">确认并启动团队</button>
+                <div class="finish-actions">
+                  <button type="button" class="btn grow" id="continueBtn">返回对话修改</button>
+                  <button type="button" class="btn btn--danger" id="discardBtn">放弃本次计划</button>
+                </div>
+                <div class="hint" id="discardHint" hidden style="color:var(--px-red);margin:6px 0 0">再点一次确认放弃：草案归档，轮次中止，不会自动重建。</div>
+              </div>
+            </div>
+
+            <div class="p-right">
+              <div class="dag-head">
+                <b>计划预览</b>
+                <span class="dag-sum">同一份数据的另一面 · 确认前不创建任何子会话</span>
+              </div>
+              <div class="dag-wrap" id="planDagWrap">
+                <svg id="planDagSvg"></svg>
+                <div class="dag-cols" id="planDagCols"></div>
+              </div>
+              <div class="detail" id="planDetail"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div style="margin-top:10px" id="collapsedBox" hidden>
+        <div class="collapsed-badge" id="collapsedBadge"><i></i><span id="collapsedText">4 名成员 · 3/6 完成</span><span style="color:var(--dsw-alias-label-secondary);font-size:13px">点击展开</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 状态文案 ================= -->
+  <section class="panel">
+    <div class="panel-head"><h2 class="panel-title" style="font-size:17px;">文案即状态机（照搬参考的十态）</h2></div>
+    <div class="panel-body">
+      <p class="tm-note">任何时刻界面上都必须有一句话解释现状，禁止只显示数字。下面十条是同一份数据在不同局面下的出口。</p>
+      <table class="tm-table">
+        <thead><tr><th style="width:20%">局面</th><th style="width:44%">文案</th><th>触发条件</th></tr></thead>
+        <tbody>
+          <tr><td>staged</td><td id="s-staged">6 项计划等待确认</td><td>草案已落盘，未创建成员</td></tr>
+          <tr><td>waitingBreakdown</td><td>队长正在拆解目标…</td><td>任务数为 0</td></tr>
+          <tr><td>allDelivered</td><td>全部 6 项任务已交付</td><td>完成数 === 任务数</td></tr>
+          <tr><td>blockedAndRunning</td><td>进行中 t3，等待依赖 t5</td><td>同时有运行与阻塞</td></tr>
+          <tr><td>running</td><td>正在执行 t3</td><td>仅运行</td></tr>
+          <tr><td>ready</td><td>就绪待派：t3、t5</td><td>有就绪任务、无运行</td></tr>
+          <tr><td>blocked</td><td>等待依赖：t5</td><td>全部阻塞</td></tr>
+          <tr><td>failedSettled</td><td>2 项失败已结算</td><td>有失败且未运行</td></tr>
+          <tr><td>ended</td><td>已结束</td><td>团队归档</td></tr>
+          <tr><td>discarded</td><td>本次计划已放弃（6 项）</td><td>草案被丢弃</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= 落点校准 ================= -->
+  <section class="panel">
+    <div class="panel-head"><h2 class="panel-title" style="font-size:17px;">落点校准（本机 Inspect 实测，不是照抄别人的 slot 名）</h2></div>
+    <div class="panel-body">
+      <table class="tm-table">
+        <thead><tr><th style="width:34%">参考项目的落点</th><th style="width:40%">本机实测</th><th>本设计</th></tr></thead>
+        <tbody>
+          <tr><td><code>conversation.session.header.actions</code></td><td class="ok">存在 · list · session · replaceRisk none</td><td class="ok">直接采用（会话头入口）</td></tr>
+          <tr><td><code>conversation.chat.turnTail</code></td><td class="ok">存在 · list · session · none</td><td class="ok">直接采用（回合尾卡）</td></tr>
+          <tr><td><code>tool.call.toolview</code></td><td class="ok">存在 · keyed · 开放域 · <code>agents_pixe_*</code> 未占用</td><td class="ok">P1：工具调用渲染成卡片</td></tr>
+          <tr><td><code>shell.overlay</code></td><td class="ok">存在 · list · root · none</td><td class="ok">面板就放这里（已在用）</td></tr>
+          <tr><td><code>sidebar.right.pane.tab</code></td><td class="warn">body 槽存在，但 <code>sidebarRightTabs</code> 服务不在客户端服务目录</td><td class="warn">改用浮层双栏 + <code>layout.openRightbar()</code></td></tr>
+          <tr><td><code>conversation.chat.node</code></td><td class="no">keyDomain 被 ChatNodeKind 占满；<code>uiConversation</code> 服务不存在</td><td class="no">不采用，改用 turnTail + toolview</td></tr>
+          <tr><td>客户端 <code>inject</code> 里的 <code>uiConversation</code> / <code>modelDirectories</code></td><td class="no">本机服务目录只有 8 个：layout / locale / sessions / slots / theme / timer / uiWorkspace / workspaces</td><td class="no">不声明（声明不存在的服务会让整块静默不挂载）</td></tr>
+        </tbody>
+      </table>
+      <p class="tm-note">结论：<b>能抄八成</b>，两条换实现。照抄 slot 名而不做这步校准，结果就是「装上了但什么都不显示，F12 也没线索」。</p>
+    </div>
+  </section>
+
+  <!-- ================= 差异 ================= -->
+  <section class="panel">
+    <div class="panel-head"><h2 class="panel-title" style="font-size:17px;">与现状的差异</h2></div>
+    <div class="panel-body">
+      <table class="tm-table">
+        <thead><tr><th style="width:20%">维度</th><th style="width:40%">现状</th><th>重新设计后</th></tr></thead>
+        <tbody>
+          <tr><td>入口</td><td class="warn">4 个散点：页签 / 浮层 / 浮层里的团队抽屉 / 设置</td><td class="ok">跟随会话：会话头按钮 + 回合尾卡，都开同一个面板</td></tr>
+          <tr><td>运行态位置</td><td class="warn">藏在浮层的一个抽屉里，要主动点开</td><td class="ok">面板即运行态，双栏可见</td></tr>
+          <tr><td>进度</td><td class="warn">一行文字计数</td><td class="ok">分段条：一段 = 一任务，颜色 = 状态</td></tr>
+          <tr><td>成员</td><td class="warn">emoji + 名字，看不到在做什么</td><td class="ok">树 + 角色/模型 chip + 交付计数 + 一行下一步</td></tr>
+          <tr><td>任务</td><td class="warn">泳道 DAG，纯读</td><td class="ok">深度分列 + 点任务联动成员 + 详情卡（前置/解锁/模型）</td></tr>
+          <tr><td>计划闸门</td><td class="no">后端有草案层，面板不渲染</td><td class="ok">计划编辑器 + 三步 stepper + 三出口</td></tr>
+          <tr><td>对话里</td><td class="no">只有工具 JSON</td><td class="ok">回合尾摘要卡 + 团队工具的专用卡片</td></tr>
+          <tr><td>保留</td><td colspan="2">508 张角色卡 · 29 个预设团队 · 像素办公室（降为面板第三页签）· 角色卡详情 · AI 闲聊</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<script src="shared.js"></script>
+<script>
+(function () {
+  var PX = window.PX;
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- 数据 ---------- */
+  var MEMBERS = [
+    { name: '星野', role: '架构师', model: 'deepseek-flash', color: '#7c3aed', next: '任务均已经结' },
+    { name: '阿岩', role: '后端工程师', model: 'deepseek-flash', color: '#3b82f6', next: '等待 t3 解锁 t5' },
+    { name: '小满', role: '前端工程师', model: 'deepseek-flash', color: '#ec4899', next: '正在实现 t3 下单页库存条' },
+    { name: '校验官', role: '代码审查员', model: 'deepseek-flash', color: '#f59e0b', next: '任务均已经结' }
+  ];
+  var TASKS = [
+    { id: 't1', subject: '拆解库存预留模块接口', who: '星野', status: 'completed', deps: [] },
+    { id: 't2', subject: '实现 src/inventory.js 库存预留', who: '阿岩', status: 'completed', deps: [] },
+    { id: 't3', subject: '实现下单页库存条组件', who: '小满', status: 'running', deps: ['t1'] },
+    { id: 't4', subject: '评审接口设计并出结论', who: '校验官', status: 'completed', deps: ['t1'] },
+    { id: 't5', subject: '独立验收 src/inventory.js', who: '阿岩', status: 'blocked', deps: ['t3'] },
+    { id: 't6', subject: '汇总交付说明 docs/usage.md', who: '星野', status: 'open', deps: ['t4'] }
+  ];
+  var ST = {
+    running: { cls: 'px-node--running', seg: 'seg--running', label: '进行中', color: 'var(--px-green)', dot: 'px-dot--working' },
+    completed: { cls: 'px-node--completed', seg: 'seg--completed', label: '已交付', color: 'var(--px-blue)', dot: 'px-dot--done' },
+    blocked: { cls: 'px-node--blocked', seg: 'seg--blocked', label: '等待依赖', color: 'var(--px-amber)', dot: 'px-dot--blocked' },
+    open: { cls: 'px-node--open', seg: 'seg--open', label: '待办', color: 'var(--px-slate)', dot: 'px-dot--idle' }
+  };
+  var state = { mode: 'run', pinned: 't3', hoverMember: null, discardArmed: false, rosterOpen: true, secMembers: true, secTasks: true };
+
+  function taskById(id) { for (var i = 0; i < TASKS.length; i++) if (TASKS[i].id === id) return TASKS[i]; return null; }
+  function ownedBy(name) { return TASKS.filter(function (t) { return t.who === name; }); }
+  function depthOf(t, seen) {
+    if (!t.deps.length) return 0;
+    var m = 0;
+    t.deps.forEach(function (d) { var p = taskById(d); if (p) m = Math.max(m, depthOf(p, (seen || 0) + 1) + 1); });
+    return m;
+  }
+  function toast(msg) {
+    var el = $('tmToast');
+    if (!el) { el = document.createElement('div'); el.className = 'tm-toast'; el.id = 'tmToast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.textContent = msg; el.hidden = false;
+    clearTimeout(toast._t); toast._t = setTimeout(function () { el.hidden = true; }, 2800);
+  }
+  function dots(count, st) { return new Array(count + 1).join('<i style="background:' + ST[st].color + '"></i>'); }
+
+  /* ---------- 摘要文案（状态机的一处出口） ---------- */
+  function teamSummary() {
+    if (state.mode === 'staged') return { text: TASKS.length + ' 项计划等待确认', tone: 'staged' };
+    var done = TASKS.filter(function (t) { return t.status === 'completed'; }).length;
+    var run = TASKS.filter(function (t) { return t.status === 'running'; });
+    var blocked = TASKS.filter(function (t) { return t.status === 'blocked'; });
+    if (done === TASKS.length) return { text: '全部 ' + done + ' 项任务已交付', tone: 'done' };
+    if (run.length && blocked.length) return { text: '进行中 ' + run[0].id + '，等待依赖 ' + blocked.map(function (t) { return t.id; }).join('、'), tone: 'run' };
+    if (run.length) return { text: '正在执行 ' + run[0].id + ' · ' + run[0].subject, tone: 'run' };
+    if (blocked.length) return { text: '等待依赖：' + blocked.map(function (t) { return t.id; }).join('、'), tone: 'run' };
+    return { text: '就绪待派', tone: 'run' };
+  }
+
+  /* ---------- 左栏：人 ---------- */
+  function renderLeft() {
+    var done = TASKS.filter(function (t) { return t.status === 'completed'; }).length;
+    $('captainArt').innerHTML = PX.avatar({ color: '#22d3ee', name: '队长' });
+    $('captainSum').textContent = '已派发 ' + TASKS.length + ' 项任务给 ' + MEMBERS.length + ' 名成员';
+    $('captainBadge').textContent = state.mode === 'staged' ? '待确认' : (done === TASKS.length ? '已收齐' : '派单中');
+
+    var counts = { running: 0, blocked: 0, completed: 0, open: 0 };
+    TASKS.forEach(function (t) { counts[t.status]++; });
+    $('segs').innerHTML = TASKS.map(function (t) { return '<i class="' + ST[t.status].seg + '" title="' + t.id + ' · ' + ST[t.status].label + '"></i>'; }).join('');
+    $('legend').innerHTML =
+      '<span>' + dots(1, 'running') + '进行中 ' + counts.running + '</span>' +
+      '<span>' + dots(1, 'blocked') + '等待依赖 ' + counts.blocked + '</span>' +
+      '<span>' + dots(1, 'completed') + '已交付 ' + counts.completed + '</span>' +
+      '<span class="tm-note" style="margin-left:auto">段数 = 任务数 ' + TASKS.length + '</span>';
+
+    var s = teamSummary();
+    $('bannerText').textContent = s.text;
+    $('banner').className = 'banner' + (s.tone === 'staged' ? ' banner--staged' : '');
+
+    $('rosterTitle').textContent = MEMBERS.length + ' 名成员';
+    $('tree').innerHTML = MEMBERS.map(function (m) {
+      var mine = ownedBy(m.name);
+      var myDone = mine.filter(function (t) { return t.status === 'completed'; }).length;
+      var sel = state.hoverMember === m.name;
+      return '<div class="m-row' + (sel ? ' is-sel' : '') + '" data-member="' + m.name + '">' +
+        '<span class="px-avatar">' + PX.avatar({ color: m.color, name: m.name }) + '</span>' +
+        '<span class="mwho"><span class="mname">' + m.name + '</span>' +
+        '<span class="px-chip">' + m.role + '</span> <span class="px-chip" style="color:var(--px-cyan);border-color:var(--px-cyan)">' + m.model + '</span>' +
+        '<div class="mnext">' + m.next + '</div>' +
+        '<div class="m-tasks">' + mine.map(function (t) { return '<span class="tchip is-' + t.status + '">' + t.id + '</span>'; }).join('') + '</div></span>' +
+        '<span class="m-count">已交付<br>' + myDone + '/' + mine.length + '</span></div>';
+    }).join('');
+  }
+
+  /* ---------- 右栏：事 ---------- */
+  function relatedSet(id) {
+    if (!id) return null;
+    var t = taskById(id); if (!t) return null;
+    var set = {}; set[id] = true;
+    TASKS.forEach(function (x) { if (x.deps.indexOf(id) >= 0) set[x.id] = true; });
+    t.deps.forEach(function (d) { set[d] = true; });
+    return set;
+  }
+
+  function renderDag(colsEl, svgEl, wrapEl, focusId, dimByMember) {
+    var byDepth = {};
+    TASKS.forEach(function (t) { var d = depthOf(t); (byDepth[d] = byDepth[d] || []).push(t); });
+    var depths = Object.keys(byDepth).map(Number).sort(function (a, b) { return a - b; });
+    var rel = relatedSet(focusId);
+    colsEl.innerHTML = depths.map(function (d, ci) {
+      return '<div class="dag-col"><div class="dag-col-head">' + (depths.length > 1 && ci === 0 ? '无前置' : (ci === depths.length - 1 && depths.length > 1 ? '收尾' : '第 ' + (ci + 1) + ' 层')) + '</div>' +
+        byDepth[d].map(function (t) {
+          var dimmed = (rel && !rel[t.id]) || (dimByMember && t.who !== dimByMember);
+          return '<div class="px-node ' + ST[t.status].cls + ' dag-node' + (dimmed ? ' is-dim' : '') + (state.pinned === t.id ? ' is-pinned' : '') + '" data-task="' + t.id + '" tabindex="0" role="button" aria-pressed="' + (state.pinned === t.id) + '">' +
+              '<div class="px-node-id">' + t.id + ' <span class="who">' + t.who + '</span></div>' +
+              '<div class="px-node-subject">' + t.subject + '</div>' +
+            '</div>';
+        }).join('') + '</div>';
+    }).join('');
+    requestAnimationFrame(function () { drawEdges(colsEl, svgEl, wrapEl); });
+  }
+
+  function drawEdges(colsEl, svgEl, wrapEl) {
+    var wrap = wrapEl.getBoundingClientRect();
+    svgEl.setAttribute('viewBox', '0 0 ' + wrap.width + ' ' + wrap.height);
+    svgEl.setAttribute('width', wrap.width); svgEl.setAttribute('height', wrap.height);
+    var rel = relatedSet(state.pinned);
+    var out = [];
+    TASKS.forEach(function (t) {
+      var to = colsEl.querySelector('[data-task="' + t.id + '"]');
+      if (!to) return;
+      t.deps.forEach(function (d) {
+        var from = colsEl.querySelector('[data-task="' + d + '"]');
+        if (!from) return;
+        var a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+        var x1 = a.right - wrap.left, y1 = a.top - wrap.top + a.height / 2;
+        var x2 = b.left - wrap.left, y2 = b.top - wrap.top + b.height / 2;
+        var mx = x1 + (x2 - x1) / 2;
+        var lit = rel && rel[t.id] && rel[d] ? ' class="is-lit"' : '';
+        out.push('<path' + lit + ' d="M ' + x1 + ' ' + y1 + ' C ' + mx + ' ' + y1 + ', ' + mx + ' ' + y2 + ', ' + x2 + ' ' + y2 + '"/>');
+      });
+    });
+    svgEl.innerHTML = out.join('');
+  }
+
+  function renderDetail(el, id) {
+    var t = id ? taskById(id) : null;
+    if (!t) { el.innerHTML = '<span class="meta">点上面任意任务卡看详情。</span>'; return; }
+    var done = TASKS.filter(function (x) { return x.deps.indexOf(t.id) >= 0 && x.status === 'completed'; }).length;
+    var unlocks = TASKS.filter(function (x) { return x.deps.indexOf(t.id) >= 0; }).map(function (x) { return x.id; });
+    var waitingOn = t.deps.filter(function (d) { var p = taskById(d); return p && p.status !== 'completed'; });
+    var why = t.status === 'completed' ? '已完成并交付'
+      : t.status === 'running' ? '正在执行，完成后解锁下游'
+      : t.status === 'blocked' ? '等待 ' + waitingOn.join('、') + ' 完成后开工'
+      : (t.deps.length ? '前置已完成，可立即开工' : '无前置，可立即开工');
+    el.innerHTML =
+      '<div class="detail-top"><b>' + t.id + ' ' + t.subject + '</b>' +
+      '<span class="px-badge px-badge--' + (t.status === 'running' ? 'working' : t.status === 'completed' ? 'done' : t.status === 'blocked' ? 'blocked' : 'open') + '">' + ST[t.status].label + '</span></div>' +
+      '<div class="meta">' + t.who + ' · ' + why + '</div>' +
+      '<div class="meta">deepseek-official/' + (MEMBER_MODEL(t.who)) + '</div>' +
+      '<div class="meta">' + (unlocks.length ? '完成后解锁 ' + unlocks.join('、') : '无下游任务') + '</div>';
+  }
+  function MEMBER_MODEL(name) { for (var i = 0; i < MEMBERS.length; i++) if (MEMBERS[i].name === name) return MEMBERS[i].model; return 'deepseek-flash'; }
+
+  /* ---------- 右栏联动 ---------- */
+  function bindPanelEvents() {
+    $('dagWrap').addEventListener('click', function (e) {
+      var n = e.target.closest('[data-task]'); if (!n) return;
+      var id = n.getAttribute('data-task');
+      state.pinned = state.pinned === id ? null : id;
+      state.hoverMember = null;
+      renderRight();
+    });
+    $('tree').addEventListener('click', function (e) {
+      var row = e.target.closest('[data-member]'); if (!row) return;
+      var name = row.getAttribute('data-member');
+      state.hoverMember = state.hoverMember === name ? null : name;
+      var mine = ownedBy(name);
+      var active = mine.filter(function (t) { return t.status !== 'completed'; })[0] || mine[0];
+      state.pinned = state.hoverMember ? (active ? active.id : null) : null;
+      renderLeft(); renderRight();
+    });
+    $('rosterToggle').addEventListener('click', function () {
+      state.rosterOpen = !state.rosterOpen;
+      $('tree').hidden = !state.rosterOpen;
+      this.textContent = state.rosterOpen ? '收起' : '展开';
+    });
+    $('foldBtn').addEventListener('click', function () { setMode('collapsed'); });
+    $('collapsedBadge').addEventListener('click', function () { setMode('run'); });
+    $('entryBtn').addEventListener('click', function () { setMode('run'); toast('打开团队面板（会话头入口）'); });
+    $('turnOpen').addEventListener('click', function () { setMode('run'); toast('打开团队面板（回合尾卡入口）'); });
+    window.addEventListener('resize', function () { renderRight(); });
+  }
+
+  /* ---------- 计划编辑器 ---------- */
+  function renderPlan() {
+    $('planArt').innerHTML = PX.avatar({ color: '#22d3ee', name: '队长' });
+    $('secMembers').innerHTML = MEMBERS.map(function (m) {
+      return '<div class="prow"><span class="grow">' + m.name + ' <span class="sub">' + m.role + '</span></span>' +
+        '<span class="model">deepseek-official/' + m.model + '</span><span class="arrow">›</span></div>';
+    }).join('');
+    $('secMembers').hidden = !state.secMembers;
+    $('secChevM').textContent = state.secMembers ? '▾' : '▸';
+    $('secTasks').innerHTML = TASKS.map(function (t) {
+      return '<div class="prow"><span class="grow">' + t.id + ' ' + t.subject + '</span>' +
+        '<span class="sub">' + t.who + ' · ' + (t.deps.length ? '依赖 ' + t.deps.join('、') : '无依赖') + '</span><span class="arrow">›</span></div>';
+    }).join('');
+    $('secTasks').hidden = !state.secTasks;
+    $('secChevT').textContent = state.secTasks ? '▾' : '▸';
+    renderDag($('planDagCols'), $('planDagSvg'), $('planDagWrap'), null, null);
+    $('planDetail').innerHTML = '<span class="meta">确认前这里只是预览：不创建子会话、不领取任务、不花成员 token。</span>';
+  }
+
+  document.querySelectorAll('[data-sec]').forEach(function (h) {
+    h.addEventListener('click', function () {
+      var k = h.getAttribute('data-sec');
+      if (k === 'members') state.secMembers = !state.secMembers; else state.secTasks = !state.secTasks;
+      renderPlan();
+    });
+  });
+  $('addTask').addEventListener('click', function () {
+    var v = $('newTaskName').value.trim();
+    if (!v) { toast('先填任务名'); return; }
+    var id = 't' + (TASKS.length + 1);
+    TASKS.push({ id: id, subject: v, who: MEMBERS[0].name, status: 'open', deps: [] });
+    $('newTaskName').value = '';
+    $('finishHint').textContent = '确认后将创建 ' + MEMBERS.length + ' 名成员并调度 ' + TASKS.length + ' 项任务。';
+    renderPlan(); renderLeft();
+    toast('已加入计划：' + id);
+  });
+  $('approveBtn').addEventListener('click', function () {
+    toast('已确认并启动：创建 ' + MEMBERS.length + ' 名成员，调度 ' + TASKS.length + ' 项任务');
+    TASKS.forEach(function (t) { if (t.status === 'blocked' && !t.deps.filter(function (d) { var p = taskById(d); return p && p.status !== 'completed'; }).length) t.status = 'open'; });
+    setMode('run');
+  });
+  $('continueBtn').addEventListener('click', function () { toast('返回对话：队长会追问哪里要改，只改这份草案'); });
+  $('discardBtn').addEventListener('click', function () {
+    if (!state.discardArmed) { state.discardArmed = true; $('discardHint').hidden = false; this.textContent = '确认放弃'; return; }
+    state.discardArmed = false; $('discardHint').hidden = true; this.textContent = '放弃本次计划';
+    TASKS.forEach(function (t) { t.status = t.status === 'completed' ? 'completed' : 'blocked'; });
+    toast('已放弃本次计划：草案归档，轮次中止');
+    setMode('run');
+  });
+
+  /* ---------- 状态机：三种面板形态 ---------- */
+  function renderRight() {
+    $('rightSum').textContent = state.hoverMember
+      ? '已按「' + state.hoverMember + '」过滤 · 点击任务看详情'
+      : '从左到右 = 完成前置后解锁 · 点击查看详情';
+    renderDag($('dagCols'), $('dagSvg'), $('dagWrap'), state.pinned, state.hoverMember);
+    renderDetail($('detail'), state.pinned);
+  }
+
+  function setMode(m) {
+    state.mode = m;
+    document.querySelectorAll('#mode button').forEach(function (b) {
+      var on = b.getAttribute('data-mode') === m;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    var staged = m === 'staged';
+    $('panel').hidden = (m === 'collapsed');
+    $('collapsedBox').hidden = (m !== 'collapsed');
+    $('stateBadge').textContent = staged ? '待确认' : '进行中';
+    $('stateBadge').className = 'badge-state ' + (staged ? 'badge-state--staged' : 'badge-state--run');
+    $('panelDot').className = 'px-dot ' + (staged ? 'px-dot--idle' : 'px-dot--working');
+    $('headSum').textContent = staged ? '4 名成员 · 6 项任务 · 0/6 完成 · 0 条消息' : '4 名成员 · 3/6 完成 · 2 条消息';
+    document.querySelector('.p-body').hidden = staged;
+    $('planBody').hidden = !staged;
+    if (staged) { renderPlan(); } else { renderLeft(); renderRight(); }
+    var done = TASKS.filter(function (t) { return t.status === 'completed'; }).length;
+    $('collapsedText').textContent = MEMBERS.length + ' 名成员 · ' + done + '/' + TASKS.length + ' 完成';
+  }
+
+  document.querySelectorAll('#mode button').forEach(function (b) {
+    b.addEventListener('click', function () { setMode(b.getAttribute('data-mode')); });
+  });
+
+  /* ---------- 会话侧渲染 ---------- */
+  $('turnAvatars').innerHTML = MEMBERS.map(function (m) {
+    return '<span class="turn-member"><span class="px-avatar">' + PX.avatar({ color: m.color, name: m.name }) + '</span><span>' + m.name + '</span></span>';
+  }).join('');
+
+  bindPanelEvents();
+  setMode('run');
+})();
+</script>
+</body>
+</html>

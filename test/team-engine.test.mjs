@@ -168,3 +168,85 @@ test('addTaskDirect / editTaskDirect / deleteTaskDirect 走 CAS + lastStep + vie
   const r = await f.step(caller, { waitMs: 100 })
   assert.ok(r.lastStep && Array.isArray(r.lastStep.dispatched), 'step 写 lastStep')
 })
+
+/* ---------- 确认草案必须挂真实 parent（真跑 plan_confirm 才发现的 bug） ----------
+ * 现象：面板/工具的确认路径曾经传 `directCaller(l)`（只有 {id} 的假对象）当 parent，
+ * 宿主 spawn 续聊成员时读到 undefined，报 `Cannot read properties of undefined (reading 'header')`，
+ * 表现为「未能创建任何成员」。对照实验：同样名册，直接路径（真实 exec.agent）一次跑通。
+ * 建任务是纯 CAS，假 caller 等价；**spawn 成员不行** —— 这两件事必须分开对待。 */
+
+test('confirmPlanDirect：没有真实 parent 必须明确拒绝，而不是拿假 caller 去 spawn', async () => {
+  const f = buildFacade(makeMockSub())
+  f.writePlanDirect('lead-session', { roster: roster(['A']), tasks: [] })
+  await assert.rejects(
+    () => f.confirmPlanDirect('lead-session', null),
+    /真实存活的 Agent/,
+    '没有 parent 时必须抛可读错误'
+  )
+  assert.ok(f.readPlanDirect('lead-session'), '拒绝后草案必须仍在（不能被消费掉）')
+})
+
+test('confirmPlanDirect：带真实 parent 时，spawn 用的就是它，且任务照常建出来', async () => {
+  const seen = []
+  const mock = makeMockSub()
+  const rawStart = mock.startContinuable.bind(mock)
+  mock.startContinuable = async (spec) => { seen.push(spec.request && spec.request.parent); return rawStart(spec) }
+  const f = buildFacade(mock)
+  f.writePlanDirect('lead-session', { roster: roster(['A', 'B']), tasks: [{ subject: 't1', description: 'd', blockedBy: [] }] })
+  const realParent = { id: 'lead-session', tag: 'REAL-AGENT' }
+  const res = await f.confirmPlanDirect('lead-session', null, undefined, realParent)
+  assert.equal(res.confirmed, true)
+  assert.equal(res.members.length, 2)
+  assert.equal(res.tasks.length, 1)
+  assert.equal(seen.length, 2, '两个成员各 spawn 一次')
+  for (const p of seen) assert.equal(p, realParent, 'startContinuable 的 parent 必须是调用方传入的真实对象')
+  assert.equal(f.readPlanDirect('lead-session'), null, '确认成功后草案被消费')
+})
+
+/* ---------- 一次性编排的快照：让它「持续可查」而不是查无此队 ----------
+ * 现象：agents_pixe_team 的非引擎路径直接在宿主里跑完就返回，磁盘上什么都不写，
+ * 于是面板/会话头/回合尾卡在跑完后依然显示「还没有活动团队」。 */
+test('view() 必须带出 lastReport / archivedAt / oneShot（团队结束后界面才有东西可显示）', async () => {
+  const g = buildFacade(makeMockSub())
+  g.recordRunDirect('lead-o', { members: [{ name: 'A' }], tasks: [{ subject: 'x' }], report: '# 最终报告正文' })
+  const v1 = await g.view({ id: 'lead-o' })
+  assert.equal(v1.lastReport, '# 最终报告正文', 'view 不带 lastReport → 面板永远看不到成果')
+  assert.equal(v1.oneShot, true, 'oneShot 要能透出去，面板据此隐藏暂停按钮')
+  assert.ok(v1.archivedAt, 'archivedAt 要能透出去')
+
+  /* 引擎路径：刚建团还没归档时字段也要存在（类型稳定，客户端不用判 undefined） */
+  const f = buildFacade(makeMockSub())
+  await f.createTeam({ id: 'lead-r' }, { roster: roster(['A']) })
+  const v0 = await f.view({ id: 'lead-r' })
+  assert.equal(typeof v0.lastReport, 'string')
+  assert.equal(v0.oneShot, false)
+  assert.equal(v0.archivedAt, null)
+})
+
+test('recordRunDirect：一次性编排也留快照，面板才能持续显示', async () => {
+  const f = buildFacade(makeMockSub())
+  const r = f.recordRunDirect('lead-oneshot', {
+    teamName: '研发团队', provider: 'spawn', report: '# 报告',
+    members: [{ name: 'A' }, { name: 'B' }],
+    tasks: [{ subject: 't1', ownerName: 'A' }, { subject: 't2', ownerName: 'B' }],
+  })
+  assert.equal(r.recorded, true)
+  assert.equal(r.members, 2)
+  assert.equal(r.tasks, 2)
+  const v = await f.view({ id: 'lead-oneshot' })
+  assert.equal(v.members.length, 2, '成员要能被 view 出来（面板/入口都读它）')
+  assert.equal(v.tasks.length, 2)
+  assert.ok(v.tasks.every((t) => t.status === 'completed'), '快照任务标记 completed：step 不会去派发不存在的成员')
+  assert.equal(v.members.some((m) => m.name === 'A'), true)
+})
+
+test('recordRunDirect：已有真团队状态时绝不覆盖', async () => {
+  const g = buildFacade(makeMockSub())
+  await g.createTeam({ id: 'lead-real' }, { roster: roster(['X']) })
+  const r2 = g.recordRunDirect('lead-real', { members: [{ name: 'Y' }], tasks: [] })
+  assert.equal(r2.recorded, false)
+  assert.equal(r2.reason, 'existing')
+  const v2 = await g.view({ id: 'lead-real' })
+  assert.equal(v2.members.length, 1)
+  assert.equal(v2.members[0].name, 'X', '真团队的成员不能被一次性快照覆盖')
+})

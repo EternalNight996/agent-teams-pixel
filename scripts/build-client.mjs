@@ -5,6 +5,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { stripComments } from './strip-comments.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const root = join(here, '..')
@@ -25,7 +26,12 @@ const tail = `
 });
 `
 
-const bundle = prelude + '\n' + main + '\n' + tail
+const rawBundle = prelude + '\n' + main + '\n' + tail
+const bundle = stripComments(rawBundle)
+
 mkdirSync(join(root, 'lib'), { recursive: true })
 writeFileSync(join(root, 'lib', 'client.js'), bundle)
-console.log(`built lib/client.js (${(bundle.length / 1024).toFixed(1)} KB)`)
+
+const kb = (b) => (Buffer.byteLength(b, 'utf8') / 1024).toFixed(1)
+const saved = Buffer.byteLength(rawBundle, 'utf8') - Buffer.byteLength(bundle, 'utf8')
+console.log(`built lib/client.js (${kb(bundle)} KB, 剥离注释省下 ${(saved / 1024).toFixed(1)} KB)`)

@@ -24,8 +24,8 @@
   "scripts": {
     "build:client": "node scripts/build-client.mjs",
     "gen:roles": "node scripts/gen-roles.mjs",
-    "test": "node --test",
-    "check": "node -e \"require('node:child_process').execSync('node --check lib/index.js && node --check lib/team-engine.js && node --check src/client.main.js && node --check scripts/build-client.mjs', { stdio: 'inherit' })\" && node --test",
+    "test": "node --test --test-force-exit \"test/*.test.mjs\"",
+    "check": "node -e \"require('node:child_process').execSync('node --check lib/index.js && node --check lib/team-engine.js && node --check src/client.main.js && node --check scripts/build-client.mjs', { stdio: 'inherit' })\" && node --test --test-force-exit \"test/*.test.mjs\"",
     "prepublishOnly": "npm run check"
   },
   "dependencies": {

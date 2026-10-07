@@ -54,7 +54,9 @@ test('草案落盘：不 spawn 任何成员，view 能一次取回 plan', async 
 test('确认草案：按名册建成员 + 逐条建任务（依赖/写域/review 保真），草案被消费', async () => {
   const { mock, engine } = facade()
   engine.writePlanDirect('lead-plan', draft)
-  const r = await engine.confirmPlanDirect('lead-plan')
+  /* 确认必须传真实 parent：宿主 spawn 续聊成员要挂在真实会话下
+   * （传 {id} 假 caller 时实测报 `Cannot read properties of undefined (reading 'header')`）。 */
+  const r = await engine.confirmPlanDirect('lead-plan', null, undefined, caller)
   assert.equal(r.confirmed, true)
   assert.equal(mock._calls(), 2, '确认后按草案名册创建 2 名成员')
   assert.equal(r.tasks.length, 2)

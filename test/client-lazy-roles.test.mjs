@@ -23,6 +23,10 @@ const buildSrc = readFileSync(join(root, 'scripts', 'build-client.mjs'), 'utf8')
 
 test('bundle 不再内嵌角色精简清单：体积回落且不含数据块', () => {
   const kb = bundle.length / 1024
+  /* 门槛的用途只有一个：抓「又把角色清单塞回 bundle」。内嵌清单时会到 ~340 KB。
+   * 2026-10-02 曾因团队面板重新设计临时抬到 260 KB；2026-10-03 构建脚本加了注释剥离
+   * （省 24 KB，见 scripts/strip-comments.mjs），于是收回 240 KB：既留约 19 KB 迭代空间，
+   * 也不需要靠抬阈值过日子。 */
   assert.ok(kb < 240, 'lib/client.js 应回落到 240 KB 以下（内嵌清单时会到 ~340 KB），实际 ' + kb.toFixed(1) + ' KB')
   assert.ok(!bundle.includes('"generatedAt"'), 'bundle 不应再含清单数据块（generatedAt）')
   assert.ok(!/roles":\[\{"id":"academic\//.test(bundle), 'bundle 不应再含 roles 数组字面量')
@@ -39,9 +43,10 @@ test('prelude 只留空壳清单，build 脚本不再读取 roles.json 注入', 
 
 test('安全不变式：清单未加载完成前不剪枝用户选择（否则会误删已选角色）', () => {
   assert.match(clientSrc, /function keyKnown\(k\) \{ return !!INDEX\.map\[k\] \|\| !ROLES_STORE\.get\(\)\.loaded; \}/)
-  assert.match(clientSrc, /getDraft: function \(\) \{ return globalDraft\.roles\.slice\(\)\.filter\(keyKnown\); \}/)
-  assert.match(clientSrc, /getActive: function \(sid\) \{ return sess\(sid\)\.active\.slice\(\)\.filter\(keyKnown\); \}/)
-  assert.ok(!/globalDraft\.roles\.slice\(\)\.filter\(function \(k\) \{ return INDEX\.map\[k\]; \}\)/.test(clientSrc), '不得保留「查不到即剪枝」的旧写法')
+  /* 草稿与名册都按会话存（sid 缺失时回落到当前会话），但「查不到不剪枝」这条不变式两处都必须在 */
+  assert.match(clientSrc, /getDraft: function \(sid\) \{ return cur\(sid\)\.draft\.roles\.slice\(\)\.filter\(keyKnown\); \}/)
+  assert.match(clientSrc, /getActive: function \(sid\) \{ return cur\(sid\)\.active\.slice\(\)\.filter\(keyKnown\); \}/)
+  assert.ok(!/\.roles\.slice\(\)\.filter\(function \(k\) \{ return INDEX\.map\[k\]; \}\)/.test(clientSrc), '不得保留「查不到即剪枝」的旧写法')
 })
 
 test('缓存策略：版本化 localStorage + 24h TTL（命中即零请求）', () => {
