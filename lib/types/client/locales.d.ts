@@ -220,6 +220,18 @@ export declare const zh: {
     'assignment.empty': string;
     'archive.label': string;
     'archive.discardedLabel': string;
+    'office.title': string;
+    'office.members': string;
+    'office.progress': string;
+    'office.awaiting': string;
+    'office.stalled': string;
+    'office.empty': string;
+    'office.captain': string;
+    'office.working': string;
+    'office.idle': string;
+    'office.unknown': string;
+    'office.showBoard': string;
+    'office.showOffice': string;
 };
 /** AgentTeams namespace key union. */
 export type AgentTeamsLocaleKey = keyof typeof zh;
@@ -442,6 +454,18 @@ export declare const en: {
     'assignment.empty': string;
     'archive.label': string;
     'archive.discardedLabel': string;
+    'office.title': string;
+    'office.members': string;
+    'office.progress': string;
+    'office.awaiting': string;
+    'office.stalled': string;
+    'office.empty': string;
+    'office.captain': string;
+    'office.working': string;
+    'office.idle': string;
+    'office.unknown': string;
+    'office.showBoard': string;
+    'office.showOffice': string;
 };
 /** Translation function consumed by pure view helpers. */
 export type AgentTeamsTranslate = (key: AgentTeamsLocaleKey, params?: Record<string, unknown>) => string;

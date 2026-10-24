@@ -26,6 +26,7 @@ import {
   IconStopFill16, IconWarningOutline16,
 } from './icons.tsx'
 import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
+import { PixelOffice } from './pixel-office/PixelOffice.tsx'
 import { currentSessionId } from './session-navigation.ts'
 import type { ModelDirectory, ModelDirectoryResolver } from '@deepseek-ai/dsh-client-ui-model-selection/client'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
@@ -106,6 +107,9 @@ type PanelGesture = {
   readonly start: PanelLayout
   activated: boolean
 }
+
+/** Persisted floater preference: board view vs pixel-office view. */
+const OFFICE_VIEW_KEY = 'agent-teams-pixel.officeView'
 
 function initialPanelLayout(): PanelLayout {
   if (typeof window === 'undefined') return DEFAULT_PANEL_LAYOUT
@@ -871,6 +875,14 @@ export function ActivityPanel({ sessionsList, modelDirectories, openMember, t, c
   const [autoOpened, setAutoOpened] = useState(false)
   const [wasActive, setWasActive] = useState(false)
   const [historic, setHistoric] = useState<ReadonlyMap<string, { data: AgentTeamsCardData; owner: string }>>(new Map())
+  const [officeMode, setOfficeMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    try { return window.localStorage.getItem(OFFICE_VIEW_KEY) === '1' } catch { return false }
+  })
+  const setOfficeView = useCallback((next: boolean): void => {
+    setOfficeMode(next)
+    try { window.localStorage.setItem(OFFICE_VIEW_KEY, next ? '1' : '0') } catch { /* private mode */ }
+  }, [])
   const [layout, setLayout] = useState<PanelLayout>(initialPanelLayout)
   const [bounds, setBounds] = useState<PanelBounds>(initialPanelBounds)
   const [interaction, setInteraction] = useState<'dragging' | 'resizing' | null>(null)
@@ -1079,6 +1091,7 @@ export function ActivityPanel({ sessionsList, modelDirectories, openMember, t, c
     [archivedTeams, current, teams],
   )
   const visibleCount = visibleTeams.length + visibleArchived.length + visibleHistoric.length
+  const officeTeam = visibleTeams[0]
   const visibleLiveTeamIds = useMemo(
     () => visibleTeams.map((team) => team.teamId).sort(),
     [visibleTeams],
@@ -1294,6 +1307,19 @@ export function ActivityPanel({ sessionsList, modelDirectories, openMember, t, c
               <span className={css.panelDot} data-busy={busy} aria-hidden />
             </span>
             <span className={css.panelControls}>
+              {hasTeams && (
+                <button
+                  type="button"
+                  className={css.iconButton}
+                  data-control="office"
+                  aria-pressed={officeMode}
+                  onClick={() => { setOfficeView(!officeMode) }}
+                  aria-label={t(officeMode ? 'office.showBoard' : 'office.showOffice')}
+                  title={t(officeMode ? 'office.showBoard' : 'office.showOffice')}
+                >
+                  <span aria-hidden>{officeMode ? '☰' : '🏢'}</span>
+                </button>
+              )}
               {!compact && (
                 <button
                   type="button"
@@ -1322,8 +1348,19 @@ export function ActivityPanel({ sessionsList, modelDirectories, openMember, t, c
               </button>
             </span>
           </header>
-          <div className={css.teams}>
-            {visibleCount === 0
+          <div className={css.teams} data-view={officeMode && officeTeam !== undefined ? 'office' : 'board'}>
+            {officeMode && officeTeam !== undefined
+              ? (
+                <PixelOffice
+                  team={officeTeam}
+                  t={t}
+                  onShowBoard={() => { setOfficeView(false) }}
+                  onOpenMember={(memberId) => {
+                    navigateToSession(officeTeam.captainSessionId as SessionId, memberId as SessionId)
+                  }}
+                />
+              )
+              : visibleCount === 0
               ? <span className={css.emptyHint}>{t('activity.empty')}</span>
               : (
                 <>

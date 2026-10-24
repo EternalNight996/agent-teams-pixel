@@ -223,6 +223,18 @@ export const zh = {
   'assignment.empty': '暂无任务',
   'archive.label': '已结束 · 历史归档',
   'archive.discardedLabel': '计划已放弃 · 历史归档',
+  'office.title': '像素办公室',
+  'office.members': '{count} 名成员',
+  'office.progress': '任务 {done}/{total}',
+  'office.awaiting': '等待批准',
+  'office.stalled': '已停止',
+  'office.empty': '暂无成员',
+  'office.captain': '队长',
+  'office.working': '工作中',
+  'office.idle': '空闲',
+  'office.unknown': '未知',
+  'office.showBoard': '看板',
+  'office.showOffice': '像素办公室',
 } satisfies Record<string, string>
 
 /** AgentTeams namespace key union. */
@@ -448,6 +460,18 @@ export const en = {
   'assignment.empty': 'No tasks',
   'archive.label': 'Ended · Archived history',
   'archive.discardedLabel': 'Plan discarded · Archived history',
+  'office.title': 'Pixel office',
+  'office.members': '{count} members',
+  'office.progress': 'Tasks {done}/{total}',
+  'office.awaiting': 'Awaiting approval',
+  'office.stalled': 'Stopped',
+  'office.empty': 'No members yet',
+  'office.captain': 'Captain',
+  'office.working': 'Working',
+  'office.idle': 'Idle',
+  'office.unknown': 'Unknown',
+  'office.showBoard': 'Board',
+  'office.showOffice': 'Pixel office',
 } satisfies Record<AgentTeamsLocaleKey, string>
 
 /** Translation function consumed by pure view helpers. */
