@@ -93,15 +93,15 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   const snapshots = useSyncExternalStore(subscribeActivitySnapshots, getActivitySnapshotsSnapshot)
   const local = useSyncExternalStore(state.subscribe, state.getSnapshot)
   const [retry, setRetry] = useState(0)
-  // The right-side AgentTeams pane is the pixel office's home: a live team opens
-  // in the office by default, and ☰ switches to the board. An explicit user
-  // choice is remembered across sessions.
-  const [officeMode, setOfficeMode] = useState<boolean>(() => {
+  // The right-side AgentTeams pane is a split view: configuration/interaction on
+  // top, the animated pixel office below. The office starts open; an explicit
+  // collapse is remembered across sessions.
+  const [officeVisible, setOfficeVisible] = useState<boolean>(() => {
     if (typeof window === 'undefined') return true
     try { return window.localStorage.getItem(WORKSPACE_OFFICE_VIEW_KEY) !== '0' } catch { return true }
   })
   const setOfficeView = (next: boolean): void => {
-    setOfficeMode(next)
+    setOfficeVisible(next)
     try { window.localStorage.setItem(WORKSPACE_OFFICE_VIEW_KEY, next ? '1' : '0') } catch { /* private mode */ }
   }
   const live = snapshots.teams.filter(team => team.captainSessionId === sessionId)
@@ -137,12 +137,12 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
               type="button"
               className={css.headingOfficeToggle}
               data-control="office"
-              aria-pressed={officeMode}
-              onClick={() => { setOfficeView(!officeMode) }}
-              aria-label={t(officeMode ? 'office.showBoard' : 'office.showOffice')}
-              title={t(officeMode ? 'office.showBoard' : 'office.showOffice')}
+              aria-pressed={officeVisible}
+              onClick={() => { setOfficeView(!officeVisible) }}
+              aria-label={t(officeVisible ? 'office.collapse' : 'office.expand')}
+              title={t(officeVisible ? 'office.collapse' : 'office.expand')}
             >
-              <span aria-hidden>{officeMode ? '☰' : '🏢'}</span>
+              <span aria-hidden>{officeVisible ? '🏢' : '▭'}</span>
             </button>
           )}
         </header>
@@ -154,19 +154,21 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
           <span className={css.emptyMark} aria-hidden>↳</span>
           <h3>{t('workspace.emptyTitle')}</h3><p>{t('workspace.emptyBody')}</p>
           <button onClick={backToChat}>{t('workspace.back')}</button>
-        </section> : officeMode && live.includes(selected) ? (
-          <PixelOffice
-            team={selected}
-            t={t}
-            onShowBoard={() => { setOfficeView(false) }}
-            onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
-          />
-        ) : <>
+        </section> : (
           <TeamSection key={`${sessionId}:${selected.teamId}`} team={selected} workspace historic={history}
             modelDirectory={selected.phase === 'staged' ? modelDirectories.directoryFor(sessionId) : undefined}
             onContinuePlanning={backToChat} onDiscarded={backToChat} onNavigate={openMember} t={t} />
-        </>}
+        )}
       </div>
+      {officeVisible && selected !== undefined && live.includes(selected) && (
+        <section className={css.officePane} data-office-pane aria-label={t('office.title')}>
+          <PixelOffice
+            team={selected}
+            t={t}
+            onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
+          />
+        </section>
+      )}
     </div>
   )
 }

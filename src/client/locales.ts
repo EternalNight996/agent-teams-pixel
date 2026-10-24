@@ -235,6 +235,8 @@ export const zh = {
   'office.unknown': '未知',
   'office.showBoard': '看板',
   'office.showOffice': '像素办公室',
+  'office.collapse': '收起像素办公室',
+  'office.expand': '展开像素办公室',
 } satisfies Record<string, string>
 
 /** AgentTeams namespace key union. */
@@ -472,6 +474,8 @@ export const en = {
   'office.unknown': 'Unknown',
   'office.showBoard': 'Board',
   'office.showOffice': 'Pixel office',
+  'office.collapse': 'Hide pixel office',
+  'office.expand': 'Show pixel office',
 } satisfies Record<AgentTeamsLocaleKey, string>
 
 /** Translation function consumed by pure view helpers. */
