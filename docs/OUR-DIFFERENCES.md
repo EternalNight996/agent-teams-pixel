@@ -13,7 +13,8 @@
 
 - ✅ 代码基座 = 上游 0.1.26（`src/` + `lib/`），包身份/插件 id/兼容矩阵已改为本项目。
 - ✅ 上游 baseline 已在 rc.3 实测跑通：staged plan → 审批 → spawn → 调度 → 成员完成 → delivery ok（10 秒）。
-- ⏳ 未做：角色卡接入、像素 UI 移植、交付包增强、与原生 `agentTeams` 的兼容策略。
+- ✅ 像素办公室 v1 已接入：`src/client/pixel-office/`（Canvas 场景 + React 视图），数据源 = 团队快照（members/tasks/activity/inbox），浮层标题栏 🏢 一键切换「看板 ↔ 像素办公室」。
+- ⏳ 未做：角色卡接入、像素 UI 增强（会议区/更多动画/独立页签）、交付包增强、与原生 `agentTeams` 的兼容策略。
 
 ## 接入顺序（约定）
 
