@@ -5,6 +5,10 @@
  * the model, while this module owns the animation loop and all drawing. Every
  * frame is defensive — a drawing error degrades to a plain backdrop and keeps
  * the loop alive so a single bad model can never blank the office.
+ *
+ * Layout contract: characters and desks are drawn in the first pass and every
+ * label/bubble in a second pass, so badges never get painted over by a later
+ * row. The world grows taller with the row count instead of squeezing rows.
  */
 /** One character shown at a desk. */
 export interface SceneMember {

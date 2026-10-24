@@ -5,6 +5,10 @@
  * the model, while this module owns the animation loop and all drawing. Every
  * frame is defensive — a drawing error degrades to a plain backdrop and keeps
  * the loop alive so a single bad model can never blank the office.
+ *
+ * Layout contract: characters and desks are drawn in the first pass and every
+ * label/bubble in a second pass, so badges never get painted over by a later
+ * row. The world grows taller with the row count instead of squeezing rows.
  */
 
 /** One character shown at a desk. */
@@ -49,10 +53,11 @@ export interface SceneHandle {
 }
 
 const WORLD_W = 520
-const WORLD_H = 300
-const DESK_W = 92
-const DESK_H = 46
+const WORLD_MIN_H = 300
+const CELL_H = 150
+const TOP_PAD = 104
 const MAX_COLUMNS = 4
+const DESK_W = 92
 
 const COLORS = {
   wall: '#3a4152',
@@ -65,8 +70,8 @@ const COLORS = {
   screen: '#7fd4ff',
   screenIdle: '#39445a',
   label: '#e8eef8',
-  labelBg: 'rgba(20, 24, 32, 0.78)',
-  bubble: 'rgba(24, 30, 42, 0.9)',
+  labelBg: 'rgba(20, 24, 32, 0.82)',
+  bubble: 'rgba(24, 30, 42, 0.92)',
   captain: '#f2c14e',
   alert: '#ef6b6b',
   good: '#67d9a5',
@@ -124,7 +129,8 @@ export function createPixelScene(
   let disposed = false
   let raf: number | undefined
   let width = WORLD_W
-  let height = WORLD_H
+  let height = WORLD_MIN_H
+  let worldH = WORLD_MIN_H
   let dpr = 1
   let scale = 1
   let offsetX = 0
@@ -132,29 +138,27 @@ export function createPixelScene(
   const zoom = options.zoom ?? 1
 
   function fit(): void {
-    const ratio = Math.min(width / WORLD_W, height / WORLD_H)
+    const ratio = Math.min(width / WORLD_W, height / worldH)
     scale = Math.max(0.2, ratio) * zoom
     offsetX = (width - WORLD_W * scale) / 2
-    offsetY = (height - WORLD_H * scale) / 2
+    offsetY = (height - worldH * scale) / 2
   }
 
   function paintRoom(time: number): void {
-    // Wall + floor.
     g.fillStyle = COLORS.wall
     g.fillRect(0, 0, WORLD_W, 96)
     g.fillStyle = COLORS.wallShade
     g.fillRect(0, 84, WORLD_W, 12)
     g.fillStyle = COLORS.floor
-    g.fillRect(0, 96, WORLD_W, WORLD_H - 96)
+    g.fillRect(0, 96, WORLD_W, worldH - 96)
     g.strokeStyle = COLORS.floorLine
     g.lineWidth = 1
     for (let x = 0; x < WORLD_W; x += 32) {
-      g.beginPath(); g.moveTo(x, 96); g.lineTo(x, WORLD_H); g.stroke()
+      g.beginPath(); g.moveTo(x, 96); g.lineTo(x, worldH); g.stroke()
     }
-    for (let y = 120; y < WORLD_H; y += 32) {
+    for (let y = 120; y < worldH; y += 32) {
       g.beginPath(); g.moveTo(0, y); g.lineTo(WORLD_W, y); g.stroke()
     }
-    // Windows with a slow light drift so the office never looks frozen.
     for (const wx of [60, 250, 420]) {
       g.fillStyle = '#26303f'
       roundRect(g, wx, 18, 62, 44, 5)
@@ -167,7 +171,6 @@ export function createPixelScene(
       g.fillRect(wx + 30, 22, 3, 36)
       g.fillRect(wx + 4, 38, 54, 3)
     }
-    // Plant + whiteboard for scene identity.
     g.fillStyle = '#7a5b3c'
     g.fillRect(14, 216, 22, 26)
     g.fillStyle = '#4f8f54'
@@ -181,6 +184,7 @@ export function createPixelScene(
     for (let i = 0; i < 4; i += 1) g.fillRect(WORLD_W - 110, 34 + i * 11, 60 + (i % 2) * 20, 3)
   }
 
+  /** Character + desk + monitor. Overlays are painted by paintOverlay. */
   function paintDesk(cx: number, deskY: number, member: SceneMember, time: number): void {
     const seed = hash(member.id || member.name)
     const skin = pick(SKIN, seed)
@@ -188,18 +192,17 @@ export function createPixelScene(
     const working = member.activity === 'working'
     const bob = working ? Math.round(Math.sin(time / 130 + seed % 7) * 1.5) : Math.round(Math.sin(time / 700 + seed % 5) * 1)
     const deskX = cx - DESK_W / 2
-    const topY = deskY - DESK_H + 6
 
-    // Character first, then desk in front (sitting behind the desk).
-    const headY = topY - 30 + bob
+    const headY = deskY - 92 + bob
     const bodyY = headY + 16
+
+    // Character.
     g.fillStyle = shirt
     g.fillRect(cx - 9, bodyY, 18, 18)
     g.fillStyle = skin
     g.fillRect(cx - 6, headY, 12, 13)
     g.fillStyle = '#2a2f3a'
     g.fillRect(cx - 6, headY - 2, 12, 4)
-    // Eyes look toward the monitor; working characters type.
     g.fillStyle = '#24303f'
     g.fillRect(cx - 3, headY + 5, 2, 2)
     g.fillRect(cx + 2, headY + 5, 2, 2)
@@ -213,7 +216,6 @@ export function createPixelScene(
       g.fillRect(cx + 8, bodyY + 12, 5, 6)
     }
     if (member.isLeader) {
-      // Crown.
       g.fillStyle = COLORS.captain
       g.beginPath()
       g.moveTo(cx - 8, headY - 3)
@@ -227,126 +229,146 @@ export function createPixelScene(
       g.fill()
     }
     if (member.activity === 'idle') {
-      // A tiny z-z-z drift for the idle.
-      g.fillStyle = 'rgba(232, 238, 248, 0.7)'
+      g.fillStyle = 'rgba(232, 238, 248, 0.75)'
       g.font = '8px monospace'
-      g.fillText('z', cx + 12, headY - 4 - Math.round(Math.sin(time / 500) * 3))
+      g.fillText('z', cx + 12, headY - 2 - Math.round(Math.sin(time / 500) * 3))
     }
 
-    // Desk and monitor.
+    // Desk front + top.
     g.fillStyle = COLORS.desk
-    roundRect(g, deskX, topY + 20, DESK_W, DESK_H - 20, 3)
+    roundRect(g, deskX, deskY - 30, DESK_W, 30, 3)
     g.fill()
     g.fillStyle = COLORS.deskTop
-    g.fillRect(deskX, topY + 20, DESK_W, 6)
+    g.fillRect(deskX, deskY - 34, DESK_W, 6)
+    // Monitor on the desk, covering the lower body.
     g.fillStyle = COLORS.monitor
-    roundRect(g, cx - 15, topY - 2, 30, 22, 3)
+    roundRect(g, cx - 16, deskY - 58, 32, 24, 3)
     g.fill()
     g.fillStyle = working ? COLORS.screen : COLORS.screenIdle
-    g.fillRect(cx - 12, topY + 1, 24, 15)
+    g.fillRect(cx - 12, deskY - 55, 24, 16)
     if (working) {
-      // Reading lines scroll with time.
       const shift = Math.floor(time / 240) % 4
       g.fillStyle = 'rgba(20, 26, 36, 0.55)'
       for (let i = 0; i < 4; i += 1) {
         const w = 6 + ((i + shift) % 3) * 5
-        g.fillRect(cx - 9, topY + 4 + i * 3, w, 1)
+        g.fillRect(cx - 9, deskY - 52 + i * 3, w, 1)
       }
     }
     g.fillStyle = '#11151c'
-    g.fillRect(cx - 2, topY + 20, 4, 3)
+    g.fillRect(cx - 2, deskY - 36, 4, 3)
+  }
 
-    // Name plate.
+  /** Name plate, state dot, progress bar, task bubble and unread badge. */
+  function paintOverlay(cx: number, deskY: number, member: SceneMember, time: number): void {
+    const seed = hash(member.id || member.name)
+    const working = member.activity === 'working'
+    const bob = working ? Math.round(Math.sin(time / 130 + seed % 7) * 1.5) : Math.round(Math.sin(time / 700 + seed % 5) * 1)
+    const headY = deskY - 92 + bob
+
+    // Name plate under the desk edge.
     const label = truncate(member.name, 10)
     g.font = '9px "Segoe UI", monospace'
     const textW = g.measureText(label).width
     g.fillStyle = COLORS.labelBg
-    roundRect(g, cx - textW / 2 - 5, deskY + 2, textW + 10, 13, 3)
+    roundRect(g, cx - textW / 2 - 6, deskY + 3, textW + 12, 14, 3)
     g.fill()
     g.fillStyle = member.isLeader ? COLORS.captain : COLORS.label
-    g.fillText(label, cx - textW / 2, deskY + 11)
+    g.fillText(label, cx - textW / 2, deskY + 13)
 
-    // State dot + per-member progress bar.
+    // State dot.
     g.fillStyle = stateTone(member.activity)
-    g.beginPath(); g.arc(cx - textW / 2 - 9, deskY + 8, 2.5, 0, Math.PI * 2); g.fill()
+    g.beginPath(); g.arc(cx - textW / 2 - 10, deskY + 10, 2.6, 0, Math.PI * 2); g.fill()
+
+    // Per-member progress bar.
     if (member.total !== undefined && member.total > 0) {
       const ratio = Math.min(1, Math.max(0, (member.done ?? 0) / member.total))
-      g.fillStyle = 'rgba(255,255,255,0.16)'
-      g.fillRect(cx - 18, deskY + 17, 36, 3)
+      g.fillStyle = 'rgba(255,255,255,0.18)'
+      g.fillRect(cx - 18, deskY + 20, 36, 3)
       g.fillStyle = COLORS.good
-      g.fillRect(cx - 18, deskY + 17, Math.round(36 * ratio), 3)
+      g.fillRect(cx - 18, deskY + 20, Math.round(36 * ratio), 3)
     }
 
-    // Task bubble.
+    // Task bubble above the head.
     if (member.currentTask !== undefined && member.currentTask !== '') {
-      const text = truncate(member.currentTask, 14)
+      const text = truncate(member.currentTask, 15)
       g.font = '8px "Segoe UI", monospace'
-      const bw = g.measureText(text).width + 10
+      const bw = g.measureText(text).width + 12
       const bx = Math.max(2, Math.min(WORLD_W - bw - 2, cx - bw / 2))
-      const by = headY - 22
+      const by = Math.max(4, headY - 26)
       g.fillStyle = COLORS.bubble
-      roundRect(g, bx, by, bw, 14, 4)
+      roundRect(g, bx, by, bw, 15, 4)
       g.fill()
       g.beginPath()
-      g.moveTo(cx - 3, by + 14)
-      g.lineTo(cx + 1, by + 18)
-      g.lineTo(cx + 4, by + 14)
+      g.moveTo(cx - 3, by + 15)
+      g.lineTo(cx + 1, by + 19)
+      g.lineTo(cx + 4, by + 15)
       g.closePath()
       g.fill()
       g.fillStyle = COLORS.label
-      g.fillText(text, bx + 5, by + 10)
+      g.fillText(text, bx + 6, by + 11)
     }
 
     // Unread badge.
     if ((member.unread ?? 0) > 0) {
       g.fillStyle = COLORS.alert
-      g.beginPath(); g.arc(cx + 15, headY - 2, 6, 0, Math.PI * 2); g.fill()
+      g.beginPath(); g.arc(cx + 16, headY - 2, 6.5, 0, Math.PI * 2); g.fill()
       g.fillStyle = '#fff'
       g.font = 'bold 7px "Segoe UI", monospace'
-      g.fillText(String(Math.min(9, member.unread ?? 0)), cx + 12, headY + 1)
+      g.fillText(String(Math.min(9, member.unread ?? 0)), cx + 13, headY + 1)
     }
   }
 
   function paint(time: number): void {
+    const members = model?.members ?? []
+    const columns = members.length === 0
+      ? 1
+      : Math.min(MAX_COLUMNS, Math.max(1, Math.ceil(Math.sqrt(members.length))), members.length)
+    const rows = Math.max(1, Math.ceil(members.length / columns))
+    worldH = Math.max(WORLD_MIN_H, TOP_PAD + rows * CELL_H + 8)
+
+    // The world height depends on the model, so the fit is recomputed per frame;
+    // resizing alone cannot know how many rows the next snapshot needs.
+    const ratio = Math.min(width / WORLD_W, height / worldH)
+    scale = Math.max(0.2, ratio) * zoom
+    offsetX = (width - WORLD_W * scale) / 2
+    offsetY = (height - worldH * scale) / 2
+
     g.setTransform(dpr, 0, 0, dpr, 0, 0)
     g.clearRect(0, 0, width, height)
     g.save()
     g.translate(offsetX, offsetY)
     g.scale(scale, scale)
     g.imageSmoothingEnabled = false
+
     paintRoom(time)
 
-    const members = model?.members ?? []
-    if (members.length === 0) {
+    const cellW = WORLD_W / columns
+    const layout = members.map((member, index) => {
+      const column = index % columns
+      const row = Math.floor(index / columns)
+      const cx = cellW * (column + 0.5)
+      const deskY = TOP_PAD + CELL_H * row + 128
+      return { member, cx, deskY }
+    })
+
+    if (layout.length === 0) {
       g.fillStyle = COLORS.label
       g.font = '12px "Segoe UI", sans-serif'
       const text = model?.labels?.empty ?? 'No members yet'
       g.fillText(text, 24, 150)
     } else {
-      const columns = Math.min(MAX_COLUMNS, Math.max(1, Math.ceil(Math.sqrt(members.length))), members.length)
-      const rows = Math.max(1, Math.ceil(members.length / columns))
-      const cellW = WORLD_W / columns
-      const usableTop = 112
-      const usableH = WORLD_H - usableTop - 24
-      const cellH = usableH / rows
-      members.forEach((member, index) => {
-        const column = index % columns
-        const row = Math.floor(index / columns)
-        const cx = cellW * (column + 0.5)
-        const deskY = usableTop + cellH * (row + 0.9)
-        paintDesk(cx, Math.min(WORLD_H - 10, deskY), member, time)
-      })
+      for (const item of layout) paintDesk(item.cx, item.deskY, item.member, time)
+      for (const item of layout) paintOverlay(item.cx, item.deskY, item.member, time)
     }
 
-    // Phase / halted overlays.
     if (model?.phase === 'staged') {
       g.fillStyle = 'rgba(16, 20, 28, 0.55)'
-      g.fillRect(0, 0, WORLD_W, WORLD_H)
+      g.fillRect(0, 0, WORLD_W, worldH)
       g.fillStyle = '#f6f8ff'
       g.font = 'bold 13px "Segoe UI", sans-serif'
       const text = model.labels?.awaiting ?? 'Waiting for approval'
       const textW = g.measureText(text).width
-      g.fillText(text, (WORLD_W - textW) / 2, 152)
+      g.fillText(text, (WORLD_W - textW) / 2, worldH / 2)
     }
     if (model?.halted === true) {
       g.fillStyle = COLORS.alert
