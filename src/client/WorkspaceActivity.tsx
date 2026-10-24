@@ -93,9 +93,12 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   const snapshots = useSyncExternalStore(subscribeActivitySnapshots, getActivitySnapshotsSnapshot)
   const local = useSyncExternalStore(state.subscribe, state.getSnapshot)
   const [retry, setRetry] = useState(0)
+  // The right-side AgentTeams pane is the pixel office's home: a live team opens
+  // in the office by default, and ☰ switches to the board. An explicit user
+  // choice is remembered across sessions.
   const [officeMode, setOfficeMode] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false
-    try { return window.localStorage.getItem(WORKSPACE_OFFICE_VIEW_KEY) === '1' } catch { return false }
+    if (typeof window === 'undefined') return true
+    try { return window.localStorage.getItem(WORKSPACE_OFFICE_VIEW_KEY) !== '0' } catch { return true }
   })
   const setOfficeView = (next: boolean): void => {
     setOfficeMode(next)

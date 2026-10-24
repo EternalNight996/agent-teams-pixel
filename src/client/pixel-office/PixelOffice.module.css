@@ -1,10 +1,10 @@
-/* Pixel-office view inside the AgentTeams activity floater. */
+/* Pixel-office view: the AgentTeams right-side pane, and the floater toggle. */
 
 .office {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-height: 240px;
+  min-height: clamp(220px, 38vh, 430px);
   padding: 6px 2px 2px;
 }
 
