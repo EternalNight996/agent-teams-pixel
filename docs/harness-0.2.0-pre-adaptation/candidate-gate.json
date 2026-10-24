@@ -1,0 +1,9 @@
+{
+  "kind": "simulated-runtime-version-gate",
+  "runtimeVersion": "0.2.0",
+  "passed": true,
+  "exemptions": {},
+  "incompatible": null,
+  "changesHostManifests": false,
+  "verifiesPublishedRelease": false
+}

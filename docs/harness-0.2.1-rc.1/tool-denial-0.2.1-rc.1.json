@@ -1,0 +1,17 @@
+[
+  {
+    "event": "stability-member-tool-denied",
+    "phase": "fresh",
+    "time": 1792223146183
+  },
+  {
+    "event": "stability-member-tool-denied",
+    "phase": "reload",
+    "time": 1792223146191
+  },
+  {
+    "event": "stability-member-tool-denied",
+    "phase": "cold",
+    "time": 1792223147577
+  }
+]

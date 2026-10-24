@@ -1,0 +1,129 @@
+{
+  "passed": true,
+  "version": "0.2.1-rc.1",
+  "artifactSha256": "7ff8f85704e16f4ff6c1f9c23435ae59f83c2f7f899d3022a7933ddfff60f3b6",
+  "pluginVersion": "0.1.24-rc.1",
+  "testFiles": {
+    "harness-runtime-verify.mjs": "3387141436803ccc030436a6f6c7286cc3c85f3642c368bd936da676d62037b9",
+    "harness-runtime-scenarios.mjs": "0a45bd756e5cae7d4783701c1ca3670f45f4c3a5864efc395fc8f6d6ecacf493",
+    "fixtures/harness-runtime-llm.mjs": "22ee4ed933fcd73543c8ea63406682325b92b05bd61154a9b0222f74ee775b9e",
+    "fixtures/harness-runtime-resume.mjs": "17f8be68c143a2f49e0c45de90665c4cf24aac2f06d8a415db062e71424b10a7",
+    "fixtures/harness-runtime-idle.mjs": "508f2437610624aaf5196c66c533a0f7b1da021343b1534c1a60818cca54bc72",
+    "fixtures/harness-runtime-entry.mjs": "decd8d29d57abbbc390b9716f8fea4bd9e45c6c5a44d9c3ebe06e2389182c4ef",
+    "fixtures/harness-runtime-web-approval.mjs": "466175266ce627df52e9622b767f3662dcae53e89c6c64b27cb2f5e2f47f49aa",
+    "fixtures/harness-runtime-protocol.mjs": "1be0de75af86c9fb96b35c88d2e52ac1c2e9eacc8a9f8451e58842df83736485",
+    "fixtures/harness-runtime-stability.mjs": "c049f4838a4123683dbe3024ef9b9d8441f691ac17da8e340654b7be0a753d21"
+  },
+  "node": "v26.7.0",
+  "platform": "darwin",
+  "arch": "arm64",
+  "cohortCount": 293,
+  "runs": [
+    {
+      "scenario": "stability",
+      "passed": true,
+      "assertions": {
+        "exit0": true,
+        "productMarker": true,
+        "hmr": true,
+        "lazy-start": true,
+        "running-plan-correction": true,
+        "steering": true,
+        "read-receipt-continuation": true,
+        "reassign": true,
+        "archive": true,
+        "batch-plan": true,
+        "terminal-evidence": true,
+        "report-retry": true,
+        "settlement-dedup": true
+      },
+      "evidence": [
+        {
+          "event": "stability-hmr-passed",
+          "sameAgent": true,
+          "persona": true,
+          "customToolDenied": true,
+          "time": 1792224307350
+        },
+        {
+          "event": "stability-lazy-start-passed",
+          "readyRequests": 1,
+          "blockedRequests": 0,
+          "welcomeRequests": 0,
+          "time": 1792224307350
+        },
+        {
+          "event": "stability-running-plan-correction-passed",
+          "pendingEdit": true,
+          "captainCancellation": true,
+          "blockedRequests": 0,
+          "time": 1792224307422
+        },
+        {
+          "event": "stability-steering-passed",
+          "queuedMessages": 32,
+          "modelStepsUntilConsumed": 1,
+          "time": 1792224308129
+        },
+        {
+          "event": "stability-read-receipt-continuation-passed",
+          "modelContinued": true,
+          "time": 1792224308194
+        },
+        {
+          "event": "stability-reassign-passed",
+          "sameMember": true,
+          "staleInputExcluded": true,
+          "time": 1792224308307
+        },
+        {
+          "event": "stability-archive-passed",
+          "pendingMessagesCleared": 32,
+          "descendantsStopped": true,
+          "siblingPreserved": true,
+          "retiredResumeRejected": true,
+          "time": 1792224309051
+        },
+        {
+          "event": "stability-batch-plan-passed",
+          "members": 5,
+          "tasks": 6,
+          "setupToolCalls": 1,
+          "previousEquivalentToolCalls": 12,
+          "memberModelRequests": 0,
+          "time": 1792224309098
+        },
+        {
+          "event": "stability-terminal-evidence-passed",
+          "records": 1,
+          "duplicateAppend": false,
+          "originalResultPreserved": true,
+          "time": 1792224309312
+        },
+        {
+          "event": "stability-report-retry-passed",
+          "duplicateModelRequests": 0,
+          "time": 1792224309375
+        },
+        {
+          "event": "stability-settlement-dedup-passed",
+          "reportWakes": 1,
+          "duplicateModelRequests": 0,
+          "time": 1792224309395
+        }
+      ],
+      "exit": {
+        "code": 0,
+        "signal": null,
+        "timedOut": false
+      }
+    }
+  ],
+  "unverified": [
+    "real provider APIs and credentials",
+    "browser interaction",
+    "other operating systems",
+    "native terminal execution",
+    "live user-data migration"
+  ]
+}

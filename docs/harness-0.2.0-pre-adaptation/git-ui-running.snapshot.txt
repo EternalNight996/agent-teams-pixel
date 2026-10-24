@@ -1,0 +1,76 @@
+[p1 "DSH 本地构建" | space "Harness 0.2.0 预适配验收"(12): 1 managed, 0 untracked — p1* "DSH 本地构建"]
+root
+  container
+    container
+      button "新建会话" [ref=43]
+        svg_root
+        container
+          text "DSH 本地构建"
+          text "0.1.7-rc.2-21638c5"
+      button "收起侧边栏" [ref=44, loc=css:button[aria-label="收起侧边栏"]]
+        svg_root
+    button "新建会话" [ref=45]
+      container
+        svg_root
+        text "新会话"
+      text "⌥"
+      text "⌘"
+      text "N"
+    container "全局面板"
+      button "插件" [ref=46, loc=css:button[aria-label="插件"]]
+        svg_root
+        text "插件"
+    container
+      container
+        text "工作区"
+        button "搜索会话" [ref=47, loc=css:button[aria-label="搜索会话"]]
+          svg_root
+        container
+          button "视图选项" [ref=48, loc=css:button[aria-label="视图选项"]]
+            svg_root
+          button "添加工作区" [ref=49, loc=css:button[aria-label="添加工作区"]]
+            svg_root
+      tree "会话"
+        treeitem
+          svg_root
+          text "默认工作区"
+        treeitem
+          text "新会话"
+    button "设置" [ref=50, loc=css:button[aria-label="设置"]]
+      svg_root
+      text "设置"
+  container
+    container
+      button "返回插件列表" [ref=94, loc=css:button[aria-label="返回插件列表"]]
+        svg_root
+        text "插件列表"
+      container
+        svg_root
+        container
+          button "卸载 @nanmicoder/dsh-agent-teams" [ref=95, loc=css:button[aria-label="卸载 @nanmicoder/dsh-agent-teams"]]
+            svg_root
+            text "卸载"
+          switch "启用 @nanmicoder/dsh-agent-teams" [ref=96, loc=css:button[aria-label="启用 @nanmicoder/dsh-agent-teams"]]
+    container
+      container
+        heading
+          text "@nanmicoder/dsh-agent-teams"
+        text "v0.1.21"
+      paragraph
+        text "@nanmicoder/dsh-agent-teams"
+      paragraph
+        text "AgentTeams for DeepSeek Harness: multi-agent team collaboration (captain, members, tasks with dependencies, messaging) driven by natural language, with a tree monitor in the web GUI"
+    container
+      container
+        heading
+          text "包含的组件"
+        text "共 1 个 · 1 运行中"
+      unordered_list
+        list_item
+          svg_root
+          container
+            text "@nanmicoder/dsh-agent-teams"
+            text "AgentTeams for DeepSeek Harness: multi-agent team collaboration (captain, members, tasks with dependencies, messaging) driven by natural language, with a tree monitor in the web GUI"
+            text "agent-teams"
+          text "运行中"
+          switch "启用组件 @nanmicoder/dsh-agent-teams" [ref=97, loc=css:button[aria-label="启用组件 @nanmicoder/dsh-agent-teams"]]

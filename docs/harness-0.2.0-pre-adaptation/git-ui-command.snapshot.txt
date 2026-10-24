@@ -1,0 +1,83 @@
+[p1 "DSH 本地构建" | space "Harness 0.2.0 预适配验收"(12): 1 managed, 0 untracked — p1* "DSH 本地构建"]
+root
+  container
+    container
+      button "新建会话" [ref=98]
+        svg_root
+        container
+          text "DSH 本地构建"
+          text "0.1.7-rc.2-21638c5"
+      button "收起侧边栏" [ref=99, loc=css:button[aria-label="收起侧边栏"]]
+        svg_root
+    button "新建会话" [ref=100]
+      container
+        svg_root
+        text "新会话"
+      text "⌥"
+      text "⌘"
+      text "N"
+    container "全局面板"
+      button "插件" [ref=101, loc=css:button[aria-label="插件"]]
+        svg_root
+        text "插件"
+    container
+      container
+        text "工作区"
+        button "搜索会话" [ref=102, loc=css:button[aria-label="搜索会话"]]
+          svg_root
+        container
+          button "视图选项" [ref=103, loc=css:button[aria-label="视图选项"]]
+            svg_root
+          button "添加工作区" [ref=104, loc=css:button[aria-label="添加工作区"]]
+            svg_root
+      tree "会话"
+        treeitem
+          svg_root
+          text "默认工作区"
+        treeitem
+          text "新会话"
+    button "设置" [ref=105, loc=css:button[aria-label="设置"]]
+      svg_root
+      text "设置"
+  container
+    button "打开右侧边栏" [ref=106, loc=css:button[aria-label="打开右侧边栏"]]
+      svg_root
+    container
+      container
+        svg_root
+        container
+          text "探索未至之境"
+          text "预览版"
+      container
+        button "选择工作区" [ref=107, loc=css:button[aria-label="选择工作区"]]
+          svg_root
+          text "默认工作区"
+          svg_root
+        button [ref=108]
+          svg_root
+          text "标准模式"
+          svg_root
+      container
+        listbox "触发候选建议"
+          text "指令"
+          listboxoption [ref=114]
+            text "agent-teams"
+            text "run a goal with a multi-agent team (you become the captain)"
+        textfield "描述你想要构建的内容, / 调用指令, @ 文件或对话" [ref=109]
+          paragraph
+            text "/agent-teams"
+        container
+          container
+            button "添加文件或调用指令" [ref=110, loc=css:button[aria-label="添加文件或调用指令"]]
+              svg_root
+            button "访问模式，当前：工作区内修改" [ref=111, loc=css:button[aria-label="访问模式，当前：工作区内修改"]]
+              svg_root
+              text "工作区内修改"
+              svg_root
+          container
+            button "选择模型，当前 DeepSeek-V41-Flash，推理等级 High" [ref=112, loc=css:button[aria-label="选择模型，当前 DeepSeek-V41-Flash，推理等级 High"]]
+              text "DeepSeek-V41-Flash"
+              text "High"
+              svg_root
+            button "发送消息" [ref=113, loc=css:button[aria-label="发送消息"]]
+              svg_root

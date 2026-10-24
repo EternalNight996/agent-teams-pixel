@@ -1,337 +1,259 @@
-# agent-teams-pixel
+<p align="right">
+  <strong>English</strong> · <a href="./README_ZH.md">简体中文</a>
+</p>
 
-给 DeepSeek Harness 的 Web 主窗口加「**工作角色**」页签 + 对话区「**像素办公室**」浮层——255+ 位专家变成会走会聊的像素小人。**一条命令安装，不改 dsh 源码。**
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="dsh-agent-teams turns one DeepSeek Harness session into a coordinated multi-agent team">
+</p>
 
-> 当前版本：**v0.2.7**（npm `agent-teams-pixel@0.2.7`）。
-> v0.2.7 修 **「页签 / 浮层 / 设置分区整块消失」**：客户端 `inject` 里长期留着已不存在的 `settingsScope` —— cordis 的 `inject` 是**硬依赖**，服务不存在就**永不调用 `apply()`**（全静默、无报错）。收紧为 `['slots','locale']`，并加 `test/client-inject-contract.test.mjs` 把「inject ⊆ 运行时服务目录」变成门禁。
-> v0.2.1 修 **DSH 0.2.0-rc.2 门禁与挂载**（peer 区间被判死 + 没挂进 profile + 缺 manifest 元数据）。
-> v0.2.2 修 **「装了但没功能」**：dsh ≥0.1.7 的 `ctx.settings` 已无 `register()`、客户端也没有 `settingsScope` —— 改为 `export const Config`（全字段 volatile）+ 跨版本 `bindSettings` + `GET/POST /agents-pixe/config`。
-> v0.2.3 做 **P0 追平**：成员种子默认只注角色卡的**专业核心三章**（真实 508 张卡实测**省 66.3% token**）、成员**模型/推理档**可配（默认快照领袖）、成员**互发消息直达**、成员**工具白名单**（角色→权限的物理层）。`memberCardMode=full` 可一键回退。
-> v0.2.4 定 **角色导入作用域**：**只导入用户选中的角色** —— `agents_pixe_team*` 的 `team` 留空即用「办公室当前会话选中的角色」组队；预设团队只导入自己的 roster，**不做全库导入**；没选人时给指引而不是兜底。
-> v0.2.5 补 **写域硬拦**：任务声明 `write_scopes` 后，完成必须上报 `changed_paths` 且全在域内，越界**拒绝完成并点名违例文件** —— 原生 DSH 的 `writeScopes` 只做 advisory 提示，这一项**本项目更强**。
-> v0.2.6 补 **专业门禁**：`kind="review"` + `review_of` 从**角色卡**抽「关键规则/技术交付物」成验收清单，完成必须逐条判定，任一 fail → 被审任务**自动打回**（下游继续阻塞）—— 判据来自 508 张卡的领域知识，**原生与 dsh-agent-teams 都只有通用流程**。同版把客户端角色清单改为宿主下发 + 缓存，**包体 339 KB → 175.5 KB（-48%）**。
-> 根因/取证/部署见 [docs/dsh-0.2-compat.md](docs/dsh-0.2-compat.md)；三方能力对比与超越路径见 [docs/agent-teams-comparison.md](docs/agent-teams-comparison.md)。
+<div align="center">
 
-## ⚡ 安装
+[![AtomGit](https://atomgit.com/NanmiCoder/dsh-agent-teams/star/new_badge.svg)](https://atomgit.com/NanmiCoder/dsh-agent-teams)
 
-官方 DSH CLI 一条命令安装（**profile 要与你实际在用的宿主一致**）：
+</div>
+
+<p align="center">
+  <a href="https://dshfind.com/en/plugins/NanmiCoder/dsh-agent-teams?ref=badge"><img src="https://img.shields.io/badge/recommended%20by-dshfind-FFD700?style=flat-square" alt="Recommended by dshfind"></a>
+  <a href="https://dshfind.com/en/plugins/NanmiCoder/dsh-agent-teams?ref=badge"><img src="https://dshfind.com/api/badge/NanmiCoder/dsh-agent-teams?lang=en" alt="dshfind score"></a>
+  <a href="https://dshfind.com/en/plugins/NanmiCoder/dsh-agent-teams?ref=badge"><img src="https://dshfind.com/api/badge/NanmiCoder/dsh-agent-teams?metric=downloads&amp;lang=en" alt="dshfind downloads"></a>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@nanmicoder/dsh-agent-teams"><img src="https://img.shields.io/npm/v/@nanmicoder/dsh-agent-teams?style=flat-square&amp;color=5B4CF0" alt="npm version"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-0B7285?style=flat-square" alt="MIT license"></a>
+  <a href="./cordis.patch.yml"><img src="https://img.shields.io/badge/DSH-Web%20%2B%20Headless-5B4CF0?style=flat-square" alt="DSH Web and Headless"></a>
+</p>
+
+## One prompt. A working team.
+
+`dsh-agent-teams` turns the current DeepSeek Harness session into a captain that can assemble durable sub-agents, split a goal into dependency-aware tasks, and coordinate work through direct messages.
+
+Ask in natural language. The plugin provides the team protocol, 14 coordination tools, persistent state, an automatic shared-task scheduler, and a live Web UI—without requiring a separate workflow engine.
+
+<p align="center">
+  <img src="./assets/readme/workspace.png" width="100%" alt="AgentTeams native workspace with members, task dependencies, and progress">
+</p>
+
+## Releases
+
+[v0.1.26](./release-notes/v0.1.26.md) refreshes the team workspace with completion and inbox cards, preserves the distinct claimed state, and fixes optional tool inputs and live host session-format detection. This stable plugin release uses npm `latest`; the recommended Harness host remains `0.2.1-rc.2`. See the exact [support matrix](./compatibility.json) and [verification scope](./docs/maintenance-workflow.md).
+
+## Why AgentTeams?
+
+| Capability | What it changes |
+| --- | --- |
+| **Captain-led delegation** | The current session creates the team, assigns roles, and consolidates the final result. |
+| **Durable members** | Members are continuable DSH sub-agents that can be woken for focused follow-up turns. |
+| **Dependency-aware tasks** | Tasks move through explicit states and cannot be claimed before their dependencies finish. |
+| **Automatic reuse and safe takeover** | Idle members claim the next ready task; reassignment revokes stale attempts before new work starts, and cold recovery retries stranded open attempts. |
+| **Direct messaging** | Members send durable mailbox messages directly to teammates or the captain—no relay required. |
+| **Live activity panel** | The Web UI combines segmented progress, a collapsible roster, and an interactive task DAG; running tasks show the member's model, and completed archives retain their full member and task history. |
+| **Plan before execution** | Normal `/agent-teams` runs stage an unspawned roster and DAG first. The Web panel uses the host model catalog for member routes. Returning to chat stops the planning turn, asks what should change, and revises the same draft; discarding archives the draft, aborts the turn, and explicitly prevents automatic recreation. Only **Approve & Run** enables scheduling; each member starts with its first ready task. |
+| **Quality gates** | Opt-in quality tasks support requirements → implementation → verification → review → integration contracts, automatic repair/re-review, and explicit resume. Scope control is a completion-time audit, not host write interception. See [docs/quality-gates.md](./docs/quality-gates.md). |
+
+The conversation card and activity panel use Harness's official locale service. They follow live language changes between English and Simplified Chinese—including status labels, dynamic summaries, controls, archive markers, and accessibility text—without a page reload or a separate plugin setting.
+
+## Install and choose versions
+
+**Recommended pair: DeepSeek Harness `0.2.1-rc.2` + AgentTeams `0.1.26`. The host remains an RC.**
+
+| Use case | DeepSeek Harness | AgentTeams plugin |
+| --- | --- | --- |
+| **Recommended** | **`0.2.1-rc.2`** | **`0.1.26`** |
+| Previous recommended RC | `0.2.1-rc.1`, `0.2.0-rc.2`, `0.1.7-rc.2` | `0.1.26` |
+| Legacy RC | `0.1.5-rc.1`, `0.1.5-rc.2`, `0.1.5-rc.3` | `0.1.26` |
+| Retaining an older RC | `0.1.2-rc.1` | `0.1.26` |
+| Developer Alpha testing | `0.1.2-alpha.5` | `0.1.26` |
+| Retaining an older Alpha | `0.1.2-alpha.2` | `0.1.26` |
+
+### Desktop app
+
+In the app sidebar, open **Plugins → Add plugin** and enter the npm package spec:
+
+```text
+@nanmicoder/dsh-agent-teams
+```
+
+The package name resolves npm `latest`. To pin a version, append `@0.1.26`. Install it, then choose **Enable now**. If the host asks for a restart, restart the desktop app. Use the package spec above for the published build; an npm or GitHub webpage URL is not the same install source. For Git installation, use a commit containing the verified build outputs described below.
+
+The desktop app supplies its own Harness core and package manager. Upgrading the global CLI does not upgrade that core, and an ordinary standalone CLI cannot manage its desktop profile. The CLI carrier installed by the desktop app can manage that profile in `0.2.1-rc.2`. Check the embedded core against the compatibility list. Harness `0.2.1-rc.2` is now the exact published target; its RC status is unchanged. The earlier source-only `0.2.0` prediction is no longer a support declaration. See the [release migration evidence](./docs/harness-0.2.1-rc.2/README.md).
+
+### CLI / Web: 1. Install DeepSeek Harness
 
 ```sh
-# 桌面壳（DeepSeek Harness.exe）用 desktop
-dsh plugin --profile desktop add agent-teams-pixel
-
-# CLI 起的 Web（dsh web）用 web
-dsh plugin --profile web add agent-teams-pixel
+npm install --global @deepseek-ai/dsh@0.2.1-rc.2
+dsh --version
 ```
 
-> ⚠️ 请一律用 `dsh plugin` 命令，**不要用 `npx @deepseek-ai/dsh`**——npx 对包名每次都会重新下载一份 dsh，装插件不该重装 dsh。
->
-> 包内 `dsh.bundle.patch` 声明了 `cordis.patch.yml`，`dsh plugin add` 后插件行自动挂载，无需手改任何 profile 补丁文件。首次安装后**重启 dsh 生效**（之后改 UI 均为热更新）。
->
-> 🔁 **升级 DSH 后插件「整体消失」**：多半是 profile 的 `dsh.profile.bundles` 里没挂它（DSH 插件树完全由 bundles 组合，不在 bundles = 不存在）或 peer 区间不覆盖新运行时。排查与修复见 [docs/dsh-0.2-compat.md](docs/dsh-0.2-compat.md)。
+Skip this if you already run this version. Alpha is opt-in: select an exact Alpha version from the table and lock all host dependencies as described in the [maintenance guide](./docs/maintenance-workflow.md).
 
-### 🆚 与 DSH 原生 Agent Teams、dsh-agent-teams 的关系
+### CLI / Web: 2. Install the AgentTeams plugin
 
-DSH `0.2.0-rc.2` 起内置了官方「智能体团队」（`@deepseek-ai/dsh-experimental-agent-team-profile`，默认已挂进 desktop profile）；社区另有编排能力很完整的 [`NanmiCoder/dsh-agent-teams`](https://github.com/NanmiCoder/dsh-agent-teams)（`@nanmicoder/dsh-agent-teams`，带计划审批与质量门禁）。
-
-本项目从 0.2.1 起会**探测 `ctx.get('agentTeams')`**：检测到原生能力时，系统提示段改为「**团队协作默认优先原生工具**」，本项目只负责另两方没有的部分——**508 张角色卡人格、29 个预设中文团队、像素办公室可视化、自定义角色、角色闲聊**，并要求同一次编排两套不混用；工具前缀（`agents_pixe_*`）与斜杠命令（`/teams`）都与它们不撞名，可以共存。
-
-**三方对比**（23 项能力 + 兼容策略对照 + 两种劣势分列 + 场景选型 + 收敛路线）见 [docs/agent-teams-comparison.md](docs/agent-teams-comparison.md)。
-
-
-
-安装完成后：聊天页出现「工作角色」页签，对话区出现可折叠的像素办公室浮层；模型选择器、会话模型完全不受影响。
-
-### 🖥 推荐：dsh-desktop 桌面壳
-
-想要双击即用的完整桌面体验（自动带起 dsh web + 本插件效果），推荐桌面壳 [**dsh-desktop**](https://github.com/EternalNight996/dsh-desktop)——Tauri 打包的 DeepSeek Harness 桌面工作台，开箱即用。
-
-也可以先装可视化插件市场，在设置界面里浏览、搜索、一键安装本插件：
+Install or upgrade from npm using the package name (resolves npm `latest`, currently `0.1.26`):
 
 ```sh
-dsh plugin --profile web add dshmarket
+dsh plugin --profile web add --save-exact @nanmicoder/dsh-agent-teams
 ```
 
-## ✨ 功能
+For a CLI-managed installation, replace `web` with your active CLI profile. **Stop and restart that profile's Harness process, then refresh the browser.** Installing the plugin does not upgrade Harness; the host and plugin have independent `latest` channels.
 
-- 🧑‍💼 **工作角色页签**：The Agency（en 255）+ agency-agents-zh（zh 253）= **508 张完整角色卡**内置随包分发，搜索 / 中英切换 / 分部分类选人。
-- 🏢 **像素办公室**：`shell.overlay` 浮层，Canvas 2D 程序化像素小人（站立 / 打字 / 踱步 + 四态徽章），可拖动、折叠、缩放，选人即入列；闲置与工作中的人都会聊天，台词可接 AI。
-- 🛠 **agents_pixe_roles 工具**：宿主半边注册，agent 按角色名取回完整角色卡（定位 + 规则 + 清单 + 语气），以「某个角色/团队身份回应」时自动调用。
-- 📦 **持久客户端插件**：npm 双面包 + 组合补丁层，包内自挂载（`dsh.bundle.patch`），安装即生效，重启不丢。
+For Git installation, use a Git package spec pinned to a commit containing the verified server, client, and type build outputs in `lib/`, rather than an npm webpage URL. The repository distributes these outputs so installation does not need a `prepare` hook or build-script approval. Source maintainers must run `pnpm build` and update the committed outputs whenever the source changes. Existing npm releases remain immutable.
 
-<p align="center">
-  <img src="assets/screen/demo.gif" width="640" alt="agent-teams-pixel 全功能演示：工作角色页签 + 像素办公室浮层（真实录屏）" />
-</p>
+For a manually cloned checkout, run `pnpm install --frozen-lockfile` and `pnpm build` after pulling, then restart the corresponding Harness process. Updating Git alone does not update local build output. See the [maintenance guide](./docs/maintenance-workflow.md).
 
-## 界面预览（真实抓屏）
+> For older `0.1.0-*` / `0.1.1-*` or unlisted hosts, keep a working pair and follow the [older-version and diagnostic guide](./docs/maintenance-workflow.md).
 
-> 📸 全部真实抓屏/录屏。
+See the full [compatibility matrix](./compatibility.json), [source installation and Alpha testing guide](./docs/maintenance-workflow.md), and [verification coverage and platform limits](./docs/maintenance-2026-09-06/release/README.md).
 
-### 🧑‍💼 工作角色页签
+Then ask for a team directly:
 
-<p align="center">
-  <img src="assets/screen/workspace-roles.png" width="820" alt="工作角色页签：选人 / 搜索 / 中英切换" />
-</p>
+> Use AgentTeams to review the commits after v0.5.3 from performance, security, and product perspectives. Return one consolidated report.
 
-> ⌨️ 键盘等价路径：`/` 聚焦搜索 · `Enter` 开工（把当前团队送进编排指令）· `Esc` 清空搜索 · `↑↓←→` 在角色卡间移动 · `Space` 加选/取消。
-> 焦点在输入框或按钮上时不抢键；页签不可见时全局监听自动让路。
-> 像素办公室浮层：`Ctrl + 滚轮` 缩放（不按 Ctrl 时普通滚动不受影响）。
+## View teams in the workspace
 
-### 🏢 像素办公室浮层
+Click **View team** in the current chat header or the team card below a reply to open the native **Team collaboration** tab. The entry belongs to its chat, rather than the general workspace start page.
 
-<p align="center">
-  <img src="assets/screen/workspace-pixe.png" width="820" alt="像素办公室：像素小人 / 团队编排 / 聊天" />
-</p>
+Team and task content starts immediately: wide panes use columns and narrow panes stack them. Select a task to locate its owner; member icons open their conversations. Closing the tab does not stop the team, and its chat can reopen it. Completed teams retain their archives. Older hosts keep the activity panel.
 
-> 标题栏现在是**两档视图切换**（`🏢 办公室` / `🤝 团队`）+ `⋯` 低频抽屉 + 折叠：原来的「选人 / − / ＋ / ⚙️ / 🤝团队」5 个平铺按钮收进了 `⋯`。
-> 折叠后不是一条空窄条，而是带计数的徽章（`4 名成员 · 3/6 完成`），点一下直接回到面板。
+## How it works
 
-### 🧩 团队面板（入口跟随会话）
+1. For a request to use AgentTeams, the captain follows the core protocol already in its system instructions. It continues an existing team and uses `agent_teams_status` when current state needs checking. When no team exists, the goal becomes a staged plan for review.
+2. The captain adds role-specific members backed by continuable sub-agents.
+3. The goal becomes tasks with owners and explicit dependencies.
+4. The shared scheduler uses real `running / idle / ready` state to atomically claim one ready task per idle member and wake it. An interrupted resident attempt stays parked and can resume through a direct message without losing its capability; after a cold process restart, the scheduler retries stranded open work with a fresh attempt.
+5. Members update with the current `attempt_id`; reassignment or captain takeover revokes the old attempt and waits for the old worker to quiesce before a new attempt starts.
+6. The captain presents the combined result, then archives the complete team record.
 
-参考 [dsh-agent-teams](https://github.com/NanmiCoder/dsh-agent-teams) 的信息架构重做，设计说明见 [docs/redesign-teams-mode.md](docs/redesign-teams-mode.md)：
+Team state is stored under `<workspace>/.agent-teams/`; the Web panel reads that disk truth and combines it with live sub-agent activity.
 
-- **入口跟随会话**：会话头右侧出现「🧩 团队 (n)」按钮，回复下方出现团队摘要卡。**没有团队时两处都不显示**，不占位、不留空壳。
-- **双栏**：左边看人（队长卡 / 分段进度 / 成员树），右边看事（依赖图 / 详情卡）。点任务高亮负责成员，点成员过滤他的任务。
-- **分段进度**：一段 = 一任务，颜色 = 状态。百分比条丢掉的「哪一项卡住」，这里一眼可见。
-- **计划闸门**：出草案时不创建任何成员、不花成员 token。在面板里改分工、加任务，再点「确认并启动团队」才真正建会话；「放弃本次计划」要二次确认。
-- **关面板不停团队**：面板只是投影，收起或关掉都不影响调度；再次打开从会话头按钮进。
-- **对话里就能看进度**：`agents_pixe_team` 等 8 个团队工具的调用不再摊原始 JSON，而是一张卡：实时状态一句话 + 任务分段条 + 成员状态 chips + 「查看团队」。要看原始参数/结果，展开卡片底部即可。
-- **布局记得住**：浮层的位置、缩放、折叠态、当前视图都会记住，重启后还在；`⋯` 里有「重置位置与缩放」。
-- **「✅ 应用到对话 (n)」常驻标题栏**：面板停在哪个画面（办公室 / 团队 / 选人 / 设置）都能点。没选人时置灰并写明原因，不隐藏。它走的是**成员清单**；想走**编排指令**请用页面里的「🚀 一键编排」，两者不要混着用。
+Member creation is zero-interaction by default: a member on the captain's current LLM route snapshots that provider, model, and reasoning effort, while a member on a requested alternative route snapshots the target model's default effort; later continuations restore the resolved snapshot. Only an explicit heterogeneous-team request (for example, “backend on provider A/model X, frontend on provider B/model Y”) supplies a member-specific `provider` + `model`; there is no per-member model or reasoning prompt.
 
-#### `/teams <目标>`：一句话拉起团队
+Captain sessions keep the concise core protocol and the original 14 native team tools from their first request. All business tools are directly available; no loading tool or extra activation call is needed. Configured profiles retain their bounded directory in the fixed system prompt. Creating, approving, continuing or ending a team does not rewrite the system prompt or tool schemas. Core rules remain available after history compaction or discarded code-mode tool results. Members receive four team tools, fixed member instructions, and their ordinary coding/research tools. Web approval wakes the captain with a control message; later member reports wake it again. See the [fixed protocol and benchmark contract](./docs/progressive-loading.md).
 
-在输入框打 `/`，选 `teams`（或直接输入），后面跟一句话目标：
+## Slash command
+
+No “use AgentTeams” phrasing required. The plugin registers the
+closed-namespace `/agent-teams` host command, so the Web GUI slash menu shows
+an `agent-teams` placeholder with an input hint: pick it (or type the
+command), describe the goal, and press Enter.
 
 ```
-/teams 调研三家竞品的定价页并给出取舍建议
+/agent-teams research the pricing pages of three competitors
 ```
 
-这一行会被命令管线认领，**原文作为你的消息进入会话**，队长据此用团队引擎拆解、派单、汇总。
-不想用斜杠命令也行：直接把目标说清楚，效果一样（斜杠命令只是让意图更明确，不用解释「该用哪个工具」）。
+The command pipeline claims the line, then preserves that exact input as an
+ordinary user follow-up so it remains visible in the main chat. The gesture
+boundary adds the deterministic activation directive at pre-step, so the
+first model request follows the staged planning protocol without a mandatory helper call. The invocation is also durably
+logged (`command/run` / `command/done`).
 
-### 📇 点击像素人 → 查看完整角色卡
+Surfaces without command adjudication (for example the headless CLI) get the
+same deterministic activation through a gesture boundary: any genuine user
+message starting with `/agent-teams` activates the protocol for the rest of
+the text. Mid-sentence mentions stay ordinary prose.
 
-<p align="center">
-  <img src="assets/screen/workspace-pixe2.png" width="820" alt="点击像素人弹出完整角色卡（Identity / Core Mission / Critical Rules / Checklist 全章节）" />
-</p>
+Historical panels require saved team state or archives. Sessions from early versions that deleted teams without retaining archives do not yet support reconstructing the full panel from logs.
 
-### ⚙️ 设置 → 像素办公室（角色工具 / 取卡粒度）
+## Configuration
 
-<p align="center">
-  <img src="assets/screen/workspace-setting.png" width="820" alt="设置 → 像素办公室：角色工具开关 + 取卡粒度（完整卡/仅规则/仅交付物）" />
-</p>
+Defaults work without extra setup. A trusted profile can override member behavior:
 
-> 更多完整桌面壳效果（对话主界面等）见 [dsh-desktop](https://github.com/EternalNight996/dsh-desktop) 的 README。
-
-## AI 聊天（开关 + 可插拔接口）
-
-像素人的聊天台词可接入 AI，含**内置 AI** 与一个**外部接口**，由页签/浮层顶部的 **🤖 AI 开关**统一控制：
-
-- **开关关**：走内置罐头问候（含打破第四面墙的问答彩蛋）。
-- **开关开 + 未接外部**：走**内置 AI**——客户端 fetch 宿主端点 `/agents-pixe/chat`，用 **dsh 自己配好的模型**（`ctx.llm`，第一个 provider/model）按角色 + 实时状态生成一句 20 字内的中文闲聊；模型失败/空则回退实时活动台词 → 罐头。
-- **开关开 + 已接外部**：优先走外部接口，未返回/返回空时回退内置。
-
-**外部接口**：在页面里赋值一个异步函数即可接管台词：
-
-```js
-window.__AGENTS_PIXE_CHAT__ = async (req) => '你好，人类';
-// req = { roleName, roleKey, emoji, state, activity, sessionId, isLeader }
-// state ∈ 'idle' | 'working' | 'done'；返回 string（展示）或 null/空（回退内置）
+```yaml
+- id: agent-teams
+  config:
+    stateDir: .agent-teams
+    memberProvider: spawn
+    memberModel: deepseek-v4
+    memberMaxDepth: 0
+    maxMembers: 8
+    toolPolicies:
+      researcher:
+        allow: [read, glob, grep]
+      implementer:
+        deny: [web_search]
 ```
 
-编程式控制开关/接口：
+`memberMaxDepth` defaults to `0`: team members cannot create nested subagents. Set `1` to explicitly permit one descendant level; the limit also covers runtime/code-tool calls. Default members report through team messages only, avoiding duplicate native parent reports. Idle roster members make no model requests. Task assignments start distinct turns; coordination joins the nearest model step. Acceptance and consumption are tracked separately. Removal/archive drains the selected branch and its pending input before reporting success.
 
-```js
-window.__AGENTS_PIXE_CHAT_API__.setEnabled(true);            // 开/关 AI 聊天
-window.__AGENTS_PIXE_CHAT_API__.setProvider(async (req) => '…'); // 设外部接口
-window.__AGENTS_PIXE_CHAT_API__.isOn();                       // 当前开关状态
-```
+`toolPolicies` is owner configuration: reusable per-member tool policies keyed by id. A member *selects* one by id — `tool_policy` on `agent_teams_add_member`, a member row of an inline `plan`, or a profile member row. The Captain model can select a declared policy but can never submit raw allow/deny lists or invent one at runtime.
 
-> 实现说明：持久 `dsh.client` 客户端插件没有「客户端→宿主」私有 RPC，但宿主半边（`lib/index.js`）可注入 `llm` + `webServer`，注册 `GET /agents-pixe/chat` 精确路由生成台词——复用 dsh 已配置的模型，无需额外密钥、无 CORS、不改 dsh 源码。
+- `deny` hides the named global tools from that member's schemas and rejects their invocation.
+- `allow` keeps only the named global tools. The four coordination tools (`agent_teams_claim_task`, `agent_teams_update_task`, `agent_teams_send_message`, `agent_teams_status`) are always added to an allow list.
+- The captain-only tool list is always denied and cannot be reopened by a policy; a policy may not deny a required coordination tool.
+- Unknown ids, empty policies, and empty lists fail at mount or before a member is persisted.
+- `agent_teams_status` shows the selected policy id per member; the complete resolved filter is kept in `team.json` for audit, and the child's durable descriptor reapplies it after a restart.
+- Teams and members created without a policy keep their previous tool set and record shape. An empty `tool_policy` on `agent_teams_edit_plan` clears a staged member's policy.
 
-## 🆕 更新日志（v1.0.2 → v1.0.3）
+This is model tool visibility and invocation policy for global tools, not an OS sandbox or an authorization boundary.
 
-### 修复：设置 → 像素办公室「角色工具」开关点击无反应
+`memberProvider` is the sub-agent runtime backend (`spawn` / `fork`), not an LLM provider. Cross-LLM-provider routing uses the optional `provider` + `model` fields of `agent_teams_add_member`; `memberModel` is only a model default for all members. A member on the captain's current provider/model inherits the captain's reasoning effort, while a changed provider or model automatically uses the target model's default. To request a particular effort, pass the optional `reasoning_effort` field — one of the target model's supported effort ids, or `"default"` to force the model's own default.
 
-问题根因有两层，均已修复：
+`slashCommand: false` disables the deterministic `/agent-teams` activation surfaces (slash command and gesture boundary), leaving the natural-language trigger as the only entry point.
 
-1. **客户端 `settingsScope.bind` 在分区渲染函数里每次调用**（每次渲染新建 controller → 订阅与写入的 scope 不是同一个）。改为在 `apply()` 中**只绑定一次**（参考 `dsh-ui-three-body` 的写法），开关点击立即可见。
-2. **宿主半边 `inject` 数组缺少 `settings` 服务**，导致 `settings.register('agents-pixe', …)` 不可用/时序不稳，namespace 从未在宿主侧生效——客户端 `describe()` 读不到、写入被拒。已补上 `'settings'` 声明。
+## Boundaries
 
-### 新增：设置分区统一管控「🤖 像素人 AI 闲聊」
+- One captain leads one active team at a time.
+- Idle members with no open task are automatically reused for ready work. An idle member that still owns an open attempt is parked until messaged or explicitly reassigned; messages that cannot be delivered live remain durable and are retried at a later status boundary.
+- State is file-backed and serialized within one DSH process; concurrent processes editing the same team are not coordinated.
+- The activity panel reports persisted state as-is. Models may occasionally finish work without performing the expected task-state update.
 
-工作角色页签与像素办公室浮层顶部的 **AI 按钮已移除**，AI 相关配置**统一收拢到设置 → 像素办公室**分区，一个入口管全部：
+See [docs/usage.md](./docs/usage.md) for the full tool reference, state model, Web UI behavior, configuration, and known limits.
 
-- AI 聊天开关（默认关，开启前有「会消耗 token，确认开启？」）
-- 台词频率（低 / 中 / 高）
-- 思考模式（开启走带思考链的模型）
+## Plugin development Skill
 
-### 变更：像素办公室标题栏按钮全部放大
+Community upgrade, audit, benchmark, testing and release skills are vendored with a pinned source revision. See [skills/README.md](./skills/README.md) for local rules and [CONTRIBUTING.md](./CONTRIBUTING.md) for the contribution workflow.
 
-选人 / 缩小 / 放大 / 设置 / 折叠按钮整体加大（padding 与字号提升），悬浮窗操作更清晰易点，不再看不清。
-
-### 零成本确认
-
-关闭全部配置时（角色工具 + AI 闲聊都关）为**纯本地零 token 消耗**：工具不注册、提示段不注入、`/agents-pixe/stats` 返回 `calls:0, tokens:0`。开启后依旧受「AI 模式硬门 + 每小时 60 次 / 60K token 预算」兜底。
-
-## Token 管控（省着花）
-
-### 角色工具：默认开启（0.2.8 起），配置分区可关
-
-- **默认开启**：`agents_pixe_roles` / `agents_pixe_team` 工具与提示段**默认注册**（对齐原生「团队协作」的默认开启，装完即用）。
-- **配置分区可关**：设置 → **像素办公室** 顶层分区，关掉「角色工具」开关即动态移除工具与提示段（无需重启），回到纯本地零 token。
-- **完整卡默认（v1.0.7 起）**：`agents_pixe_roles` 默认返回**完整角色卡**（1:1 上游 508 张，定位/使命/关键规则/交付物/工作流程/沟通风格全部章节）；总量上限 100K 字符，超出跳过后续角色并说明。
-- **按需省 token**：设置 → 像素办公室 → 选「取卡粒度」——**完整卡 / 仅规则 / 仅交付物**（按钮，默认完整卡）——这是 `agents_pixe_roles` 的全局默认，不用每次口头交代（工具仍可被 `sections=rules/deliverables` 单次覆盖）。
-- **真·团队编排（v1.0.7 新增）**：`agents_pixe_team`——领袖拆解任务 → 每位成员开独立子代理（种子=完整角色卡，上下文互不挤占，provider spawn/fork）并行执行 → 领袖汇总。**工作角色页签**有「🚀 一键编排」按钮（最稳，走 dsh setDraft），办公室选人面板也有（有反馈），一点就把当前团队送进编排指令，补一句任务即可发送。预设 29 团队名直传或角色名列表；成员上限默认 4、最大 6。成本 = N+2 次子代理调用，深度任务再用。
-
-### 🧠 智子内核（v1.0.9 新增）：system prompt 注入
-
-设置 → 像素办公室 → **「开启内核模式」**开关 + 档位/语气/自称/称呼。开启后把「智子内核」注入每次对话的 system prompt（第一性原理 + 五步纲领：问清→方案→章程→执行→交付），团队/角色协作用上它。
-
-- **档位**：`minimal` 精简 / `balanced` 均衡 / `full` 完整（含示例），默认 balanced。
-- **语气**：傲慢 / 温和 / 热忱；**语言**：中 / 英；**自称 / 称呼**默认「本尊 / 主上」。
-- **内核覆盖**：设置里粘贴自定义文本（优先级最高，`{{self}}`/`{{master}}` 会替换）。
-- ⚠️ 开启即 token 成本（每轮 ~200-800 字进上下文），不用时可关。
-- **像素人点击查看角色卡详情（v1.0.11 新增）**：办公室浮层里，**左键点击任一像素人**即可打开该角色的**完整角色卡**（定位/使命/关键规则/交付物/沟通风格/工作流程全部章节，1:1 上游内容），分段展示、可滚动，点 ✕ 关闭。
-- **token 实时可见**：办公室浮层标题栏实时显示当前会话全局计量——`N 轮 · M 步 | 缓存命中 X% | 输入↑xx.xK | 输出↓xx.xK`（来自 dsh 真实 provider 用量的 `tokenUsage`/`sessionStats` 投影，非仅插件闲聊）。
-
-### 🧠 内核（推荐 dsh-ui-three-body）
-
-本插件**不自带**智子内核，也不注入 system prompt。想要「第一性原理 + 五步纲领（问清→方案→章程→执行→交付）」式的内核，请用专门的内核插件：
-
-- 推荐插件：[**dsh-ui-three-body**](https://github.com/EternalNight996/dsh-ui-three-body)（「智子内核」）——`dsh plugin --profile web add dsh-ui-three-body`。它把内核注入每次对话的 system prompt，左上角悬浮萌宠做开关，设置面板可配内核档位（minimal/balanced/full × 中/英 × 傲慢/温和/热忱）与人设自称/称呼。与本插件同作者，可一并安装。
-
-> 说明：本插件聚焦「角色页签 + 像素办公室 + 角色/团队工具」，内核交给专门的 three-body 插件，职责单一、互不干扰。
-
-## 编排内核（团队协作）
-
-> 上游 agency-agents（en/zh）**没有**一份项目级共享纲领——每个角色卡自带的 frontmatter + 章节（Identity & Memory / Core Mission / Critical Rules / Communication Style / Deliverables）就是角色的「内核」。本插件的团队协作另有一套**编排内核**，贯穿 `agents_pixe_team` 的三段式：
-
-1. **领袖拆解**：唯一持完整卡 + 团队名册的调度者；输出 `{assignments:[{name,assignment}], synthesis_focus}` 的 JSON 分工。拆分失败自动退化为「各成员按自身专业并行处理同一任务」。
-2. **成员独立执行**：每位成员一个**独立子代理**，种子 = 该角色**完整角色卡**——因此 30K 字全卡第一次真正用上（上下文互不挤占），成员只在自身专业内对 `assignment` 负责，彼此不吞上下文。
-3. **领袖汇总**：收齐各成员产出后再合成为最终报告（结论先行、标注关键分歧、给出下一步行动），`synthesis_focus` 指定汇总重点。
-
-**成本与质量权衡**（编排内核的取舍）：完整卡保真度最高、最耗 token；`sections=rules/deliverables` 取单章节是质量/成本的中间档；`agents_pixe_team` 用 N+2 次子代理换真并行闭环。**简单问题不套团队，深度任务才编排。**
-
-### 真·团队协助引擎（v0.1.2 新增）
-
-团队协作从「一轮到底」升级为**真正团队协助**，设计参考 [dsh-agent-teams](https://github.com/NanmiCoder/dsh-agent-teams) 上游，但**基于宿主 `subagents` 续聊原语 + 文件态自建引擎**（不依赖`agentTeams`，后者在若干 dsh 仅声明契约未挂载）：
-
-1. **当前会话创建团队并成为领袖**（一领袖同时只带一个活动团队）。
-2. **成员 = 驻留可续聊子 Agent**（`subagents.startContinuable` 建立），上下文互不挤占、可被唤醒续做。
-3. **目标拆成带显式依赖的任务**（`blockedBy`）；`ready = 依赖全完成`。
-4. **共享调度器**：按真实 `running/idle/ready` 为每个空闲成员**原子领取**一项就绪任务并唤醒；持有开放进度的空闲成员**停驻**可被直发续用或转派；冷重启遗留任务自动释放并**重claim（新 attempt）**恢复。
-5. **成员携带 attempt_id 更新任务**（`expected_revision` CAS）；转派/接管先撤销旧 attempt 等原成员归静再启新 attempt。
-6. **领袖汇总后归档**完整团队记录。
-
-调用方式：宿主 `subagents` 可达时 `agents_pixe_team` 自动走真引擎（创建→拆依赖任务→派单→汇总）；也可用细粒度工具逐步编排——`agents_pixe_team_create` / `agents_pixe_task_create` / `agents_pixe_task_update` / `agents_pixe_team_step` / `agents_pixe_team_message` / `agents_pixe_team_report`。
-
-像素办公室标题栏新增「**🤝 团队**」按钮 → 活动面板：roster 状态徽章（工作中/空闲/离线/启动中/失败）+ 任务板（状态/负责人/依赖/就绪）+ 进度分段 + 归档标记，数据读 `<DSH_HOME>/agents-pixe/teams/<leadId>.json` 磁盘真相快照。
-
-> 宿主导航：**用法见 [`docs/usage.md`](docs/usage.md)（标准 7 步 + 一键 3 步配方 + token 防爆）**，设计分析见 [`docs/agent-teams-analysis.md`](docs/agent-teams-analysis.md)。宿主无 `subagents` 时引擎工具不注册、`agents_pixe_team` 沿用原一次性逻辑、面板返回 `available:false`，均不报错。
-
-### AI 闲聊：同样省着花
-
-- **闲聊走便宜快模型**：默认自动路由到 `flash/mini/lite/free/small` 等便宜模型（可手动指定）；`reasoningEffort: off` 关思考、`maxTokens: 120` 封顶输出。
-- **AI 模式硬门**：未开启 AI 模式时，服务端凭 `aiEnabled` 授权标记**直接拒绝调用、零 token 消耗**（不依赖客户端自觉）；开启后才走下面的预算管控。
-- **滚动小时预算**：每小时最多 60 次真实调用、估算 token 上限 60K（字符/2 粗估）；超出直接回退罐头台词，**绝不静默烧 token**。
-- **台词去重缓存**：相同请求 45s 内命中缓存不重复调用（重复帧/重复角色）。
-- **输入硬化**：接话上下文截断 200 字符、角色描述 120 字符。
-- **默认低频**：AI 台词频率默认 `low`（180s/角色、全局 1 并发）；开启 AI 前有「会消耗 token，确认开启？」弹窗。
-- **用量透明**：`/agents-pixe/stats` 返回调用数/失败/缓存命中/预算拦截/估算 token，办公室浮层实时显示「已调用 N/60 次 · 约 M token」。
-
-## 角色库已内置
-
-agency-agents 全量角色卡（en 255 + zh 253 = 508 张）固化进本插件，随包分发，换环境不丢：
-
-- `lib/roles.json`：紧凑目录（name/emoji/color/desc），**冻结进 client bundle**，UI 直接用。
-- `lib/roles-full.json`：**508 张完整角色卡**（定位 + 规则 + 清单 + 语气），宿主工具数据源。
-- `lib/index.js`（宿主半边）：注册 `agents_pixe_roles` 工具，agent 按角色名取回完整卡。
-
-唯一不随包走的是「你手动保存的自定义团队」（本机 localStorage）与「AI 生成的自定义角色」（`~/.dsh/agents-pixe/custom-roles.json`）。
-
-## 目录结构
-
-```
-agent-teams-pixel/
-├── package.json            # dsh.client 声明 + dsh.bundle.patch 自挂载
-├── cordis.patch.yml        # 组合补丁行（- insert: agent-teams-pixel）
-├── assets/                 # README 截图/录屏（demo.gif + 真实抓屏）
-├── lib/
-│   ├── index.js            # node 半边：agents_pixe_roles 工具 + /agents-pixe/* 路由
-│   ├── client.js           # browser 半边（构建产物，自包含 __ModuleLoader__.load）
-│   ├── roles.json          # 角色目录（生成物，冻结进 client.js）
-│   └── roles-full.json     # 508 张完整角色卡（宿主工具数据源）
-├── src/
-│   ├── client.prelude.js   # bundle 头（require react + var ROLES_DATA =）
-│   └── client.main.js      # 主体逻辑（像素引擎 + 页签 + 浮层）
-├── scripts/
-│   ├── gen-roles.mjs       # 从 en/zh 角色库生成 roles.json + roles-full.json
-│   └── build-client.mjs    # prelude + roles.json + main → lib/client.js
-└── test/
-    └── smoke.test.mjs      # 发布前冒烟测试（node --test）
-```
-
-## 构建 / 测试 / 发布
+The repository also ships the open Agent Skills package [`dsh-plugin-development`](./skills/dsh-plugin-development/SKILL.md):
 
 ```sh
-# 生成角色数据（缺失自动从上游克隆）→ 生成 lib/client.js
-node scripts/gen-roles.mjs
-node scripts/build-client.mjs
-
-# 冒烟测试
-node --test
-
-# 发布（需已 npm login；版本号在 package.json）
-npm publish
+npx skills add NanmiCoder/dsh-agent-teams --skill dsh-plugin-development
 ```
 
-- `gen-roles.mjs` 读 en（`~/.agents/skills/agency-agents/references/` 或 `AGENTS_PIXE_EN_ROOT`）与 zh（`%TEMP%\dsh-analysis\agency-agents-zh` 或 `AGENTS_PIXE_ZH_ROOT`）；本地缺失自动 `git clone` 上游（en: github.com/msitarzewski/agency-agents，zh: github.com/jnMetaCode/agency-agents-zh）。
-- `build-client.mjs` 把 prelude + roles.json + main 拼成自包含 bundle，无任何构建工具依赖。
-- peerDependencies（`@deepseek-ai/dsh-tools`、`@deepseek-ai/dsh-llm`）由 dsh 运行时依赖闭包提供，插件不重复安装。
+## Documentation
 
-## 与桌面壳（dsh-desktop）的关系
+| Guide | Covers |
+| --- | --- |
+| [Usage](./docs/usage.md) | Architecture, UI behavior, tools, configuration, limits, and validation |
+| [Verification](./docs/verification-guide.md) | Offline, composition, real e2e, and GUI verification |
+| [Plugin development](./docs/developing-dsh-plugins.md) | Human-readable guide built from this plugin |
+| [README writing](./docs/readme-writing-guide.md) | Repository documentation conventions |
 
-本插件是独立 npm 包，[dsh-desktop](https://github.com/EternalNight996/dsh-desktop) **不再内置**它；按需安装即可：
+## Development
 
 ```sh
-dsh plugin --profile web add agent-teams-pixel
+pnpm install
+pnpm build
+pnpm verify
 ```
 
-## 待办 / 后续开发方向
+## Named multi-role profiles
 
-> 已落地：角色卡完整化（sections=rules/deliverables）、一键团队编排（agents_pixe_team）、像素人点击查看角色卡详情、tok 实时计量、取卡配方按钮。
+Configure one or more complete team profiles in `cordis.patch.yml`. A profile always supplies the roster (independent provider/model/role/reasoning effort). Set `taskPlanning: captain` when the Captain should derive the DAG from the user's goal; omit it or set `taskPlanning: seed` to keep a fixed template workflow:
 
-### 数据与持久化
+```yaml
+profiles:
+  demo-delivery:
+    description: Ship a small feature
+    protocol: Discuss requirements, review, test, then prepare release; do not deploy automatically.
+    members:
+      - name: analyst
+        model: gpt-5.6-sol
+        role: Analyze requirements
+      - name: implementer
+        model: gpt-5.6-terra
+        role: Implement the approved solution
+    tasks:
+      - id: requirements
+        subject: Requirements discussion
+        assignee: analyst
+      - id: implementation
+        subject: Implement solution
+        assignee: implementer
+        dependencies: [requirements]
+```
 
-- [ ] 保存的自定义团队跨环境不丢（当前在 localStorage；可选导出/导入 JSON 或宿主侧持久化）。
-- [ ] 自定义角色**表单编辑器**：在 UI 里增删改角色卡字段（当前仅 AI 生成 + 导入 md），含角色卡格式校验。
+Use an explicit profile flag: `/agent-teams --profile demo-delivery implement the feature`. The first ordinary token is never treated as an implicit profile. Normal command runs call `agent_teams_create({ profile, approval: "required" })`: the roster and seed/Captain-designed DAG remain staged, no child session is created, and no task is claimed. Edit the plan in the activity panel using the host model catalog, return to chat so the Captain asks what to revise and then atomically updates the same draft, discard it, or click **Approve & Run**. Return/discard actions cancel any planning turn still running; discard also parks model-facing context that forbids silently creating a replacement team. Approval resolves the final provider/model/reasoning choices, commits the roster, and creates each member session only when its first task is ready. A running team is stopped from its own panel header through a confirmation dialog rather than from the composer. Direct tool clients may pass `approval: "automatic"` for the legacy immediate path. Failed review/test tasks do not unlock downstream work; automatic repair/review tasks do not depend on the failed review.
 
-### 角色工具（agent 侧）
+## License
 
-- [ ] 按部门 / 技能 / 关键词检索角色（当前 `agents_pixe_roles` 只按名查）。
-- [ ] 团队编排**多轮协作**：领袖收到成员产出后还能再派下一轮/驳回重做（当前一轮到底）。
-- [ ] 成员间传递**中间产物** + 依赖排序（A 的产出喂给 B），支持超时 / 断点续跑。
-- [ ] 编排 provider 混合：不同成员指定不同后端（spawn / fork / codex 等）。
-
-### 像素办公室（表现层）
-
-- [ ] 「+选人」弹出面板右侧留空：推荐团队区右侧空白待利用（可放角色预览 / 搜索框 / 最近使用）。
-- [ ] 角色卡详情增强：详情里直接「加入团队」「设为领袖」「复制角色卡」快捷键。
-- [ ] 更多状态动画：喝咖啡 / 开会 / 庆祝等；agent 完成任务时小人举手提示。
-- [ ] 场景与皮肤：多背景（会议室 / 茶水间）、白天黑夜主题、像素人换装。
-- [ ] 精确运行态：目前靠会话 `running` 信号；精确到「每个角色各自的工具调用」需接真实事件流（HookProvider 形态）。
-- [ ] 大团队性能：50+ 人同屏时 Canvas 脏矩形 / 离屏画布优化。
-
-### AI 闲聊
-
-- [ ] 台词注入角色性格：把角色卡「语气」段落喂给 `/agents-pixe/chat`，按角色风格说话。
-- [ ] 台词多语言：跟随 dsh UI locale 输出中/英台词。
-
-### 工程化
-
-- [ ] 设置分区文案 i18n（当前硬编码中文）。
-- [ ] 客户端 bundle 自动化冒烟测试（当前测试仅覆盖宿主半边）。
-- [ ] CI：发布前自动跑 `gen-roles` 数据一致性校验（角色库上游更新时 508 张卡数量比对）。
-
+[MIT](./LICENSE)

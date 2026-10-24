@@ -1,0 +1,20 @@
+{
+  "version": "0.1.24-rc.1",
+  "dist.integrity": "sha512-7QghjdCHRSwUdmIqV2ISgij4o044YIN/5J9t9k6CWZkfdV758EY/3kUMtaEu5MpPIVkKPi2+TG+W2oxABS4S3Q==",
+  "dist.tarball": "https://registry.npmjs.org/@nanmicoder/dsh-agent-teams/-/dsh-agent-teams-0.1.24-rc.1.tgz",
+  "dist-tags": {
+    "alpha": "0.1.15-alpha.1",
+    "next": "0.1.24-rc.1",
+    "latest": "0.1.23"
+  },
+  "sourceCommit": "33f29cd",
+  "pullRequest": "https://github.com/NanmiCoder/dsh-agent-teams/pull/246",
+  "workflow": "https://github.com/NanmiCoder/dsh-agent-teams/actions/runs/39015623921",
+  "sha256": "7ff8f85704e16f4ff6c1f9c23435ae59f83c2f7f899d3022a7933ddfff60f3b6",
+  "registryMatchesCiArtifact": true,
+  "staticChecks": [
+    "Ubuntu",
+    "Windows"
+  ],
+  "supportedHostsVerified": 9
+}
