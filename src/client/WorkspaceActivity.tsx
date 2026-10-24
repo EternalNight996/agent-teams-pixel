@@ -12,7 +12,7 @@ import { LEAD_ART } from './artwork.ts'
 import css from './WorkspaceActivity.module.css'
 
 export const TEAM_TAB_KIND = 'agent-teams'
-export const TEAM_TAB_ID = '@nanmicoder/dsh-agent-teams/activity'
+export const TEAM_TAB_ID = 'agent-teams-pixel/activity'
 
 /** Optional host integration is observable so installing/removing it also switches the fallback. */
 export function createWorkspaceBridge() {

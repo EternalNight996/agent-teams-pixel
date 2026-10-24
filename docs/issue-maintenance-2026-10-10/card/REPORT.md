@@ -6,7 +6,7 @@
 
 ## 1. 原失败（真实复现，不是静态推断）
 
-用隔离 profile（`dsh-base` + `dsh-web-app` + 本 worktree 的 `@nanmicoder/dsh-agent-teams`）启动真实 dsh web 实例，经官方 `sessionController`/`workspaceRegistry` 下发一次真实 prompt，由真实 DeepSeek Flash 调用 `agent_teams_create`：
+用隔离 profile（`dsh-base` + `dsh-web-app` + 本 worktree 的 `agent-teams-pixel`）启动真实 dsh web 实例，经官方 `sessionController`/`workspaceRegistry` 下发一次真实 prompt，由真实 DeepSeek Flash 调用 `agent_teams_create`：
 
 - session `session-d5eada7e-626d-4498-b8a1-c43ce84681fb`，工作区 `/private/tmp/agentteams-issues-20261010/card/workspace/ws-baseline`
 - 工具参数 `{"name":"数据团队","approval":"automatic","plan":{"members":[{"name":"阿明","role":"工程师"},{"name":"Léa","role":"reviewer"}],"tasks":[]}}`
@@ -66,7 +66,7 @@
 | 项 | 值 |
 | --- | --- |
 | 宿主 | `@deepseek-ai/dsh` 0.2.0-rc.2（`node_modules/.bin/dsh --version`） |
-| profile | `/private/tmp/agentteams-issues-20261010/card/dsh-home/profiles/card-203`（bundles: dsh-base, dsh-web-app, @nanmicoder/dsh-agent-teams `link:` 本 worktree；`package.json` 含 name/version） |
+| profile | `/private/tmp/agentteams-issues-20261010/card/dsh-home/profiles/card-203`（bundles: dsh-base, dsh-web-app, agent-teams-pixel `link:` 本 worktree；`package.json` 含 name/version） |
 | 凭据 | `credentials.path → /Users/nanmi/.dsh/.credentials.yaml`，复用既有账号；无 apiKeyEnv、无 key 值 |
 | 模型 | 12 次真实请求，全部 `deepseek-account/deepseek-flash`，0 error；本地 guard 插件会拒绝任何其他路由 |
 | session | `session-d5eada7e…`(baseline)、`session-5b9c59ae…`(candidate)、`session-4b48c399…`(candidate-long)、`session-c2ca852c…`(legacy-long)、`session-aa175fc6…`(legacy-emoji)、`session-db4ae894…`(legacy-staged) |

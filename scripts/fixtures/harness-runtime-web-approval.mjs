@@ -57,7 +57,7 @@ class WebApprovalAdapter extends LlmAdapter {
         // satisfy the approval/report assertions.
         const pluginMessages = options.messages.filter(message => message.role === 'user' && (
             message.source?.kind === 'agent-teams'
-            || (message.source?.kind === 'plugin' && message.source.plugin === '@nanmicoder/dsh-agent-teams')));
+            || (message.source?.kind === 'plugin' && message.source.plugin === 'agent-teams-pixel')));
         const messageText = message => message.content.filter(block => block.type === 'text').map(block => block.text).join('\n');
         const approvals = pluginMessages.filter(message => messageText(message).includes('The user approved the staged AgentTeams plan') && messageText(message).includes('from the pre-run review UI.'));
         const reports = pluginMessages.filter(message => messageText(message).includes('AgentTeams message from member worker:') && messageText(message).includes('WEB_MEMBER_REPORT_OK'));

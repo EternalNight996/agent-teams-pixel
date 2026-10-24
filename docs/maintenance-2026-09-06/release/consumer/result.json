@@ -1,7 +1,7 @@
 {
   "capturedAt": "2026-09-05T17:47:27.486405+00:00",
   "passed": true,
-  "package": "@nanmicoder/dsh-agent-teams",
+  "package": "agent-teams-pixel",
   "version": "0.1.16-rc.1",
   "distTags": {
     "alpha": "0.1.15-alpha.1",
@@ -14,7 +14,7 @@
   "npmMatchesCiArtifact": true,
   "installedArtifactMatch": {
     "passed": true,
-    "installedPackage": "/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/@nanmicoder/dsh-agent-teams",
+    "installedPackage": "/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/agent-teams-pixel",
     "checkedFiles": 85,
     "mismatches": []
   },

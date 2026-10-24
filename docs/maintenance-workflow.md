@@ -23,7 +23,7 @@
 旧的 `0.1.0-*`、`0.1.1-*` 宿主不在此候选矩阵中。保留其已工作的精确插件版本，或整体迁移到验收过的宿主/插件组合；不要只更新一端。历史记录中，`0.1.1-rc.2` 配插件 `0.1.10` 的精确安装已由维护者验证，可在该旧宿主上使用：
 
 ```sh
-dsh plugin --profile web add --save-exact @nanmicoder/dsh-agent-teams@0.1.10
+dsh plugin --profile web add --save-exact agent-teams-pixel@0.1.10
 ```
 
 这是旧组合的恢复参考，不是对所有旧 RC 或当前 Desktop 的支持承诺。Desktop 用户还要核对内置核心和实际 profile；安装全局新 CLI 不会更换桌面内核。修改 npm dist-tag 也不会撤销既有 profile 中的宽依赖范围或已安装包。

@@ -2,7 +2,7 @@
   "issue": 203,
   "generatedAt": "2026-10-10T15:23:58.705Z",
   "host": "@deepseek-ai/dsh 0.2.0-rc.2 (repo devDependencies)",
-  "profile": "/private/tmp/agentteams-issues-20261010/card/dsh-home/profiles/card-203 (dsh-base + dsh-web-app + @nanmicoder/dsh-agent-teams link: to the worktree)",
+  "profile": "/private/tmp/agentteams-issues-20261010/card/dsh-home/profiles/card-203 (dsh-base + dsh-web-app + agent-teams-pixel link: to the worktree)",
   "credentials": "credentials.path -> /Users/nanmi/.dsh/.credentials.yaml (existing account store; no API key value or apiKeyEnv in the profile)",
   "modelRoute": {
     "provider": "deepseek-account",
@@ -257,7 +257,7 @@
     "host": {
       "cli": "/Users/nanmi/.codex/worktrees/issue-card-203/dsh-agent-teams/node_modules/.bin/dsh",
       "version": "0.2.0-rc.2",
-      "profilePair": "baseline and candidate both ran under the identical isolated profile card-203 (dsh-base + dsh-web-app + @nanmicoder/dsh-agent-teams link: to this worktree)"
+      "profilePair": "baseline and candidate both ran under the identical isolated profile card-203 (dsh-base + dsh-web-app + agent-teams-pixel link: to this worktree)"
     },
     "baseline": {
       "commit": "1e1c624fd2e909008aa5228a004706b3e4460670",

@@ -2,7 +2,7 @@
   "host": {
     "cli": "/Users/nanmi/.codex/worktrees/issue-card-203/dsh-agent-teams/node_modules/.bin/dsh",
     "version": "0.2.0-rc.2",
-    "profilePair": "baseline and candidate both ran under the identical isolated profile card-203 (dsh-base + dsh-web-app + @nanmicoder/dsh-agent-teams link: to this worktree)"
+    "profilePair": "baseline and candidate both ran under the identical isolated profile card-203 (dsh-base + dsh-web-app + agent-teams-pixel link: to this worktree)"
   },
   "baseline": {
     "commit": "1e1c624fd2e909008aa5228a004706b3e4460670",

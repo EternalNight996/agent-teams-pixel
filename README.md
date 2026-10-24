@@ -1,14 +1,15 @@
+> **Derivative notice**：本项目是 [dsh-agent-teams](https://github.com/NanmiCoder/dsh-agent-teams)（MIT，NanmiCoder）的衍生版，包名与插件 id 为 `agent-teams-pixel`。上游版权见 [NOTICE.md](./NOTICE.md) 与 [LICENSE](./LICENSE)；本版差异与路线见 [docs/OUR-DIFFERENCES.md](./docs/OUR-DIFFERENCES.md)。
+
 <p align="right">
   <strong>English</strong> · <a href="./README_ZH.md">简体中文</a>
 </p>
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="dsh-agent-teams turns one DeepSeek Harness session into a coordinated multi-agent team">
+  <img src="./assets/readme/hero.svg" width="100%" alt="agent-teams-pixel turns one DeepSeek Harness session into a coordinated multi-agent team">
 </p>
 
 <div align="center">
 
-[![AtomGit](https://atomgit.com/NanmiCoder/dsh-agent-teams/star/new_badge.svg)](https://atomgit.com/NanmiCoder/dsh-agent-teams)
 
 </div>
 
@@ -19,14 +20,14 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@nanmicoder/dsh-agent-teams"><img src="https://img.shields.io/npm/v/@nanmicoder/dsh-agent-teams?style=flat-square&amp;color=5B4CF0" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/agent-teams-pixel"><img src="https://img.shields.io/npm/v/agent-teams-pixel?style=flat-square&amp;color=5B4CF0" alt="npm version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-0B7285?style=flat-square" alt="MIT license"></a>
   <a href="./cordis.patch.yml"><img src="https://img.shields.io/badge/DSH-Web%20%2B%20Headless-5B4CF0?style=flat-square" alt="DSH Web and Headless"></a>
 </p>
 
 ## One prompt. A working team.
 
-`dsh-agent-teams` turns the current DeepSeek Harness session into a captain that can assemble durable sub-agents, split a goal into dependency-aware tasks, and coordinate work through direct messages.
+`agent-teams-pixel` turns the current DeepSeek Harness session into a captain that can assemble durable sub-agents, split a goal into dependency-aware tasks, and coordinate work through direct messages.
 
 Ask in natural language. The plugin provides the team protocol, 14 coordination tools, persistent state, an automatic shared-task scheduler, and a live Web UI—without requiring a separate workflow engine.
 
@@ -71,7 +72,7 @@ The conversation card and activity panel use Harness's official locale service. 
 In the app sidebar, open **Plugins → Add plugin** and enter the npm package spec:
 
 ```text
-@nanmicoder/dsh-agent-teams
+agent-teams-pixel
 ```
 
 The package name resolves npm `latest`. To pin a version, append `@0.1.26`. Install it, then choose **Enable now**. If the host asks for a restart, restart the desktop app. Use the package spec above for the published build; an npm or GitHub webpage URL is not the same install source. For Git installation, use a commit containing the verified build outputs described below.
@@ -92,7 +93,7 @@ Skip this if you already run this version. Alpha is opt-in: select an exact Alph
 Install or upgrade from npm using the package name (resolves npm `latest`, currently `0.1.26`):
 
 ```sh
-dsh plugin --profile web add --save-exact @nanmicoder/dsh-agent-teams
+dsh plugin --profile web add --save-exact agent-teams-pixel
 ```
 
 For a CLI-managed installation, replace `web` with your active CLI profile. **Stop and restart that profile's Harness process, then refresh the browser.** Installing the plugin does not upgrade Harness; the host and plugin have independent `latest` channels.

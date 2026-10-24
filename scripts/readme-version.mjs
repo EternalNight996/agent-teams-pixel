@@ -50,7 +50,7 @@ export function checkReadmeVersions({ version, known, files }) {
     }
     for (const pinned of findPinnedInstallVersions(markdown)) {
       if (pinned !== version) {
-        problems.push(`${name} pins @nanmicoder/dsh-agent-teams@${pinned} but the package is ${version}`)
+        problems.push(`${name} pins agent-teams-pixel@${pinned} but the package is ${version}`)
       }
     }
   }

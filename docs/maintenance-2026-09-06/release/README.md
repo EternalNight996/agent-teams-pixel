@@ -1,6 +1,6 @@
 # 0.1.16-rc.1 发布与消费验收
 
-`@nanmicoder/dsh-agent-teams@0.1.16-rc.1` 已通过 [Publish Package Action](https://github.com/NanmiCoder/dsh-agent-teams/actions/runs/33981644849) 发布到 npm `next`，并创建 [GitHub 预发布](https://github.com/NanmiCoder/dsh-agent-teams/releases/tag/v0.1.16-rc.1)。发布源为 `eb09334f9a76dac890a25673449a6a51d5ceffcb`，标签为 `v0.1.16-rc.1`。
+`agent-teams-pixel@0.1.16-rc.1` 已通过 [Publish Package Action](https://github.com/NanmiCoder/dsh-agent-teams/actions/runs/33981644849) 发布到 npm `next`，并创建 [GitHub 预发布](https://github.com/NanmiCoder/dsh-agent-teams/releases/tag/v0.1.16-rc.1)。发布源为 `eb09334f9a76dac890a25673449a6a51d5ceffcb`，标签为 `v0.1.16-rc.1`。
 
 ## 发行结果
 
@@ -26,7 +26,7 @@
 先确认实际宿主为支持矩阵中的精确版本，并保持依赖闭包一致。推荐宿主目标是 `0.1.2-rc.1`；另支持已验的 `0.1.2-alpha.5` 和 `0.1.2-alpha.2`。在实际使用的 profile 中安装（以下为 `web`）：
 
 ```sh
-dsh plugin --profile web add --save-exact @nanmicoder/dsh-agent-teams@0.1.16-rc.1
+dsh plugin --profile web add --save-exact agent-teams-pixel@0.1.16-rc.1
 ```
 
 安装后重启实际 Harness 进程并刷新 Web。旧 Desktop 内置核心不能通过升级全局 CLI 自动替换；Windows 实际宿主运行、Desktop 组合、Node 22 运行及 OOM 长期资源问题不由本次 macOS 消费结果证明。Windows CI 的通过范围是原生 runner 中的 typecheck/build/verify。Node 22 未在本轮运行，不表示不支持，也不作为原故障归因。

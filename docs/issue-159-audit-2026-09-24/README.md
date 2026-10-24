@@ -6,7 +6,7 @@
 
 ## 版本及测试对象
 
-- npm `latest` 为 `@nanmicoder/dsh-agent-teams@0.1.20`，2026-09-17 06:07 UTC 发布。
+- npm `latest` 为 `agent-teams-pixel@0.1.20`，2026-09-17 06:07 UTC 发布。
 - 报告称“9 月 11 日最新版本”。当天 09:47 UTC 发布的是 0.1.17；此前为 0.1.17-rc.1。报告没有给出精确安装记录，不能断言其现场一定加载了哪一个包。本轮选择 0.1.17 作旧版对照。
 - 0.1.18 于 2026-09-13 05:52 UTC 发布，晚于 issue 创建时间。
 - 远程 main 和本地基线均为 `87c95c94d7847e4a242cb589916adc519981175f`。
@@ -84,7 +84,7 @@
 ```sh
 node docs/issue-159-audit-2026-09-24/prepare-runner.mjs /tmp/issue159-runner-new
 mkdir -p /tmp/issue159-artifacts-new
-npm pack @nanmicoder/dsh-agent-teams@0.1.20 --ignore-scripts --pack-destination /tmp/issue159-artifacts-new
+npm pack agent-teams-pixel@0.1.20 --ignore-scripts --pack-destination /tmp/issue159-artifacts-new
 node /tmp/issue159-runner-new/harness-runtime-verify.mjs --host-version 0.1.5-rc.1 --artifact /tmp/issue159-artifacts-new/nanmicoder-dsh-agent-teams-0.1.20.tgz --scenario stability --report-dir /tmp/issue159-latest-new
 ```
 

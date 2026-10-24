@@ -8,7 +8,7 @@
   },
   "plugin": {
     "version": "0.1.16-rc.1",
-    "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/@nanmicoder/dsh-agent-teams"
+    "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/agent-teams-pixel"
   },
   "checkedPackages": 214,
   "resolvedDshVersions": [

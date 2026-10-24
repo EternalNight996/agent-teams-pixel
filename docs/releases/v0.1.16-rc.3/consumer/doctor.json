@@ -6,7 +6,7 @@
   },
   "plugin": {
     "version": "0.1.16-rc.3",
-    "path": "/private/tmp/dsh-progressive-rc1/runtime/node_modules/@nanmicoder/dsh-agent-teams"
+    "path": "/private/tmp/dsh-progressive-rc1/runtime/node_modules/agent-teams-pixel"
   },
   "checkedPackages": 214,
   "supportedHosts": [

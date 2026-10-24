@@ -1,14 +1,15 @@
+> **衍生声明**：本项目是 [dsh-agent-teams](https://github.com/NanmiCoder/dsh-agent-teams)（MIT，NanmiCoder）的衍生版，包名与插件 id 为 `agent-teams-pixel`。上游版权见 [NOTICE.md](./NOTICE.md) 与 [LICENSE](./LICENSE)；本版差异与路线见 [docs/OUR-DIFFERENCES.md](./docs/OUR-DIFFERENCES.md)。
+
 <p align="right">
   <a href="./README.md">English</a> · <strong>简体中文</strong>
 </p>
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="dsh-agent-teams 把一个 DeepSeek Harness 会话变成可协作的多智能体团队">
+  <img src="./assets/readme/hero.svg" width="100%" alt="agent-teams-pixel 把一个 DeepSeek Harness 会话变成可协作的多智能体团队">
 </p>
 
 <div align="center">
 
-[![AtomGit](https://atomgit.com/NanmiCoder/dsh-agent-teams/star/new_badge.svg)](https://atomgit.com/NanmiCoder/dsh-agent-teams)
 
 </div>
 
@@ -19,14 +20,14 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@nanmicoder/dsh-agent-teams"><img src="https://img.shields.io/npm/v/@nanmicoder/dsh-agent-teams?style=flat-square&amp;color=5B4CF0" alt="npm 版本"></a>
+  <a href="https://www.npmjs.com/package/agent-teams-pixel"><img src="https://img.shields.io/npm/v/agent-teams-pixel?style=flat-square&amp;color=5B4CF0" alt="npm 版本"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-0B7285?style=flat-square" alt="MIT 许可证"></a>
   <a href="./cordis.patch.yml"><img src="https://img.shields.io/badge/DSH-Web%20%2B%20Headless-5B4CF0?style=flat-square" alt="DSH Web 与 Headless"></a>
 </p>
 
 ## 一句话，拉起一支真正协作的团队
 
-`dsh-agent-teams` 让当前 DeepSeek Harness 会话成为队长：创建可续聊的子 Agent、把目标拆成有依赖的任务，并通过直达消息协调成员工作。
+`agent-teams-pixel` 让当前 DeepSeek Harness 会话成为队长：创建可续聊的子 Agent、把目标拆成有依赖的任务，并通过直达消息协调成员工作。
 
 你只需用自然语言提出目标。插件会提供精简的固定团队协议、14 个业务工具、持久化状态、自动共享任务调度和实时 Web UI，不需要额外的 Workflow 引擎。
 
@@ -70,7 +71,7 @@
 在应用侧栏打开「插件 → 添加插件」，输入 npm 包名和版本：
 
 ```text
-@nanmicoder/dsh-agent-teams
+agent-teams-pixel
 ```
 
 不带版本号的包名会安装 npm `latest`；需要锁定版本时可追加 `@0.1.26`。安装完成后点击「立即启用」；宿主提示需要重启时，重启桌面应用。发布版请使用上面的包名，npm 或 GitHub 网页链接与 npm 包名不是同一种安装来源。从 Git 安装时，请选用包含下方所述已验证构建产物的提交。
@@ -91,7 +92,7 @@ dsh --version
 从 npm 安装或升级插件（不带版本号时使用 npm `latest`，当前为正式版 `0.1.26`）：
 
 ```sh
-dsh plugin --profile web add --save-exact @nanmicoder/dsh-agent-teams
+dsh plugin --profile web add --save-exact agent-teams-pixel
 ```
 
 CLI 管理的安装可将 `web` 换成实际使用的 CLI profile。**安装后，停止并重新启动该 profile 的 Harness 进程，再刷新浏览器。** 安装插件不会自动升级宿主；Harness 的 `latest` 与插件的 `latest` 是两个独立渠道。

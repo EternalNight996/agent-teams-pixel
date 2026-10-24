@@ -2,7 +2,7 @@
 
 2026-09-10 发布完成。下列渠道快照为首次发布时的记录；2026-09-11 默认渠道提升见下方补充。
 
-- npm：`@nanmicoder/dsh-agent-teams@0.1.17-rc.1`，渠道 `next`；`latest` 保持 `0.1.15`。
+- npm：`agent-teams-pixel@0.1.17-rc.1`，渠道 `next`；`latest` 保持 `0.1.15`。
 - 推荐宿主：`@deepseek-ai/dsh@0.1.5-rc.1`。
 - Git tag：`v0.1.17-rc.1`，提交 `2e59da17918558cfa3bf91d30d40f737509cca0c`。
 - [发布 Action #34488258594](https://github.com/NanmiCoder/dsh-agent-teams/actions/runs/34488258594) 全部成功：Ubuntu、Windows、四版本宿主回归、完整兼容 gate、npm publish、GitHub Release。
@@ -29,19 +29,19 @@ SHA-256：`efe4989adaed00b7b29b82767c2d916e98541e6b7fefbd0732a35053ffb19302`。
 
 ```sh
 npm install --global @deepseek-ai/dsh@0.1.5-rc.1
-dsh plugin --profile web add --save-exact @nanmicoder/dsh-agent-teams@0.1.17-rc.1
+dsh plugin --profile web add --save-exact agent-teams-pixel@0.1.17-rc.1
 ```
 
 安装后重启该 profile 的 Harness，再刷新浏览器。中英文 README 已更新上述宿主/插件配对及精确安装命令。早期删除且未保留团队归档的历史会话不在本次重建范围内。
 
 ## 2026-09-11 默认安装渠道提升
 
-按维护者决定，使用 `npm dist-tag add @nanmicoder/dsh-agent-teams@0.1.17-rc.1 latest` 将已经验收的同一版本设为默认安装入口。registry 已确认 `latest` 与 `next` 均指向 `0.1.17-rc.1`；`alpha` 保持 `0.1.15-alpha.1`。没有重新发布 npm 包、修改版本或重打 Git tag，GitHub Release 仍标记为预发布。
+按维护者决定，使用 `npm dist-tag add agent-teams-pixel@0.1.17-rc.1 latest` 将已经验收的同一版本设为默认安装入口。registry 已确认 `latest` 与 `next` 均指向 `0.1.17-rc.1`；`alpha` 保持 `0.1.15-alpha.1`。没有重新发布 npm 包、修改版本或重打 Git tag，GitHub Release 仍标记为预发布。
 
 默认新安装命令：
 
 ```sh
-dsh plugin --profile web add @nanmicoder/dsh-agent-teams
+dsh plugin --profile web add agent-teams-pixel
 ```
 
 推荐宿主仍为 DeepSeek Harness `0.1.5-rc.1`，插件安装不会替用户升级实际运行的宿主。镜像和第三方市场的版本展示可能需要等待同步。

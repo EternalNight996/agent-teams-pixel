@@ -1,7 +1,7 @@
 {
   "version": "0.1.24-rc.1",
   "dist.integrity": "sha512-7QghjdCHRSwUdmIqV2ISgij4o044YIN/5J9t9k6CWZkfdV758EY/3kUMtaEu5MpPIVkKPi2+TG+W2oxABS4S3Q==",
-  "dist.tarball": "https://registry.npmjs.org/@nanmicoder/dsh-agent-teams/-/dsh-agent-teams-0.1.24-rc.1.tgz",
+  "dist.tarball": "https://registry.npmjs.org/agent-teams-pixel/-/dsh-agent-teams-0.1.24-rc.1.tgz",
   "dist-tags": {
     "alpha": "0.1.15-alpha.1",
     "next": "0.1.24-rc.1",

@@ -51,8 +51,8 @@ export function inspectInstallation(hostRoot, profileRoot, support = policy) {
   walk(hostPath)
   let plugin
   if (profileRoot) {
-    const path = locatePackage('@nanmicoder/dsh-agent-teams', resolve(profileRoot))
-    if (!path) missing.push('@nanmicoder/dsh-agent-teams (profile)')
+    const path = locatePackage('agent-teams-pixel', resolve(profileRoot))
+    if (!path) missing.push('agent-teams-pixel (profile)')
     else {
       const pkg = manifest(path)
       plugin = { version: pkg.version, path: dirname(path) }

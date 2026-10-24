@@ -15,11 +15,11 @@
       "name": "plugin-info",
       "ok": true,
       "at": "2026-10-10T16:46:31.745Z",
-      "note": "@nanmicoder/dsh-agent-teams@0.1.22",
+      "note": "agent-teams-pixel@0.1.22",
       "detail": {
         "ok": true,
         "pluginRoot": "/private/tmp/agentteams-issues-20261010/integration/plugin",
-        "name": "@nanmicoder/dsh-agent-teams",
+        "name": "agent-teams-pixel",
         "version": "0.1.22",
         "stateDirDefault": null,
         "clientBundleHasUnicodeKey": true,

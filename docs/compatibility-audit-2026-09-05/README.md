@@ -28,7 +28,7 @@
 | 维度 | 实际例子 | 含义 |
 | --- | --- | --- |
 | Harness 核心 | `@deepseek-ai/dsh@0.1.2-rc.1` | 上游 CLI/核心发布版本 |
-| AgentTeams 插件 | `@nanmicoder/dsh-agent-teams@0.1.15` | 本仓库独立发布版本，不与宿主数字对应 |
+| AgentTeams 插件 | `agent-teams-pixel@0.1.15` | 本仓库独立发布版本，不与宿主数字对应 |
 | npm 渠道 | `latest`、`next`、`alpha` | 可移动的版本指针，不是兼容性证明 |
 | Desktop 或源码 | Desktop 产品版本、Git commit/tag | Desktop 有内置核心；本地 checkout 可能比 npm 更早或更晚 |
 
@@ -39,7 +39,7 @@
 | 包/来源 | 观测值 | 对默认安装的影响 |
 | --- | --- | --- |
 | `@deepseek-ai/dsh` | `latest = next = 0.1.2-rc.1`；`alpha = 0.1.2-alpha.5` | 当前普通 CLI 安装获得 rc.1 |
-| `@nanmicoder/dsh-agent-teams` | `latest = 0.1.15`；`alpha = 0.1.15-alpha.1` | 当前插件默认包只明确验收过 Alpha.2 |
+| `agent-teams-pixel` | `latest = 0.1.15`；`alpha = 0.1.15-alpha.1` | 当前插件默认包只明确验收过 Alpha.2 |
 | 本地 Harness checkout | `d347e70390`，已合入 `0.1.3-alpha.1` 发布分支 | 不可用它替代 npm 已发布版本的验收 |
 | 上游 `0.1.3-alpha.1` | 有 GitHub release；本次查询尚无对应 npm 版本 | 暂不作为默认支持目标 |
 
@@ -63,7 +63,7 @@
 历史锁版命令（仅适用于表中 rc.2 组合）：
 
 ```sh
-dsh plugin --profile web add --save-exact @nanmicoder/dsh-agent-teams@0.1.10
+dsh plugin --profile web add --save-exact agent-teams-pixel@0.1.10
 ```
 
 精确版本字符串本身不是浮动范围；`^0.1.10` 才会允许更高兼容版本。市场或安装器主动改写声明，需要单独调查，不能归因于“裸版本也会自动升级”。

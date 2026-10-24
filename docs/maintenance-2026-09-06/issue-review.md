@@ -444,7 +444,7 @@
 > The current UI already includes role artwork, working indicators, text labels and reduced-motion handling, and the earlier visual refresh is in main. The remaining part of this proposal is the reusable/pluggable status presentation contract, including intentional waiting, failure and cancellation states. We will keep that scope separate from custom avatars (#67/#121), reuse the existing monitor updates and avoid another animation polling loop.
 
 
-## [#54 插件模块导出的 name（`agent-teams`）与包名（`@nanmicoder/dsh-agent-teams`）不一致](https://github.com/NanmiCoder/dsh-agent-teams/issues/54)
+## [#54 插件模块导出的 name（`agent-teams`）与包名（`agent-teams-pixel`）不一致](https://github.com/NanmiCoder/dsh-agent-teams/issues/54)
 
 - 事实：导出agent-teams与npm不同属实，patch name正确；精确rc1plugin.ts只是pnpmforwarder，未找到所称官方plugin check。
 - 动作：`keep_needs_info`。

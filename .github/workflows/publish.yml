@@ -105,7 +105,7 @@ jobs:
         env:
           PACKAGE_VERSION: ${{ steps.version.outputs.value }}
         run: |
-          CURRENT_LATEST="$(npm view @nanmicoder/dsh-agent-teams dist-tags.latest)"
+          CURRENT_LATEST="$(npm view agent-teams-pixel dist-tags.latest)"
           export CURRENT_LATEST
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict'

@@ -2,7 +2,7 @@
 
 - 工作区：`/Users/nanmi/.codex/worktrees/issue-session-scheduler/dsh-agent-teams`（本人 worktree）
 - 分支：`codex/issues-20261010-sessions`；baseline = `1e1c624fd2e909008aa5228a004706b3e4460670`
-- 宿主（baseline 与 candidate 完全相同）：`@deepseek-ai/dsh@0.2.0-rc.2`（npm 精确产物，`pnpm install --frozen-lockfile`），真实 Loader profile：`dsh-base + dsh-web-app + @nanmicoder/dsh-agent-teams`
+- 宿主（baseline 与 candidate 完全相同）：`@deepseek-ai/dsh@0.2.0-rc.2`（npm 精确产物，`pnpm install --frozen-lockfile`），真实 Loader profile：`dsh-base + dsh-web-app + agent-teams-pixel`
 - 模型路由：用户已有登录的 `deepseek-account / deepseek-flash / max`（未填写任何 API key，未读取/复制凭据）；隔离 `DSH_HOME` = `/private/tmp/agentteams-issues-20261010/sessions/home`，仅 `credentials.path` 指向已有认证存储
 - 运行环境：macOS arm64，Node `v26.7.0`，pnpm `10.33.0`
 - 证据根目录：`/private/tmp/agentteams-issues-20261010/sessions/`（`baseline/`、`candidate/`、`logs/`、`drivers/`、`repro/`）
@@ -89,7 +89,7 @@ LAB_BASE=http://127.0.0.1:3111 node drivers/issue-103-live.mjs <work-root> basel
 `src/harness-compat.ts` 新增 `agentTeamsSource()`：
 
 - 宿主 `SESSION_FORMAT_VERSION >= 3` → 继续 mint 生产者自有 kind（`agent-teams-command` / `agent-teams`），这是现行宿主文档化的 merge-extensible 契约；
-- 宿主存储代次 < 3 → 写发布版 plugin wrapper `{ kind: 'plugin', plugin: '@nanmicoder/dsh-agent-teams' }`，它在 v2→v3 白名单内、并能被 v3→v4 迁移正常改写。
+- 宿主存储代次 < 3 → 写发布版 plugin wrapper `{ kind: 'plugin', plugin: 'agent-teams-pixel' }`，它在 v2→v3 白名单内、并能被 v3→v4 迁移正常改写。
 
 `src/command.ts` 的两条注入分支（profile 解析失败分支与正常激活分支）与 `src/harness-compat.ts` 的两条成员投递路径（queue/steer）统一走该函数。
 
@@ -118,7 +118,7 @@ LAB_BASE=http://127.0.0.1:3111 node drivers/issue-103-live.mjs <work-root> basel
 # 仓库内
 node scripts/legacy-session-source-repair.mjs --session-dir <session-dir> [--apply]
 # 安装后（profile 或工程 node_modules）
-node node_modules/@nanmicoder/dsh-agent-teams/scripts/legacy-session-source-repair.mjs --session-dir <session-dir> [--apply]
+node node_modules/agent-teams-pixel/scripts/legacy-session-source-repair.mjs --session-dir <session-dir> [--apply]
 ```
 
 要求该位置能解析到 Harness 依赖闭包（至少 `@deepseek-ai/dsh-session`），即 checkout 的 node_modules 或已安装 profile 的 node_modules。

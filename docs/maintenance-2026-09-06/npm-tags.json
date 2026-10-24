@@ -6,7 +6,7 @@
     "latest": "0.1.2-rc.1",
     "next": "0.1.2-rc.1"
   },
-  "@nanmicoder/dsh-agent-teams": {
+  "agent-teams-pixel": {
     "alpha": "0.1.15-alpha.1",
     "latest": "0.1.15"
   }

@@ -3,7 +3,7 @@
   "dist": {
     "integrity": "sha512-K0D1OWZB0/EKk153mndPsoh2Gbx9u1TAIj7DUBRnuJyOZ+ycZMRXqoDhore0qcnqd9qU3fKbxWOOGnxVrJKFsQ==",
     "shasum": "7de6286967c8dd630428349d8dd4b2b07bddefd5",
-    "tarball": "https://registry.npmjs.org/@nanmicoder/dsh-agent-teams/-/dsh-agent-teams-0.1.18.tgz",
+    "tarball": "https://registry.npmjs.org/agent-teams-pixel/-/dsh-agent-teams-0.1.18.tgz",
     "fileCount": 96,
     "unpackedSize": 2893688,
     "attestations": {

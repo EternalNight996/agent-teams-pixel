@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "installedPackage": "/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/@nanmicoder/dsh-agent-teams",
+  "installedPackage": "/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/agent-teams-pixel",
   "checkedFiles": 85,
   "mismatches": []
 }

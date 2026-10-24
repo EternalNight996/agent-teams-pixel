@@ -27,7 +27,7 @@
 安装或升级：
 
 ```sh
-dsh plugin --profile web add --save-exact @nanmicoder/dsh-agent-teams@0.1.17
+dsh plugin --profile web add --save-exact agent-teams-pixel@0.1.17
 ```
 
 重启对应 Harness 进程，再刷新页面。普通新安装可省略插件版本号；实际宿主仍应使用兼容清单中的版本。

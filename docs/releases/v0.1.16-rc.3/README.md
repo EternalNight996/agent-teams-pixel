@@ -1,6 +1,6 @@
 # v0.1.16-rc.3 发布验收
 
-`@nanmicoder/dsh-agent-teams@0.1.16-rc.3` 已通过 tag 触发的 [Publish Package Action](https://github.com/NanmiCoder/dsh-agent-teams/actions/runs/34353925675) 发布到 npm `next`，并生成 [GitHub 预发布](https://github.com/NanmiCoder/dsh-agent-teams/releases/tag/v0.1.16-rc.3)。发布源为 `bf17f93d35ef75964e96333ff644ab2c9c57b3cb`；此目录是在发布完成后归档的回执，不包含在该 tag 的 npm 包中。
+`agent-teams-pixel@0.1.16-rc.3` 已通过 tag 触发的 [Publish Package Action](https://github.com/NanmiCoder/dsh-agent-teams/actions/runs/34353925675) 发布到 npm `next`，并生成 [GitHub 预发布](https://github.com/NanmiCoder/dsh-agent-teams/releases/tag/v0.1.16-rc.3)。发布源为 `bf17f93d35ef75964e96333ff644ab2c9c57b3cb`；此目录是在发布完成后归档的回执，不包含在该 tag 的 npm 包中。
 
 ## 发布与产物
 

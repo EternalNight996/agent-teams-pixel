@@ -57,10 +57,10 @@ AgentTeams 的 .gitignore:2 忽略 lib/，git ls-files lib 无结果；package.j
 执行：
 
 ```sh
-node --import tsx/esm --input-type=module -e 'import {parseInstallSpec} from "./packages/boot/plugin-manager/src/install-spec.ts"; for (const spec of ["https://github.com/NanmiCoder/dsh-agent-teams","https://www.npmjs.com/package/@nanmicoder/dsh-agent-teams","https://registry.npmjs.org/@nanmicoder/dsh-agent-teams/-/dsh-agent-teams-0.1.21.tgz","@nanmicoder/dsh-agent-teams@0.1.21"]) {try {console.log(parseInstallSpec(spec))} catch(e) {console.log(e.message)}}'
+node --import tsx/esm --input-type=module -e 'import {parseInstallSpec} from "./packages/boot/plugin-manager/src/install-spec.ts"; for (const spec of ["https://github.com/NanmiCoder/dsh-agent-teams","https://www.npmjs.com/package/agent-teams-pixel","https://registry.npmjs.org/agent-teams-pixel/-/dsh-agent-teams-0.1.21.tgz","agent-teams-pixel@0.1.21"]) {try {console.log(parseInstallSpec(spec))} catch(e) {console.log(e.message)}}'
 ```
 
-结果：GitHub URL 返回 kind=git、host=github.com；npm 网页 URL 抛 `plugin-manager: a URL must point at a git repository or a tarball: https://www.npmjs.com/package/@nanmicoder/dsh-agent-teams`；registry tgz URL 返回 kind=tarball、host=registry.npmjs.org；精确 npm 包 ID 返回 kind=registry、name=@nanmicoder/dsh-agent-teams、range=0.1.21。
+结果：GitHub URL 返回 kind=git、host=github.com；npm 网页 URL 抛 `plugin-manager: a URL must point at a git repository or a tarball: https://www.npmjs.com/package/agent-teams-pixel`；registry tgz URL 返回 kind=tarball、host=registry.npmjs.org；精确 npm 包 ID 返回 kind=registry、name=agent-teams-pixel、range=0.1.21。
 
 位置：packages/boot/plugin-manager/src/install-spec.ts:79–82。此为宿主输入格式限制，不是 AgentTeams 运行 API 破坏。UI 应同时测用户给的网页 URL 和正确 npm ID/产物 URL，并明确区分结果。
 

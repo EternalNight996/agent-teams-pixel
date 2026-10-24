@@ -38,7 +38,7 @@
       ],
       "plugin": {
         "version": "0.1.16-rc.1",
-        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2/node_modules/@nanmicoder/dsh-agent-teams"
+        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2/node_modules/agent-teams-pixel"
       }
     },
     {
@@ -46,7 +46,7 @@
       "entry": "installed-script-host",
       "argv": [
         "/tmp/dsh-runtime-lab-20260906/node-v24.20.0-darwin-arm64/bin/node",
-        "/private/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2/node_modules/@nanmicoder/dsh-agent-teams/scripts/doctor.mjs",
+        "/private/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2/node_modules/agent-teams-pixel/scripts/doctor.mjs",
         "--host-root",
         "/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2",
         "--json"
@@ -70,7 +70,7 @@
       "entry": "installed-script-profile",
       "argv": [
         "/tmp/dsh-runtime-lab-20260906/node-v24.20.0-darwin-arm64/bin/node",
-        "/private/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2/node_modules/@nanmicoder/dsh-agent-teams/scripts/doctor.mjs",
+        "/private/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2/node_modules/agent-teams-pixel/scripts/doctor.mjs",
         "--host-root",
         "/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2",
         "--profile-root",
@@ -92,7 +92,7 @@
       ],
       "plugin": {
         "version": "0.1.16-rc.1",
-        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2/node_modules/@nanmicoder/dsh-agent-teams"
+        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2/node_modules/agent-teams-pixel"
       },
       "installedHashesMatchArtifact": true
     },
@@ -123,7 +123,7 @@
       ],
       "plugin": {
         "version": "0.1.16-rc.1",
-        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2/node_modules/@nanmicoder/dsh-agent-teams"
+        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-alpha.2/node_modules/agent-teams-pixel"
       }
     },
     {
@@ -152,7 +152,7 @@
       ],
       "plugin": {
         "version": "0.1.16-rc.1",
-        "path": "/private/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3/node_modules/@nanmicoder/dsh-agent-teams"
+        "path": "/private/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3/node_modules/agent-teams-pixel"
       }
     },
     {
@@ -160,7 +160,7 @@
       "entry": "installed-script-host",
       "argv": [
         "/tmp/dsh-runtime-lab-20260906/node-v24.20.0-darwin-arm64/bin/node",
-        "/private/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3/node_modules/@nanmicoder/dsh-agent-teams/scripts/doctor.mjs",
+        "/private/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3/node_modules/agent-teams-pixel/scripts/doctor.mjs",
         "--host-root",
         "/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3",
         "--json"
@@ -184,7 +184,7 @@
       "entry": "installed-script-profile",
       "argv": [
         "/tmp/dsh-runtime-lab-20260906/node-v24.20.0-darwin-arm64/bin/node",
-        "/private/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3/node_modules/@nanmicoder/dsh-agent-teams/scripts/doctor.mjs",
+        "/private/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3/node_modules/agent-teams-pixel/scripts/doctor.mjs",
         "--host-root",
         "/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3",
         "--profile-root",
@@ -206,7 +206,7 @@
       ],
       "plugin": {
         "version": "0.1.16-rc.1",
-        "path": "/private/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3/node_modules/@nanmicoder/dsh-agent-teams"
+        "path": "/private/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3/node_modules/agent-teams-pixel"
       },
       "installedHashesMatchArtifact": true
     },
@@ -237,7 +237,7 @@
       ],
       "plugin": {
         "version": "0.1.16-rc.1",
-        "path": "/private/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3/node_modules/@nanmicoder/dsh-agent-teams"
+        "path": "/private/tmp/dsh-runtime-lab-20260906/runtime-alpha5-v3/node_modules/agent-teams-pixel"
       }
     },
     {
@@ -266,7 +266,7 @@
       ],
       "plugin": {
         "version": "0.1.16-rc.1",
-        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/@nanmicoder/dsh-agent-teams"
+        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/agent-teams-pixel"
       }
     },
     {
@@ -274,7 +274,7 @@
       "entry": "installed-script-host",
       "argv": [
         "/tmp/dsh-runtime-lab-20260906/node-v24.20.0-darwin-arm64/bin/node",
-        "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/@nanmicoder/dsh-agent-teams/scripts/doctor.mjs",
+        "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/agent-teams-pixel/scripts/doctor.mjs",
         "--host-root",
         "/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1",
         "--json"
@@ -298,7 +298,7 @@
       "entry": "installed-script-profile",
       "argv": [
         "/tmp/dsh-runtime-lab-20260906/node-v24.20.0-darwin-arm64/bin/node",
-        "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/@nanmicoder/dsh-agent-teams/scripts/doctor.mjs",
+        "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/agent-teams-pixel/scripts/doctor.mjs",
         "--host-root",
         "/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1",
         "--profile-root",
@@ -320,7 +320,7 @@
       ],
       "plugin": {
         "version": "0.1.16-rc.1",
-        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/@nanmicoder/dsh-agent-teams"
+        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/agent-teams-pixel"
       },
       "installedHashesMatchArtifact": true
     },
@@ -351,7 +351,7 @@
       ],
       "plugin": {
         "version": "0.1.16-rc.1",
-        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/@nanmicoder/dsh-agent-teams"
+        "path": "/private/tmp/dsh-runtime-lab-20260906/0.1.2-rc.1/node_modules/agent-teams-pixel"
       }
     }
   ],

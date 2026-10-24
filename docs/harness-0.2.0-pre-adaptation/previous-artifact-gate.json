@@ -4,7 +4,7 @@
   "passed": false,
   "exemptions": {},
   "incompatible": {
-    "name": "@nanmicoder/dsh-agent-teams",
+    "name": "agent-teams-pixel",
     "version": "0.1.21",
     "runtimeVersion": "0.2.0",
     "peers": {

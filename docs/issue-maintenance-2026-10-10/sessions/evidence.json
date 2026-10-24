@@ -110,7 +110,7 @@
       "shipped": "listed in package.json#files; present in the packed tarball with a matching content hash",
       "invocation": [
         "repo: node scripts/legacy-session-source-repair.mjs --session-dir <session-dir> [--apply]",
-        "installed package: node node_modules/@nanmicoder/dsh-agent-teams/scripts/legacy-session-source-repair.mjs --session-dir <session-dir> [--apply]",
+        "installed package: node node_modules/agent-teams-pixel/scripts/legacy-session-source-repair.mjs --session-dir <session-dir> [--apply]",
         "requirement: the Harness cohort must resolve from the tool's location (@deepseek-ai/dsh-session at minimum) - a checkout's node_modules or an installed profile"
       ],
       "report": {
