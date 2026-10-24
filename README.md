@@ -8,17 +8,6 @@
   <img src="./assets/readme/hero.svg" width="100%" alt="agent-teams-pixel turns one DeepSeek Harness session into a coordinated multi-agent team">
 </p>
 
-<div align="center">
-
-
-</div>
-
-<p align="center">
-  <a href="https://dshfind.com/en/plugins/NanmiCoder/dsh-agent-teams?ref=badge"><img src="https://img.shields.io/badge/recommended%20by-dshfind-FFD700?style=flat-square" alt="Recommended by dshfind"></a>
-  <a href="https://dshfind.com/en/plugins/NanmiCoder/dsh-agent-teams?ref=badge"><img src="https://dshfind.com/api/badge/NanmiCoder/dsh-agent-teams?lang=en" alt="dshfind score"></a>
-  <a href="https://dshfind.com/en/plugins/NanmiCoder/dsh-agent-teams?ref=badge"><img src="https://dshfind.com/api/badge/NanmiCoder/dsh-agent-teams?metric=downloads&amp;lang=en" alt="dshfind downloads"></a>
-</p>
-
 <p align="center">
   <a href="https://www.npmjs.com/package/agent-teams-pixel"><img src="https://img.shields.io/npm/v/agent-teams-pixel?style=flat-square&amp;color=5B4CF0" alt="npm version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-0B7285?style=flat-square" alt="MIT license"></a>

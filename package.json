@@ -251,7 +251,7 @@
     "typescript": "^5.9.3"
   },
   "bin": {
-    "dsh-agent-teams-doctor": "scripts/doctor.mjs"
+    "agent-teams-pixel-doctor": "scripts/doctor.mjs"
   },
   "contributors": [
     {

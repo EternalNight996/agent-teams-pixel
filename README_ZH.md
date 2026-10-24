@@ -8,17 +8,6 @@
   <img src="./assets/readme/hero.svg" width="100%" alt="agent-teams-pixel 把一个 DeepSeek Harness 会话变成可协作的多智能体团队">
 </p>
 
-<div align="center">
-
-
-</div>
-
-<p align="center">
-  <a href="https://dshfind.com/zh/plugins/NanmiCoder/dsh-agent-teams?ref=badge"><img src="https://img.shields.io/badge/%E7%94%B1%20dshfind-%E6%8E%A8%E8%8D%90-FFD700?style=flat-square" alt="由 dshfind 推荐"></a>
-  <a href="https://dshfind.com/zh/plugins/NanmiCoder/dsh-agent-teams?ref=badge"><img src="https://dshfind.com/api/badge/NanmiCoder/dsh-agent-teams?lang=zh" alt="dshfind 评分"></a>
-  <a href="https://dshfind.com/zh/plugins/NanmiCoder/dsh-agent-teams?ref=badge"><img src="https://dshfind.com/api/badge/NanmiCoder/dsh-agent-teams?metric=downloads&amp;lang=zh" alt="dshfind 下载量"></a>
-</p>
-
 <p align="center">
   <a href="https://www.npmjs.com/package/agent-teams-pixel"><img src="https://img.shields.io/npm/v/agent-teams-pixel?style=flat-square&amp;color=5B4CF0" alt="npm 版本"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-0B7285?style=flat-square" alt="MIT 许可证"></a>
