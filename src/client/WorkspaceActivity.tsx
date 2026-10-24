@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 import { ActivityPanel, TeamSection, historicCardTeam, type ActivityPanelProps } from './ActivityPanel.tsx'
+import { PixelOffice } from './pixel-office/PixelOffice.tsx'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { OPEN_PANEL_EVENT } from './AgentTeamsCard.tsx'
 import type { AgentTeamsCardData } from './agent-teams-card-definition.ts'
 import { currentSessionId } from './session-navigation.ts'
@@ -13,6 +15,9 @@ import css from './WorkspaceActivity.module.css'
 
 export const TEAM_TAB_KIND = 'agent-teams'
 export const TEAM_TAB_ID = 'agent-teams-pixel/activity'
+
+/** Persisted workspace-tab preference: board view vs pixel-office view. */
+const WORKSPACE_OFFICE_VIEW_KEY = 'agent-teams-pixel.workspaceOfficeView'
 
 /** Optional host integration is observable so installing/removing it also switches the fallback. */
 export function createWorkspaceBridge() {
@@ -88,6 +93,14 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   const snapshots = useSyncExternalStore(subscribeActivitySnapshots, getActivitySnapshotsSnapshot)
   const local = useSyncExternalStore(state.subscribe, state.getSnapshot)
   const [retry, setRetry] = useState(0)
+  const [officeMode, setOfficeMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    try { return window.localStorage.getItem(WORKSPACE_OFFICE_VIEW_KEY) === '1' } catch { return false }
+  })
+  const setOfficeView = (next: boolean): void => {
+    setOfficeMode(next)
+    try { window.localStorage.setItem(WORKSPACE_OFFICE_VIEW_KEY, next ? '1' : '0') } catch { /* private mode */ }
+  }
   const live = snapshots.teams.filter(team => team.captainSessionId === sessionId)
   const archived = snapshots.archivedTeams.filter(team => team.captainSessionId === sessionId && !live.some(item => item.teamId === team.teamId))
   const historic = [...local.history.values()].filter(team => team.captainSessionId === sessionId
@@ -116,6 +129,19 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
           <img src={LEAD_ART} alt="" aria-hidden />
           <h2>AgentTeams</h2>
           <span>{t('workspace.title')}</span>
+          {selected !== undefined && live.includes(selected) && (
+            <button
+              type="button"
+              className={css.headingOfficeToggle}
+              data-control="office"
+              aria-pressed={officeMode}
+              onClick={() => { setOfficeView(!officeMode) }}
+              aria-label={t(officeMode ? 'office.showBoard' : 'office.showOffice')}
+              title={t(officeMode ? 'office.showBoard' : 'office.showOffice')}
+            >
+              <span aria-hidden>{officeMode ? '☰' : '🏢'}</span>
+            </button>
+          )}
         </header>
         {status === 'error' && <div className={css.error} role="alert"><span>{t('workspace.error')}</span><button onClick={() => setRetry(value => value + 1)}>{t('workspace.retry')}</button></div>}
         {records.length > 1 && <nav className={css.selector} aria-label={t('workspace.title')}>
@@ -125,7 +151,14 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
           <span className={css.emptyMark} aria-hidden>↳</span>
           <h3>{t('workspace.emptyTitle')}</h3><p>{t('workspace.emptyBody')}</p>
           <button onClick={backToChat}>{t('workspace.back')}</button>
-        </section> : <>
+        </section> : officeMode && live.includes(selected) ? (
+          <PixelOffice
+            team={selected}
+            t={t}
+            onShowBoard={() => { setOfficeView(false) }}
+            onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
+          />
+        ) : <>
           <TeamSection key={`${sessionId}:${selected.teamId}`} team={selected} workspace historic={history}
             modelDirectory={selected.phase === 'staged' ? modelDirectories.directoryFor(sessionId) : undefined}
             onContinuePlanning={backToChat} onDiscarded={backToChat} onNavigate={openMember} t={t} />
