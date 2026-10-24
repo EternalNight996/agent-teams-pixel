@@ -26,7 +26,7 @@ Ask in natural language. The plugin provides the team protocol, 14 coordination 
 
 ## Releases
 
-[v0.3.0-datbase.1](./release-notes/v0.3.0-datbase.1.md) refreshes the team workspace with completion and inbox cards, preserves the distinct claimed state, and fixes optional tool inputs and live host session-format detection. This stable plugin release uses npm `latest`; the recommended Harness host remains `0.2.1-rc.2`. See the exact [support matrix](./compatibility.json) and [verification scope](./docs/maintenance-workflow.md).
+[v0.3.0-rc.1](./release-notes/v0.3.0-rc.1.md) refreshes the team workspace with completion and inbox cards, preserves the distinct claimed state, and fixes optional tool inputs and live host session-format detection. This stable plugin release uses npm `latest`; the recommended Harness host remains `0.2.1-rc.2`. See the exact [support matrix](./compatibility.json) and [verification scope](./docs/maintenance-workflow.md).
 
 ## Why AgentTeams?
 
@@ -45,16 +45,16 @@ The conversation card and activity panel use Harness's official locale service. 
 
 ## Install and choose versions
 
-**Recommended pair: DeepSeek Harness `0.2.1-rc.3` + AgentTeams `0.3.0-datbase.1`. The host remains an RC.**
+**Recommended pair: DeepSeek Harness `0.2.1-rc.3` + AgentTeams `0.3.0-rc.1`. The host remains an RC.**
 
 | Use case | DeepSeek Harness | AgentTeams plugin |
 | --- | --- | --- |
-| **Recommended** | **`0.2.1-rc.3`** | **`0.3.0-datbase.1`** |
-| Previous recommended RC | `0.2.1-rc.1`, `0.2.0-rc.2`, `0.1.7-rc.2` | `0.3.0-datbase.1` |
-| Legacy RC | `0.1.5-rc.1`, `0.1.5-rc.2`, `0.1.5-rc.3` | `0.3.0-datbase.1` |
-| Retaining an older RC | `0.1.2-rc.1` | `0.3.0-datbase.1` |
-| Developer Alpha testing | `0.1.2-alpha.5` | `0.3.0-datbase.1` |
-| Retaining an older Alpha | `0.1.2-alpha.2` | `0.3.0-datbase.1` |
+| **Recommended** | **`0.2.1-rc.3`** | **`0.3.0-rc.1`** |
+| Previous recommended RC | `0.2.1-rc.1`, `0.2.0-rc.2`, `0.1.7-rc.2` | `0.3.0-rc.1` |
+| Legacy RC | `0.1.5-rc.1`, `0.1.5-rc.2`, `0.1.5-rc.3` | `0.3.0-rc.1` |
+| Retaining an older RC | `0.1.2-rc.1` | `0.3.0-rc.1` |
+| Developer Alpha testing | `0.1.2-alpha.5` | `0.3.0-rc.1` |
+| Retaining an older Alpha | `0.1.2-alpha.2` | `0.3.0-rc.1` |
 
 ### Desktop app
 
@@ -64,7 +64,7 @@ In the app sidebar, open **Plugins → Add plugin** and enter the npm package sp
 agent-teams-pixel
 ```
 
-The package name resolves npm `latest`. To pin a version, append `@0.3.0-datbase.1`. Install it, then choose **Enable now**. If the host asks for a restart, restart the desktop app. Use the package spec above for the published build; an npm or GitHub webpage URL is not the same install source. For Git installation, use a commit containing the verified build outputs described below.
+The package name resolves npm `latest`. To pin a version, append `@0.3.0-rc.1`. Install it, then choose **Enable now**. If the host asks for a restart, restart the desktop app. Use the package spec above for the published build; an npm or GitHub webpage URL is not the same install source. For Git installation, use a commit containing the verified build outputs described below.
 
 The desktop app supplies its own Harness core and package manager. Upgrading the global CLI does not upgrade that core, and an ordinary standalone CLI cannot manage its desktop profile. The CLI carrier installed by the desktop app can manage that profile in `0.2.1-rc.2`. Check the embedded core against the compatibility list. Harness `0.2.1-rc.3` is now the exact published target; its RC status is unchanged. The earlier source-only `0.2.0` prediction is no longer a support declaration. See the [release migration evidence](./docs/harness-0.2.1-rc.2/README.md).
 
@@ -79,7 +79,7 @@ Skip this if you already run this version. Alpha is opt-in: select an exact Alph
 
 ### CLI / Web: 2. Install the AgentTeams plugin
 
-Install or upgrade from npm using the package name (resolves npm `latest`, currently `0.3.0-datbase.1`):
+Install or upgrade from npm using the package name (resolves npm `latest`, currently `0.3.0-rc.1`):
 
 ```sh
 dsh plugin --profile web add --save-exact agent-teams-pixel

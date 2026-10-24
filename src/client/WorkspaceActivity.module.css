@@ -22,6 +22,34 @@
   padding: 16px 14px 20px;
   box-sizing: border-box;
 }
+/* Draggable divider between the configuration panel and the pixel office. */
+.splitter {
+  flex: 0 0 auto;
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  height: 9px;
+  margin: 0 auto;
+  cursor: row-resize;
+  touch-action: none;
+}
+.splitter::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 4px;
+  height: 1px;
+  background: var(--dsw-alias-border-l2);
+  transition: background-color 120ms, height 120ms;
+}
+.splitter:hover::before,
+.splitter:active::before {
+  top: 3px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--dsw-alias-state-business-primary);
+}
 /* Bottom panel: the animated pixel office. */
 .officePane {
   flex: 0 0 auto;

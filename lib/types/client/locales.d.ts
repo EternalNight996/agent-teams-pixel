@@ -234,6 +234,7 @@ export declare const zh: {
     'office.showOffice': string;
     'office.collapse': string;
     'office.expand': string;
+    'office.resize': string;
 };
 /** AgentTeams namespace key union. */
 export type AgentTeamsLocaleKey = keyof typeof zh;
@@ -470,6 +471,7 @@ export declare const en: {
     'office.showOffice': string;
     'office.collapse': string;
     'office.expand': string;
+    'office.resize': string;
 };
 /** Translation function consumed by pure view helpers. */
 export type AgentTeamsTranslate = (key: AgentTeamsLocaleKey, params?: Record<string, unknown>) => string;

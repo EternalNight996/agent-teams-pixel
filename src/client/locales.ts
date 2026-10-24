@@ -237,6 +237,7 @@ export const zh = {
   'office.showOffice': '像素办公室',
   'office.collapse': '收起像素办公室',
   'office.expand': '展开像素办公室',
+  'office.resize': '拖动调整像素办公室高度',
 } satisfies Record<string, string>
 
 /** AgentTeams namespace key union. */
@@ -476,6 +477,7 @@ export const en = {
   'office.showOffice': 'Pixel office',
   'office.collapse': 'Hide pixel office',
   'office.expand': 'Show pixel office',
+  'office.resize': 'Drag to resize the pixel office',
 } satisfies Record<AgentTeamsLocaleKey, string>
 
 /** Translation function consumed by pure view helpers. */

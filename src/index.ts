@@ -282,29 +282,6 @@ export function apply(ctx: Context, config: Config): void {
     },
   }), 'agent-teams: activity route')
 
-    // TEMPORARY verification route (removed before release): hands the local
-    // authenticated browser URL to loopback callers so a headless browser can
-    // screenshot the real Web GUI. Loopback-only; every other route stays
-    // behind the Connection fence.
-    ctx.effect(() => rawWebServer.register({
-      kind: 'exact',
-      path: '/plugins/dsh-agent-teams/debug-url',
-      handler: (req, res) => {
-        const remote = req.socket.remoteAddress ?? ''
-        const loopback = remote === '127.0.0.1' || remote === '::1' || remote === '::ffff:127.0.0.1'
-        const gate = ctx.get('connection') as { authenticatedUrl?: (url: string) => string } | undefined
-        const webApp = ctx.get('webApp') as { getAdvertisedUrl?: () => string } | undefined
-        let base: string | undefined
-        try { base = webApp?.getAdvertisedUrl?.() } catch { base = undefined }
-        let url: string | undefined
-        if (loopback && base !== undefined && gate?.authenticatedUrl !== undefined) {
-          try { url = gate.authenticatedUrl(base) } catch { url = undefined }
-        }
-        res.writeHead(loopback ? 200 : 403, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
-        res.end(JSON.stringify(loopback ? { base, url } : { error: 'loopback only' }))
-      },
-    }), 'agent-teams: debug url route')
-
     ctx.effect(() => webServer.register({
       kind: 'exact',
       path: '/plugins/dsh-agent-teams/halt',

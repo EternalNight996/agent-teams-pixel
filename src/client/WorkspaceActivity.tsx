@@ -1,5 +1,5 @@
 /** Native workspace content; discovery remains mounted independently of tab lifetime. */
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 import { ActivityPanel, TeamSection, historicCardTeam, type ActivityPanelProps } from './ActivityPanel.tsx'
@@ -18,6 +18,9 @@ export const TEAM_TAB_ID = 'agent-teams-pixel/activity'
 
 /** Persisted workspace-tab preference: board view vs pixel-office view. */
 const WORKSPACE_OFFICE_VIEW_KEY = 'agent-teams-pixel.workspaceOfficeView'
+/** Persisted pixel-office pane height (px); unset uses the CSS default. */
+const WORKSPACE_OFFICE_HEIGHT_KEY = 'agent-teams-pixel.workspaceOfficeHeight'
+const OFFICE_MIN_HEIGHT = 140
 
 /** Optional host integration is observable so installing/removing it also switches the fallback. */
 export function createWorkspaceBridge() {
@@ -104,6 +107,43 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     setOfficeVisible(next)
     try { window.localStorage.setItem(WORKSPACE_OFFICE_VIEW_KEY, next ? '1' : '0') } catch { /* private mode */ }
   }
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const officePaneRef = useRef<HTMLElement | null>(null)
+  const dragRef = useRef<{ startY: number; startHeight: number } | null>(null)
+  const [officeHeight, setOfficeHeight] = useState<number | undefined>(() => {
+    if (typeof window === 'undefined') return undefined
+    try {
+      const raw = Number(window.localStorage.getItem(WORKSPACE_OFFICE_HEIGHT_KEY))
+      return Number.isFinite(raw) && raw >= OFFICE_MIN_HEIGHT ? raw : undefined
+    } catch { return undefined }
+  })
+  const beginSplit = (event: ReactMouseEvent<HTMLDivElement>): void => {
+    const pane = officePaneRef.current
+    const container = containerRef.current
+    if (pane === null || container === null || event.button !== 0) return
+    event.preventDefault()
+    dragRef.current = { startY: event.clientY, startHeight: pane.getBoundingClientRect().height }
+    const move = (moveEvent: MouseEvent): void => {
+      const drag = dragRef.current
+      if (drag === null) return
+      const containerHeight = container.getBoundingClientRect().height
+      const next = Math.min(Math.max(180, containerHeight - 180), Math.max(OFFICE_MIN_HEIGHT, drag.startHeight + (drag.startY - moveEvent.clientY)))
+      setOfficeHeight(next)
+    }
+    const up = (): void => {
+      window.removeEventListener('mousemove', move)
+      window.removeEventListener('mouseup', up)
+      dragRef.current = null
+      setOfficeHeight((value) => {
+        if (value !== undefined) {
+          try { window.localStorage.setItem(WORKSPACE_OFFICE_HEIGHT_KEY, String(Math.round(value))) } catch { /* private mode */ }
+        }
+        return value
+      })
+    }
+    window.addEventListener('mousemove', move)
+    window.addEventListener('mouseup', up)
+  }
   const live = snapshots.teams.filter(team => team.captainSessionId === sessionId)
   const archived = snapshots.archivedTeams.filter(team => team.captainSessionId === sessionId && !live.some(item => item.teamId === team.teamId))
   const historic = [...local.history.values()].filter(team => team.captainSessionId === sessionId
@@ -126,7 +166,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     requestAnimationFrame(() => document.querySelector<HTMLElement>('[data-composer-card] [contenteditable="true"][role="textbox"], [data-composer-card] textarea')?.focus())
   }
   return (
-    <div className={css.root} data-agent-teams-workspace data-session-id={sessionId}>
+    <div ref={containerRef} className={css.root} data-agent-teams-workspace data-session-id={sessionId}>
       <div className={css.content}>
         <header className={css.heading}>
           <img src={LEAD_ART} alt="" aria-hidden />
@@ -161,13 +201,30 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
         )}
       </div>
       {officeVisible && selected !== undefined && live.includes(selected) && (
-        <section className={css.officePane} data-office-pane aria-label={t('office.title')}>
-          <PixelOffice
-            team={selected}
-            t={t}
-            onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
+        <>
+          <div
+            className={css.splitter}
+            data-control="office-splitter"
+            role="separator"
+            aria-orientation="horizontal"
+            aria-label={t('office.resize')}
+            title={t('office.resize')}
+            onMouseDown={beginSplit}
           />
-        </section>
+          <section
+            ref={officePaneRef}
+            className={css.officePane}
+            data-office-pane
+            aria-label={t('office.title')}
+            style={officeHeight === undefined ? undefined : { height: `${Math.round(officeHeight)}px` }}
+          >
+            <PixelOffice
+              team={selected}
+              t={t}
+              onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
+            />
+          </section>
+        </>
       )}
     </div>
   )
