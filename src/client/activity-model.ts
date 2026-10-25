@@ -285,19 +285,38 @@ export function taskStages<T extends RelationshipTask>(tasks: readonly T[]): rea
  * turning every task into a large card.
  */
 export function compactDagLayout<T extends RelationshipTask>(tasks: readonly T[], dimensions?: {
-  readonly nodeWidth: number; readonly nodeHeight: number; readonly columnGap: number; readonly rowGap: number
+  readonly nodeWidth: number
+  readonly nodeHeight: number
+  readonly columnGap: number
+  readonly rowGap: number
+  /** 横向流水线（默认）或纵向拓扑流：纵向时每个依赖深度是一层，自上而下。 */
+  readonly direction?: 'horizontal' | 'vertical'
 }): CompactDagLayout<T> {
   const nodeWidth = dimensions?.nodeWidth ?? COMPACT_DAG_NODE_WIDTH
   const nodeHeight = dimensions?.nodeHeight ?? COMPACT_DAG_NODE_HEIGHT
   const columnGap = dimensions?.columnGap ?? COMPACT_DAG_COLUMN_GAP
   const rowGap = dimensions?.rowGap ?? COMPACT_DAG_ROW_GAP
+  const vertical = dimensions?.direction === 'vertical'
   const stages = taskStages(tasks)
+  const widest = Math.max(1, ...stages.map((stage) => stage.tasks.length))
+  const track = widest * nodeWidth + (widest - 1) * columnGap
   const positions = new Map<string, { x: number; y: number }>()
   const nodes: CompactDagNode<T>[] = []
-  for (const [column, stage] of stages.entries()) {
+  for (const [index, stage] of stages.entries()) {
+    if (!vertical) {
+      for (const [row, task] of stage.tasks.entries()) {
+        const x = index * (nodeWidth + columnGap)
+        const y = row * (nodeHeight + rowGap)
+        positions.set(task.id, { x, y })
+        nodes.push({ task, x, y })
+      }
+      continue
+    }
+    // 纵向流：同深度的任务居中排在同一层，节点自下而上连成 flow。
+    const stageWidth = stage.tasks.length * nodeWidth + Math.max(0, stage.tasks.length - 1) * columnGap
     for (const [row, task] of stage.tasks.entries()) {
-      const x = column * (nodeWidth + columnGap)
-      const y = row * (nodeHeight + rowGap)
+      const x = (track - stageWidth) / 2 + row * (nodeWidth + columnGap)
+      const y = index * (nodeHeight + rowGap)
       positions.set(task.id, { x, y })
       nodes.push({ task, x, y })
     }
@@ -309,6 +328,18 @@ export function compactDagLayout<T extends RelationshipTask>(tasks: readonly T[]
     for (const dependency of task.dependencies) {
       const source = positions.get(dependency)
       if (source === undefined) continue
+      if (vertical) {
+        const x1 = source.x + nodeWidth / 2
+        const y1 = source.y + nodeHeight
+        const x2 = target.x + nodeWidth / 2
+        const y2 = target.y
+        edges.push({
+          from: dependency,
+          to: task.id,
+          path: `M${x1} ${y1}C${x1} ${y1 + 18},${x2} ${y2 - 18},${x2} ${y2}`,
+        })
+        continue
+      }
       const x1 = source.x + nodeWidth
       const y1 = source.y + nodeHeight / 2
       const x2 = target.x
@@ -324,10 +355,12 @@ export function compactDagLayout<T extends RelationshipTask>(tasks: readonly T[]
   return {
     width: stages.length === 0
       ? 0
-      : stages.length * nodeWidth + (stages.length - 1) * columnGap,
+      : vertical ? track : stages.length * nodeWidth + (stages.length - 1) * columnGap,
     height: stages.length === 0
       ? 0
-      : rows * nodeHeight + (rows - 1) * rowGap,
+      : vertical
+        ? stages.length * nodeHeight + (stages.length - 1) * rowGap
+        : rows * nodeHeight + (rows - 1) * rowGap,
     nodes,
     edges,
   }

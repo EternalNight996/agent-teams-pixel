@@ -355,11 +355,13 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
   const [pinnedTaskId, setPinnedTaskId] = useState<string | null>(null)
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const focusedTaskId = dependencyFocusTaskId(pinnedTaskId, keyboardTaskId, hoverTaskId)
-  const nodeWidth = workspace ? 164 : COMPACT_DAG_NODE_WIDTH
+  // 工作台用纵向拓扑流（每个依赖深度一层，自上而下），浮窗保持紧凑横向。
+  const nodeWidth = workspace ? 190 : COMPACT_DAG_NODE_WIDTH
   const nodeHeight = workspace ? 76 : COMPACT_DAG_NODE_HEIGHT
   const layout = useMemo(() => compactDagLayout(tasks, workspace
-    ? { nodeWidth: 164, nodeHeight: 76, columnGap: 36, rowGap: 16 } : undefined), [tasks, workspace])
+    ? { nodeWidth: 190, nodeHeight: 76, columnGap: 24, rowGap: 28, direction: 'vertical' } : undefined), [tasks, workspace])
   const parallel = useMemo(() => usesParallelTaskGrid(tasks), [tasks])
+  const memberByName = useMemo(() => new Map(members.map((member) => [member.name, member])), [members])
   const related = useMemo(
     () => focusedTaskId === null ? null : relatedTaskIds(focusedTaskId, tasks),
     [focusedTaskId, tasks],
@@ -425,6 +427,8 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
               </svg>}
               {layout.nodes.map(({ task, x, y }) => {
                 const model = taskModelLabel(task, members)
+                const member = workspace ? memberByName.get(task.assignee) : undefined
+                const art = workspace ? memberArtUrl(task.assignee, member?.role ?? '') : null
                 return (
                   <button
                     key={task.id}
@@ -437,6 +441,7 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
                     data-state={discarded ? 'cancelled' : taskTone(task.state, task.status)}
                     data-verdict-stale={task.verdictStale === undefined ? undefined : 'true'}
                     data-task-model={model || undefined}
+                    data-portrait={art !== null || undefined}
                     data-focused={related?.has(task.id) ?? false}
                     data-dimmed={related !== null && !related.has(task.id)}
                     aria-pressed={pinnedTaskId === task.id}
@@ -451,6 +456,7 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
                     <span className={css.dagNodeLabel}>
                       {workspace ? task.subject : compactTaskLabel(task.subject)}
                     </span>
+                    {art !== null && <img className={css.dagPortrait} src={art} alt="" aria-hidden />}
                     {!discarded && task.state === 'claimed' && <span className={css.dagClaimedState}>{t('task.status.claimed')}</span>}
                     {task.state === 'running' && (
                       <span className={css.dagRunningState} aria-label={t('task.runningAria')}>

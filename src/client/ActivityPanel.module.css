@@ -1406,6 +1406,21 @@
   background: var(--dsw-alias-state-error-primary);
 }
 
+/* 节点右下角的修士像素人（工作台纵向 flow 视图）。 */
+.dagPortrait {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.team[data-workspace-team] .dagNode[data-portrait='true'] {
+  padding-right: 44px;
+}
+
 .dagNodeLabel {
   overflow: hidden;
   color: var(--dsw-alias-label-tertiary);

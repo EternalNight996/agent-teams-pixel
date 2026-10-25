@@ -165,6 +165,8 @@ export declare function compactDagLayout<T extends RelationshipTask>(tasks: read
     readonly nodeHeight: number;
     readonly columnGap: number;
     readonly rowGap: number;
+    /** 横向流水线（默认）或纵向拓扑流：纵向时每个依赖深度是一层，自上而下。 */
+    readonly direction?: 'horizontal' | 'vertical';
 }): CompactDagLayout<T>;
 /**
  * Return the complete upstream/downstream chain around one task.
