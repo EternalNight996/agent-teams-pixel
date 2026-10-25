@@ -1,5 +1,5 @@
 /**
- * Server-side quick-start plans for the click-to-dispatch entry.
+ * Server-side 修仙宗·start plans for the click-to-dispatch entry.
  *
  * The Web dialog collects a goal plus an optional template and roster; this
  * module turns that into the same staged plan shape the captain tool accepts,
@@ -126,7 +126,7 @@ function shortGoal(goal: string, max: number): string {
   return flat.length <= max ? flat : `${flat.slice(0, Math.max(1, max - 1))}…`
 }
 
-/** Build the staged plan a quick-start request turns into. */
+/** Build the staged plan a 修仙宗·start request turns into. */
 export function buildQuickStartPlan(goal: string, templateId: string, requestedRoles?: readonly string[]): QuickStartPlan {
   const template = templateOf(templateId)
   const cleaned = [...new Set((requestedRoles ?? []).map(role => role.trim()).filter(role => role !== ''))]
@@ -140,5 +140,5 @@ export function buildQuickStartPlan(goal: string, templateId: string, requestedR
     assignee: ROLE_NAMES[roles.includes(task.role) ? task.role : roles[index % roles.length] as string] ?? (roles.includes(task.role) ? task.role : roles[index % roles.length] as string),
     dependencies: [...(task.dependencies ?? [])],
   }))
-  return { teamName: `quick-${template.id}-${stamp}`, template: template.id, members, tasks }
+  return { teamName: `修仙宗·${template.id}-${stamp}`, template: template.id, members, tasks }
 }
