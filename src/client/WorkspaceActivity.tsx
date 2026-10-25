@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type MouseE
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 import { ActivityPanel, TeamSection, historicCardTeam, type ActivityPanelProps } from './ActivityPanel.tsx'
+import { StagingPlanEditor } from './StagingPlanEditor.tsx'
+import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice } from './pixel-office/PixelOffice.tsx'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { OPEN_PANEL_EVENT } from './AgentTeamsCard.tsx'
@@ -16,8 +18,8 @@ import css from './WorkspaceActivity.module.css'
 export const TEAM_TAB_KIND = 'agent-teams'
 export const TEAM_TAB_ID = 'agent-teams-pixel/activity'
 
-/** Persisted workspace-tab preference: board view vs pixel-office view. */
-const WORKSPACE_OFFICE_VIEW_KEY = 'agent-teams-pixel.workspaceOfficeView'
+/** Persisted workspace-tab preference: progress board vs setup page. */
+const WORKSPACE_VIEW_KEY = 'agent-teams-pixel.workspaceView'
 /** Persisted pixel-office pane height (px); unset uses the CSS default. */
 const WORKSPACE_OFFICE_HEIGHT_KEY = 'agent-teams-pixel.workspaceOfficeHeight'
 const OFFICE_MIN_HEIGHT = 140
@@ -96,16 +98,15 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   const snapshots = useSyncExternalStore(subscribeActivitySnapshots, getActivitySnapshotsSnapshot)
   const local = useSyncExternalStore(state.subscribe, state.getSnapshot)
   const [retry, setRetry] = useState(0)
-  // The right-side AgentTeams pane is a split view: configuration/interaction on
-  // top, the animated pixel office below. The office starts open; an explicit
-  // collapse is remembered across sessions.
-  const [officeVisible, setOfficeVisible] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true
-    try { return window.localStorage.getItem(WORKSPACE_OFFICE_VIEW_KEY) !== '0' } catch { return true }
+  // Two pages above the fixed pixel office: setup (edit/approve, read the
+  // roster and task contracts) and the progress board.
+  const [view, setView] = useState<'board' | 'config'>(() => {
+    if (typeof window === 'undefined') return 'board'
+    try { return window.localStorage.getItem(WORKSPACE_VIEW_KEY) === 'config' ? 'config' : 'board' } catch { return 'board' }
   })
-  const setOfficeView = (next: boolean): void => {
-    setOfficeVisible(next)
-    try { window.localStorage.setItem(WORKSPACE_OFFICE_VIEW_KEY, next ? '1' : '0') } catch { /* private mode */ }
+  const setWorkspaceView = (next: 'board' | 'config'): void => {
+    setView(next)
+    try { window.localStorage.setItem(WORKSPACE_VIEW_KEY, next) } catch { /* private mode */ }
   }
   const containerRef = useRef<HTMLDivElement | null>(null)
   const officePaneRef = useRef<HTMLElement | null>(null)
@@ -172,19 +173,6 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
           <img src={LEAD_ART} alt="" aria-hidden />
           <h2>AgentTeams</h2>
           <span>{t('workspace.title')}</span>
-          {selected !== undefined && live.includes(selected) && (
-            <button
-              type="button"
-              className={css.headingOfficeToggle}
-              data-control="office"
-              aria-pressed={officeVisible}
-              onClick={() => { setOfficeView(!officeVisible) }}
-              aria-label={t(officeVisible ? 'office.collapse' : 'office.expand')}
-              title={t(officeVisible ? 'office.collapse' : 'office.expand')}
-            >
-              <span aria-hidden>{officeVisible ? '🏢' : '▭'}</span>
-            </button>
-          )}
         </header>
         {status === 'error' && <div className={css.error} role="alert"><span>{t('workspace.error')}</span><button onClick={() => setRetry(value => value + 1)}>{t('workspace.retry')}</button></div>}
         {records.length > 1 && <nav className={css.selector} aria-label={t('workspace.title')}>
@@ -195,12 +183,28 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
           <h3>{t('workspace.emptyTitle')}</h3><p>{t('workspace.emptyBody')}</p>
           <button onClick={backToChat}>{t('workspace.back')}</button>
         </section> : (
-          <TeamSection key={`${sessionId}:${selected.teamId}`} team={selected} workspace historic={history}
-            modelDirectory={selected.phase === 'staged' ? modelDirectories.directoryFor(sessionId) : undefined}
-            onContinuePlanning={backToChat} onDiscarded={backToChat} onNavigate={openMember} t={t} />
+          <>
+            <div className={css.viewTabs} role="tablist" data-control="workspace-views">
+              <button type="button" role="tab" aria-selected={view === 'board'} data-view="board" onClick={() => { setWorkspaceView('board') }}>{t('workspace.tabBoard')}</button>
+              <button type="button" role="tab" aria-selected={view === 'config'} data-view="config" onClick={() => { setWorkspaceView('config') }}>{t('workspace.tabConfig')}</button>
+            </div>
+            {view === 'config'
+              ? (live.includes(selected) && selected.phase === 'staged'
+                  ? <StagingPlanEditor team={selected} modelDirectory={modelDirectories.directoryFor(sessionId)} onContinuePlanning={backToChat} onDiscarded={backToChat} t={t} />
+                  : <TeamConfigPanel team={selected} t={t} />)
+              : (live.includes(selected) && selected.phase === 'staged'
+                  ? <section className={css.stagedNotice} data-staged-notice>
+                      <h3>{t('config.stagedTitle')}</h3>
+                      <p>{t('config.stagedBody')}</p>
+                      <button type="button" onClick={() => { setWorkspaceView('config') }}>{t('config.openConfig')}</button>
+                    </section>
+                  : <TeamSection key={`${sessionId}:${selected.teamId}`} team={selected} workspace historic={history}
+                      modelDirectory={selected.phase === 'staged' ? modelDirectories.directoryFor(sessionId) : undefined}
+                      onContinuePlanning={backToChat} onDiscarded={backToChat} onNavigate={openMember} t={t} />)}
+          </>
         )}
       </div>
-      {officeVisible && selected !== undefined && live.includes(selected) && (
+      {selected !== undefined && live.includes(selected) && (
         <>
           <div
             className={css.splitter}
