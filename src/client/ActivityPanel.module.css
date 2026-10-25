@@ -1294,33 +1294,6 @@
   opacity: 0.24;
 }
 
-/* 实时链路：当前工作的依赖线条流动，节点带工作光晕。 */
-.dagEdges path[data-live='true'] {
-  stroke: var(--dsw-alias-state-business-primary);
-  stroke-width: 2;
-  stroke-dasharray: 7 6;
-  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--dsw-alias-state-business-primary) 70%, transparent));
-  animation: dagLiveFlow 1s linear infinite;
-}
-
-.dagEdges path[data-live='true'][data-active='true'] {
-  stroke-width: 2.4;
-}
-
-@keyframes dagLiveFlow {
-  to { stroke-dashoffset: -13; }
-}
-
-.dagNode[data-live='true'] {
-  border-color: color-mix(in srgb, var(--dsw-alias-state-business-primary) 45%, var(--dsw-alias-border-l2));
-}
-
-.dagNode[data-live-active='true'] {
-  border-color: var(--dsw-alias-state-business-primary);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--dsw-alias-state-business-primary) 40%, transparent),
-    0 0 14px color-mix(in srgb, var(--dsw-alias-state-business-primary) 32%, transparent);
-}
 
 .dagNode {
   position: absolute;
@@ -1402,31 +1375,6 @@
 .dagNode[data-state='running'] .dagNodeHead {
   padding-right: 12px;
 }
-
-/* 节点内的修士工作状态：头像 + 状态词，颜色随状态变化。 */
-.dagStatus {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 1px;
-  color: var(--dsw-alias-label-secondary);
-  font-size: 9.5px;
-  line-height: 12px;
-}
-
-.dagAvatar {
-  width: 14px;
-  height: 14px;
-  flex: none;
-  object-fit: contain;
-}
-
-.dagNode[data-member-state='working'] .dagStatus { color: var(--dsw-alias-state-success-primary); }
-.dagNode[data-member-state='working'] .dagAvatar { animation: agentTeamsBreathe 4.2s ease-in-out infinite; }
-.dagNode[data-member-state='blocked'] .dagStatus { color: var(--dsw-alias-state-warn-primary); }
-.dagNode[data-member-state='failed'] .dagStatus { color: var(--dsw-alias-state-error-primary); }
-.dagNode[data-member-state='idle'] .dagStatus { color: var(--dsw-alias-label-tertiary); }
-.dagNode[data-member-state='done'] .dagStatus { color: var(--dsw-alias-state-success-primary); }
 
 .dagRunningState {
   position: absolute;

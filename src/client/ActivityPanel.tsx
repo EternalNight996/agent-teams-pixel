@@ -355,53 +355,15 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
   const [pinnedTaskId, setPinnedTaskId] = useState<string | null>(null)
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const focusedTaskId = dependencyFocusTaskId(pinnedTaskId, keyboardTaskId, hoverTaskId)
-  const nodeWidth = workspace ? 168 : COMPACT_DAG_NODE_WIDTH
-  // 节点多一行「修士 + 工作状态」，工作台节点相应加高。
-  const nodeHeight = workspace ? 92 : COMPACT_DAG_NODE_HEIGHT
+  const nodeWidth = workspace ? 164 : COMPACT_DAG_NODE_WIDTH
+  const nodeHeight = workspace ? 76 : COMPACT_DAG_NODE_HEIGHT
   const layout = useMemo(() => compactDagLayout(tasks, workspace
-    ? { nodeWidth: 168, nodeHeight: 92, columnGap: 36, rowGap: 22 } : undefined), [tasks, workspace])
+    ? { nodeWidth: 164, nodeHeight: 76, columnGap: 36, rowGap: 16 } : undefined), [tasks, workspace])
   const parallel = useMemo(() => usesParallelTaskGrid(tasks), [tasks])
-  const memberByName = useMemo(() => new Map(members.map((member) => [member.name, member])), [members])
-  const related = useMemo(() => {
-    if (focusedTaskId === null) return null
-    const path = new Set(relatedTaskIds(focusedTaskId, tasks))
-    // 拓扑图是修士工作状态的交互面：聚焦一项任务时，把同一位修士的其他任务一起纳入高亮。
-    const owner = tasks.find((task) => task.id === focusedTaskId)?.assignee
-    if (owner !== undefined && owner !== '') {
-      for (const task of tasks) {
-        if (task.assignee === owner) path.add(task.id)
-      }
-    }
-    return path
-  }, [focusedTaskId, tasks])
-  const memberWork = (task: ActivityTask): { tone: string; label: string } => {
-    if (discarded) return { tone: 'cancelled', label: t('task.status.notRun') }
-    if (task.status === 'failed') return { tone: 'failed', label: t('task.status.failed') }
-    if (task.status === 'completed') return { tone: 'done', label: t('task.status.completed') }
-    if (task.status === 'cancelled') return { tone: 'cancelled', label: t('task.status.cancelled') }
-    if (task.state === 'blocked') return { tone: 'blocked', label: t('member.state.waiting') }
-    const member = memberByName.get(task.assignee)
-    if (member?.activity === 'working') return { tone: 'working', label: t('member.state.working') }
-    if (member?.activity === 'unknown') return { tone: 'unknown', label: t('office.unknown') }
-    return { tone: 'idle', label: t('office.idle') }
-  }
-  // 实时链路：正在执行/已认领任务及其全部前置，用流动线条标出「当前工作」。
-  const livePath = useMemo(() => {
-    const byId = new Map(tasks.map((task) => [task.id, task]))
-    const path = new Set<string>()
-    const stack = tasks
-      .filter((task) => task.state === 'running' || task.state === 'claimed')
-      .map((task) => task.id)
-    while (stack.length > 0) {
-      const id = stack.pop() as string
-      if (path.has(id)) continue
-      path.add(id)
-      const task = byId.get(id)
-      if (task === undefined) continue
-      for (const dependency of task.dependencies) stack.push(dependency)
-    }
-    return path
-  }, [tasks])
+  const related = useMemo(
+    () => focusedTaskId === null ? null : relatedTaskIds(focusedTaskId, tasks),
+    [focusedTaskId, tasks],
+  )
   const scheduleHover = (id: string | null): void => {
     if (hoverTimer.current !== null) {
       clearTimeout(hoverTimer.current)
@@ -458,15 +420,11 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
               {!parallel && <svg className={css.dagEdges} width={layout.width} height={layout.height} aria-hidden>
                 {layout.edges.map((edge) => {
                   const active = related !== null && related.has(edge.from) && related.has(edge.to)
-                  const live = livePath.has(edge.from) && livePath.has(edge.to)
-                  return <path key={`${edge.from}:${edge.to}`} d={edge.path} data-active={active} data-live={live || undefined} data-dimmed={related !== null && !active} />
+                  return <path key={`${edge.from}:${edge.to}`} d={edge.path} data-active={active} data-dimmed={related !== null && !active} />
                 })}
               </svg>}
               {layout.nodes.map(({ task, x, y }) => {
                 const model = taskModelLabel(task, members)
-                const work = memberWork(task)
-                const member = memberByName.get(task.assignee)
-                const art = workspace ? memberArtUrl(task.assignee, member?.role ?? '') : null
                 return (
                   <button
                     key={task.id}
@@ -479,11 +437,8 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
                     data-state={discarded ? 'cancelled' : taskTone(task.state, task.status)}
                     data-verdict-stale={task.verdictStale === undefined ? undefined : 'true'}
                     data-task-model={model || undefined}
-                    data-member-state={workspace ? work.tone : undefined}
                     data-focused={related?.has(task.id) ?? false}
                     data-dimmed={related !== null && !related.has(task.id)}
-                    data-live={livePath.has(task.id) || undefined}
-                    data-live-active={(task.state === 'running' || task.state === 'claimed') || undefined}
                     aria-pressed={pinnedTaskId === task.id}
                     title={taskTitle(task, model)}
                     onClick={() => { const next = pinnedTaskId === task.id ? null : task.id; setPinnedTaskId(next); onSelectTask?.(next) }}
@@ -496,12 +451,6 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
                     <span className={css.dagNodeLabel}>
                       {workspace ? task.subject : compactTaskLabel(task.subject)}
                     </span>
-                    {workspace && (
-                      <span className={css.dagStatus}>
-                        {art !== null && <img className={css.dagAvatar} src={art} alt="" aria-hidden />}
-                        <span>{work.label}</span>
-                      </span>
-                    )}
                     {!discarded && task.state === 'claimed' && <span className={css.dagClaimedState}>{t('task.status.claimed')}</span>}
                     {task.state === 'running' && (
                       <span className={css.dagRunningState} aria-label={t('task.runningAria')}>
@@ -736,7 +685,6 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
         </div>
 
         {!workspace && <ProgressOverview team={team} t={t} discarded={discarded} />}
-      {workspace && <DependencyMap tasks={team.tasks} members={team.members} t={t} discarded={discarded} workspace onSelectTask={setSelectedTaskId} />}
 
         {!workspace && (() => {
           const orderedMembers = orderDelegationMembers(team.members, team.tasks)
@@ -858,7 +806,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
         })()}
       </section>
 
-      {!workspace && <DependencyMap tasks={team.tasks} members={team.members} t={t} discarded={discarded} workspace={workspace} onSelectTask={setSelectedTaskId} />}
+      <DependencyMap tasks={team.tasks} members={team.members} t={t} discarded={discarded} workspace={workspace} onSelectTask={setSelectedTaskId} />
       </section>
       <Modal
         open={stopOpen}
