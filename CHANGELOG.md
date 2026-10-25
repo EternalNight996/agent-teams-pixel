@@ -18,6 +18,10 @@
   centred, and a faint 聚灵阵, stone lanterns, an incense burner, drifting qi
   motes and a lotus pond (with koi, ripples and reeds) give the courtyard floor
   structure.
+- The hall stops at a 640px-tall card and centres in the tab instead of
+  stretching into an endless canvas, and the 藏经阁/山门/功德碑/传音阁 sheets now
+  open at the top-right next to the wall (was bottom / bottom-right), so the
+  answer appears where the click happened.
 - Sheets animate in, take focus as a dialog on open (not the ×), close on Esc /
   the scrim / ×, and the plan/setup sheet hugs its content instead of leaving a
   blank column.

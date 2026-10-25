@@ -3,10 +3,12 @@
 .office {
   display: flex;
   flex-direction: column;
-  /* Fill the dock pane instead of sizing to the roster: a percentage height
-     alone left the pane's bottom slack empty once the dock was dragged taller. */
+  /* Fill the dock pane, but stop growing at a comfortable hall height: an
+     endlessly tall canvas pushed the courtyard (and every idle cultivator) far
+     from the wall menu and made clicks and panels feel disconnected. */
   flex: 1 1 auto;
   height: 100%;
+  max-height: min(640px, 100%);
   min-height: 0;
   padding: 0;
   box-sizing: border-box;

@@ -42,6 +42,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   padding: 6px 8px 8px;
   box-sizing: border-box;
   overflow: hidden;
@@ -140,15 +141,20 @@
 }
 
 @keyframes sheetIn {
-  from { opacity: 0; transform: translateY(10px) scale(.992); }
+  from { opacity: 0; transform: translateY(-8px) scale(.992); }
   to { opacity: 1; transform: none; }
 }
-/* Lists stay small; progress uses the room; the plan/setup card hugs its content. */
+/* Panels open next to the wall the click came from (top-right), not at the far
+   bottom of a tall hall, so the answer appears where the user just clicked. */
 .sheet[data-sheet='teams'],
-.sheet[data-sheet='inbox'] {
-  inset: auto 8px 8px auto;
+.sheet[data-sheet='inbox'],
+.sheet[data-sheet='board'] {
+  inset: 8px 8px auto auto;
   width: min(380px, calc(100% - 16px));
   max-height: calc(100% - 16px);
+}
+.sheet[data-sheet='board'] {
+  width: min(420px, calc(100% - 16px));
 }
 .sheet[data-sheet='config'] {
   inset: 8px 8px auto;
