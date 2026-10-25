@@ -198,6 +198,7 @@ const clientIndexSource = await readFile(new URL('../src/client/index.tsx', impo
 const agentTeamsCardCss = await readFile(new URL('../src/client/AgentTeamsCard.module.css', import.meta.url), 'utf8')
 const agentTeamsCardSource = await readFile(new URL('../src/client/AgentTeamsCard.tsx', import.meta.url), 'utf8')
 const artworkSource = await readFile(new URL('../src/client/artwork.ts', import.meta.url), 'utf8')
+const artDataSource = await readFile(new URL('../src/client/art-data.ts', import.meta.url), 'utf8')
 const hostSource = await readFile(new URL('../src/index.ts', import.meta.url), 'utf8')
 const toolsSource = await readFile(new URL('../src/tools.ts', import.meta.url), 'utf8')
 const localesSource = await readFile(new URL('../src/client/locales.ts', import.meta.url), 'utf8')
@@ -339,10 +340,22 @@ const twelveRoleArtwork = [
   'writer', 'auditor', 'architect', 'tester', 'documenter', 'operator',
 ].map(role => memberArtUrl(role, role))
 check(
-  'every built-in 道途 resolves to its own portrait, including a bare role id as the name',
-  twelveRoleArtwork.every(Boolean) && new Set(twelveRoleArtwork).size === 12
-    && twelveRoleArtwork[1] === '/plugins/dsh-agent-teams/assets/avatar-implementer.png',
-  `resolved artwork = ${JSON.stringify(twelveRoleArtwork)}`,
+  'every built-in 道途 resolves to its own embedded portrait, including a bare role id as the name',
+  twelveRoleArtwork.every(uri => typeof uri === 'string' && uri.startsWith('data:image/png;base64,'))
+    && new Set(twelveRoleArtwork).size === 12,
+  `resolved artwork = ${JSON.stringify(twelveRoleArtwork.map(uri => (uri ?? '').slice(0, 32)))}`,
+)
+check(
+  'the embedded artwork module carries every packaged image',
+  expectedArtwork.every(name => artDataSource.includes(`'${name}':`)),
+  'regenerate src/client/art-data.ts with node scripts/gen-art-data.mjs',
+)
+check(
+  'the client renders portraits from embedded data instead of the host asset route',
+  artworkSource.includes("from './art-data.ts'")
+    && artworkSource.includes('data:image/png;base64,')
+    && !artworkSource.includes('/plugins/dsh-agent-teams/assets/'),
+  'portrait URLs must not depend on the host allowlist that requires an app restart',
 )
 check(
   'cultivation portraits use transparent cutouts instead of dark circular plates',
