@@ -237,9 +237,17 @@ function drawAvatar(p) {
       set(24, 18, p.accent); set(23, 15, p.accent); rect(27, 15, 2, 2, p.trim)
       break
     case 'blade':
-      rect(24, 8, 3, 3, '#3a2230'); rect(26, 11, 3, 3, '#3a2230'); rect(28, 14, 2, 6, '#3a2230')
-      vline(24, 8, 3, p.accent); vline(26, 11, 3, p.accent); vline(28, 14, 6, p.accent)
-      rect(22, 18, 5, 2, p.trim); rect(23, 20, 3, 3, '#7a3f52')
+      // 魔剑：锯齿阔身 + 品红锋刃 + 金色护手 + 血色剑首
+      rect(24, 4, 4, 3, '#6a2fd0')
+      rect(25, 7, 4, 3, '#5a26b8')
+      rect(26, 10, 3, 3, '#4a1f9a')
+      rect(27, 13, 2, 4, '#3a1878')
+      vline(27, 4, 3, '#ff4fb0'); vline(28, 7, 3, '#ff4fb0')
+      vline(28, 10, 4, '#ff4fb0'); vline(28, 14, 3, '#ff4fb0')
+      set(25, 6, '#ffd27a'); set(26, 9, '#ffd27a'); set(27, 12, '#ffd27a')
+      rect(21, 17, 9, 2, '#f2c14e'); hline(21, 17, 9, '#ffe9a8')
+      rect(24, 19, 3, 6, '#2a1a2a'); vline(25, 19, 6, '#7a3f52')
+      rect(23, 25, 5, 3, '#c23a3a'); set(25, 26, '#ff9aa8')
       break
     default: break
   }

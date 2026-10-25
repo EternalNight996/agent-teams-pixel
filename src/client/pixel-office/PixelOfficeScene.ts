@@ -571,19 +571,53 @@ export function createPixelScene(
         break
       }
       case 'blade': {
-        // 魔刀
-        g.fillStyle = '#3a2230'
-        g.fillRect(cx - 10, base - 24, 6, 4)
-        g.fillRect(cx - 6, base - 22, 6, 5)
-        g.fillRect(cx - 1, base - 19, 4, 8)
-        g.fillStyle = accent
-        g.fillRect(cx - 10, base - 24, 6, 2)
-        g.fillRect(cx - 6, base - 20, 6, 2)
-        g.fillRect(cx - 1, base - 17, 4, 4)
-        g.fillStyle = trim
-        g.fillRect(cx + 3, base - 13, 8, 3)
+        // 魔剑：宽阔锯齿剑身 + 品红锋焰 + 地面法阵（高阶）
+        if (realm >= 2) {
+          g.save()
+          g.strokeStyle = 'rgba(95, 208, 168, 0.55)'
+          g.lineWidth = 1.5
+          g.beginPath(); g.ellipse(cx + 2, deskY - 10, 16 + realm * 2, 5, 0, 0, Math.PI * 2); g.stroke()
+          g.strokeStyle = 'rgba(95, 208, 168, 0.25)'
+          g.beginPath(); g.ellipse(cx + 2, deskY - 10, 11 + realm * 2, 3.5, 0, 0, Math.PI * 2); g.stroke()
+          g.restore()
+        }
+        g.save()
+        g.shadowColor = 'rgba(255, 79, 176, 0.9)'
+        g.shadowBlur = 7 + realm * 3
+        g.fillStyle = '#4a1f9a'
+        g.fillRect(cx + 2, base - 54, 9, 11)
+        g.fillRect(cx + 1, base - 43, 9, 9)
+        g.fillRect(cx, base - 34, 8, 8)
+        g.fillRect(cx - 1, base - 26, 6, 6)
+        g.fillStyle = '#ff4fb0'
+        g.fillRect(cx + 10, base - 54, 2, 11)
+        g.fillRect(cx + 9, base - 43, 2, 9)
+        g.fillRect(cx + 7, base - 34, 2, 8)
+        g.fillRect(cx + 4, base - 26, 2, 6)
+        g.restore()
+        // 剑身符纹
+        g.fillStyle = '#ffd27a'
+        g.fillRect(cx + 5, base - 49, 2, 2)
+        g.fillRect(cx + 6, base - 39, 2, 2)
+        g.fillRect(cx + 4, base - 30, 2, 2)
+        // 护手 + 剑柄 + 剑首
+        g.fillStyle = '#f2c14e'
+        g.fillRect(cx - 9, base - 20, 15, 3)
+        g.fillStyle = '#ffe9a8'
+        g.fillRect(cx - 9, base - 20, 15, 1)
+        g.fillStyle = '#2a1a2a'
+        g.fillRect(cx - 4, base - 17, 4, 10)
         g.fillStyle = '#7a3f52'
-        g.fillRect(cx + 9, base - 11, 5, 5)
+        g.fillRect(cx - 3, base - 17, 1, 10)
+        g.fillStyle = '#c23a3a'
+        g.fillRect(cx - 5, base - 7, 6, 4)
+        g.fillStyle = '#ff9aa8'
+        g.fillRect(cx - 4, base - 6, 2, 2)
+        if (working) {
+          g.fillStyle = 'rgba(255, 79, 176, 0.95)'
+          g.fillRect(cx + 12, base - 58 - Math.round(Math.sin(time / 160) * 3), 2, 2)
+          g.fillRect(cx + 2, base - 62 - Math.round(Math.cos(time / 200) * 2), 2, 2)
+        }
         break
       }
       default: break
