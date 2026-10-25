@@ -1,27 +1,49 @@
-﻿/** Click-to-dispatch entry: a header button that stages a plan from a small form. */
+/** Click-to-dispatch entry: a header button that stages a plan from a small form. */
 import { useEffect, useRef, useState } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import css from './QuickStartDialog.module.css'
 
+type TplKey = 'quickstart.tplFix' | 'quickstart.tplFeat' | 'quickstart.tplResearch' | 'quickstart.tplAudit'
+  | 'quickstart.tplBuild' | 'quickstart.tplArray' | 'quickstart.tplDocs' | 'quickstart.tplDebate'
+
 interface QuickTemplate {
   readonly id: string
-  readonly labelKey: 'quickstart.tplFix' | 'quickstart.tplFeat' | 'quickstart.tplResearch' | 'quickstart.tplAudit'
+  readonly labelKey: TplKey
+  readonly descKey: string
   readonly roles: readonly string[]
 }
 
 const TEMPLATES: readonly QuickTemplate[] = [
-  { id: 'fix', labelKey: 'quickstart.tplFix', roles: ['implementer', 'verifier', 'reviewer'] },
-  { id: 'feat', labelKey: 'quickstart.tplFeat', roles: ['planner', 'implementer', 'verifier', 'reviewer'] },
-  { id: 'research', labelKey: 'quickstart.tplResearch', roles: ['researcher', 'analyst', 'writer', 'reviewer'] },
-  { id: 'audit', labelKey: 'quickstart.tplAudit', roles: ['auditor', 'reviewer'] },
+  { id: 'fix', labelKey: 'quickstart.tplFix', descKey: 'quickstart.desc.fix', roles: ['implementer', 'verifier', 'reviewer'] },
+  { id: 'feat', labelKey: 'quickstart.tplFeat', descKey: 'quickstart.desc.feat', roles: ['planner', 'implementer', 'verifier', 'reviewer'] },
+  { id: 'research', labelKey: 'quickstart.tplResearch', descKey: 'quickstart.desc.research', roles: ['researcher', 'analyst', 'writer', 'reviewer'] },
+  { id: 'audit', labelKey: 'quickstart.tplAudit', descKey: 'quickstart.desc.audit', roles: ['auditor', 'reviewer'] },
+  { id: 'build', labelKey: 'quickstart.tplBuild', descKey: 'quickstart.desc.build', roles: ['implementer', 'verifier', 'operator'] },
+  { id: 'array', labelKey: 'quickstart.tplArray', descKey: 'quickstart.desc.array', roles: ['architect', 'implementer', 'verifier', 'reviewer'] },
+  { id: 'docs', labelKey: 'quickstart.tplDocs', descKey: 'quickstart.desc.docs', roles: ['writer', 'documenter', 'reviewer'] },
+  { id: 'debate', labelKey: 'quickstart.tplDebate', descKey: 'quickstart.desc.debate', roles: ['researcher', 'analyst', 'reviewer'] },
 ]
 
-/** Roles offered by the multi-select; custom names can be added on top. */
-const ROLE_OPTIONS: readonly string[] = [
-  'planner', 'implementer', 'verifier', 'reviewer',
-  'researcher', 'analyst', 'writer', 'auditor',
-  'architect', 'tester', 'documenter', 'operator',
+interface RoleMeta {
+  readonly id: string
+  readonly nameKey: string
+  readonly abilityKey: string
+}
+
+const ROLE_META: readonly RoleMeta[] = [
+  { id: 'planner', nameKey: 'role.planner.name', abilityKey: 'role.planner.ability' },
+  { id: 'implementer', nameKey: 'role.implementer.name', abilityKey: 'role.implementer.ability' },
+  { id: 'verifier', nameKey: 'role.verifier.name', abilityKey: 'role.verifier.ability' },
+  { id: 'reviewer', nameKey: 'role.reviewer.name', abilityKey: 'role.reviewer.ability' },
+  { id: 'researcher', nameKey: 'role.researcher.name', abilityKey: 'role.researcher.ability' },
+  { id: 'analyst', nameKey: 'role.analyst.name', abilityKey: 'role.analyst.ability' },
+  { id: 'writer', nameKey: 'role.writer.name', abilityKey: 'role.writer.ability' },
+  { id: 'auditor', nameKey: 'role.auditor.name', abilityKey: 'role.auditor.ability' },
+  { id: 'architect', nameKey: 'role.architect.name', abilityKey: 'role.architect.ability' },
+  { id: 'tester', nameKey: 'role.tester.name', abilityKey: 'role.tester.ability' },
+  { id: 'documenter', nameKey: 'role.documenter.name', abilityKey: 'role.documenter.ability' },
+  { id: 'operator', nameKey: 'role.operator.name', abilityKey: 'role.operator.ability' },
 ]
 
 function templateOf(id: string): QuickTemplate {
@@ -37,6 +59,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
   const [rolesOpen, setRolesOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [blocked, setBlocked] = useState(false)
   const [created, setCreated] = useState<string | undefined>()
   const multiRef = useRef<HTMLDivElement | null>(null)
 
@@ -53,6 +76,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
   const reset = (): void => {
     setGoal('')
     setError('')
+    setBlocked(false)
     setCreated(undefined)
     setBusy(false)
     setRolesOpen(false)
@@ -64,13 +88,17 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
   const toggleRole = (role: string): void => {
     setRoles((current) => current.includes(role) ? current.filter(entry => entry !== role) : [...current, role])
   }
+  const roleName = (id: string): string => {
+    const meta = ROLE_META.find(entry => entry.id === id)
+    return meta === undefined ? id : t(meta.nameKey as Parameters<typeof t>[0])
+  }
   const addCustomRole = (): void => {
     const trimmed = customRole.trim()
     if (trimmed === '') return
     setRoles((current) => current.includes(trimmed) ? current : [...current, trimmed])
     setCustomRole('')
   }
-  const submit = async (): Promise<void> => {
+  const submit = async (replace: boolean): Promise<void> => {
     const trimmed = goal.trim()
     if (trimmed === '') { setError(t('quickstart.goalRequired')); return }
     setBusy(true)
@@ -79,17 +107,14 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
       const response = await fetch('/plugins/dsh-agent-teams/quick-start', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          goal: trimmed,
-          template,
-          roles,
-        }),
+        body: JSON.stringify({ sessionId, goal: trimmed, template, roles, replace }),
       })
       const body = await response.json().catch(() => null) as { ok?: boolean; teamId?: string; error?: string } | null
       if (!response.ok || body?.ok !== true) {
         const raw = body?.error ?? `HTTP ${response.status}`
-        throw new Error(/already lead team/i.test(raw) ? t('quickstart.teamExists') : raw)
+        const existing = /already lead team/i.test(raw)
+        setBlocked(existing)
+        throw new Error(existing ? t('quickstart.teamExists') : raw)
       }
       setCreated(body.teamId ?? '')
       setGoal('')
@@ -103,7 +128,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
 
   return (
     <>
-      <button type="button" className={css.entry} data-quick-start-entry title={t('quickstart.entryTitle')} onClick={() => { setOpen(true); setError(''); setCreated(undefined) }}>
+      <button type="button" className={css.entry} data-quick-start-entry title={t('quickstart.entryTitle')} onClick={() => { setOpen(true); setError(''); setBlocked(false); setCreated(undefined) }}>
         <span aria-hidden>⛩</span>{t('quickstart.entry')}
       </button>
       <Modal
@@ -114,7 +139,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
         footer={(
           <span className={css.actions}>
             <button type="button" disabled={busy} onClick={() => { setOpen(false); reset() }}>{t('quickstart.cancel')}</button>
-            <button type="button" disabled={busy} data-primary onClick={() => { void submit() }}>
+            <button type="button" disabled={busy} data-primary onClick={() => { void submit(false) }}>
               {busy ? t('quickstart.busy') : t('quickstart.submit')}
             </button>
           </span>
@@ -127,6 +152,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
             <select value={template} disabled={busy} onChange={(event) => { chooseTemplate(event.target.value) }}>
               {TEMPLATES.map(entry => <option key={entry.id} value={entry.id}>{t(entry.labelKey)}</option>)}
             </select>
+            <small className={css.templateDesc}>{t(templateOf(template).descKey as Parameters<typeof t>[0])}</small>
           </label>
           <label className={css.field}>
             <span>{t('quickstart.goal')}</span>
@@ -154,16 +180,18 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
                 <span className={css.chips}>
                   {roles.length === 0
                     ? <span className={css.placeholder}>{t('quickstart.rolesEmpty')}</span>
-                    : roles.map(role => <span key={role} className={css.chip}>{role}</span>)}
+                    : roles.map(role => <span key={role} className={css.chip}>{roleName(role)}</span>)}
                 </span>
                 <span className={css.caret} aria-hidden>▾</span>
               </button>
               {rolesOpen && (
                 <div className={css.multiPanel} role="listbox" aria-multiselectable="true" aria-label={t('quickstart.roles')}>
-                  {ROLE_OPTIONS.map(role => (
-                    <label key={role} className={css.option}>
-                      <input type="checkbox" checked={roles.includes(role)} onChange={() => { toggleRole(role) }} />
-                      <span>{role}</span>
+                  {ROLE_META.map(meta => (
+                    <label key={meta.id} className={css.option}>
+                      <input type="checkbox" checked={roles.includes(meta.id)} onChange={() => { toggleRole(meta.id) }} />
+                      <span className={css.optionName}>{t(meta.nameKey as Parameters<typeof t>[0])}</span>
+                      <span className={css.optionId}>{meta.id}</span>
+                      <span className={css.optionAbility}>{t(meta.abilityKey as Parameters<typeof t>[0])}</span>
                     </label>
                   ))}
                   <div className={css.customRow}>
@@ -182,6 +210,12 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
             </div>
           </div>
           {error !== '' && <p className={css.error} role="alert">{error}</p>}
+          {blocked && (
+            <p className={css.replaceRow}>
+              <span>{t('quickstart.replaceHint')}</span>
+              <button type="button" disabled={busy} onClick={() => { void submit(true) }}>{t('quickstart.replace')}</button>
+            </p>
+          )}
           {created !== undefined && <p className={css.success} role="status">{t('quickstart.created', { team: created })}</p>}
         </div>
       </Modal>

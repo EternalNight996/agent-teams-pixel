@@ -381,15 +381,26 @@ export function apply(ctx: Context, config: Config): void {
           return
         }
         const plan = buildQuickStartPlan(goal, template, roles)
+        const replace = payload.replace === true
         const abort = new AbortController()
         const timeout = setTimeout(() => { abort.abort() }, 30_000)
+        const run = { agent: captain, signal: abort.signal, deferContext() {}, concludeTurn() {} }
         try {
+          if (replace) {
+            // Explicit user choice: end the current sect so a new one can be founded.
+            const remove = tools?.get?.('agent_teams_delete')
+            try {
+              await remove?.execute?.({}, run)
+            } catch {
+              // The current team may already be gone; creation decides the real outcome.
+            }
+          }
           const value = await definition.execute({
             name: plan.teamName,
             description: goal,
             approval: 'required',
             plan: { members: plan.members, tasks: plan.tasks },
-          }, { agent: captain, signal: abort.signal, deferContext() {}, concludeTurn() {} }) as { team_id?: string; phase?: string; team_name?: string }
+          }, run) as { team_id?: string; phase?: string; team_name?: string }
           res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
           res.end(JSON.stringify({ ok: true, teamId: value.team_id, teamName: value.team_name, phase: value.phase, template: plan.template, tasks: plan.tasks.length }))
         } catch (error: unknown) {

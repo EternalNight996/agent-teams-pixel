@@ -174,3 +174,49 @@
 }
 
 .customRow button:disabled { opacity: 0.5; cursor: default; }
+
+.templateDesc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.option { flex-wrap: wrap; }
+
+.optionName { font-weight: 600; }
+
+.optionId {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.optionAbility {
+  flex-basis: 100%;
+  padding-left: 22px;
+  font-size: 10px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.replaceRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-state-warning-primary) 40%, var(--dsw-alias-border-l2));
+  background: color-mix(in srgb, var(--dsw-alias-state-warning-primary) 8%, transparent);
+  font-size: 11px;
+}
+
+.replaceRow button {
+  padding: 5px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font-size: 11px;
+  cursor: pointer;
+}
