@@ -1,5 +1,5 @@
 /**
- * Server-side 修仙宗·start plans for the click-to-dispatch entry.
+ * Server-side quick-start plans for the click-to-dispatch entry.
  *
  * The Web dialog collects a goal plus an optional template and roster; this
  * module turns that into the same staged plan shape the captain tool accepts,
@@ -7,6 +7,11 @@
  */
 
 /** One built-in template: default roles and a small task DAG. */
+export const SECT_NAMES: Record<string, string> = {
+  fix: '斗法宗', feat: '开山宗', research: '寻仙宗', audit: '巡查宗',
+  build: '炼器宗', array: '布阵宗', docs: '传道宗', debate: '论道宗',
+}
+
 export const ROLE_NAMES: Record<string, string> = {
   planner: '军师', implementer: '剑修', verifier: '丹修', reviewer: '执法长老',
   researcher: '散修', analyst: '推演师', writer: '书记', auditor: '巡查使',
@@ -126,7 +131,7 @@ function shortGoal(goal: string, max: number): string {
   return flat.length <= max ? flat : `${flat.slice(0, Math.max(1, max - 1))}…`
 }
 
-/** Build the staged plan a 修仙宗·start request turns into. */
+/** Build the staged plan a quick-start request turns into. */
 export function buildQuickStartPlan(goal: string, templateId: string, requestedRoles?: readonly string[]): QuickStartPlan {
   const template = templateOf(templateId)
   const cleaned = [...new Set((requestedRoles ?? []).map(role => role.trim()).filter(role => role !== ''))]
@@ -140,5 +145,5 @@ export function buildQuickStartPlan(goal: string, templateId: string, requestedR
     assignee: ROLE_NAMES[roles.includes(task.role) ? task.role : roles[index % roles.length] as string] ?? (roles.includes(task.role) ? task.role : roles[index % roles.length] as string),
     dependencies: [...(task.dependencies ?? [])],
   }))
-  return { teamName: `修仙宗·${template.id}-${stamp}`, template: template.id, members, tasks }
+  return { teamName: `${SECT_NAMES[template.id] ?? '修仙宗'}·${stamp.slice(8)}`, template: template.id, members, tasks }
 }

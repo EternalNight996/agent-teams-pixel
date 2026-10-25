@@ -1,11 +1,12 @@
 /**
- * Server-side 修仙宗·start plans for the click-to-dispatch entry.
+ * Server-side quick-start plans for the click-to-dispatch entry.
  *
  * The Web dialog collects a goal plus an optional template and roster; this
  * module turns that into the same staged plan shape the captain tool accepts,
  * so the host never invents a second team model.
  */
 /** One built-in template: default roles and a small task DAG. */
+export declare const SECT_NAMES: Record<string, string>;
 export declare const ROLE_NAMES: Record<string, string>;
 export interface QuickStartTemplate {
     readonly id: string;
@@ -35,5 +36,5 @@ export interface QuickStartPlan {
         dependencies: string[];
     }[];
 }
-/** Build the staged plan a 修仙宗·start request turns into. */
+/** Build the staged plan a quick-start request turns into. */
 export declare function buildQuickStartPlan(goal: string, templateId: string, requestedRoles?: readonly string[]): QuickStartPlan;

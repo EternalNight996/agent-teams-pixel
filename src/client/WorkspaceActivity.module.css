@@ -180,3 +180,5 @@
 @keyframes breathe { to { opacity: .45; } }
 @container team-workspace (min-width: 720px) { .content { padding: 24px 24px 32px; } .heading { margin-bottom: 24px; } }
 @media (prefers-reduced-motion: reduce) { .skeleton i { animation: none; } .root button { transition: none; } }
+
+.teamPickerSelect[data-current='true'] { color: #4ec98a; border-color: #4ec98a; background: color-mix(in srgb, #4ec98a 10%, var(--dsw-alias-bg-layer-1)); }
