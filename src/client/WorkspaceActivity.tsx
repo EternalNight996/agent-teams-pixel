@@ -1,5 +1,5 @@
 /** Native workspace content; discovery remains mounted independently of tab lifetime. */
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 import { ActivityPanel, TeamSection, historicCardTeam, type ActivityPanelProps } from './ActivityPanel.tsx'
@@ -137,9 +137,54 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     setView(next)
     try { window.localStorage.setItem(WORKSPACE_VIEW_KEY, next) } catch { /* private mode */ }
   }
-  // The wall facility whose panel is open. One sheet at a time keeps the hall visible.
+  // The wall facility whose panel is open. One floating panel at a time keeps the hall visible.
   const [sheet, setSheet] = useState<SceneAction | undefined>()
   const sheetRef = useRef<HTMLElement | null>(null)
+  // 悬浮面板：可拖动（拖标题栏）、可拖右下角改大小，位置只作会话内记忆。
+  const [sheetOffset, setSheetOffset] = useState({ x: 0, y: 0 })
+  const sheetDrag = useRef<{
+    startX: number; startY: number; baseX: number; baseY: number
+    minX: number; maxX: number; minY: number; maxY: number
+  } | null>(null)
+  const beginSheetDrag = (event: ReactPointerEvent<HTMLElement>): void => {
+    if ((event.target as HTMLElement).closest('button') !== null) return
+    const panel = sheetRef.current
+    const stage = panel?.parentElement
+    if (panel === null || stage === null || stage === undefined) return
+    event.preventDefault()
+    const pr = panel.getBoundingClientRect()
+    const sr = stage.getBoundingClientRect()
+    const halfStage = sr.width / 2
+    const minX = Math.min(0, 8 - halfStage + pr.width / 2)
+    const maxX = Math.max(0, halfStage - 8 - pr.width / 2)
+    sheetDrag.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      baseX: sheetOffset.x,
+      baseY: sheetOffset.y,
+      minX,
+      maxX,
+      minY: 0,
+      maxY: Math.max(0, sr.height - 24 - pr.height),
+    }
+    const onMove = (moveEvent: PointerEvent): void => {
+      const drag = sheetDrag.current
+      if (drag === null) return
+      const clamp = (value: number, low: number, high: number): number => Math.min(high, Math.max(low, value))
+      setSheetOffset({
+        x: clamp(drag.baseX + (moveEvent.clientX - drag.startX), drag.minX, drag.maxX),
+        y: clamp(drag.baseY + (moveEvent.clientY - drag.startY), drag.minY, drag.maxY),
+      })
+    }
+    const onUp = (): void => {
+      sheetDrag.current = null
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }
+  useEffect(() => { setSheetOffset({ x: 0, y: 0 }) }, [sheet])
   // First visit: one floating line explains what on the wall is clickable.
   const [guide, setGuide] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false
@@ -380,8 +425,10 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
                 aria-modal="false"
                 aria-label={sheetTitle(sheet)}
                 tabIndex={-1}
+                style={{ '--sheet-dx': `${sheetOffset.x}px`, '--sheet-dy': `${sheetOffset.y}px` } as CSSProperties}
               >
-                <header className={css.sheetHead}>
+                <header className={css.sheetHead} onPointerDown={beginSheetDrag}>
+                  <span className={css.sheetGrip} aria-hidden>⠿</span>
                   <span className={css.sheetTitle}>{sheetTitle(sheet)}</span>
                   <span className={css.sheetMeta}>{selected.name} · {t('team.stats.completed', { completed: completedCount, total: selected.tasks.length })}</span>
                   <button

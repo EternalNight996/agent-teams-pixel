@@ -114,7 +114,7 @@
   z-index: 3;
   padding: 0;
   border: 0;
-  background: rgb(8 12 10 / 34%);
+  background: rgb(8 12 10 / 22%);
   cursor: default;
   animation: scrimIn 140ms ease-out;
 }
@@ -124,39 +124,34 @@
   to { opacity: 1; }
 }
 
+/* Floating panel: centred near the top of the hall, draggable by its title bar
+   and resizable from the corner, so content size never fights the canvas size.
+   The hall stays visible behind it; the light scrim only separates focus. */
 .sheet {
   position: absolute;
-  inset: 8px;
   z-index: 4;
+  top: 16px;
+  left: 50%;
+  transform: translate(calc(-50% + var(--sheet-dx, 0px)), var(--sheet-dy, 0px));
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  min-height: 0;
+  width: min(620px, calc(100% - 24px));
+  max-width: calc(100% - 16px);
+  max-height: calc(100% - 32px);
+  min-width: 280px;
+  min-height: 180px;
   border-radius: 12px;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 82%, transparent);
   background: var(--dsw-alias-bg-layer-1);
-  box-shadow: 0 16px 48px rgb(0 0 0 / 42%);
+  box-shadow: 0 22px 60px rgb(0 0 0 / 52%), 0 2px 0 rgb(255 255 255 / 4%) inset;
   overflow: hidden;
-  animation: sheetIn 180ms cubic-bezier(.2, .8, .2, 1);
+  resize: both;
+  animation: sheetFloatIn 160ms ease-out;
 }
 
-@keyframes sheetIn {
-  from { opacity: 0; transform: translateY(-8px) scale(.992); }
-  to { opacity: 1; transform: none; }
-}
-/* List panels open next to the wall the click came from (top-right), not at the
-   far bottom of a tall hall, so the answer appears where the user just clicked.
-   The 功德碑 keeps the previous full-canvas presentation: its ring + task list
-   need the whole width, so it takes the hall over like before. */
-.sheet[data-sheet='teams'],
-.sheet[data-sheet='inbox'] {
-  inset: 8px 8px auto auto;
-  width: min(380px, calc(100% - 16px));
-  max-height: calc(100% - 16px);
-}
-.sheet[data-sheet='config'] {
-  inset: 8px 8px auto;
-  max-height: calc(100% - 16px);
+@keyframes sheetFloatIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .sheet:focus { outline: none; }
 .sheetHead {
@@ -164,9 +159,19 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 8px 7px 12px;
+  padding: 7px 8px 7px 10px;
   border-bottom: 1px solid var(--dsw-alias-border-l2);
+  cursor: move;
+  user-select: none;
+  touch-action: none;
   background: color-mix(in srgb, var(--dsw-alias-bg-module-platform) 65%, var(--dsw-alias-bg-layer-1));
+}
+.sheetGrip {
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: -1px;
 }
 .sheetTitle { font-size: 12px; font-weight: 650; letter-spacing: -0.2px; white-space: nowrap; }
 .sheetMeta {

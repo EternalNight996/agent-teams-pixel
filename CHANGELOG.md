@@ -19,10 +19,12 @@
   motes and a lotus pond (with koi, ripples and reeds) give the courtyard floor
   structure.
 - The hall stops at a 640px-tall card and centres in the tab instead of
-  stretching into an endless canvas, and the 山门/传音阁 list sheets now open at
-  the top-right next to the wall (was bottom-right), so the answer appears where
-  the click happened. The 功德碑 keeps its previous full-canvas sheet: its ring
-  and completion list need the width.
+  stretching into an endless canvas.
+- Facility panels are now one floating dialog: it floats over the still-visible
+  hall, is dragged by its title bar (⠿ grip, clamped to the stage), resized from
+  the bottom-right corner, and reopens centred each time. A light scrim still
+  closes it on an outside click, and Esc/× work as before. Content size no
+  longer has to fight the canvas size.
 - Sheets animate in, take focus as a dialog on open (not the ×), close on Esc /
   the scrim / ×, and the plan/setup sheet hugs its content instead of leaving a
   blank column.
