@@ -350,6 +350,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
             onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
             onUnavailable={showOfficeHint}
           />
+          <p className={css.hallHint} data-hall-hint>{t('office.hintShort')}</p>
           {guide && sheet === undefined && (
             <div className={css.hallGuide} role="note" data-hall-guide>
               <span>{t('office.guide')}</span>

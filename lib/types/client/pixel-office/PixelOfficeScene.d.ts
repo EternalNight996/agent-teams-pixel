@@ -63,6 +63,8 @@ export interface SceneModel {
     readonly facilities?: readonly SceneFacility[];
     /** Facility whose panel is currently open (drawn as selected). */
     readonly activeAction?: SceneAction;
+    /** 闲置修士随机说的一句话（由调用方本地化），空数组则不显示闲聊。 */
+    readonly chatter?: readonly string[];
 }
 export type { SceneAction } from './office-actions.ts';
 export interface SceneHandle {

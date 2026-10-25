@@ -272,6 +272,24 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
+/* 常驻引导：一句小字提醒「什么可以点」，不挡画面、不误触。 */
+.hallHint {
+  position: absolute;
+  z-index: 4;
+  left: 12px;
+  bottom: 12px;
+  margin: 0;
+  padding: 3px 9px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 80%, transparent);
+  border-radius: 999px;
+  background: rgb(16 20 24 / 72%);
+  color: #cbd5e1;
+  font-size: 10px;
+  line-height: 15px;
+  letter-spacing: 0.2px;
+  pointer-events: none;
+}
+
 /* First-visit coach line: one floating sentence, dismissed once. */
 .hallGuide {
   position: absolute;

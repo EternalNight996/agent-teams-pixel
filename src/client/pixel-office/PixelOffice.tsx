@@ -50,6 +50,12 @@ const FACILITY_GLYPH: Readonly<Record<SceneAction, string>> = {
 
 const ALL_ACTIONS: readonly SceneAction[] = FACILITY_ORDER
 
+/** 闲置修士的随机闲聊：短句、与任务无关，按角色口吻写。 */
+const CHATTER_KEYS: readonly AgentTeamsLocaleKey[] = [
+  'office.chatter.1', 'office.chatter.2', 'office.chatter.3', 'office.chatter.4',
+  'office.chatter.5', 'office.chatter.6', 'office.chatter.7', 'office.chatter.8',
+]
+
 function sceneLabel(activity: SceneMember['activity'], t: AgentTeamsTranslate): string {
   if (activity === 'working') return t('office.working')
   if (activity === 'unknown') return t('office.unknown')
@@ -119,6 +125,8 @@ export function PixelOffice({
       members,
       activeAction: activeAction ?? undefined,
       facilities,
+      // 闲置闲聊：设定好的短句，由场景按 seed 随机挑一句冒泡。
+      chatter: CHATTER_KEYS.map(key => t(key)),
       labels: {
         captain: t('office.captain'),
         stalled: t('office.stalled'),

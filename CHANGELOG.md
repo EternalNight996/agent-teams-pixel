@@ -23,6 +23,14 @@
   blank column.
 
 ### Added
+- Idle cultivators leave their desks: they stroll the courtyard on a reproducible
+  per-seed loop (62% walking, the rest pausing) and return to the desk the moment
+  a task starts; desks, incense burners and 本命法器 stay behind.
+- Idle cultivators occasionally speak a preset line in a small bubble (eight
+  short zh/en lines, one every ~11–18 s per member, never while a task bubble is
+  showing).
+- A persistent one-line hall hint (bottom-left) plus the first-visit coach line:
+  "点修士看会话 · 点墙上设施开面板".
 - `office.facility.*`, `office.action.*Hint`, `office.sceneAria`, `office.rail`,
   `office.closePanel`, `office.guide`, `office.teamsHint` and `office.inboxCount`
   locale keys (zh/en).
