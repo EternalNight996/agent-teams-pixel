@@ -115,6 +115,12 @@
   border: 0;
   background: rgb(8 12 10 / 34%);
   cursor: default;
+  animation: scrimIn 140ms ease-out;
+}
+
+@keyframes scrimIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .sheet {
@@ -130,14 +136,25 @@
   background: var(--dsw-alias-bg-layer-1);
   box-shadow: 0 16px 48px rgb(0 0 0 / 42%);
   overflow: hidden;
+  animation: sheetIn 180ms cubic-bezier(.2, .8, .2, 1);
 }
-/* Lists stay small; progress/config need the room. */
+
+@keyframes sheetIn {
+  from { opacity: 0; transform: translateY(10px) scale(.992); }
+  to { opacity: 1; transform: none; }
+}
+/* Lists stay small; progress uses the room; the plan/setup card hugs its content. */
 .sheet[data-sheet='teams'],
 .sheet[data-sheet='inbox'] {
   inset: auto 8px 8px auto;
   width: min(380px, calc(100% - 16px));
   max-height: calc(100% - 16px);
 }
+.sheet[data-sheet='config'] {
+  inset: 8px 8px auto;
+  max-height: calc(100% - 16px);
+}
+.sheet:focus { outline: none; }
 .sheetHead {
   flex: 0 0 auto;
   display: flex;
@@ -255,6 +272,40 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
+/* First-visit coach line: one floating sentence, dismissed once. */
+.hallGuide {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 24px);
+  padding: 7px 8px 7px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, #d4af37 45%, var(--dsw-alias-border-l2));
+  background: rgb(18 22 26 / 94%);
+  color: #e8eef8;
+  font-size: 11px;
+  line-height: 1.55;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 38%);
+  animation: officeHintIn 200ms ease-out;
+}
+.hallGuide span { flex: 1 1 auto; }
+.hallGuide button {
+  flex: none;
+  padding: 4px 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  background: rgba(212, 175, 55, 0.14);
+  color: #ffe9a8;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.hallGuide button:hover { background: rgba(212, 175, 55, 0.26); }
+
 
 .heading { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; margin-bottom: 8px; }
 .heading img { width: 26px; height: 26px; object-fit: contain; }
@@ -332,6 +383,10 @@
 .skeleton i:last-child { animation-delay: .3s; }
 @keyframes breathe { to { opacity: .45; } }
 @container team-workspace (min-width: 720px) { .content { padding: 24px 24px 32px; } .heading { margin-bottom: 24px; } }
-@media (prefers-reduced-motion: reduce) { .skeleton i { animation: none; } .root button { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton i { animation: none; }
+  .root button { transition: none; }
+  .sheet, .scrim, .hallGuide { animation: none; }
+}
 
 .teamPickerSelect[data-current='true'] { color: #4ec98a; border-color: #4ec98a; background: color-mix(in srgb, #4ec98a 10%, var(--dsw-alias-bg-layer-1)); }

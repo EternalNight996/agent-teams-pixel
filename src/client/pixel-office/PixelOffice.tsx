@@ -258,7 +258,7 @@ export function PixelOffice({
             {hover.kind === 'member' ? (
               <>
                 <strong>{hover.name}</strong>
-                <span>{roleLabel(hover.role, hover.name, t)} · {hover.realm}</span>
+                <span>{hover.role === 'captain' ? hover.realm : `${roleLabel(hover.role, hover.name, t)} · ${hover.realm}`}</span>
                 <span data-activity={hover.activity}>{sceneLabel(hover.activity, t)}{hover.task === '' ? '' : ` · ${hover.task}`}</span>
               </>
             ) : (

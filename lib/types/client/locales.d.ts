@@ -249,6 +249,10 @@ export declare const zh: {
     'office.sceneAria': string;
     'office.rail': string;
     'office.closePanel': string;
+    'office.guide': string;
+    'office.guideDismiss': string;
+    'office.teamsHint': string;
+    'office.inboxCount': string;
     'office.stagedReview': string;
     'office.facility.teams': string;
     'office.facility.board': string;
@@ -645,6 +649,10 @@ export declare const en: {
     'office.sceneAria': string;
     'office.rail': string;
     'office.closePanel': string;
+    'office.guide': string;
+    'office.guideDismiss': string;
+    'office.teamsHint': string;
+    'office.inboxCount': string;
     'office.stagedReview': string;
     'office.facility.teams': string;
     'office.facility.board': string;

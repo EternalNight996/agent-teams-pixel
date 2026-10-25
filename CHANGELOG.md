@@ -10,13 +10,24 @@
 - The wall is a real menu: facilities get hover outlines, labelled wooden tags,
   live counts (progress on 功德碑, unread badge on 传音阁) and pointer cursors. The
   floater only enables the 功德碑 (board) facility.
+- The wall tags now carry a trailing › and a hover cursor; hovering a cultivator
+  draws gold corner brackets around the desk, and the action tooltip opens below
+  the pointer so it cannot be clipped at the wall.
 - Tall panes paint the hall floor to the bottom edge instead of floating the
-  world in dead bands; rows spread and centre themselves, an incomplete last row
-  is centred, and a faint 聚灵阵 gives the courtyard floor structure.
+  world in dead bands; rows anchor under the wall, an incomplete last row is
+  centred, and a faint 聚灵阵, stone lanterns, an incense burner, drifting qi
+  motes and a lotus pond (with koi, ripples and reeds) give the courtyard floor
+  structure.
+- Sheets animate in, take focus as a dialog on open (not the ×), close on Esc /
+  the scrim / ×, and the plan/setup sheet hugs its content instead of leaving a
+  blank column.
 
 ### Added
-- `office.facility.*`, `office.action.*Hint`, `office.sceneAria`, `office.rail`
-  and `office.closePanel` locale keys (zh/en).
+- `office.facility.*`, `office.action.*Hint`, `office.sceneAria`, `office.rail`,
+  `office.closePanel`, `office.guide`, `office.teamsHint` and `office.inboxCount`
+  locale keys (zh/en).
+- A one-time floating coach line (localStorage `agent-teams-pixel.hallGuide`)
+  names the four wall facilities and the cultivator desks on first visit.
 - `src/client/pixel-office/office-actions.ts`: one shared facility layout for the
   renderer and the React hit surface, with a unit test for non-overlap and
   centre hit-testing.

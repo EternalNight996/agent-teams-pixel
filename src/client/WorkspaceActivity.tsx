@@ -21,6 +21,8 @@ export const TEAM_TAB_ID = 'agent-teams-pixel/activity'
 
 /** Persisted history-page preference: progress board vs setup page. */
 const WORKSPACE_VIEW_KEY = 'agent-teams-pixel.workspaceView'
+/** One-time coach line pointing at the wall menu (dismissed once, then never again). */
+const HALL_GUIDE_KEY = 'agent-teams-pixel.hallGuide'
 
 /** Optional host integration is observable so installing/removing it also switches the fallback. */
 export function createWorkspaceBridge() {
@@ -137,6 +139,28 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   }
   // The wall facility whose panel is open. One sheet at a time keeps the hall visible.
   const [sheet, setSheet] = useState<SceneAction | undefined>()
+  const sheetRef = useRef<HTMLElement | null>(null)
+  // First visit: one floating line explains what on the wall is clickable.
+  const [guide, setGuide] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    try { return window.localStorage.getItem(HALL_GUIDE_KEY) !== '1' } catch { return false }
+  })
+  const dismissGuide = (): void => {
+    setGuide(false)
+    try { window.localStorage.setItem(HALL_GUIDE_KEY, '1') } catch { /* private mode */ }
+  }
+  useEffect(() => {
+    if (!guide) return
+    const timer = window.setTimeout(dismissGuide, 12000)
+    return () => { window.clearTimeout(timer) }
+  }, [guide])
+  useEffect(() => {
+    if (sheet === undefined) return
+    // Focus the dialog itself (not the ×) so mouse users do not get a heavy
+    // focus ring; Tab then reaches the close button like any dialog.
+    const frame = window.requestAnimationFrame(() => { sheetRef.current?.focus() })
+    return () => { window.cancelAnimationFrame(frame) }
+  }, [sheet])
   // 点击没有会话的修士时给一条短暂提示，而不是跳转到空对话。
   const [officeHint, setOfficeHint] = useState('')
   const officeHintTimer = useRef<number | undefined>(undefined)
@@ -244,7 +268,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     if (kind === 'teams') {
       return (
         <div className={css.sheetSection}>
-          <p className={css.sheetHint}>{t('workspace.guide')}</p>
+          <p className={css.sheetHint}>{t('office.teamsHint')}</p>
           <ul className={css.teamList}>
             {records.map(team => {
               const current = selected !== undefined && team.teamId === selected.teamId
@@ -284,7 +308,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     }
     return (
       <div className={css.sheetSection}>
-        <p className={css.sheetHint}>{t('workspace.inboxHint')}</p>
+        <p className={css.sheetHint}>{t('office.inboxCount', { count: team.captainInbox.length })}</p>
         <ul className={css.inboxList}>
           {team.captainInbox.map((message, index) => (
             <li key={`${index}:${message.from}`} className={css.inboxRow}>
@@ -326,6 +350,12 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
             onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
             onUnavailable={showOfficeHint}
           />
+          {guide && sheet === undefined && (
+            <div className={css.hallGuide} role="note" data-hall-guide>
+              <span>{t('office.guide')}</span>
+              <button type="button" onClick={dismissGuide}>{t('office.guideDismiss')}</button>
+            </div>
+          )}
           {selected.phase === 'staged' && sheet !== 'config' && (
             <div className={css.stagedRibbon} data-staged-ribbon>
               <span>{t('office.awaiting')}</span>
@@ -342,11 +372,13 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
                 onClick={() => { setSheet(undefined) }}
               />
               <aside
+                ref={sheetRef}
                 className={css.sheet}
                 data-sheet={sheet}
                 role="dialog"
                 aria-modal="false"
                 aria-label={sheetTitle(sheet)}
+                tabIndex={-1}
               >
                 <header className={css.sheetHead}>
                   <span className={css.sheetTitle}>{sheetTitle(sheet)}</span>
