@@ -1,4 +1,4 @@
-/* Click-to-dispatch header button and its small staging dialog. */
+﻿/* Click-to-dispatch header button and its small staging dialog. */
 
 .entry {
   display: inline-flex;
@@ -118,12 +118,9 @@
 .caret { margin-left: auto; color: var(--dsw-alias-label-secondary); font-size: 10px; }
 
 .multiPanel {
-  position: absolute;
-  z-index: 5;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  max-height: 230px;
+  position: static;
+  margin-top: 4px;
+  max-height: 200px;
   overflow: auto;
   padding: 6px;
   border-radius: 10px;

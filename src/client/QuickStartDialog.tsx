@@ -1,4 +1,4 @@
-/** Click-to-dispatch entry: a header button that stages a plan from a small form. */
+﻿/** Click-to-dispatch entry: a header button that stages a plan from a small form. */
 import { useEffect, useRef, useState } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
@@ -104,7 +104,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
   return (
     <>
       <button type="button" className={css.entry} data-quick-start-entry title={t('quickstart.entryTitle')} onClick={() => { setOpen(true); setError(''); setCreated(undefined) }}>
-        <span aria-hidden>＋</span>{t('quickstart.entry')}
+        <span aria-hidden>⛩</span>{t('quickstart.entry')}
       </button>
       <Modal
         open={open}

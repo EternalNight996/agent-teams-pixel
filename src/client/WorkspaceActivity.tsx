@@ -1,4 +1,4 @@
-/** Native workspace content; discovery remains mounted independently of tab lifetime. */
+﻿/** Native workspace content; discovery remains mounted independently of tab lifetime. */
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
@@ -196,7 +196,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
       <div className={css.content}>
         <header className={css.heading}>
           <img src={LEAD_ART} alt="" aria-hidden />
-          <h2>AgentTeams</h2>
+          <h2>{t('app.title')}</h2>
           <span>{t('workspace.title')}</span>
           {records.length > 0 && (
             <label className={css.teamPicker}>
@@ -283,7 +283,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
               title={t('office.expand')}
               onClick={() => { setOfficeOpenPersist(true) }}
             >
-              <span aria-hidden>🏢</span>
+              <span aria-hidden>⛩</span>
               {t('office.expand')}
             </button>
           </div>

@@ -1,4 +1,4 @@
-/** Pixel-office view of one AgentTeams snapshot, driven by the shared activity model. */
+﻿/** Pixel-office view of one AgentTeams snapshot, driven by the shared activity model. */
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { ActivityTeam } from '../activity-monitor.ts'
 import type { AgentTeamsTranslate } from '../locales.ts'
@@ -137,7 +137,7 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
     <section className={css.office} data-pixel-office data-phase={team.phase} data-halted={team.halted === true || undefined} aria-label={t('office.title')}>
       <header className={css.head}>
         <span className={css.title}>
-          <span aria-hidden>🏢</span>
+          <span aria-hidden>⛩</span>
           {t('office.title')}
           <span className={css.count}>{t('office.members', { count: live.length })}</span>
         </span>
