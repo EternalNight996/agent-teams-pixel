@@ -165,6 +165,20 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   const selected = records.find(team => team.teamId === local.selected.get(sessionId)) ?? records[0]
   const history = selected !== undefined && !live.includes(selected)
   const status = local.statuses.get(sessionId) ?? 'loading'
+  // Auto page: a freshly staged team opens Setup (review/approve); once the
+  // plan is approved and the team starts running, flip to the progress board.
+  const lastTeamRef = useRef<string | undefined>(undefined)
+  const lastPhaseRef = useRef<'staged' | 'running' | undefined>(undefined)
+  useEffect(() => {
+    if (selected === undefined || !live.includes(selected)) return
+    if (lastTeamRef.current !== selected.teamId) {
+      if (selected.phase === 'staged') setWorkspaceView('config')
+    } else if (lastPhaseRef.current === 'staged' && selected.phase === 'running') {
+      setWorkspaceView('board')
+    }
+    lastTeamRef.current = selected.teamId
+    lastPhaseRef.current = selected.phase
+  }, [selected?.teamId, selected?.phase])
   // Explicit reconnect is bounded and cleaned up; ordinary polling is owned by the monitor.
   useEffect(() => {
     if (retry === 0 || !tab.visible) return

@@ -48,6 +48,8 @@ export interface SceneHandle {
   render(model: SceneModel): void
   /** Resize in CSS pixels; devicePixelRatio is handled internally. */
   resize(width: number, height: number): void
+  /** Hit-test a pointer in CSS pixels; returns the member id under it. */
+  hitTest(x: number, y: number): string | undefined
   /** Cancel the loop and release the context. */
   dispose(): void
 }
@@ -122,7 +124,7 @@ export function createPixelScene(
 ): SceneHandle {
   const context = canvas.getContext('2d')
   if (context === null) {
-    return { render() {}, resize() {}, dispose() {} }
+    return { render() {}, resize() {}, dispose() {}, hitTest() { return undefined } }
   }
   const g = context
   let model: SceneModel | undefined
@@ -135,6 +137,7 @@ export function createPixelScene(
   let scale = 1
   let offsetX = 0
   let offsetY = 0
+  let hitAreas: { id: string; x: number; y: number; w: number; h: number }[] = []
   const zoom = options.zoom ?? 1
 
   function fit(): void {
@@ -358,6 +361,7 @@ export function createPixelScene(
       const deskY = TOP_PAD + CELL_H * row + 128
       return { member, cx, deskY }
     })
+    hitAreas = layout.map(item => ({ id: item.member.id, x: item.cx - 62, y: item.deskY - 78, w: 124, h: 98 }))
 
     if (layout.length === 0) {
       g.fillStyle = COLORS.label
@@ -429,6 +433,15 @@ export function createPixelScene(
       canvas.style.width = `${width}px`
       canvas.style.height = `${height}px`
       fit()
+    },
+    hitTest(x, y) {
+      const wx = (x - offsetX) / scale
+      const wy = (y - offsetY) / scale
+      for (let index = hitAreas.length - 1; index >= 0; index--) {
+        const area = hitAreas[index]!
+        if (wx >= area.x && wx <= area.x + area.w && wy >= area.y && wy <= area.y + area.h) return area.id
+      }
+      return undefined
     },
     dispose() {
       disposed = true

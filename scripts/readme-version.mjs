@@ -39,7 +39,10 @@ export function findStaleVersionReferences(markdown, version, known) {
 }
 
 export function findPinnedInstallVersions(markdown) {
-  return [...markdown.matchAll(/@nanmicoder\/dsh-agent-teams@([0-9A-Za-z.-]+)/g)].map(match => match[1])
+  // The package was renamed from `@nanmicoder/dsh-agent-teams` to
+  // `agent-teams-pixel`; pin detection must follow the name that install
+  // commands in the READMEs actually use.
+  return [...markdown.matchAll(/(?<![0-9A-Za-z./-])agent-teams-pixel@([0-9A-Za-z.-]+)/g)].map(match => match[1])
 }
 
 export function checkReadmeVersions({ version, known, files }) {

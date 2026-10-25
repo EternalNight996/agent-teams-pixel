@@ -44,6 +44,8 @@ export interface SceneHandle {
     render(model: SceneModel): void;
     /** Resize in CSS pixels; devicePixelRatio is handled internally. */
     resize(width: number, height: number): void;
+    /** Hit-test a pointer in CSS pixels; returns the member id under it. */
+    hitTest(x: number, y: number): string | undefined;
     /** Cancel the loop and release the context. */
     dispose(): void;
 }

@@ -235,6 +235,7 @@ export declare const zh: {
     'office.collapse': string;
     'office.expand': string;
     'office.resize': string;
+    'office.hint': string;
     'quickstart.entry': string;
     'quickstart.entryTitle': string;
     'quickstart.title': string;
@@ -511,6 +512,7 @@ export declare const en: {
     'office.collapse': string;
     'office.expand': string;
     'office.resize': string;
+    'office.hint': string;
     'quickstart.entry': string;
     'quickstart.entryTitle': string;
     'quickstart.title': string;

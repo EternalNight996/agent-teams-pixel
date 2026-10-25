@@ -1,5 +1,5 @@
 /** Pixel-office view of one AgentTeams snapshot, driven by the shared activity model. */
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { ActivityTeam } from '../activity-monitor.ts'
 import type { AgentTeamsTranslate } from '../locales.ts'
 import { createPixelScene, type SceneMember, type SceneModel } from './PixelOfficeScene.ts'
@@ -27,6 +27,7 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const hostRef = useRef<HTMLDivElement | null>(null)
   const sceneRef = useRef<ReturnType<typeof createPixelScene> | null>(null)
+  const [hover, setHover] = useState<{ id: string; name: string; role: string; activity: SceneMember['activity']; task: string; x: number; y: number } | undefined>()
 
   const model = useMemo<SceneModel>(() => {
     const live = team.members.filter(member => member.status !== 'removed')
@@ -94,6 +95,43 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
   const done = team.tasks.filter(task => task.state === 'completed').length
   const live = team.members.filter(member => member.status !== 'removed')
   const working = live.filter(member => member.activity === 'working').length
+  const sceneMembers = useMemo(() => new Map(model.members.map(member => [member.id, member])), [model])
+  const hitAt = (event: ReactPointerEvent<HTMLCanvasElement>): string | undefined => {
+    const canvas = canvasRef.current
+    if (canvas === null) return undefined
+    const rect = canvas.getBoundingClientRect()
+    return sceneRef.current?.hitTest(event.clientX - rect.left, event.clientY - rect.top)
+  }
+  const onPointerMove = (event: ReactPointerEvent<HTMLCanvasElement>): void => {
+    const id = hitAt(event)
+    const canvas = canvasRef.current
+    if (id === undefined) {
+      if (hover !== undefined) setHover(undefined)
+      if (canvas !== null) canvas.style.cursor = 'default'
+      return
+    }
+    if (canvas !== null) canvas.style.cursor = 'pointer'
+    const member = sceneMembers.get(id)
+    if (member === undefined) return
+    const rect = event.currentTarget.getBoundingClientRect()
+    setHover({
+      id,
+      name: member.name,
+      role: member.role,
+      activity: member.activity,
+      task: member.currentTask ?? '',
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    })
+  }
+  const onPointerLeave = (): void => {
+    setHover(undefined)
+    if (canvasRef.current !== null) canvasRef.current.style.cursor = 'default'
+  }
+  const onClick = (event: ReactPointerEvent<HTMLCanvasElement>): void => {
+    const id = hitAt(event)
+    if (id !== undefined) onOpenMember?.(id)
+  }
 
   return (
     <section className={css.office} data-pixel-office data-phase={team.phase} data-halted={team.halted === true || undefined} aria-label={t('office.title')}>
@@ -122,7 +160,23 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
         )}
       </header>
       <div ref={hostRef} className={css.canvasHost}>
-        <canvas ref={canvasRef} className={css.canvas} role="img" aria-label={t('office.title')} />
+        <canvas
+          ref={canvasRef}
+          className={css.canvas}
+          role="img"
+          aria-label={t('office.title')}
+          title={t('office.hint')}
+          onPointerMove={onPointerMove}
+          onPointerLeave={onPointerLeave}
+          onClick={onClick}
+        />
+        {hover !== undefined && (
+          <div className={css.tooltip} style={{ left: hover.x, top: hover.y }} role="tooltip">
+            <strong>{hover.name}</strong>
+            <span>{hover.role}</span>
+            <span data-activity={hover.activity}>{sceneLabel(hover.activity, t)}{hover.task === '' ? '' : ` · ${hover.task}`}</span>
+          </div>
+        )}
       </div>
       {live.length > 0 && (
         <ul className={css.chips} aria-label={t('office.members', { count: live.length })}>
