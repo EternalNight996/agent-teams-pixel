@@ -1403,6 +1403,31 @@
   padding-right: 12px;
 }
 
+/* 节点内的修士工作状态：头像 + 状态词，颜色随状态变化。 */
+.dagStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 1px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 9.5px;
+  line-height: 12px;
+}
+
+.dagAvatar {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  object-fit: contain;
+}
+
+.dagNode[data-member-state='working'] .dagStatus { color: var(--dsw-alias-state-success-primary); }
+.dagNode[data-member-state='working'] .dagAvatar { animation: agentTeamsBreathe 4.2s ease-in-out infinite; }
+.dagNode[data-member-state='blocked'] .dagStatus { color: var(--dsw-alias-state-warn-primary); }
+.dagNode[data-member-state='failed'] .dagStatus { color: var(--dsw-alias-state-error-primary); }
+.dagNode[data-member-state='idle'] .dagStatus { color: var(--dsw-alias-label-tertiary); }
+.dagNode[data-member-state='done'] .dagStatus { color: var(--dsw-alias-state-success-primary); }
+
 .dagRunningState {
   position: absolute;
   top: 4px;
