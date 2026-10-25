@@ -1,7 +1,7 @@
 /**
  * AgentTeams conversation card: the lightweight in-conversation summary for
- * one team — the captain's whale avatar and name, the member roster as
- * clickable whale avatars (opening the member's subagent transcript), and
+ * one team — the captain's portrait and name, the member roster as
+ * clickable 道途 portraits (opening the member's subagent transcript), and
  * an "activity panel" button that re-activates the top-right floater.
  *
  * The floater and this card share the `agent-teams:open-panel` window event

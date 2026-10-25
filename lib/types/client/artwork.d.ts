@@ -1,13 +1,15 @@
 /**
- * Shared whale artwork lookup for the activity panel and the conversation
- * card: role keywords map to the packaged role images; the captain always
- * uses the lead whale.
+ * Cultivation artwork lookup for the activity panel and the conversation card.
+ *
+ * Every built-in 道途 resolves by role id, so a quick-start roster never falls
+ * back to a bare initial. Custom roles fall back to a keyword heuristic and,
+ * failing that, to the caller's initial-letter badge.
  * @module dsh-agent-teams/client/artwork
  */
 /** Artwork route prefix served by the plugin host half. */
 export declare const ART_BASE = "/plugins/dsh-agent-teams/assets/";
-/** Captain artwork (always the lead whale). */
-export declare const LEAD_ART = "/plugins/dsh-agent-teams/assets/team-lead-v2.png";
+/** Captain portrait (the sect leader). */
+export declare const LEAD_ART = "/plugins/dsh-agent-teams/assets/avatar-captain.png";
 /** Status action artwork per member activity. */
 export declare const ACTION_ART: Record<'working' | 'idle' | 'unknown', string>;
 /**

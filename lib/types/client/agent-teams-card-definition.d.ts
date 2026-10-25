@@ -1,6 +1,6 @@
 /**
  * AgentTeams conversation card: a lightweight in-conversation summary shown
- * when a team is created — the captain's name, the member roster with whale
+ * when a team is created — the captain's name, the member roster with 道途
  * avatars, and an entry point that re-activates the top-right activity
  * panel (useful after the floater was closed, or when re-opening an old
  * session for review).

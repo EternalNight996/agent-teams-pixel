@@ -569,19 +569,17 @@ export function apply(ctx: Context, config: Config): void {
       },
     }), 'agent-teams: plan route')
 
-  // Whale mascot artwork: serve the packaged V2 role/action images to the
-  // activity panel. An explicit allowlist guards the route (no path
+  // Cultivation artwork: serve the packaged 道途 portraits and state icons to
+  // the activity panel. An explicit allowlist guards the route (no path
   // traversal); the images ship with the bundle (files: assets/).
   const artDir = fileURLToPath(new URL('../assets/agent-teams/', import.meta.url))
   const ART_ALLOWLIST = new Set([
-    'team-lead-v2.png',
-    'member-researcher-v2.png', 'member-engineer-v2.png',
-    'member-qa-v2.png', 'member-designer-v2.png',
-    'member-security-v2.png', 'member-docs-v2.png',
-    'member-data-v2.png', 'member-operator-v2.png',
-    'action-working-v2.png', 'action-thinking-v2.png',
-    'action-reporting-v2.png', 'action-celebrating-v2.png',
-    'action-sleeping-v2.png', 'action-sending-v2.png',
+    'avatar-captain.png',
+    'avatar-planner.png', 'avatar-implementer.png', 'avatar-verifier.png',
+    'avatar-reviewer.png', 'avatar-researcher.png', 'avatar-analyst.png',
+    'avatar-writer.png', 'avatar-auditor.png', 'avatar-architect.png',
+    'avatar-tester.png', 'avatar-documenter.png', 'avatar-operator.png',
+    'state-working.png', 'state-idle.png', 'state-unknown.png',
   ])
     ctx.effect(() => webServer.register({
       kind: 'prefix',

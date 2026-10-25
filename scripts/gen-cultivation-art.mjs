@@ -1,6 +1,10 @@
 /**
- * Generate the cultivation-world pixel avatars used by the activity panel.
- * Pure Node (zlib) so the repo needs no image tooling: 24x24 art scaled x4.
+ * Generate the cultivation-world pixel art used by the activity panel.
+ *
+ * Pure Node (zlib) so the repo needs no image tooling: every icon is a 24x24
+ * pixel grid scaled x4 to a 96x96 RGBA PNG. The set is keyed by role id, not
+ * by the legacy agency buckets, so every built-in 道途 resolves to a portrait
+ * and the panel never falls back to a bare initial.
  */
 import { deflateSync } from 'node:zlib'
 import { writeFileSync, mkdirSync } from 'node:fs'
@@ -10,20 +14,28 @@ const OUT = join(import.meta.dirname, '..', 'assets', 'agent-teams')
 const SIZE = 24
 const SCALE = 4
 
-const PALETTES = {
-  'team-lead-v2.png': { robe: '#d4af37', trim: '#8a1c1c', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffe9a8', kind: 'crown' },
-  'member-data-v2.png': { robe: '#4a6fa5', trim: '#2c4363', hair: '#3a2a22', skin: '#f0c9a8', accent: '#d8e6ff', kind: 'scroll' },
-  'member-researcher-v2.png': { robe: '#4f7d5a', trim: '#2f4d38', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#d9f2df', kind: 'gourd' },
-  'member-qa-v2.png': { robe: '#7a5c9e', trim: '#4b3665', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#e6d9ff', kind: 'pill' },
-  'member-engineer-v2.png': { robe: '#8a5a3a', trim: '#573923', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffe0c2', kind: 'hammer' },
-  'member-designer-v2.png': { robe: '#b05a7a', trim: '#6f3650', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffd9e6', kind: 'brush' },
-  'member-security-v2.png': { robe: '#5a5a6a', trim: '#353542', hair: '#1e1e1e', skin: '#f0c9a8', accent: '#e0e0ff', kind: 'sword' },
-  'member-docs-v2.png': { robe: '#6a7a4a', trim: '#3f4b2c', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#f0f2d9', kind: 'scroll' },
-  'member-operator-v2.png': { robe: '#3a6a6a', trim: '#234444', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#d9f2f2', kind: 'fan' },
-  'member-array-v2.png': { robe: '#3f6a8a', trim: '#274358', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#bfe3ff', kind: 'array' },
-  'member-body-v2.png': { robe: '#8a3f3f', trim: '#5a2626', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffd9c2', kind: 'fist' },
-  'member-beast-v2.png': { robe: '#6a5a3f', trim: '#40351f', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffe9b8', kind: 'beast' },
-  'member-puppet-v2.png': { robe: '#5f5f7a', trim: '#3a3a52', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#e0e0ff', kind: 'puppet' },
+/** 道途立绘：袍色 + 本命法器。 */
+const AVATARS = {
+  'avatar-captain.png': { robe: '#d4af37', trim: '#8a1c1c', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffe9a8', kind: 'crown' },
+  'avatar-planner.png': { robe: '#3f4f7a', trim: '#26304a', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#d8e6ff', kind: 'fan' },
+  'avatar-implementer.png': { robe: '#3f6a8a', trim: '#274358', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#cfe8ff', kind: 'sword' },
+  'avatar-verifier.png': { robe: '#7a5c9e', trim: '#4b3665', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#e6d9ff', kind: 'pill' },
+  'avatar-reviewer.png': { robe: '#4a4a58', trim: '#2b2b35', hair: '#1e1e1e', skin: '#f0c9a8', accent: '#ffe9a8', kind: 'scroll' },
+  'avatar-researcher.png': { robe: '#4f7d5a', trim: '#2f4d38', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#d9f2df', kind: 'gourd' },
+  'avatar-analyst.png': { robe: '#3f5a8a', trim: '#28395a', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#bfe3ff', kind: 'compass' },
+  'avatar-writer.png': { robe: '#5a6a3f', trim: '#39452a', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#f0f2d9', kind: 'brush' },
+  'avatar-auditor.png': { robe: '#5a5a6a', trim: '#353542', hair: '#1e1e1e', skin: '#f0c9a8', accent: '#ffe9b8', kind: 'lantern' },
+  'avatar-architect.png': { robe: '#2f6a6a', trim: '#1f4444', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#bff3ef', kind: 'array' },
+  'avatar-tester.png': { robe: '#8a3f3f', trim: '#5a2626', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffd9c2', kind: 'fist' },
+  'avatar-documenter.png': { robe: '#8a6a3a', trim: '#573f23', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffe9c2', kind: 'book' },
+  'avatar-operator.png': { robe: '#6a5a3f', trim: '#40351f', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffe9b8', kind: 'hammer' },
+}
+
+/** 状态小像：修炼 / 静修 / 推演。 */
+const STATES = {
+  'state-working.png': 'working',
+  'state-idle.png': 'idle',
+  'state-unknown.png': 'unknown',
 }
 
 function canvas() {
@@ -40,7 +52,7 @@ function canvas() {
   return { px, set, rect }
 }
 
-function draw(p) {
+function drawAvatar(p) {
   const { px, set, rect } = canvas()
   // 道袍
   rect(7, 12, 10, 10, p.robe)
@@ -54,18 +66,63 @@ function draw(p) {
   // 腰带
   rect(9, 17, 6, 1, p.accent)
   // 本命法器
-  if (p.kind === 'sword') { rect(19, 6, 1, 12, '#d8e6ff'); rect(18, 16, 3, 1, '#8a6a3a') }
-  if (p.kind === 'scroll') { rect(17, 9, 4, 5, p.accent); rect(17, 11, 4, 1, p.trim) }
-  if (p.kind === 'pill') { rect(18, 14, 3, 3, p.accent); set(19, 15, p.trim) }
-  if (p.kind === 'gourd') { rect(18, 12, 3, 4, p.accent); rect(19, 10, 1, 2, p.trim) }
-  if (p.kind === 'hammer') { rect(18, 10, 2, 8, '#8a6a3a'); rect(17, 8, 4, 3, p.accent) }
-  if (p.kind === 'brush') { rect(19, 7, 1, 10, '#8a6a3a'); rect(18, 16, 3, 2, p.accent) }
-  if (p.kind === 'fan') { rect(18, 12, 3, 5, p.accent); rect(19, 10, 1, 2, p.trim) }
-  if (p.kind === 'array') { rect(17, 12, 5, 5, p.accent); rect(18, 13, 3, 3, p.trim); set(19, 14, p.accent) }
-  if (p.kind === 'fist') { rect(17, 14, 4, 4, p.accent); rect(18, 15, 2, 2, p.trim) }
-  if (p.kind === 'beast') { rect(18, 14, 3, 3, p.accent); set(18, 13, p.accent); set(20, 13, p.accent) }
-  if (p.kind === 'puppet') { rect(18, 10, 3, 3, p.accent); rect(19, 13, 1, 4, p.trim) }
-  if (p.kind === 'crown') { rect(9, 1, 6, 1, p.accent); set(11, 0, p.accent); set(13, 0, p.accent) }
+  switch (p.kind) {
+    case 'sword': rect(19, 4, 1, 12, '#d8e6ff'); rect(18, 15, 3, 1, p.trim); rect(19, 16, 1, 2, '#8a6a3a'); break
+    case 'scroll': rect(17, 9, 4, 5, p.accent); rect(17, 11, 4, 1, p.trim); rect(18, 8, 2, 1, p.trim); break
+    case 'pill': rect(18, 14, 3, 3, p.accent); set(19, 15, p.trim); set(20, 16, '#ffffff'); break
+    case 'gourd': rect(18, 12, 3, 4, p.accent); rect(19, 10, 1, 2, p.trim); break
+    case 'hammer': rect(19, 9, 1, 8, '#8a6a3a'); rect(17, 7, 4, 3, p.accent); break
+    case 'brush': rect(19, 6, 1, 10, '#8a6a3a'); rect(18, 15, 3, 2, p.accent); break
+    case 'fan': rect(18, 10, 1, 6, '#8a6a3a'); rect(17, 7, 4, 3, p.accent); rect(19, 6, 1, 1, p.trim); break
+    case 'array': rect(17, 11, 5, 5, p.accent); rect(18, 12, 3, 3, p.trim); set(19, 13, p.accent); break
+    case 'compass': rect(17, 9, 5, 5, p.accent); rect(18, 10, 3, 3, p.trim); set(19, 11, '#ffe9a8'); rect(19, 12, 1, 2, p.accent); break
+    case 'lantern': rect(18, 9, 3, 5, p.accent); rect(18, 8, 3, 1, p.trim); rect(18, 14, 3, 1, p.trim); rect(19, 7, 1, 1, p.trim); break
+    case 'book': rect(17, 9, 4, 4, p.accent); rect(17, 13, 4, 1, p.trim); rect(18, 10, 2, 1, p.trim); rect(18, 12, 2, 1, p.trim); break
+    case 'fist': rect(17, 13, 4, 4, p.accent); rect(18, 14, 2, 2, p.trim); break
+    case 'crown': rect(9, 1, 6, 1, p.accent); set(11, 0, p.accent); set(13, 0, p.accent); break
+    default: break
+  }
+  return px
+}
+
+/** 修炼中：御剑，剑身带剑气。 */
+function drawWorking() {
+  const { px, set, rect } = canvas()
+  rect(11, 3, 2, 11, '#d8e6ff')
+  rect(10, 4, 1, 9, '#9fc4ef')
+  rect(9, 14, 6, 2, '#d4af37')
+  rect(11, 16, 2, 4, '#8a6a3a')
+  set(11, 2, '#ffffff'); set(13, 1, '#bff3ef'); set(8, 8, '#bff3ef'); set(15, 11, '#bff3ef')
+  set(7, 18, '#5fd0a8'); set(16, 6, '#5fd0a8')
+  return px
+}
+
+/** 静修：盘坐修士。 */
+function drawIdle() {
+  const { px, set, rect } = canvas()
+  rect(9, 5, 6, 5, '#f0c9a8')
+  rect(9, 4, 6, 2, '#2a2a2a')
+  set(10, 8, '#3a3a3a'); set(13, 8, '#3a3a3a')
+  rect(8, 11, 8, 6, '#3f6a8a')
+  rect(8, 14, 8, 1, '#bff3ef')
+  rect(6, 17, 12, 3, '#274358')
+  rect(6, 20, 12, 1, '#1c2f42')
+  rect(11, 12, 2, 3, '#bff3ef')
+  return px
+}
+
+/** 推演：卦盘。 */
+function drawUnknown() {
+  const { px, set, rect } = canvas()
+  rect(7, 3, 10, 1, '#bff3ef')
+  rect(5, 5, 14, 1, '#7fd4c0')
+  rect(4, 8, 16, 1, '#bff3ef')
+  rect(4, 12, 16, 1, '#7fd4c0')
+  rect(5, 15, 14, 1, '#bff3ef')
+  rect(7, 17, 10, 1, '#7fd4c0')
+  rect(10, 6, 4, 4, '#d4af37')
+  set(11, 7, '#fff6cf'); set(12, 8, '#fff6cf')
+  rect(10, 16, 4, 4, '#1c2f42')
   return px
 }
 
@@ -110,8 +167,12 @@ function encode(px) {
 }
 
 mkdirSync(OUT, { recursive: true })
-for (const [name, palette] of Object.entries(PALETTES)) {
-  const p = draw(palette)
-  writeFileSync(join(OUT, name), encode(p))
+for (const [name, palette] of Object.entries(AVATARS)) {
+  writeFileSync(join(OUT, name), encode(drawAvatar(palette)))
+  console.log('wrote', name)
+}
+for (const [name, kind] of Object.entries(STATES)) {
+  const px = kind === 'working' ? drawWorking() : kind === 'idle' ? drawIdle() : drawUnknown()
+  writeFileSync(join(OUT, name), encode(px))
   console.log('wrote', name)
 }

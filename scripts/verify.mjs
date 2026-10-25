@@ -289,19 +289,17 @@ check(
     && localesSource.includes("'member.state.notCreated': '未创建'"),
 )
 const expectedArtwork = [
-  'team-lead-v2.png',
-  'member-researcher-v2.png', 'member-engineer-v2.png',
-  'member-qa-v2.png', 'member-designer-v2.png',
-  'member-security-v2.png', 'member-docs-v2.png',
-  'member-data-v2.png', 'member-operator-v2.png',
-  'action-working-v2.png', 'action-thinking-v2.png',
-  'action-reporting-v2.png', 'action-celebrating-v2.png',
-  'action-sleeping-v2.png', 'action-sending-v2.png',
+  'avatar-captain.png',
+  'avatar-planner.png', 'avatar-implementer.png', 'avatar-verifier.png',
+  'avatar-reviewer.png', 'avatar-researcher.png', 'avatar-analyst.png',
+  'avatar-writer.png', 'avatar-auditor.png', 'avatar-architect.png',
+  'avatar-tester.png', 'avatar-documenter.png', 'avatar-operator.png',
+  'state-working.png', 'state-idle.png', 'state-unknown.png',
 ].sort()
 const artworkDir = new URL('../assets/agent-teams/', import.meta.url)
 const packagedArtwork = (await readdir(artworkDir)).sort()
 check(
-  'artwork directory contains exactly the V2 captain, eight members, and six actions',
+  'artwork directory contains exactly the captain, twelve 道途 portraits, and three state icons',
   JSON.stringify(packagedArtwork) === JSON.stringify(expectedArtwork),
   `artwork = ${JSON.stringify(packagedArtwork)}`,
 )
@@ -317,42 +315,37 @@ const artworkHeaders = await Promise.all(expectedArtwork.map(async (name) => {
   }
 }))
 check(
-  'all V2 artwork is 256x256 8-bit RGBA PNG',
+  'all cultivation artwork is 96x96 8-bit RGBA PNG',
   artworkHeaders.every(image => image.png
-    && image.width === 256
-    && image.height === 256
+    && image.width === 96
+    && image.height === 96
     && image.bitDepth === 8
     && image.colorType === 6),
   `invalid headers = ${JSON.stringify(artworkHeaders.filter(image => !image.png
-    || image.width !== 256
-    || image.height !== 256
+    || image.width !== 96
+    || image.height !== 96
     || image.bitDepth !== 8
     || image.colorType !== 6))}`,
 )
 check(
-  'client mapping and host allowlist reference every V2 artwork asset',
+  'client mapping and host allowlist reference every packaged artwork asset',
   expectedArtwork.every(name => artworkSource.includes(name) || hostSource.includes(name))
-    && artworkSource.includes('member-data-v2.png')
-    && artworkSource.includes('member-operator-v2.png'),
-  'a packaged image is unreachable or one of the eighth-member mappings is missing',
+    && artworkSource.includes('avatar-implementer.png')
+    && artworkSource.includes('avatar-operator.png'),
+  'a packaged image is unreachable or one of the role mappings is missing',
 )
-const eightRoleArtwork = [
-  ['Researcher', 'Researcher'],
-  ['Engineer', 'Backend Engineer'],
-  ['QA', 'QA Engineer'],
-  ['Designer', 'UI UX Designer'],
-  ['Security', 'Security Reviewer'],
-  ['Docs', 'Docs Writer'],
-  ['Data', 'Data Analyst'],
-  ['Operator', 'Release Operator'],
-].map(([name, role]) => memberArtUrl(name, role))
+const twelveRoleArtwork = [
+  'planner', 'implementer', 'verifier', 'reviewer', 'researcher', 'analyst',
+  'writer', 'auditor', 'architect', 'tester', 'documenter', 'operator',
+].map(role => memberArtUrl(role, role))
 check(
-  'canonical eight-member roster resolves to eight distinct role images',
-  eightRoleArtwork.every(Boolean) && new Set(eightRoleArtwork).size === 8,
-  `resolved artwork = ${JSON.stringify(eightRoleArtwork)}`,
+  'every built-in 道途 resolves to its own portrait, including a bare role id as the name',
+  twelveRoleArtwork.every(Boolean) && new Set(twelveRoleArtwork).size === 12
+    && twelveRoleArtwork[1] === '/plugins/dsh-agent-teams/assets/avatar-implementer.png',
+  `resolved artwork = ${JSON.stringify(twelveRoleArtwork)}`,
 )
 check(
-  'whale portraits use transparent cutouts instead of dark circular plates',
+  'cultivation portraits use transparent cutouts instead of dark circular plates',
   !/#0b1d33/iu.test(`${activityPanelCss}\n${agentTeamsCardCss}`)
     && activityPanelCss.includes('object-fit: contain')
     && activityPanelCss.includes('agentTeamsUnreadPulse')
