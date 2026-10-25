@@ -3,10 +3,10 @@
 .office {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   height: 100%;
   min-height: 0;
-  padding: 6px 2px 2px;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -15,7 +15,7 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  min-height: 22px;
+  min-height: 18px;
 }
 
 .title {
@@ -63,7 +63,7 @@
 .canvasHost {
   position: relative;
   flex: 1 1 auto;
-  min-height: 180px;
+  min-height: 140px;
   border-radius: 10px;
   overflow: hidden;
   background: #20252f;

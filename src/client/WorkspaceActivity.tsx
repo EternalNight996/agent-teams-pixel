@@ -173,21 +173,23 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
           <img src={LEAD_ART} alt="" aria-hidden />
           <h2>AgentTeams</h2>
           <span>{t('workspace.title')}</span>
+          {records.length > 1 && <nav className={css.selector} aria-label={t('workspace.title')}>
+            {records.map(team => <button key={team.teamId} aria-pressed={selected?.teamId === team.teamId} onClick={() => state.select(sessionId, team.teamId)}>{team.name}<span>{t(live.includes(team) ? 'workspace.current' : 'workspace.history')}</span></button>)}
+          </nav>}
+          {selected !== undefined && (
+            <div className={css.viewTabs} role="tablist" data-control="workspace-views">
+              <button type="button" role="tab" aria-selected={view === 'board'} data-view="board" onClick={() => { setWorkspaceView('board') }}>{t('workspace.tabBoard')}</button>
+              <button type="button" role="tab" aria-selected={view === 'config'} data-view="config" onClick={() => { setWorkspaceView('config') }}>{t('workspace.tabConfig')}</button>
+            </div>
+          )}
         </header>
         {status === 'error' && <div className={css.error} role="alert"><span>{t('workspace.error')}</span><button onClick={() => setRetry(value => value + 1)}>{t('workspace.retry')}</button></div>}
-        {records.length > 1 && <nav className={css.selector} aria-label={t('workspace.title')}>
-          {records.map(team => <button key={team.teamId} aria-pressed={selected?.teamId === team.teamId} onClick={() => state.select(sessionId, team.teamId)}>{team.name}<span>{t(live.includes(team) ? 'workspace.current' : 'workspace.history')}</span></button>)}
-        </nav>}
         {selected === undefined ? status === 'loading' ? <div className={css.skeleton} role="status" aria-label={t('workspace.loading')}><i /><i /><i /></div> : <section className={css.empty}>
           <span className={css.emptyMark} aria-hidden>↳</span>
           <h3>{t('workspace.emptyTitle')}</h3><p>{t('workspace.emptyBody')}</p>
           <button onClick={backToChat}>{t('workspace.back')}</button>
         </section> : (
           <>
-            <div className={css.viewTabs} role="tablist" data-control="workspace-views">
-              <button type="button" role="tab" aria-selected={view === 'board'} data-view="board" onClick={() => { setWorkspaceView('board') }}>{t('workspace.tabBoard')}</button>
-              <button type="button" role="tab" aria-selected={view === 'config'} data-view="config" onClick={() => { setWorkspaceView('config') }}>{t('workspace.tabConfig')}</button>
-            </div>
             {view === 'config'
               ? (live.includes(selected) && selected.phase === 'staged'
                   ? <StagingPlanEditor team={selected} modelDirectory={modelDirectories.directoryFor(sessionId)} onContinuePlanning={backToChat} onDiscarded={backToChat} t={t} />
@@ -220,7 +222,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
             className={css.officePane}
             data-office-pane
             aria-label={t('office.title')}
-            style={officeHeight === undefined ? undefined : { height: `${Math.round(officeHeight)}px` }}
+            style={officeHeight === undefined ? undefined : { height: `${Math.round(officeHeight)}px`, flex: '0 0 auto' }}
           >
             <PixelOffice
               team={selected}

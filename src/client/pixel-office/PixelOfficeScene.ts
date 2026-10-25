@@ -320,16 +320,24 @@ export function createPixelScene(
 
   function paint(time: number): void {
     const members = model?.members ?? []
-    const columns = members.length === 0
-      ? 1
-      : Math.min(MAX_COLUMNS, Math.max(1, Math.ceil(Math.sqrt(members.length))), members.length)
-    const rows = Math.max(1, Math.ceil(members.length / columns))
-    worldH = Math.max(WORLD_MIN_H, TOP_PAD + rows * CELL_H + 8)
-
-    // The world height depends on the model, so the fit is recomputed per frame;
-    // resizing alone cannot know how many rows the next snapshot needs.
-    const ratio = Math.min(width / WORLD_W, height / worldH)
-    scale = Math.max(0.2, ratio) * zoom
+    // A wide, short pane (the right-side team tab) gains a lot from fewer rows:
+    // pick the column count whose world fits the canvas with the largest scale.
+    let columns = 1
+    let worldHeight = WORLD_MIN_H
+    let bestScale = -1
+    const maxColumns = members.length === 0 ? 1 : Math.min(MAX_COLUMNS, members.length)
+    for (let candidate = 1; candidate <= maxColumns; candidate++) {
+      const candidateRows = Math.max(1, Math.ceil(members.length / candidate))
+      const candidateHeight = Math.max(WORLD_MIN_H, TOP_PAD + candidateRows * CELL_H + 8)
+      const candidateScale = Math.min(width / WORLD_W, height / candidateHeight)
+      if (candidateScale > bestScale + 1e-6) {
+        bestScale = candidateScale
+        columns = candidate
+        worldHeight = candidateHeight
+      }
+    }
+    worldH = worldHeight
+    scale = Math.max(0.2, bestScale) * zoom
     offsetX = (width - WORLD_W * scale) / 2
     offsetY = (height - worldH * scale) / 2
 

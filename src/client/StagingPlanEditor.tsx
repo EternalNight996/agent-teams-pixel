@@ -617,8 +617,10 @@ export function StagingPlanEditor({ team, modelDirectory, onContinuePlanning, on
 }) {
   const membersId = useId()
   const tasksId = useId()
-  const [membersOpen, setMembersOpen] = useState(true)
-  const [tasksOpen, setTasksOpen] = useState(true)
+  // Keep the review page compact: the summary line above already carries the
+  // counts, and expanding a section is one click when inspection is needed.
+  const [membersOpen, setMembersOpen] = useState(false)
+  const [tasksOpen, setTasksOpen] = useState(false)
   const [newTask, setNewTask] = useState('')
   const [busy, setBusy] = useState(false)
   const [discardArmed, setDiscardArmed] = useState(false)
