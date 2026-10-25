@@ -25,12 +25,12 @@
   the bottom-right corner, and reopens centred each time. A light scrim still
   closes it on an outside click, and Esc/× work as before. Content size no
   longer has to fight the canvas size.
-- The floating dialog sits in the **bottom-right corner** of the hall (560px wide,
-  16px inset) with a visible resize grip, so the wall menu — and the 功德碑's 宗门
-  气运 numbers — stay visible above it while the clicked facility's content
-  renders inside the panel body. Its dragged offset and resized dimensions are
-  remembered in localStorage (`agent-teams-pixel.sheetRect`) and re-clamped into
-  the stage on every open.
+- The floating dialog is portaled to `document.body` and fixed to the
+  **bottom-right corner of the whole DSH window** (560px wide, 16px inset,
+  z-index 12000) — it is no longer confined to the right-pane tab, stays above
+  the hall, is dragged by its title bar, resized from the corner, and remembers
+  its offset/size in localStorage (`agent-teams-pixel.sheetRect`, re-clamped to
+  the viewport on every open).
 - Sheets animate in, take focus as a dialog on open (not the ×), close on Esc /
   the scrim / ×, and the plan/setup sheet hugs its content instead of leaving a
   blank column.

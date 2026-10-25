@@ -128,9 +128,10 @@
    and resizable from the corner, so content size never fights the canvas size.
    The hall stays visible behind it; the light scrim only separates focus. */
 .sheet {
-  position: absolute;
-  z-index: 4;
-  /* 悬浮在右下角，像一张可拖动的工作台：墙面与洞府始终留在上方可见。 */
+  /* 悬浮在整个 DSH 界面的右下角（portal 到 body，fixed 定位），
+     不属于右侧标签页，也不受标签页滚动/裁剪影响。 */
+  position: fixed;
+  z-index: 12000;
   right: 16px;
   bottom: 16px;
   transform: translate(var(--sheet-dx, 0px), var(--sheet-dy, 0px));

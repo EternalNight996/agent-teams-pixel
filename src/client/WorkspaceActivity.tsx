@@ -1,5 +1,6 @@
 /** Native workspace content; discovery remains mounted independently of tab lifetime. */
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 import { ActivityPanel, TeamSection, historicCardTeam, type ActivityPanelProps } from './ActivityPanel.tsx'
@@ -190,19 +191,18 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   const beginSheetDrag = (event: ReactPointerEvent<HTMLElement>): void => {
     if ((event.target as HTMLElement).closest('button') !== null) return
     const panel = sheetRef.current
-    const stage = panel?.parentElement
-    if (panel === null || stage === null || stage === undefined) return
+    if (panel === null) return
     event.preventDefault()
     const pr = panel.getBoundingClientRect()
-    const sr = stage.getBoundingClientRect()
-    // Offsets are relative to the current position, so the clamp works for any
-    // anchor (bottom-right by default, or wherever the user last dragged it).
-    const relLeft = pr.left - sr.left
-    const relTop = pr.top - sr.top
+    // The panel floats over the DSH viewport, so bounds are the window, not the tab.
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+    const relLeft = pr.left
+    const relTop = pr.top
     const minX = sheetOffset.x + (8 - relLeft)
-    const maxX = sheetOffset.x + (sr.width - 8 - (relLeft + pr.width))
+    const maxX = sheetOffset.x + (viewportWidth - 8 - (relLeft + pr.width))
     const minY = sheetOffset.y + (8 - relTop)
-    const maxY = sheetOffset.y + (sr.height - 8 - (relTop + pr.height))
+    const maxY = sheetOffset.y + (viewportHeight - 8 - (relTop + pr.height))
     const clampAxis = (low: number, high: number, base: number): readonly [number, number] =>
       high < low ? [base, base] : [low, high]
     const [clampedMinX, clampedMaxX] = clampAxis(minX, maxX, sheetOffset.x)
@@ -240,23 +240,21 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     if (sheet === undefined) return
     const frame = window.requestAnimationFrame(() => {
       const panel = sheetRef.current
-      const stage = panel?.parentElement
-      if (panel === null || stage === undefined || stage === null) return
+      if (panel === null) return
       const pr = panel.getBoundingClientRect()
-      const sr = stage.getBoundingClientRect()
-      const relLeft = pr.left - sr.left
-      const relTop = pr.top - sr.top
-      // 兜底：万一记住的几何把面板推到可视区外，直接回到右下角的默认位置。
-      const visible = pr.bottom > sr.top && pr.top < sr.bottom && pr.right > sr.left && pr.left < sr.right
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      // 兜底：万一记住的几何把面板推到窗口外，直接回到右下角的默认位置。
+      const visible = pr.bottom > 0 && pr.top < vh && pr.right > 0 && pr.left < vw
       if (!visible) {
         setSheetOffset({ x: 0, y: 0 })
         return
       }
       setSheetOffset((current) => {
-        const lowX = current.x + (8 - relLeft)
-        const highX = current.x + (sr.width - 8 - (relLeft + pr.width))
-        const lowY = current.y + (8 - relTop)
-        const highY = current.y + (sr.height - 8 - (relTop + pr.height))
+        const lowX = current.x + (8 - pr.left)
+        const highX = current.x + (vw - 8 - pr.right)
+        const lowY = current.y + (8 - pr.top)
+        const highY = current.y + (vh - 8 - pr.bottom)
         return {
           x: highX < lowX ? current.x : Math.min(highX, Math.max(lowX, current.x)),
           y: highY < lowY ? current.y : Math.min(highY, Math.max(lowY, current.y)),
@@ -510,15 +508,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
               <button type="button" onClick={() => { setSheet('config') }}>{t('office.stagedReview')}</button>
             </div>
           )}
-          {sheet !== undefined && (
-            <>
-              <button
-                type="button"
-                className={css.scrim}
-                aria-label={t('office.closePanel')}
-                tabIndex={-1}
-                onClick={() => { setSheet(undefined) }}
-              />
+          {sheet !== undefined && typeof document !== 'undefined' && createPortal((
               <aside
                 ref={sheetRef}
                 className={css.sheet}
@@ -549,8 +539,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
                 </header>
                 <div className={css.sheetBody}>{sheetBody(sheet, selected)}</div>
               </aside>
-            </>
-          )}
+          ), document.body)}
           {officeHint !== '' && (
             <div className={css.officeHint} role="status">{t('office.noConversation', { name: officeHint })}</div>
           )}
