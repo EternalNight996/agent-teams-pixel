@@ -246,6 +246,12 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
       const sr = stage.getBoundingClientRect()
       const relLeft = pr.left - sr.left
       const relTop = pr.top - sr.top
+      // 兜底：万一记住的几何把面板推到可视区外，直接回到右下角的默认位置。
+      const visible = pr.bottom > sr.top && pr.top < sr.bottom && pr.right > sr.left && pr.left < sr.right
+      if (!visible) {
+        setSheetOffset({ x: 0, y: 0 })
+        return
+      }
       setSheetOffset((current) => {
         const lowX = current.x + (8 - relLeft)
         const highX = current.x + (sr.width - 8 - (relLeft + pr.width))
