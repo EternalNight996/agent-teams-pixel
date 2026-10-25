@@ -302,6 +302,13 @@ export declare const zh: {
     'config.team': string;
     'config.phase': string;
     'config.halted': string;
+    'realm.qi': string;
+    'realm.foundation': string;
+    'realm.golden': string;
+    'realm.nascent': string;
+    'realm.spirit': string;
+    'config.realm': string;
+    'office.realm': string;
     'config.phaseStaged': string;
     'config.phaseRunning': string;
     'config.kind.work': string;
@@ -631,6 +638,13 @@ export declare const en: {
     'config.team': string;
     'config.phase': string;
     'config.halted': string;
+    'realm.qi': string;
+    'realm.foundation': string;
+    'realm.golden': string;
+    'realm.nascent': string;
+    'realm.spirit': string;
+    'config.realm': string;
+    'office.realm': string;
     'config.phaseStaged': string;
     'config.phaseRunning': string;
     'config.kind.work': string;

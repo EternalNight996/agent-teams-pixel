@@ -1,6 +1,7 @@
-/** Read-only configuration view: roster, routing and task contracts. */
+﻿/** Read-only configuration view: roster, routing and task contracts. */
 import type { AgentTeamsTranslate } from './locales.ts'
 import type { ActivityTeam } from './activity-monitor.ts'
+import { realmKey } from './realm.ts'
 import css from './TeamConfigPanel.module.css'
 
 function memberRoute(member: ActivityTeam['members'][number]): string {
@@ -61,12 +62,13 @@ export function TeamConfigPanel({ team, t }: { team: ActivityTeam; t: AgentTeams
       <h3 className={css.heading}>{t('config.members')}</h3>
       <div className={css.tableWrap}>
         <table className={css.table}>
-          <thead><tr><th>{t('config.name')}</th><th>{t('config.role')}</th><th>{t('config.model')}</th><th>{t('config.effort')}</th></tr></thead>
+          <thead><tr><th>{t('config.name')}</th><th>{t('config.role')}</th><th>{t('config.realm')}</th><th>{t('config.model')}</th><th>{t('config.effort')}</th></tr></thead>
           <tbody>
             {team.members.map(member => (
               <tr key={member.id}>
                 <td>{member.name}</td>
                 <td>{member.role}</td>
+                <td>{t(realmKey(member.progress ?? 0))}</td>
                 <td className={css.mono}>{memberRoute(member)}</td>
                 <td>{member.reasoningEffort ?? '—'}</td>
               </tr>

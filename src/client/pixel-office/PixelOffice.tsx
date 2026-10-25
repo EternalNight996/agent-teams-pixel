@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { ActivityTeam } from '../activity-monitor.ts'
 import type { AgentTeamsTranslate } from '../locales.ts'
+import { realmKey } from '../realm.ts'
 import { createPixelScene, type SceneMember, type SceneModel } from './PixelOfficeScene.ts'
 import css from './PixelOffice.module.css'
 
@@ -27,7 +28,7 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const hostRef = useRef<HTMLDivElement | null>(null)
   const sceneRef = useRef<ReturnType<typeof createPixelScene> | null>(null)
-  const [hover, setHover] = useState<{ id: string; name: string; role: string; activity: SceneMember['activity']; task: string; x: number; y: number } | undefined>()
+  const [hover, setHover] = useState<{ id: string; name: string; role: string; activity: SceneMember['activity']; realm: string; task: string; x: number; y: number } | undefined>()
 
   const model = useMemo<SceneModel>(() => {
     const live = team.members.filter(member => member.status !== 'removed')
@@ -119,6 +120,7 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
       name: member.name,
       role: member.role,
       activity: member.activity,
+      realm: t(realmKey(member.progress ?? 0)),
       task: member.currentTask ?? '',
       x: event.clientX - rect.left,
       y: event.clientY - rect.top,
