@@ -1,4 +1,4 @@
-node_modules/
+﻿node_modules/
 *.tsbuildinfo
 .DS_Store
 .agent-teams/
@@ -7,5 +7,6 @@ node_modules/
 /artifacts/harness-0.2.1-rc.1/
 *.tgz
 
-.dsh/
+.dsh/*.log
+.dsh/check-locale.mjs
 
