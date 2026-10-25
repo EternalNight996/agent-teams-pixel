@@ -7,6 +7,12 @@
  */
 
 /** One built-in template: default roles and a small task DAG. */
+export const ROLE_NAMES: Record<string, string> = {
+  planner: '军师', implementer: '剑修', verifier: '丹修', reviewer: '执法长老',
+  researcher: '散修', analyst: '推演师', writer: '书记', auditor: '巡查使',
+  architect: '阵修', tester: '体修', documenter: '传道长老', operator: '炼器师',
+}
+
 export interface QuickStartTemplate {
   readonly id: string
   readonly label: string
@@ -126,12 +132,12 @@ export function buildQuickStartPlan(goal: string, templateId: string, requestedR
   const cleaned = [...new Set((requestedRoles ?? []).map(role => role.trim()).filter(role => role !== ''))]
   const roles = cleaned.length > 0 ? cleaned : [...template.roles]
   const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)
-  const members = roles.map(role => ({ name: role, role }))
+  const members = roles.map(role => ({ name: ROLE_NAMES[role] ?? role, role }))
   const tasks = template.tasks.map((task, index) => ({
     id: task.id,
     subject: `${task.subject}：${shortGoal(goal, 40)}`,
     description: `${task.description}\n\n目标：${goal}`,
-    assignee: roles.includes(task.role) ? task.role : roles[index % roles.length] as string,
+    assignee: ROLE_NAMES[roles.includes(task.role) ? task.role : roles[index % roles.length] as string] ?? (roles.includes(task.role) ? task.role : roles[index % roles.length] as string),
     dependencies: [...(task.dependencies ?? [])],
   }))
   return { teamName: `quick-${template.id}-${stamp}`, template: template.id, members, tasks }

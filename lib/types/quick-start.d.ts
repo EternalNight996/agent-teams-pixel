@@ -6,6 +6,7 @@
  * so the host never invents a second team model.
  */
 /** One built-in template: default roles and a small task DAG. */
+export declare const ROLE_NAMES: Record<string, string>;
 export interface QuickStartTemplate {
     readonly id: string;
     readonly label: string;

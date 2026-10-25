@@ -117,6 +117,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
         throw new Error(existing ? t('quickstart.teamExists') : raw)
       }
       setCreated(body.teamId ?? '')
+      if (body.teamId !== undefined) window.dispatchEvent(new CustomEvent('agent-teams:team-created', { detail: { teamId: body.teamId } }))
       setGoal('')
       window.setTimeout(() => { setOpen(false); reset() }, 1400)
     } catch (cause) {
