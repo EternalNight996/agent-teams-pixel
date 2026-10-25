@@ -1,8 +1,9 @@
-﻿/** Click-to-dispatch entry: a header button that stages a plan from a small form. */
+/** Click-to-dispatch entry: a header button that stages a plan from a small form. */
 import { useEffect, useRef, useState } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import css from './QuickStartDialog.module.css'
+import { TEAM_CREATED_EVENT } from './team-reveal.ts'
 
 type TplKey = 'quickstart.tplFix' | 'quickstart.tplFeat' | 'quickstart.tplResearch' | 'quickstart.tplAudit'
   | 'quickstart.tplBuild' | 'quickstart.tplArray' | 'quickstart.tplDocs' | 'quickstart.tplDebate'
@@ -117,7 +118,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
         throw new Error(existing ? t('quickstart.teamExists') : raw)
       }
       setCreated(body.teamId ?? '')
-      if (body.teamId !== undefined) window.dispatchEvent(new CustomEvent('agent-teams:team-created', { detail: { teamId: body.teamId } }))
+      if (body.teamId !== undefined) window.dispatchEvent(new CustomEvent(TEAM_CREATED_EVENT, { detail: { teamId: body.teamId } }))
       setGoal('')
       window.setTimeout(() => { setOpen(false); reset() }, 1400)
     } catch (cause) {

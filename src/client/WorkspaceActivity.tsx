@@ -1,4 +1,4 @@
-﻿/** Native workspace content; discovery remains mounted independently of tab lifetime. */
+/** Native workspace content; discovery remains mounted independently of tab lifetime. */
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
@@ -10,6 +10,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { OPEN_PANEL_EVENT } from './AgentTeamsCard.tsx'
 import type { AgentTeamsCardData } from './agent-teams-card-definition.ts'
 import { currentSessionId } from './session-navigation.ts'
+import { TEAM_CREATED_EVENT, shouldRevealTeam } from './team-reveal.ts'
 import { getActivityMonitorTargetsSnapshot, getActivitySnapshotsSnapshot, startActivityPolling, subscribeActivityMonitorTargets, subscribeActivitySnapshots, updateActivitySnapshots } from './activity-monitor.ts'
 import { createTeamDiscovery, type WorkspaceActivityState } from './workspace-state.ts'
 import { LEAD_ART } from './artwork.ts'
@@ -67,10 +68,16 @@ function WorkspaceMonitor({ sessionsList, sidebar, state }: ActivityPanelProps &
         if (update.teams === undefined) return
         const added = discover(update.teams.filter(team => team.captainSessionId === current))
         // Do not replace a file/terminal, or navigate a session whose surface is not bound.
-        if (added !== undefined && sidebar.mounted.getSnapshot() === current && !sidebar.isExpanded()) {
-          state.select(current, added)
-          sidebar.openTab(TEAM_TAB_KIND)
-        }
+        if (added === undefined) return
+        if (!shouldRevealTeam({
+          source: 'discovered',
+          sessionId: current,
+          onScreenSessionId: sidebar.mounted.getSnapshot(),
+          teamId: added,
+          expanded: sidebar.isExpanded(),
+        })) return
+        state.select(current, added)
+        sidebar.openTab(TEAM_TAB_KIND)
       },
     })
     return () => { controller.stop() }
@@ -85,6 +92,29 @@ function WorkspaceMonitor({ sessionsList, sidebar, state }: ActivityPanelProps &
     }
     window.addEventListener(OPEN_PANEL_EVENT, open)
     return () => { window.removeEventListener(OPEN_PANEL_EVENT, open) }
+  }, [current, sidebar, state])
+  // The quick-start dialog stages a plan from the conversation header, where the
+  // tab's own listener is not mounted. Reveal the tab from this always-mounted
+  // monitor so "生成草案" never ends in silence — with the column already open on
+  // another page (the discard button closes the tab but keeps the column), the
+  // event is the only signal that gets the user to the plan review.
+  useEffect(() => {
+    const reveal = (event: Event): void => {
+      if (current === undefined) return
+      const teamId = (event as CustomEvent<{ teamId?: string }>).detail?.teamId
+      if (teamId === undefined) return
+      if (!shouldRevealTeam({
+        source: 'created',
+        sessionId: current,
+        onScreenSessionId: sidebar.mounted.getSnapshot(),
+        teamId,
+        expanded: sidebar.isExpanded(),
+      })) return
+      state.select(current, teamId)
+      sidebar.openTab(TEAM_TAB_KIND)
+    }
+    window.addEventListener(TEAM_CREATED_EVENT, reveal)
+    return () => { window.removeEventListener(TEAM_CREATED_EVENT, reveal) }
   }, [current, sidebar, state])
   return null
 }
@@ -172,8 +202,8 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
       state.select(sessionId, detail.teamId)
       setWorkspaceView('config')
     }
-    window.addEventListener('agent-teams:team-created', onCreated)
-    return () => { window.removeEventListener('agent-teams:team-created', onCreated) }
+    window.addEventListener(TEAM_CREATED_EVENT, onCreated)
+    return () => { window.removeEventListener(TEAM_CREATED_EVENT, onCreated) }
   }, [sessionId, state])
 
   // Auto page: a freshly staged team opens Setup (review/approve); once the
