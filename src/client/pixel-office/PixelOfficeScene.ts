@@ -171,7 +171,7 @@ export function createPixelScene(
       g.fillRect(wx + 5, 22, 52, 34)
       const bookColors = ['#a34b3f', '#3f6aa3', '#a3873f', '#3f8a6a', '#7a3f8a']
       for (let i = 0; i < 14; i += 1) {
-        g.fillStyle = bookColors[i % bookColors.length]
+        g.fillStyle = bookColors[i % bookColors.length]!
         g.fillRect(wx + 7 + (i % 7) * 7, 24 + Math.floor(i / 7) * 16, 5, 13)
       }
     }
