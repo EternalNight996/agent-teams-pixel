@@ -8,11 +8,42 @@ function memberRoute(member: ActivityTeam['members'][number]): string {
   return parts.length > 0 ? parts.join(' / ') : '—'
 }
 
+const STATUS_KEYS: Record<string, Parameters<AgentTeamsTranslate>[0]> = {
+  pending: 'task.status.pending',
+  claimed: 'task.status.claimed',
+  running: 'task.status.inProgress',
+  in_progress: 'task.status.inProgress',
+  completed: 'task.status.completed',
+  failed: 'task.status.failed',
+  cancelled: 'task.status.cancelled',
+}
+
+const KIND_KEYS: Record<string, Parameters<AgentTeamsTranslate>[0]> = {
+  work: 'config.kind.work',
+  requirements: 'config.kind.requirements',
+  implementation: 'config.kind.implementation',
+  verification: 'config.kind.verification',
+  review: 'config.kind.review',
+  repair: 'config.kind.repair',
+  integration: 'config.kind.integration',
+}
+
+function statusLabel(status: string, t: AgentTeamsTranslate): string {
+  const key = STATUS_KEYS[status]
+  return key === undefined ? status : t(key)
+}
+
+function kindLabel(kind: string | undefined, t: AgentTeamsTranslate): string {
+  if (kind === undefined) return ''
+  const key = KIND_KEYS[kind]
+  return key === undefined ? kind : t(key)
+}
+
 export function TeamConfigPanel({ team, t }: { team: ActivityTeam; t: AgentTeamsTranslate }) {
   const completed = team.tasks.filter(task => task.status === 'completed').length
   const facts = [
     { label: t('config.team'), value: team.name, sub: team.teamId },
-    { label: t('config.phase'), value: team.halted === true ? t('config.halted') : team.phase },
+    { label: t('config.phase'), value: team.halted === true ? t('config.halted') : t(team.phase === 'staged' ? 'config.phaseStaged' : 'config.phaseRunning') },
     { label: t('config.members'), value: String(team.members.length) },
     { label: t('config.tasks'), value: `${completed}/${team.tasks.length}` },
   ]
@@ -52,7 +83,7 @@ export function TeamConfigPanel({ team, t }: { team: ActivityTeam; t: AgentTeams
               <tr key={task.id}>
                 <td>{task.subject}</td>
                 <td>{task.assignee === '' ? t('config.unassigned') : task.assignee}</td>
-                <td>{task.kind === undefined ? task.status : `${task.kind} · ${task.status}`}</td>
+                <td>{task.kind === undefined ? statusLabel(task.status, t) : `${kindLabel(task.kind, t)} · ${statusLabel(task.status, t)}`}</td>
                 <td className={css.mono}>{task.dependencies.length === 0 ? '—' : task.dependencies.join(', ')}</td>
               </tr>
             ))}
