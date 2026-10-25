@@ -11,6 +11,7 @@ import type { ModelDirectory } from '@deepseek-ai/dsh-client-ui-model-selection/
 import { Menu, type MenuEntry } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ActivityMember, ActivityTask, ActivityTeam } from './activity-monitor.ts'
 import type { AgentTeamsTranslate } from './locales.ts'
+import { roleLabel } from './role-labels.ts'
 import css from './ActivityPanel.module.css'
 
 const PLAN_URL = '/plugins/dsh-agent-teams/plan'
@@ -441,7 +442,7 @@ function StagedMemberEditor({ team, member, modelDirectory, onPendingChange, t }
       >
         <span className={css.planCardIdentity}>
           <strong>{member.name}</strong>
-          <span>{role || t('plan.member.roleFallback')}</span>
+          <span>{role === '' ? t('plan.member.roleFallback') : roleLabel(role, member.name, t)}</span>
         </span>
         <span className={css.planCardMeta} title={route}>{route}</span>
         {dirty && <em className={css.planDirty}>{t('plan.unsaved')}</em>}

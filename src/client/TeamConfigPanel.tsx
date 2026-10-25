@@ -1,7 +1,8 @@
-﻿/** Read-only configuration view: roster, routing and task contracts. */
+/** Read-only configuration view: roster, routing and task contracts. */
 import type { AgentTeamsTranslate } from './locales.ts'
 import type { ActivityTeam } from './activity-monitor.ts'
 import { realmKey } from './realm.ts'
+import { roleLabel } from './role-labels.ts'
 import css from './TeamConfigPanel.module.css'
 
 function memberRoute(member: ActivityTeam['members'][number]): string {
@@ -67,7 +68,7 @@ export function TeamConfigPanel({ team, t }: { team: ActivityTeam; t: AgentTeams
             {team.members.map(member => (
               <tr key={member.id}>
                 <td>{member.name}</td>
-                <td>{member.role}</td>
+                <td>{roleLabel(member.role, member.name, t)}</td>
                 <td>{t(realmKey(member.progress ?? 0))}</td>
                 <td className={css.mono}>{memberRoute(member)}</td>
                 <td>{member.reasoningEffort ?? '—'}</td>

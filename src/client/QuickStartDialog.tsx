@@ -4,6 +4,7 @@ import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots
 import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import css from './QuickStartDialog.module.css'
 import { TEAM_CREATED_EVENT } from './team-reveal.ts'
+import { ROLE_META } from './role-labels.ts'
 
 type TplKey = 'quickstart.tplFix' | 'quickstart.tplFeat' | 'quickstart.tplResearch' | 'quickstart.tplAudit'
   | 'quickstart.tplBuild' | 'quickstart.tplArray' | 'quickstart.tplDocs' | 'quickstart.tplDebate'
@@ -24,27 +25,6 @@ const TEMPLATES: readonly QuickTemplate[] = [
   { id: 'array', labelKey: 'quickstart.tplArray', descKey: 'quickstart.desc.array', roles: ['architect', 'implementer', 'verifier', 'reviewer'] },
   { id: 'docs', labelKey: 'quickstart.tplDocs', descKey: 'quickstart.desc.docs', roles: ['writer', 'documenter', 'reviewer'] },
   { id: 'debate', labelKey: 'quickstart.tplDebate', descKey: 'quickstart.desc.debate', roles: ['researcher', 'analyst', 'reviewer'] },
-]
-
-interface RoleMeta {
-  readonly id: string
-  readonly nameKey: string
-  readonly abilityKey: string
-}
-
-const ROLE_META: readonly RoleMeta[] = [
-  { id: 'planner', nameKey: 'role.planner.name', abilityKey: 'role.planner.ability' },
-  { id: 'implementer', nameKey: 'role.implementer.name', abilityKey: 'role.implementer.ability' },
-  { id: 'verifier', nameKey: 'role.verifier.name', abilityKey: 'role.verifier.ability' },
-  { id: 'reviewer', nameKey: 'role.reviewer.name', abilityKey: 'role.reviewer.ability' },
-  { id: 'researcher', nameKey: 'role.researcher.name', abilityKey: 'role.researcher.ability' },
-  { id: 'analyst', nameKey: 'role.analyst.name', abilityKey: 'role.analyst.ability' },
-  { id: 'writer', nameKey: 'role.writer.name', abilityKey: 'role.writer.ability' },
-  { id: 'auditor', nameKey: 'role.auditor.name', abilityKey: 'role.auditor.ability' },
-  { id: 'architect', nameKey: 'role.architect.name', abilityKey: 'role.architect.ability' },
-  { id: 'tester', nameKey: 'role.tester.name', abilityKey: 'role.tester.ability' },
-  { id: 'documenter', nameKey: 'role.documenter.name', abilityKey: 'role.documenter.ability' },
-  { id: 'operator', nameKey: 'role.operator.name', abilityKey: 'role.operator.ability' },
 ]
 
 function templateOf(id: string): QuickTemplate {
@@ -91,7 +71,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
   }
   const roleName = (id: string): string => {
     const meta = ROLE_META.find(entry => entry.id === id)
-    return meta === undefined ? id : t(meta.nameKey as Parameters<typeof t>[0])
+    return meta === undefined ? id : t(meta.nameKey)
   }
   const addCustomRole = (): void => {
     const trimmed = customRole.trim()
@@ -190,9 +170,9 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
                   {ROLE_META.map(meta => (
                     <label key={meta.id} className={css.option}>
                       <input type="checkbox" checked={roles.includes(meta.id)} onChange={() => { toggleRole(meta.id) }} />
-                      <span className={css.optionName}>{t(meta.nameKey as Parameters<typeof t>[0])}</span>
+                      <span className={css.optionName}>{t(meta.nameKey)}</span>
                       <span className={css.optionId}>{meta.id}</span>
-                      <span className={css.optionAbility}>{t(meta.abilityKey as Parameters<typeof t>[0])}</span>
+                      <span className={css.optionAbility}>{t(meta.abilityKey)}</span>
                     </label>
                   ))}
                   <div className={css.customRow}>

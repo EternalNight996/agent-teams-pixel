@@ -1,10 +1,13 @@
-﻿/* Pixel-office view: the AgentTeams right-side pane, and the floater toggle. */
+/* Pixel-office view: the AgentTeams right-side pane, and the floater toggle. */
 
 .office {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  height: 100%;
+  /* Grow into the dock pane instead of sizing to the roster: a percentage height
+     alone left the pane's bottom slack empty once the dock was dragged taller. */
+  flex: 1 1 auto;
+  height: auto;
   min-height: 0;
   padding: 0;
   box-sizing: border-box;

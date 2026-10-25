@@ -65,6 +65,10 @@
 /* Bottom panel: a fixed-height animated pixel office dock. */
 .officePane {
   flex: 0 0 auto;
+  /* A flex column so the office body stretches to the dock's full height even
+     when a persisted drag height (inline style) is larger than its content. */
+  display: flex;
+  flex-direction: column;
   height: clamp(200px, 34vh, 380px);
   width: 100%;
   max-width: 1400px;

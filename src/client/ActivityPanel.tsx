@@ -28,6 +28,7 @@ import {
 import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import { PixelOffice } from './pixel-office/PixelOffice.tsx'
 import { currentSessionId } from './session-navigation.ts'
+import { roleLabel } from './role-labels.ts'
 import type { ModelDirectory, ModelDirectoryResolver } from '@deepseek-ai/dsh-client-ui-model-selection/client'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
@@ -731,7 +732,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                   <span className={css.memberInfo}>
                     <span className={css.memberLine}>
                       <span className={css.memberName}>{member.name}</span>
-                      {member.role !== '' && <span className={css.memberRole}>{member.role}</span>}
+                      {member.role !== '' && <span className={css.memberRole}>{roleLabel(member.role, member.name, t)}</span>}
                       {/* Inline member model badge: compact visible label, full route in
                           title/aria-label (accessible tooltip) and the data-member-model
                           DOM probe; noninteractive span, no tab stop. */}

@@ -1,8 +1,9 @@
-﻿/** Pixel-office view of one AgentTeams snapshot, driven by the shared activity model. */
+/** Pixel-office view of one AgentTeams snapshot, driven by the shared activity model. */
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { ActivityTeam } from '../activity-monitor.ts'
 import type { AgentTeamsTranslate } from '../locales.ts'
 import { realmKey } from '../realm.ts'
+import { roleLabel } from '../role-labels.ts'
 import { createPixelScene, type SceneMember, type SceneModel } from './PixelOfficeScene.ts'
 import css from './PixelOffice.module.css'
 
@@ -175,7 +176,7 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
         {hover !== undefined && (
           <div className={css.tooltip} style={{ left: hover.x, top: hover.y }} role="tooltip">
             <strong>{hover.name}</strong>
-            <span>{hover.role}</span>
+            <span>{roleLabel(hover.role, hover.name, t)}</span>
             <span data-activity={hover.activity}>{sceneLabel(hover.activity, t)}{hover.task === '' ? '' : ` · ${hover.task}`}</span>
           </div>
         )}
@@ -191,7 +192,7 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
                 data-unread={member.unread > 0 || undefined}
                 disabled={onOpenMember === undefined}
                 onClick={() => { onOpenMember?.(member.id) }}
-                title={`${member.name} · ${member.role} · ${sceneLabel(member.activity, t)}`}
+                title={`${member.name} · ${roleLabel(member.role, member.name, t)} · ${sceneLabel(member.activity, t)}`}
               >
                 <span className={css.dot} aria-hidden />
                 <span className={css.chipName}>{member.name}</span>
