@@ -23,6 +23,36 @@ export const TEAM_TAB_ID = 'agent-teams-pixel/activity'
 const WORKSPACE_VIEW_KEY = 'agent-teams-pixel.workspaceView'
 /** One-time coach line pointing at the wall menu (dismissed once, then never again). */
 const HALL_GUIDE_KEY = 'agent-teams-pixel.hallGuide'
+/** Floating panel geometry remembered across opens: offset + user-resized size. */
+const SHEET_RECT_KEY = 'agent-teams-pixel.sheetRect'
+
+interface SheetRect {
+  readonly x: number
+  readonly y: number
+  readonly w?: number
+  readonly h?: number
+}
+
+function readSheetRect(): SheetRect {
+  if (typeof window === 'undefined') return { x: 0, y: 0 }
+  try {
+    const raw = window.localStorage.getItem(SHEET_RECT_KEY)
+    if (raw === null) return { x: 0, y: 0 }
+    const parsed = JSON.parse(raw) as Partial<SheetRect>
+    return {
+      x: typeof parsed.x === 'number' && Number.isFinite(parsed.x) ? parsed.x : 0,
+      y: typeof parsed.y === 'number' && Number.isFinite(parsed.y) ? parsed.y : 0,
+      w: typeof parsed.w === 'number' && parsed.w > 200 ? parsed.w : undefined,
+      h: typeof parsed.h === 'number' && parsed.h > 120 ? parsed.h : undefined,
+    }
+  } catch {
+    return { x: 0, y: 0 }
+  }
+}
+
+function writeSheetRect(rect: SheetRect): void {
+  try { window.localStorage.setItem(SHEET_RECT_KEY, JSON.stringify(rect)) } catch { /* private mode */ }
+}
 
 /** Optional host integration is observable so installing/removing it also switches the fallback. */
 export function createWorkspaceBridge() {
@@ -140,8 +170,19 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   // The wall facility whose panel is open. One floating panel at a time keeps the hall visible.
   const [sheet, setSheet] = useState<SceneAction | undefined>()
   const sheetRef = useRef<HTMLElement | null>(null)
-  // 悬浮面板：可拖动（拖标题栏）、可拖右下角改大小，位置只作会话内记忆。
-  const [sheetOffset, setSheetOffset] = useState({ x: 0, y: 0 })
+  // 悬浮面板：可拖动（拖标题栏）、可拖右下角改大小，位置/大小记在 localStorage。
+  const [sheetOffset, setSheetOffset] = useState(() => {
+    const rect = readSheetRect()
+    return { x: rect.x, y: rect.y }
+  })
+  const [sheetSize, setSheetSize] = useState(() => {
+    const rect = readSheetRect()
+    return { w: rect.w, h: rect.h }
+  })
+  const sheetOffsetRef = useRef(sheetOffset)
+  sheetOffsetRef.current = sheetOffset
+  const sheetSizeRef = useRef(sheetSize)
+  sheetSizeRef.current = sheetSize
   const sheetDrag = useRef<{
     startX: number; startY: number; baseX: number; baseY: number
     minX: number; maxX: number; minY: number; maxY: number
@@ -189,11 +230,57 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
       sheetDrag.current = null
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
+      writeSheetRect({ ...sheetOffsetRef.current, ...sheetSizeRef.current })
     }
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
   }
-  useEffect(() => { setSheetOffset({ x: 0, y: 0 }) }, [sheet])
+  // 打开时把面板夹回洞府范围内（窗口变小或上次拖到边缘也安全）。
+  useEffect(() => {
+    if (sheet === undefined) return
+    const frame = window.requestAnimationFrame(() => {
+      const panel = sheetRef.current
+      const stage = panel?.parentElement
+      if (panel === null || stage === undefined || stage === null) return
+      const pr = panel.getBoundingClientRect()
+      const sr = stage.getBoundingClientRect()
+      const relLeft = pr.left - sr.left
+      const relTop = pr.top - sr.top
+      setSheetOffset((current) => {
+        const lowX = current.x + (8 - relLeft)
+        const highX = current.x + (sr.width - 8 - (relLeft + pr.width))
+        const lowY = current.y + (8 - relTop)
+        const highY = current.y + (sr.height - 8 - (relTop + pr.height))
+        return {
+          x: highX < lowX ? current.x : Math.min(highX, Math.max(lowX, current.x)),
+          y: highY < lowY ? current.y : Math.min(highY, Math.max(lowY, current.y)),
+        }
+      })
+    })
+    return () => { window.cancelAnimationFrame(frame) }
+  }, [sheet])
+  // 用户改过大小后记住尺寸（ResizeObserver 去抖，不参与渲染循环）。
+  useEffect(() => {
+    const panel = sheetRef.current
+    if (sheet === undefined || panel === null || typeof ResizeObserver === 'undefined') return
+    let timer: number | undefined
+    const observer = new ResizeObserver(() => {
+      if (timer !== undefined) window.clearTimeout(timer)
+      timer = window.setTimeout(() => {
+        const rect = panel.getBoundingClientRect()
+        const next = { w: Math.round(rect.width), h: Math.round(rect.height) }
+        setSheetSize((current) => (
+          Math.abs((current.w ?? 0) - next.w) > 1 || Math.abs((current.h ?? 0) - next.h) > 1 ? next : current
+        ))
+        writeSheetRect({ ...sheetOffsetRef.current, ...next })
+      }, 400)
+    })
+    observer.observe(panel)
+    return () => {
+      if (timer !== undefined) window.clearTimeout(timer)
+      observer.disconnect()
+    }
+  }, [sheet])
   // First visit: one floating line explains what on the wall is clickable.
   const [guide, setGuide] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false
@@ -434,7 +521,12 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
                 aria-modal="false"
                 aria-label={sheetTitle(sheet)}
                 tabIndex={-1}
-                style={{ '--sheet-dx': `${sheetOffset.x}px`, '--sheet-dy': `${sheetOffset.y}px` } as CSSProperties}
+                style={{
+                  '--sheet-dx': `${sheetOffset.x}px`,
+                  '--sheet-dy': `${sheetOffset.y}px`,
+                  ...(sheetSize.w === undefined ? {} : { width: `${sheetSize.w}px` }),
+                  ...(sheetSize.h === undefined ? {} : { height: `${sheetSize.h}px` }),
+                } as CSSProperties}
               >
                 <header className={css.sheetHead} onPointerDown={beginSheetDrag}>
                   <span className={css.sheetGrip} aria-hidden>⠿</span>

@@ -28,7 +28,9 @@
 - The floating dialog sits in the **bottom-right corner** of the hall (560px wide,
   16px inset) with a visible resize grip, so the wall menu — and the 功德碑's 宗门
   气运 numbers — stay visible above it while the clicked facility's content
-  renders inside the panel body.
+  renders inside the panel body. Its dragged offset and resized dimensions are
+  remembered in localStorage (`agent-teams-pixel.sheetRect`) and re-clamped into
+  the stage on every open.
 - Sheets animate in, take focus as a dialog on open (not the ×), close on Esc /
   the scrim / ×, and the plan/setup sheet hugs its content instead of leaving a
   blank column.
