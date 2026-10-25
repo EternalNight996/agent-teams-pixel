@@ -25,6 +25,9 @@
   the bottom-right corner, and reopens centred each time. A light scrim still
   closes it on an outside click, and Esc/× work as before. Content size no
   longer has to fight the canvas size.
+- The floating dialog docks **below the wall** (top ≈ 17% of the hall, capped),
+  so the wall menu — and the 功德碑's 宗门气运 numbers — stay visible above it while
+  the clicked facility's content renders inside the panel body.
 - Sheets animate in, take focus as a dialog on open (not the ×), close on Esc /
   the scrim / ×, and the plan/setup sheet hugs its content instead of leaving a
   blank column.

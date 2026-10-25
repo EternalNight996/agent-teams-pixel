@@ -130,14 +130,15 @@
 .sheet {
   position: absolute;
   z-index: 4;
-  top: 16px;
+  /* 停在墙面下方：功德碑等墙面设施始终在面板上方可见，面板只占用下方空间。 */
+  top: clamp(84px, 17%, 128px);
   left: 50%;
   transform: translate(calc(-50% + var(--sheet-dx, 0px)), var(--sheet-dy, 0px));
   display: flex;
   flex-direction: column;
   width: min(620px, calc(100% - 24px));
   max-width: calc(100% - 16px);
-  max-height: calc(100% - 32px);
+  max-height: calc(100% - 136px);
   min-width: 280px;
   min-height: 180px;
   border-radius: 12px;
