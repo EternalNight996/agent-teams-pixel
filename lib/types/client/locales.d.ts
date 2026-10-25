@@ -254,6 +254,7 @@ export declare const zh: {
     'quickstart.created': string;
     'workspace.tabBoard': string;
     'workspace.tabConfig': string;
+    'workspace.switchTeam': string;
     'config.team': string;
     'config.phase': string;
     'config.halted': string;
@@ -529,6 +530,7 @@ export declare const en: {
     'quickstart.created': string;
     'workspace.tabBoard': string;
     'workspace.tabConfig': string;
+    'workspace.switchTeam': string;
     'config.team': string;
     'config.phase': string;
     'config.halted': string;

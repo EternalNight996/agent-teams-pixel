@@ -184,9 +184,24 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
           <img src={LEAD_ART} alt="" aria-hidden />
           <h2>AgentTeams</h2>
           <span>{t('workspace.title')}</span>
-          {records.length > 1 && <nav className={css.selector} aria-label={t('workspace.title')}>
-            {records.map(team => <button key={team.teamId} aria-pressed={selected?.teamId === team.teamId} onClick={() => state.select(sessionId, team.teamId)}>{team.name}<span>{t(live.includes(team) ? 'workspace.current' : 'workspace.history')}</span></button>)}
-          </nav>}
+          {records.length > 0 && (
+            <label className={css.teamPicker}>
+              <span className={css.teamPickerCaption}>{t('workspace.switchTeam')}</span>
+              <select
+                className={css.teamPickerSelect}
+                value={selected?.teamId ?? ''}
+                aria-label={t('workspace.switchTeam')}
+                data-control="team-picker"
+                onChange={(event) => { state.select(sessionId, event.target.value) }}
+              >
+                {records.map(team => (
+                  <option key={team.teamId} value={team.teamId}>
+                    {live.includes(team) ? team.name : `${team.name} · ${t('workspace.history')}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           {selected !== undefined && (
             <div className={css.viewTabs} role="tablist" data-control="workspace-views">
               <button type="button" role="tab" aria-selected={view === 'board'} data-view="board" onClick={() => { setWorkspaceView('board') }}>{t('workspace.tabBoard')}</button>

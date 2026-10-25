@@ -14,7 +14,7 @@
 /* Top panel: configuration and interaction. Sized to its content and capped,
    so short content leaves the room to the pixel office instead of scrolling. */
 .content {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
   width: 100%;
@@ -62,10 +62,10 @@
   border-radius: 2px;
   background: var(--dsw-alias-state-business-primary);
 }
-/* Bottom panel: the animated pixel office fills the remaining height. */
+/* Bottom panel: a fixed-height animated pixel office dock. */
 .officePane {
-  flex: 1 1 auto;
-  min-height: 180px;
+  flex: 0 0 auto;
+  height: clamp(200px, 34vh, 380px);
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
@@ -84,6 +84,7 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  margin-top: auto;
   padding: 4px 12px;
   box-sizing: border-box;
   border-top: 1px solid var(--dsw-alias-border-l2);
@@ -146,13 +147,21 @@
 .stagedNotice p { margin: 0; font-size: 12px; line-height: 1.7; color: var(--dsw-alias-label-secondary); }
 .stagedNotice button { padding: 8px 14px; border-radius: 9px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-module-platform); color: var(--dsw-alias-label-primary); font-size: 12px; }
 .stagedNotice button:hover { border-color: var(--dsw-alias-state-business-primary); }
-.selector { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; flex: 1 1 auto; min-width: 0; }
-.selector button { display: flex; gap: 8px; align-items: center; max-width: 100%; border: 1px solid var(--dsw-alias-border-l2); border-radius: 9px; padding: 6px 10px; background: var(--dsw-alias-bg-layer-1); text-align: left; overflow-wrap: anywhere; font-size: 11px; transition: background-color 140ms, border-color 140ms; }
-.selector span { font-size: 10px; color: var(--dsw-alias-label-secondary); white-space: nowrap; }
-.selector button[aria-pressed='true'] { background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 8%, var(--dsw-alias-bg-layer-1)); border-color: var(--dsw-alias-state-business-primary); }
-.selector button:hover { border-color: var(--dsw-alias-state-business-primary); }
+.teamPicker { display: inline-flex; align-items: center; gap: 6px; margin: 0; min-width: 0; }
+.teamPickerCaption { font-size: 10px; color: var(--dsw-alias-label-secondary); white-space: nowrap; }
+.teamPickerSelect {
+  max-width: 230px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 11px;
+}
+.teamPickerSelect:focus-visible { outline: 2px solid var(--dsw-alias-state-business-primary); outline-offset: 2px; }
 .root button { font-family: inherit; cursor: pointer; }
-.selector button, .empty button, .error button { color: inherit; }
+.empty button, .error button, .officeBarButton { color: inherit; }
 .root button:active { transform: scale(.98); }
 .root button:focus-visible { outline: 2px solid var(--dsw-alias-state-business-primary); outline-offset: 3px; }
 .empty { padding: 32px 24px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 18px; background: var(--dsw-alias-bg-layer-1); }
