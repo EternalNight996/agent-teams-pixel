@@ -149,6 +149,17 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     setOfficeOpen(next)
     try { window.localStorage.setItem(OFFICE_OPEN_KEY, next ? '1' : '0') } catch { /* private mode */ }
   }
+  // 点击没有会话的修士时给一条短暂提示，而不是跳转到空对话。
+  const [officeHint, setOfficeHint] = useState('')
+  const officeHintTimer = useRef<number | undefined>(undefined)
+  const showOfficeHint = (name: string): void => {
+    setOfficeHint(name)
+    if (officeHintTimer.current !== undefined) window.clearTimeout(officeHintTimer.current)
+    officeHintTimer.current = window.setTimeout(() => { setOfficeHint('') }, 2600)
+  }
+  useEffect(() => () => {
+    if (officeHintTimer.current !== undefined) window.clearTimeout(officeHintTimer.current)
+  }, [])
   const containerRef = useRef<HTMLDivElement | null>(null)
   const officePaneRef = useRef<HTMLElement | null>(null)
   const dragRef = useRef<{ startY: number; startHeight: number } | null>(null)
@@ -312,7 +323,11 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
                 t={t}
                 onCollapse={() => { setOfficeOpenPersist(false) }}
                 onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
+                onUnavailable={showOfficeHint}
               />
+              {officeHint !== '' && (
+                <div className={css.officeHint} role="status">{t('office.noConversation', { name: officeHint })}</div>
+              )}
             </section>
           </>
         ) : (

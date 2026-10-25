@@ -501,13 +501,13 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
 }
 
 /**
- * Workspace-only dependency chain: task order, owner and state in one compact
- * row. The workspace board used to spend a full DAG card on a three-task plan;
- * folding the edges into the chips (← t1) keeps the dependency readable while
- * the member tree carries the per-person detail.
+ * 任务依赖主视图（工作台）：以任务为中心的列表，按依赖深度排序，每行给出
+ * 负责人、前置与状态；点击一行展开说明与解锁关系。工作台用它替代修士列表，
+ * 修士的状态/灵气则在下方山门洞府里看。
  */
-function TaskChain({ tasks, t, discarded, selectedTaskId, onSelectTask }: {
+function TaskBoard({ tasks, members, t, discarded, selectedTaskId, onSelectTask }: {
   readonly tasks: readonly ActivityTask[]
+  readonly members: readonly ActivityMember[]
   readonly t: AgentTeamsTranslate
   readonly discarded: boolean
   readonly selectedTaskId: string | null
@@ -516,47 +516,68 @@ function TaskChain({ tasks, t, discarded, selectedTaskId, onSelectTask }: {
   if (tasks.length === 0) return null
   const ordered = [...tasks].sort((a, b) => (a.depth - b.depth) || a.id.localeCompare(b.id))
   return (
-    <section className={css.taskChain} aria-label={t('dependency.aria')} data-task-chain>
-      <span className={css.taskChainTitle}><IconBranchOutline16 />{t('dependency.title')}</span>
-      <div className={css.taskChainTrack}>
+    <section className={css.taskBoard} aria-label={t('dependency.aria')} data-task-board>
+      <header className={css.taskBoardHead}>
+        <span><IconBranchOutline16 />{t('dependency.title')}</span>
+        <span className={css.taskBoardHint}>{t('dependency.hint.chain')}</span>
+      </header>
+      <ul className={css.taskBoardList}>
         {ordered.map((task) => {
+          const selected = task.id === selectedTaskId
           const owner = task.assignee === undefined || task.assignee === '' ? t('task.assignee.unclaimed') : task.assignee
           const state = discarded ? 'cancelled' : taskTone(task.state, task.status)
           const status = discarded ? t('task.status.notRun') : taskStatusLabel(task.status, t)
-          const glyph = discarded || task.status === 'cancelled'
-            ? '–'
+          const waitingOn = task.dependencies.filter((id) => {
+            const dependency = tasks.find((candidate) => candidate.id === id)
+            return dependency !== undefined && dependency.status !== 'completed'
+          })
+          const dependents = tasks.filter((candidate) => candidate.dependencies.includes(task.id))
+          const model = taskModelLabel(task, members)
+          const detail = discarded
+            ? t('task.detail.notRun')
             : task.status === 'completed'
-              ? '✓'
-              : task.status === 'failed'
-                ? '✕'
-                : task.state === 'running'
-                  ? '▶'
-                  : task.state === 'blocked'
-                    ? '⏸'
-                    : '·'
+              ? t('task.detail.completed')
+              : task.status === 'cancelled'
+                ? t('task.detail.cancelled')
+                : task.status === 'failed'
+                  ? t('task.detail.failed')
+                  : task.dependencies.length === 0
+                    ? t('task.detail.noPrerequisite')
+                    : waitingOn.length === 0
+                      ? t('task.detail.ready')
+                      : t('task.detail.waitingOn', { tasks: formatTaskIds(waitingOn, t) })
           return (
-            <button
-              key={task.id}
-              type="button"
-              className={css.taskChip}
-              data-state={state}
-              data-selected={task.id === selectedTaskId || undefined}
-              title={`${task.id} · ${task.subject} · ${owner} · ${status}`}
-              onClick={() => { onSelectTask(task.id === selectedTaskId ? null : task.id) }}
-            >
-              <span className={css.taskChipDot} aria-hidden />
-              <span className={css.taskChipId}>{task.id}</span>
-              <span className={css.taskChipOwner}>{owner}</span>
-              {task.dependencies.length > 0 && (
-                <span className={css.taskChipDep} aria-label={t('task.detail.waitingOn', { tasks: formatTaskIds(task.dependencies, t) })}>
-                  ← {task.dependencies.join(' ')}
-                </span>
+            <li key={task.id}>
+              <button
+                type="button"
+                className={css.taskRow}
+                data-state={state}
+                data-selected={selected || undefined}
+                aria-expanded={selected}
+                title={`${task.id} · ${task.subject} · ${owner} · ${status}`}
+                onClick={() => { onSelectTask(selected ? null : task.id) }}
+              >
+                <span className={css.taskRowDot} aria-hidden />
+                <span className={css.taskRowId}>{task.id}</span>
+                <span className={css.taskRowSubject}>{task.subject}</span>
+                <span className={css.taskRowOwner}>{owner}</span>
+                <span className={css.taskRowDeps}>{task.dependencies.length === 0 ? '—' : `← ${task.dependencies.join(' ')}`}</span>
+                <span className={css.taskRowStatus}>{status}</span>
+              </button>
+              {selected && (
+                <div className={css.taskRowDetail} role="region" aria-label={task.id}>
+                  {task.description !== undefined && task.description !== '' && <p>{task.description}</p>}
+                  <span>{detail}{model === '' ? '' : ` · ${t('task.model', { model })}`}{' · '}
+                    {dependents.length === 0
+                      ? t('task.detail.noDownstream')
+                      : t('task.detail.unlocks', { tasks: formatTaskIds(dependents.map((candidate) => candidate.id), t) })}
+                  </span>
+                </div>
               )}
-              <span className={css.taskChipGlyph} aria-hidden>{glyph}</span>
-            </button>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </section>
   )
 }
@@ -596,7 +617,8 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
   const unfinishedCount = team.tasks.filter((task) => (
     task.status !== 'completed' && task.status !== 'failed' && task.status !== 'cancelled'
   )).length
-  const canStop = !historic && team.phase === 'running' && team.halted !== true && teamIsActive(team)
+  // 全部完成即「已完成」终态：不再提供停止/重新开始。
+  const canStop = !historic && team.phase === 'running' && team.halted !== true && !allCompleted && teamIsActive(team)
   // 停止后从面板重新开始：与掌门工具 agent_teams_resume 同一条宿主路径。
   const resumeTeam = async (): Promise<void> => {
     if (resuming) return
@@ -654,6 +676,11 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
       <section className={css.team} data-team-id={team.teamId} data-workspace-team={workspace || undefined}>
         <header className={css.teamHead}>
           <span className={css.teamName} title={team.name}>{team.name}</span>
+          {!historic && team.phase === 'running' && !stopped && (
+            <span className={css.statePill} data-state={allCompleted ? 'completed' : 'running'}>
+              {t(allCompleted ? 'team.state.completed' : 'team.state.running')}
+            </span>
+          )}
           {historic && <span className={css.historicPill}>{t(discarded ? 'team.discarded' : 'team.ended')}</span>}
           {stopped && <span className={css.historicPill}>{t('team.stopped')}</span>}
           {stopped && (
@@ -740,9 +767,9 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
         </div>
 
         {!workspace && <ProgressOverview team={team} t={t} discarded={discarded} />}
-      {workspace && <TaskChain tasks={team.tasks} t={t} discarded={discarded} selectedTaskId={selectedTaskId} onSelectTask={setSelectedTaskId} />}
+      {workspace && <TaskBoard tasks={team.tasks} members={team.members} t={t} discarded={discarded} selectedTaskId={selectedTaskId} onSelectTask={setSelectedTaskId} />}
 
-        {(() => {
+        {!workspace && (() => {
           const orderedMembers = orderDelegationMembers(team.members, team.tasks)
           const runningMembers = orderedMembers.filter((member) => (
             member.activity === 'working' || member.status === 'working'

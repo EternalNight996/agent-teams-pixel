@@ -13,6 +13,8 @@ export interface PixelOfficeProps {
   readonly t: AgentTeamsTranslate
   /** Open one member's subagent transcript. */
   readonly onOpenMember?: (memberId: string) => void
+  /** A member without a conversation was clicked (nothing to open yet). */
+  readonly onUnavailable?: (name: string) => void
   /** Switch the floater back to the board view. */
   readonly onShowBoard?: () => void
   /** Collapse the office back to its bottom bar. */
@@ -25,7 +27,7 @@ function sceneLabel(activity: SceneMember['activity'], t: AgentTeamsTranslate): 
   return t('office.idle')
 }
 
-export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: PixelOfficeProps) {
+export function PixelOffice({ team, t, onOpenMember, onUnavailable, onShowBoard, onCollapse }: PixelOfficeProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const hostRef = useRef<HTMLDivElement | null>(null)
   const sceneRef = useRef<ReturnType<typeof createPixelScene> | null>(null)
@@ -151,7 +153,12 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
   }
   const onClick = (event: ReactPointerEvent<HTMLCanvasElement>): void => {
     const id = hitAt(event)
-    if (id !== undefined) onOpenMember?.(id)
+    if (id === undefined) return
+    const member = sceneMembers.get(id)
+    if (member === undefined) return
+    // 还没有对话（未创建会话的修士）不跳转，只提示。
+    if (member.id === '') { onUnavailable?.(member.name); return }
+    onOpenMember?.(member.id)
   }
 
   return (
@@ -208,8 +215,11 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
                 className={css.chip}
                 data-activity={member.activity}
                 data-unread={member.unread > 0 || undefined}
-                disabled={onOpenMember === undefined}
-                onClick={() => { onOpenMember?.(member.id) }}
+                disabled={onOpenMember === undefined && onUnavailable === undefined}
+                onClick={() => {
+                  if (member.id === '') { onUnavailable?.(member.name); return }
+                  onOpenMember?.(member.id)
+                }}
                 title={`${member.name} · ${roleLabel(member.role, member.name, t)} · ${sceneLabel(member.activity, t)}`}
               >
                 <span className={css.dot} aria-hidden />

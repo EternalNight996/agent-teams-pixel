@@ -46,6 +46,8 @@ export declare const zh: {
     'team.stopping': string;
     'team.stopFailed': string;
     'team.stopRequestFailed': string;
+    'team.state.running': string;
+    'team.state.completed': string;
     'team.resume': string;
     'team.resuming': string;
     'team.resumeReason': string;
@@ -235,6 +237,7 @@ export declare const zh: {
     'office.idle': string;
     'office.unknown': string;
     'office.showBoard': string;
+    'office.noConversation': string;
     'office.showOffice': string;
     'office.collapse': string;
     'office.expand': string;
@@ -424,6 +427,8 @@ export declare const en: {
     'team.stopping': string;
     'team.stopFailed': string;
     'team.stopRequestFailed': string;
+    'team.state.running': string;
+    'team.state.completed': string;
     'team.resume': string;
     'team.resuming': string;
     'team.resumeReason': string;
@@ -613,6 +618,7 @@ export declare const en: {
     'office.idle': string;
     'office.unknown': string;
     'office.showBoard': string;
+    'office.noConversation': string;
     'office.showOffice': string;
     'office.collapse': string;
     'office.expand': string;

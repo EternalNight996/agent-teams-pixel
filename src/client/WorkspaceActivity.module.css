@@ -64,6 +64,7 @@
 }
 /* Bottom panel: a fixed-height animated pixel office dock. */
 .officePane {
+  position: relative;
   flex: 1 1 auto;
   min-height: 200px;
   /* A flex column so the office body stretches to the dock's full height even
@@ -80,6 +81,31 @@
   background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 55%, transparent);
   overflow: hidden;
 }
+/* 「暂无对话」提示：短暂浮在洞府底部。 */
+.officeHint {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  z-index: 3;
+  max-width: 92%;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-state-business-primary) 55%, var(--dsw-alias-border-l2));
+  border-radius: 8px;
+  background: rgb(20 24 32 / 94%);
+  color: var(--dsw-alias-label-primary);
+  font-size: 11px;
+  line-height: 16px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 35%);
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: officeHintIn 160ms ease-out;
+}
+
+@keyframes officeHintIn {
+  from { opacity: 0; transform: translate(-50%, 4px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
 /* Collapsed office: a slim dock bar pinned to the bottom edge. */
 .officeBar {
   flex: 0 0 auto;
