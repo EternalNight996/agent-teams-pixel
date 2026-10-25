@@ -144,17 +144,15 @@
   from { opacity: 0; transform: translateY(-8px) scale(.992); }
   to { opacity: 1; transform: none; }
 }
-/* Panels open next to the wall the click came from (top-right), not at the far
-   bottom of a tall hall, so the answer appears where the user just clicked. */
+/* List panels open next to the wall the click came from (top-right), not at the
+   far bottom of a tall hall, so the answer appears where the user just clicked.
+   The 功德碑 keeps the previous full-canvas presentation: its ring + task list
+   need the whole width, so it takes the hall over like before. */
 .sheet[data-sheet='teams'],
-.sheet[data-sheet='inbox'],
-.sheet[data-sheet='board'] {
+.sheet[data-sheet='inbox'] {
   inset: 8px 8px auto auto;
   width: min(380px, calc(100% - 16px));
   max-height: calc(100% - 16px);
-}
-.sheet[data-sheet='board'] {
-  width: min(420px, calc(100% - 16px));
 }
 .sheet[data-sheet='config'] {
   inset: 8px 8px auto;
