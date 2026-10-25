@@ -41,6 +41,7 @@ import { collectArchivedTeamsActivity, collectTeamsActivity } from './snapshot.t
 import { findTeamByCaptain } from './state.ts'
 import { leadIdentityOfAsync } from './lineage.ts'
 import { formatProfilesForPrompt, type TeamProfileConfig } from './profiles.ts'
+import { buildQuickStartPlan } from './quick-start.ts'
 import { parseToolPolicies, type MemberToolPolicy } from './tool-policies.ts'
 import { installTeamCapabilities } from './capabilities.ts'
 import { agentTeamsSource, observedSessionFormatVersion } from './harness-compat.ts'
@@ -336,6 +337,71 @@ export function apply(ctx: Context, config: Config): void {
         }
       },
     }), 'agent-teams: halt route')
+
+    // Click-to-dispatch: the Web "开团" dialog asks the host to stage exactly
+    // what the captain tool would stage, so the user never has to type a
+    // command. Approval stays required; this route never spawns members.
+    ctx.effect(() => webServer.register({
+      kind: 'exact',
+      path: '/plugins/dsh-agent-teams/quick-start',
+      handler: async (req, res) => {
+        if (req.method !== 'POST') {
+          res.writeHead(405, { allow: 'POST', 'cache-control': 'no-store' })
+          res.end()
+          return
+        }
+        let payload: Record<string, unknown>
+        try {
+          payload = await readJsonRequest(req)
+        } catch (error: unknown) {
+          res.writeHead(error instanceof RequestBodyError ? error.status : 400, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ error: error instanceof Error ? error.message : 'invalid request body' }))
+          return
+        }
+        const sessionId = typeof payload.sessionId === 'string' ? payload.sessionId.trim() : ''
+        const goal = typeof payload.goal === 'string' ? payload.goal.trim() : ''
+        const template = typeof payload.template === 'string' ? payload.template : 'fix'
+        const roles = Array.isArray(payload.roles) ? payload.roles.filter((role): role is string => typeof role === 'string') : undefined
+        if (sessionId === '' || goal === '') {
+          res.writeHead(400, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ error: 'sessionId and goal are required' }))
+          return
+        }
+        const captain = ctx.agents.get(sessionId as import('@deepseek-ai/dsh-session').SessionId)
+        if (captain === undefined) {
+          res.writeHead(409, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ error: 'session is not attached' }))
+          return
+        }
+        const tools = ctx.get('tools') as { get?: (name: string) => { execute?: (args: unknown, exec: unknown) => Promise<unknown> } | undefined } | undefined
+        const definition = tools?.get?.('agent_teams_create')
+        if (definition?.execute === undefined) {
+          res.writeHead(503, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ error: 'team creation tool is unavailable' }))
+          return
+        }
+        const plan = buildQuickStartPlan(goal, template, roles)
+        const abort = new AbortController()
+        const timeout = setTimeout(() => { abort.abort() }, 30_000)
+        try {
+          const value = await definition.execute({
+            name: plan.teamName,
+            description: goal,
+            approval: 'required',
+            plan: { members: plan.members, tasks: plan.tasks },
+          }, { agent: captain, signal: abort.signal, deferContext() {}, concludeTurn() {} }) as { team_id?: string; phase?: string; team_name?: string }
+          res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ ok: true, teamId: value.team_id, teamName: value.team_name, phase: value.phase, template: plan.template, tasks: plan.tasks.length }))
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error)
+          ctx.logger.warn(`agent-teams: quick-start failed for ${sessionId}: ${message}`)
+          res.writeHead(422, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ error: message }))
+        } finally {
+          clearTimeout(timeout)
+        }
+      },
+    }), 'agent-teams: quick-start route')
 
     ctx.effect(() => webServer.register({
       kind: 'exact',

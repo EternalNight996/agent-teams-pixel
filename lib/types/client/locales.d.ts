@@ -235,6 +235,23 @@ export declare const zh: {
     'office.collapse': string;
     'office.expand': string;
     'office.resize': string;
+    'quickstart.entry': string;
+    'quickstart.entryTitle': string;
+    'quickstart.title': string;
+    'quickstart.desc': string;
+    'quickstart.goal': string;
+    'quickstart.goalPlaceholder': string;
+    'quickstart.template': string;
+    'quickstart.roles': string;
+    'quickstart.tplFix': string;
+    'quickstart.tplFeat': string;
+    'quickstart.tplResearch': string;
+    'quickstart.tplAudit': string;
+    'quickstart.cancel': string;
+    'quickstart.submit': string;
+    'quickstart.busy': string;
+    'quickstart.goalRequired': string;
+    'quickstart.created': string;
 };
 /** AgentTeams namespace key union. */
 export type AgentTeamsLocaleKey = keyof typeof zh;
@@ -472,6 +489,23 @@ export declare const en: {
     'office.collapse': string;
     'office.expand': string;
     'office.resize': string;
+    'quickstart.entry': string;
+    'quickstart.entryTitle': string;
+    'quickstart.title': string;
+    'quickstart.desc': string;
+    'quickstart.goal': string;
+    'quickstart.goalPlaceholder': string;
+    'quickstart.template': string;
+    'quickstart.roles': string;
+    'quickstart.tplFix': string;
+    'quickstart.tplFeat': string;
+    'quickstart.tplResearch': string;
+    'quickstart.tplAudit': string;
+    'quickstart.cancel': string;
+    'quickstart.submit': string;
+    'quickstart.busy': string;
+    'quickstart.goalRequired': string;
+    'quickstart.created': string;
 };
 /** Translation function consumed by pure view helpers. */
 export type AgentTeamsTranslate = (key: AgentTeamsLocaleKey, params?: Record<string, unknown>) => string;
