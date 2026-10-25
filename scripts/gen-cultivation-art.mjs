@@ -1,42 +1,41 @@
 /**
  * Generate the cultivation-world pixel art used by the activity panel.
  *
- * Pure Node (zlib) so the repo needs no image tooling: every icon is a 24x24
- * pixel grid scaled x4 to a 96x96 RGBA PNG. The set is keyed by role id, not
- * by the legacy agency buckets, so every built-in 道途 resolves to a portrait
- * and the panel never falls back to a bare initial.
+ * Pure Node (zlib) so the repo needs no image tooling: every icon is a 32x32
+ * pixel grid with a 1px outline and two-tone shading, scaled x4 to a 128x128
+ * RGBA PNG. Larger grids plus outlines keep the portraits readable at 40px.
+ * The set is keyed by role id, so every built-in 道途 resolves to a portrait.
  */
 import { deflateSync } from 'node:zlib'
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 const OUT = join(import.meta.dirname, '..', 'assets', 'agent-teams')
-const SIZE = 24
+const SIZE = 32
 const SCALE = 4
+const OUTLINE = '#17131c'
+const EYE = '#2b2430'
+const MOUTH = '#b0605a'
 
 /** 道途立绘：袍色 + 本命法器。 */
 const AVATARS = {
-  'avatar-captain.png': { robe: '#d4af37', trim: '#8a1c1c', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffe9a8', kind: 'crown' },
-  'avatar-planner.png': { robe: '#3f4f7a', trim: '#26304a', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#d8e6ff', kind: 'fan' },
-  'avatar-implementer.png': { robe: '#3f6a8a', trim: '#274358', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#cfe8ff', kind: 'sword' },
-  'avatar-verifier.png': { robe: '#7a5c9e', trim: '#4b3665', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#e6d9ff', kind: 'pill' },
-  'avatar-reviewer.png': { robe: '#4a4a58', trim: '#2b2b35', hair: '#1e1e1e', skin: '#f0c9a8', accent: '#ffe9a8', kind: 'scroll' },
-  'avatar-researcher.png': { robe: '#4f7d5a', trim: '#2f4d38', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#d9f2df', kind: 'gourd' },
-  'avatar-analyst.png': { robe: '#3f5a8a', trim: '#28395a', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#bfe3ff', kind: 'compass' },
-  'avatar-writer.png': { robe: '#5a6a3f', trim: '#39452a', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#f0f2d9', kind: 'brush' },
-  'avatar-auditor.png': { robe: '#5a5a6a', trim: '#353542', hair: '#1e1e1e', skin: '#f0c9a8', accent: '#ffe9b8', kind: 'lantern' },
-  'avatar-architect.png': { robe: '#2f6a6a', trim: '#1f4444', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#bff3ef', kind: 'array' },
-  'avatar-tester.png': { robe: '#8a3f3f', trim: '#5a2626', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffd9c2', kind: 'fist' },
-  'avatar-documenter.png': { robe: '#8a6a3a', trim: '#573f23', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffe9c2', kind: 'book' },
-  'avatar-operator.png': { robe: '#6a5a3f', trim: '#40351f', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffe9b8', kind: 'hammer' },
+  'avatar-captain.png': { robe: '#d4af37', robeDark: '#9a7a1e', robeLight: '#f2d97a', trim: '#8a1c1c', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffe9a8', kind: 'crown' },
+  'avatar-planner.png': { hairStyle: 'topknot', robe: '#3f4f7a', robeDark: '#2b3757', robeLight: '#5c6fa0', trim: '#d8e6ff', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#d8e6ff', kind: 'fan' },
+  'avatar-implementer.png': { robe: '#3f6a8a', robeDark: '#2a4a63', robeLight: '#5f8fb2', trim: '#cfe8ff', hair: '#241f2c', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#cfe8ff', kind: 'sword' },
+  'avatar-verifier.png': { robe: '#7a5c9e', robeDark: '#55416f', robeLight: '#9b7fc0', trim: '#e6d9ff', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#e6d9ff', kind: 'pill' },
+  'avatar-reviewer.png': { beard: true, robe: '#4a4a58', robeDark: '#32323d', robeLight: '#666675', trim: '#d4af37', hair: '#1c1a22', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffe9a8', kind: 'scroll' },
+  'avatar-researcher.png': { hairStyle: 'long', robe: '#4f7d5a', robeDark: '#365740', robeLight: '#6c9f78', trim: '#d9f2df', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#d9f2df', kind: 'gourd' },
+  'avatar-analyst.png': { hairStyle: 'topknot', robe: '#3f5a8a', robeDark: '#2a3f63', robeLight: '#5c7cb2', trim: '#bfe3ff', hair: '#241f2c', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#bfe3ff', kind: 'compass' },
+  'avatar-writer.png': { hairStyle: 'long', robe: '#5a6a3f', robeDark: '#3e4a2a', robeLight: '#788c56', trim: '#f0f2d9', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#f0f2d9', kind: 'brush' },
+  'avatar-auditor.png': { beard: true, robe: '#5a5a6a', robeDark: '#3d3d49', robeLight: '#787888', trim: '#ffe9b8', hair: '#1c1a22', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffe9b8', kind: 'lantern' },
+  'avatar-architect.png': { robe: '#2f6a6a', robeDark: '#1f4848', robeLight: '#4b8f8f', trim: '#bff3ef', hair: '#241f2c', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#bff3ef', kind: 'array' },
+  'avatar-tester.png': { robe: '#8a3f3f', robeDark: '#612a2a', robeLight: '#ad5c5c', trim: '#ffd9c2', hair: '#241f2c', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffd9c2', kind: 'fist' },
+  'avatar-documenter.png': { robe: '#8a6a3a', robeDark: '#614a26', robeLight: '#ad8a56', trim: '#ffe9c2', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffe9c2', kind: 'book' },
+  'avatar-operator.png': { robe: '#6a5a3f', robeDark: '#4a3f2b', robeLight: '#8a7856', trim: '#ffe9b8', hair: '#241f2c', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffe9b8', kind: 'hammer' },
 }
 
 /** 状态小像：修炼 / 静修 / 推演。 */
-const STATES = {
-  'state-working.png': 'working',
-  'state-idle.png': 'idle',
-  'state-unknown.png': 'unknown',
-}
+const STATES = ['state-working.png', 'state-idle.png', 'state-unknown.png']
 
 function canvas() {
   const px = new Uint8Array(SIZE * SIZE * 4)
@@ -49,80 +48,212 @@ function canvas() {
     px[i + 3] = 255
   }
   const rect = (x0, y0, w, h, hex) => { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) set(x, y, hex) }
-  return { px, set, rect }
+  const hline = (x0, y, w, hex) => rect(x0, y, w, 1, hex)
+  const vline = (x, y0, h, hex) => rect(x, y0, 1, h, hex)
+  return { px, set, rect, hline, vline }
 }
 
+/** Paint a 1px outline around every opaque pixel (sprite silhouette). */
+function outline(px) {
+  const source = px.slice()
+  const opaque = (x, y) => x >= 0 && y >= 0 && x < SIZE && y < SIZE && source[(y * SIZE + x) * 4 + 3] === 255
+  const hex = [parseInt(OUTLINE.slice(1, 3), 16), parseInt(OUTLINE.slice(3, 5), 16), parseInt(OUTLINE.slice(5, 7), 16)]
+  for (let y = 0; y < SIZE; y += 1) {
+    for (let x = 0; x < SIZE; x += 1) {
+      const i = (y * SIZE + x) * 4
+      if (source[i + 3] === 255) continue
+      if (!opaque(x - 1, y) && !opaque(x + 1, y) && !opaque(x, y - 1) && !opaque(x, y + 1)) continue
+      px[i] = hex[0]; px[i + 1] = hex[1]; px[i + 2] = hex[2]; px[i + 3] = 255
+    }
+  }
+}
+
+/** 道袍、头部与本命法器（32x32 网格）。 */
 function drawAvatar(p) {
-  const { px, set, rect } = canvas()
-  // 道袍
-  rect(7, 12, 10, 10, p.robe)
-  rect(7, 20, 10, 2, p.trim)
-  rect(10, 12, 4, 3, p.trim)
-  // 头与发髻
-  rect(8, 4, 8, 8, p.skin)
-  rect(8, 3, 8, 2, p.hair)
-  rect(11, 1, 2, 2, p.hair)
-  set(8, 8, '#3a3a3a'); set(9, 8, '#3a3a3a')
+  const { px, set, rect, hline, vline } = canvas()
+  // 靴
+  rect(11, 28, 4, 3, '#2c2433')
+  rect(18, 28, 4, 3, '#2c2433')
+  hline(11, 28, 4, '#3d3346'); hline(18, 28, 4, '#3d3346')
+  // 袍身
+  rect(8, 16, 16, 12, p.robe)
+  rect(8, 16, 3, 12, p.robeLight)
+  rect(21, 16, 3, 12, p.robeDark)
+  rect(8, 27, 16, 1, p.trim)
+  // 衣襟
+  rect(13, 16, 6, 3, p.trim)
+  vline(15, 19, 8, p.trim); vline(16, 19, 8, p.trim)
   // 腰带
-  rect(9, 17, 6, 1, p.accent)
+  rect(9, 22, 14, 2, p.robeDark)
+  rect(14, 22, 4, 2, p.accent)
+  // 手臂与手
+  rect(7, 17, 2, 8, p.robeDark)
+  rect(23, 17, 2, 8, p.robeDark)
+  rect(7, 25, 2, 2, p.skin)
+  rect(23, 25, 2, 2, p.skin)
+  // 颈
+  rect(14, 14, 4, 2, p.skinShade)
+  // 头
+  rect(10, 4, 12, 11, p.skin)
+  rect(10, 12, 12, 1, p.skinShade)
+  rect(20, 4, 2, 8, p.skinShade)
+  // 发
+  rect(9, 2, 14, 4, p.hair)
+  rect(9, 6, 2, 6, p.hair)
+  rect(21, 6, 2, 6, p.hair)
+  rect(14, 0, 4, 2, p.hair)
+  rect(13, 1, 6, 1, p.hair)
+  hline(13, 3, 3, p.robeLight)
+  // 发型差异
+  if (p.hairStyle === 'long') {
+    rect(8, 6, 2, 12, p.hair); rect(22, 6, 2, 12, p.hair)
+    rect(9, 18, 2, 2, p.hair); rect(21, 18, 2, 2, p.hair)
+  }
+  if (p.hairStyle === 'topknot') {
+    rect(14, 0, 4, 3, p.hair); rect(15, 0, 2, 2, p.hair)
+    hline(13, 3, 6, p.trim); set(13, 4, p.accent)
+  }
+  if (p.beard === true) {
+    rect(13, 13, 6, 3, '#d8d2c8'); rect(14, 16, 4, 2, '#c8c1b4')
+    set(16, 14, MOUTH)
+  }
+  // 眼与眉
+  hline(12, 8, 3, p.hair); hline(18, 8, 3, p.hair)
+  set(13, 10, EYE); set(14, 10, '#f7f3ea'); set(18, 10, EYE); set(19, 10, '#f7f3ea')
+  set(13, 11, p.skinShade); set(19, 11, p.skinShade)
+  if (p.beard !== true) set(16, 12, MOUTH)
   // 本命法器
   switch (p.kind) {
-    case 'sword': rect(19, 4, 1, 12, '#d8e6ff'); rect(18, 15, 3, 1, p.trim); rect(19, 16, 1, 2, '#8a6a3a'); break
-    case 'scroll': rect(17, 9, 4, 5, p.accent); rect(17, 11, 4, 1, p.trim); rect(18, 8, 2, 1, p.trim); break
-    case 'pill': rect(18, 14, 3, 3, p.accent); set(19, 15, p.trim); set(20, 16, '#ffffff'); break
-    case 'gourd': rect(18, 12, 3, 4, p.accent); rect(19, 10, 1, 2, p.trim); break
-    case 'hammer': rect(19, 9, 1, 8, '#8a6a3a'); rect(17, 7, 4, 3, p.accent); break
-    case 'brush': rect(19, 6, 1, 10, '#8a6a3a'); rect(18, 15, 3, 2, p.accent); break
-    case 'fan': rect(18, 10, 1, 6, '#8a6a3a'); rect(17, 7, 4, 3, p.accent); rect(19, 6, 1, 1, p.trim); break
-    case 'array': rect(17, 11, 5, 5, p.accent); rect(18, 12, 3, 3, p.trim); set(19, 13, p.accent); break
-    case 'compass': rect(17, 9, 5, 5, p.accent); rect(18, 10, 3, 3, p.trim); set(19, 11, '#ffe9a8'); rect(19, 12, 1, 2, p.accent); break
-    case 'lantern': rect(18, 9, 3, 5, p.accent); rect(18, 8, 3, 1, p.trim); rect(18, 14, 3, 1, p.trim); rect(19, 7, 1, 1, p.trim); break
-    case 'book': rect(17, 9, 4, 4, p.accent); rect(17, 13, 4, 1, p.trim); rect(18, 10, 2, 1, p.trim); rect(18, 12, 2, 1, p.trim); break
-    case 'fist': rect(17, 13, 4, 4, p.accent); rect(18, 14, 2, 2, p.trim); break
-    case 'crown': rect(9, 1, 6, 1, p.accent); set(11, 0, p.accent); set(13, 0, p.accent); break
+    case 'sword':
+      rect(26, 2, 2, 14, '#e6f0ff'); vline(26, 2, 14, '#ffffff'); vline(27, 4, 10, '#a9c4e6')
+      rect(23, 16, 8, 2, p.accent); rect(23, 16, 8, 1, '#fff6d8')
+      rect(25, 18, 3, 6, '#8a5a3a'); vline(26, 18, 6, '#b07a52'); set(26, 25, p.accent)
+      break
+    case 'fan':
+      // 羽扇：上宽下窄的叶片 + 扇柄
+      rect(25, 7, 5, 2, p.accent)
+      rect(23, 9, 9, 3, p.accent)
+      rect(22, 12, 11, 3, p.accent)
+      rect(23, 15, 9, 2, p.accent)
+      rect(25, 17, 5, 1, p.trim)
+      vline(27, 18, 8, '#8a5a3a')
+      set(26, 8, '#ffffff'); set(28, 10, p.robeLight); set(28, 13, p.robeLight)
+      hline(24, 14, 7, p.trim)
+      break
+    case 'pill':
+      // 丹瓶：瓶腹 + 瓶颈 + 高光
+      rect(24, 18, 7, 6, p.accent)
+      rect(24, 18, 1, 6, p.robeDark); rect(30, 18, 1, 6, p.robeDark)
+      rect(25, 20, 3, 3, '#fff2ff'); set(26, 20, '#ffffff')
+      rect(26, 16, 3, 2, p.trim); hline(25, 15, 5, p.trim)
+      set(28, 23, p.trim)
+      break
+    case 'scroll':
+      rect(23, 12, 8, 10, p.accent); vline(23, 12, 10, p.trim); vline(30, 12, 10, p.trim)
+      hline(25, 15, 4, p.robeDark); hline(25, 17, 4, p.robeDark); hline(25, 19, 3, p.robeDark)
+      rect(23, 11, 8, 1, '#8a6a3a'); rect(23, 22, 8, 1, '#8a6a3a')
+      break
+    case 'gourd':
+      rect(24, 20, 7, 5, p.accent); rect(25, 16, 5, 4, p.accent)
+      rect(24, 20, 2, 5, p.robeLight); hline(24, 20, 7, '#ffffff')
+      rect(26, 15, 3, 1, p.trim); set(27, 19, p.trim); set(28, 22, p.robeDark)
+      break
+    case 'compass':
+      rect(23, 10, 8, 8, p.accent); rect(24, 11, 6, 6, p.robeDark)
+      rect(25, 12, 4, 4, p.robe); set(27, 13, '#ffe9a8'); rect(27, 14, 1, 2, p.accent)
+      hline(23, 10, 8, p.trim)
+      break
+    case 'brush':
+      rect(27, 5, 2, 12, '#8a5a3a'); vline(28, 5, 12, '#b07a52')
+      rect(26, 17, 4, 4, p.accent); set(27, 20, '#ffffff'); rect(26, 21, 4, 1, p.trim)
+      break
+    case 'lantern':
+      rect(24, 9, 6, 8, p.accent); rect(25, 10, 4, 6, '#fff2c4')
+      rect(23, 8, 8, 1, p.trim); rect(23, 17, 8, 1, p.trim); rect(26, 6, 2, 2, p.trim)
+      set(27, 12, '#ffffff')
+      break
+    case 'array':
+      rect(23, 10, 8, 8, p.accent); rect(24, 11, 6, 6, p.robeDark)
+      set(25, 12, p.accent); set(28, 12, p.accent); set(25, 15, p.accent); set(28, 15, p.accent)
+      vline(26, 13, 2, p.trim); vline(27, 13, 2, p.trim)
+      break
+    case 'fist':
+      rect(23, 15, 7, 6, p.skin); hline(23, 15, 7, '#ffffff'); vline(25, 16, 3, p.skinShade); vline(27, 16, 3, p.skinShade)
+      rect(22, 17, 1, 3, p.skin); rect(24, 21, 5, 2, p.accent); set(26, 22, p.trim)
+      break
+    case 'book':
+      rect(23, 11, 8, 8, p.accent); rect(24, 12, 6, 6, '#fff6e0')
+      hline(24, 14, 6, p.robeDark); hline(24, 16, 6, p.robeDark)
+      vline(23, 11, 8, p.trim); vline(30, 11, 8, p.trim)
+      break
+    case 'hammer':
+      rect(27, 10, 2, 12, '#8a5a3a'); rect(23, 7, 8, 5, p.accent)
+      hline(23, 7, 8, '#fff6d8'); rect(24, 8, 6, 3, p.robeLight)
+      break
+    case 'crown':
+      rect(13, 0, 6, 2, p.accent); set(13, 0, p.accent); set(18, 0, p.accent)
+      set(15, 1, p.trim); set(16, 1, p.trim)
+      break
     default: break
   }
+  outline(px)
   return px
 }
 
-/** 修炼中：御剑，剑身带剑气。 */
+/** 修炼中：御剑，剑气环绕。 */
 function drawWorking() {
-  const { px, set, rect } = canvas()
-  rect(11, 3, 2, 11, '#d8e6ff')
-  rect(10, 4, 1, 9, '#9fc4ef')
-  rect(9, 14, 6, 2, '#d4af37')
-  rect(11, 16, 2, 4, '#8a6a3a')
-  set(11, 2, '#ffffff'); set(13, 1, '#bff3ef'); set(8, 8, '#bff3ef'); set(15, 11, '#bff3ef')
-  set(7, 18, '#5fd0a8'); set(16, 6, '#5fd0a8')
+  const { px, set, rect, hline, vline } = canvas()
+  rect(14, 4, 3, 16, '#e6f0ff'); vline(14, 4, 16, '#ffffff'); vline(16, 6, 12, '#a9c4e6')
+  rect(11, 19, 9, 2, '#d4af37'); hline(11, 19, 9, '#ffe9a8')
+  rect(14, 21, 3, 7, '#8a5a3a'); set(15, 27, '#d4af37')
+  set(11, 8, '#7fe0c0'); set(20, 11, '#7fe0c0'); set(9, 16, '#bff3ef')
+  set(12, 5, '#ffffff'); set(19, 6, '#ffffff')
+  rect(6, 22, 2, 6, '#5fd0a8'); hline(6, 27, 2, '#bff3ef')
+  rect(23, 20, 2, 6, '#5fd0a8'); hline(23, 25, 2, '#bff3ef')
+  outline(px)
   return px
 }
 
-/** 静修：盘坐修士。 */
+/** 静修：盘坐修士，闭目。 */
 function drawIdle() {
-  const { px, set, rect } = canvas()
-  rect(9, 5, 6, 5, '#f0c9a8')
-  rect(9, 4, 6, 2, '#2a2a2a')
-  set(10, 8, '#3a3a3a'); set(13, 8, '#3a3a3a')
-  rect(8, 11, 8, 6, '#3f6a8a')
-  rect(8, 14, 8, 1, '#bff3ef')
-  rect(6, 17, 12, 3, '#274358')
-  rect(6, 20, 12, 1, '#1c2f42')
-  rect(11, 12, 2, 3, '#bff3ef')
+  const { px, set, rect, hline, vline } = canvas()
+  // 蒲团
+  rect(6, 25, 20, 4, '#2f4858'); hline(6, 25, 20, '#4b7089'); hline(6, 28, 20, '#1e303c')
+  // 盘腿
+  rect(8, 21, 16, 4, '#3f6a8a'); hline(8, 21, 16, '#5f8fb2')
+  // 袍身
+  rect(10, 12, 12, 10, '#3f6a8a'); vline(10, 12, 10, '#5f8fb2'); vline(21, 12, 10, '#2a4a63')
+  rect(14, 14, 4, 2, '#bff3ef'); rect(14, 20, 4, 1, '#bff3ef')
+  // 手
+  rect(12, 18, 2, 2, '#f2cfae'); rect(18, 18, 2, 2, '#f2cfae')
+  // 头
+  rect(12, 4, 8, 8, '#f2cfae'); rect(12, 10, 8, 1, '#d9ab8a')
+  rect(11, 2, 10, 3, '#2a2230'); rect(13, 0, 6, 2, '#2a2230')
+  // 闭目
+  hline(13, 7, 2, '#2b2430'); hline(17, 7, 2, '#2b2430')
+  hline(13, 6, 2, '#d9ab8a'); hline(17, 6, 2, '#d9ab8a')
+  set(15, 9, '#b0605a')
+  // 灵气
+  set(7, 12, '#7fe0c0'); set(6, 17, '#bff3ef'); set(25, 14, '#7fe0c0'); set(26, 19, '#bff3ef')
+  outline(px)
   return px
 }
 
-/** 推演：卦盘。 */
+/** 推演：卦盘，含铜针与卦爻。 */
 function drawUnknown() {
-  const { px, set, rect } = canvas()
-  rect(7, 3, 10, 1, '#bff3ef')
-  rect(5, 5, 14, 1, '#7fd4c0')
-  rect(4, 8, 16, 1, '#bff3ef')
-  rect(4, 12, 16, 1, '#7fd4c0')
-  rect(5, 15, 14, 1, '#bff3ef')
-  rect(7, 17, 10, 1, '#7fd4c0')
-  rect(10, 6, 4, 4, '#d4af37')
-  set(11, 7, '#fff6cf'); set(12, 8, '#fff6cf')
-  rect(10, 16, 4, 4, '#1c2f42')
+  const { px, set, rect, hline, vline } = canvas()
+  // 外盘
+  rect(5, 6, 22, 2, '#3f6a6a'); hline(5, 6, 22, '#7fd4c0')
+  rect(4, 9, 24, 2, '#2f5252'); hline(4, 9, 24, '#5fb3a6')
+  rect(3, 12, 26, 2, '#3f6a6a'); hline(3, 12, 26, '#7fd4c0')
+  rect(4, 15, 24, 2, '#2f5252'); hline(4, 15, 24, '#5fb3a6')
+  rect(5, 18, 22, 2, '#3f6a6a'); hline(5, 18, 22, '#7fd4c0')
+  rect(7, 21, 18, 2, '#2f5252'); hline(7, 21, 18, '#5fb3a6')
+  // 中宫
+  rect(13, 7, 6, 15, '#1f3333'); rect(14, 8, 4, 13, '#132424')
+  rect(14, 10, 4, 4, '#d4af37'); hline(14, 10, 4, '#ffe9a8'); set(15, 11, '#ffffff')
+  rect(14, 16, 4, 4, '#8a1c1c'); hline(14, 16, 4, '#c23a3a')
+  outline(px)
   return px
 }
 
@@ -169,10 +300,8 @@ function encode(px) {
 mkdirSync(OUT, { recursive: true })
 for (const [name, palette] of Object.entries(AVATARS)) {
   writeFileSync(join(OUT, name), encode(drawAvatar(palette)))
-  console.log('wrote', name)
 }
-for (const [name, kind] of Object.entries(STATES)) {
-  const px = kind === 'working' ? drawWorking() : kind === 'idle' ? drawIdle() : drawUnknown()
-  writeFileSync(join(OUT, name), encode(px))
-  console.log('wrote', name)
-}
+writeFileSync(join(OUT, 'state-working.png'), encode(drawWorking()))
+writeFileSync(join(OUT, 'state-idle.png'), encode(drawIdle()))
+writeFileSync(join(OUT, 'state-unknown.png'), encode(drawUnknown()))
+console.log('wrote', Object.keys(AVATARS).length + STATES.length, 'images')

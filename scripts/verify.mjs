@@ -316,15 +316,15 @@ const artworkHeaders = await Promise.all(expectedArtwork.map(async (name) => {
   }
 }))
 check(
-  'all cultivation artwork is 96x96 8-bit RGBA PNG',
+  'all cultivation artwork is 128x128 8-bit RGBA PNG',
   artworkHeaders.every(image => image.png
-    && image.width === 96
-    && image.height === 96
+    && image.width === 128
+    && image.height === 128
     && image.bitDepth === 8
     && image.colorType === 6),
   `invalid headers = ${JSON.stringify(artworkHeaders.filter(image => !image.png
-    || image.width !== 96
-    || image.height !== 96
+    || image.width !== 128
+    || image.height !== 128
     || image.bitDepth !== 8
     || image.colorType !== 6))}`,
 )
