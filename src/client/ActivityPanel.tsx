@@ -692,7 +692,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
 
         {!workspace && <ProgressOverview team={team} t={t} discarded={discarded} />}
 
-        {!workspace && (() => {
+        {(() => {
           const orderedMembers = orderDelegationMembers(team.members, team.tasks)
           const runningMembers = orderedMembers.filter((member) => (
             member.activity === 'working' || member.status === 'working'
