@@ -151,6 +151,52 @@
   color: var(--dsw-alias-state-success-primary, #3fbf9a);
 }
 
+/* 门派：一枚 chip 一套道途；随机门派可反复重抽。 */
+.sectRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sectChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 11px;
+  line-height: 15px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sectChip:hover:not(:disabled) {
+  border-color: var(--dsw-alias-state-business-primary, #5b8def);
+  color: var(--dsw-alias-label-primary);
+}
+
+.sectChip[data-active='true'] {
+  border-color: #4ec98a;
+  background: color-mix(in srgb, #4ec98a 12%, var(--dsw-alias-bg-layer-1));
+  color: #4ec98a;
+}
+
+.sectChip:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.sectRoster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
 /* Role multi-select */
 .multi { position: relative; }
 

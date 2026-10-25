@@ -5,6 +5,7 @@ import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import css from './QuickStartDialog.module.css'
 import { TEAM_CREATED_EVENT } from './team-reveal.ts'
 import { ROLE_META } from './role-labels.ts'
+import { SECT_PRESETS, randomSect, sectPreset } from './sects.ts'
 
 type TplKey = 'quickstart.tplFix' | 'quickstart.tplFeat' | 'quickstart.tplResearch' | 'quickstart.tplAudit'
   | 'quickstart.tplBuild' | 'quickstart.tplArray' | 'quickstart.tplDocs' | 'quickstart.tplDebate'
@@ -36,6 +37,9 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
   const [goal, setGoal] = useState('')
   const [template, setTemplate] = useState<string>(TEMPLATES[0]?.id ?? 'fix')
   const [roles, setRoles] = useState<string[]>([...(TEMPLATES[0]?.roles ?? [])])
+  // 门派有两种玩法：用户选一个预设，或让系统随机动态分配（再点一次重抽）。
+  const [sectMode, setSectMode] = useState<'random' | 'custom' | string>('random')
+  const [rolledSect, setRolledSect] = useState<string>(() => randomSect().id)
   const [customRole, setCustomRole] = useState('')
   const [rolesOpen, setRolesOpen] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -62,9 +66,27 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
     setBusy(false)
     setRolesOpen(false)
   }
+  const activeSect = sectMode === 'custom' ? undefined : sectPreset(sectMode === 'random' ? rolledSect : sectMode)
+  const sectRoles = activeSect?.roles ?? roles
   const chooseTemplate = (id: string): void => {
     setTemplate(id)
-    setRoles([...templateOf(id).roles])
+    // 门派已经配好道途时，换模板不再覆盖这套道途（自定义模式才跟随模板）。
+    if (sectMode === 'custom') setRoles([...templateOf(id).roles])
+  }
+  const chooseSect = (id: string): void => {
+    setSectMode(id)
+    const preset = sectPreset(id)
+    if (preset !== undefined) setRoles([...preset.roles])
+  }
+  const rollSect = (): void => {
+    const next = randomSect(rolledSect)
+    setRolledSect(next.id)
+    setSectMode('random')
+    setRoles([...next.roles])
+  }
+  const chooseCustom = (): void => {
+    setSectMode('custom')
+    if (roles.length === 0) setRoles([...templateOf(template).roles])
   }
   const toggleRole = (role: string): void => {
     setRoles((current) => current.includes(role) ? current.filter(entry => entry !== role) : [...current, role])
@@ -88,7 +110,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
       const response = await fetch('/plugins/dsh-agent-teams/quick-start', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ sessionId, goal: trimmed, template, roles, replace }),
+        body: JSON.stringify({ sessionId, goal: trimmed, template, roles: sectMode === 'custom' ? roles : [...(activeSect?.roles ?? roles)], replace }),
       })
       const body = await response.json().catch(() => null) as { ok?: boolean; teamId?: string; error?: string } | null
       if (!response.ok || body?.ok !== true) {
@@ -97,7 +119,10 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
         setBlocked(existing)
         throw new Error(existing ? t('quickstart.teamExists') : raw)
       }
-      setCreated(body.teamId ?? '')
+      setCreated(t('quickstart.created', {
+        team: body.teamId ?? '',
+        sect: activeSect === undefined ? t('quickstart.sectCustomPicked') : t(activeSect.nameKey),
+      }))
       if (body.teamId !== undefined) window.dispatchEvent(new CustomEvent(TEAM_CREATED_EVENT, { detail: { teamId: body.teamId } }))
       setGoal('')
       window.setTimeout(() => { setOpen(false); reset() }, 1400)
@@ -147,6 +172,42 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
             />
           </label>
           <div className={css.field}>
+            <span>{t('quickstart.sect')}</span>
+            <div className={css.sectRow}>
+              <button type="button" className={css.sectChip} data-active={sectMode === 'random' || undefined} disabled={busy} onClick={rollSect}>
+                <span aria-hidden>🎲</span>{t('quickstart.sectRandom')}
+              </button>
+              {SECT_PRESETS.map(preset => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className={css.sectChip}
+                  data-active={sectMode === preset.id || undefined}
+                  disabled={busy}
+                  onClick={() => { chooseSect(preset.id) }}
+                >
+                  {t(preset.nameKey)}
+                </button>
+              ))}
+              <button type="button" className={css.sectChip} data-active={sectMode === 'custom' || undefined} disabled={busy} onClick={chooseCustom}>
+                {t('quickstart.sectCustom')}
+              </button>
+            </div>
+            <small className={css.templateDesc}>
+              {sectMode === 'custom'
+                ? t('quickstart.sectCustomHint')
+                : sectMode === 'random'
+                  ? t('quickstart.sectRolled', { sect: activeSect === undefined ? '' : t(activeSect.nameKey) })
+                  : activeSect === undefined ? '' : t(activeSect.descKey)}
+            </small>
+            {sectMode !== 'custom' && (
+              <span className={css.sectRoster}>
+                {sectRoles.map(role => <span key={role} className={css.chip}>{roleName(role)}</span>)}
+              </span>
+            )}
+          </div>
+          {sectMode === 'custom' && (
+          <div className={css.field}>
             <span>{t('quickstart.roles')}</span>
             <div className={css.multi} ref={multiRef}>
               <button
@@ -190,6 +251,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
               )}
             </div>
           </div>
+          )}
           {error !== '' && <p className={css.error} role="alert">{error}</p>}
           {blocked && (
             <p className={css.replaceRow}>
@@ -197,7 +259,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
               <button type="button" disabled={busy} onClick={() => { void submit(true) }}>{t('quickstart.replace')}</button>
             </p>
           )}
-          {created !== undefined && <p className={css.success} role="status">{t('quickstart.created', { team: created })}</p>}
+          {created !== undefined && <p className={css.success} role="status">{created}</p>}
         </div>
       </Modal>
     </>
