@@ -13,6 +13,8 @@ export interface PixelOfficeProps {
   readonly onOpenMember?: (memberId: string) => void
   /** Switch the floater back to the board view. */
   readonly onShowBoard?: () => void
+  /** Collapse the office back to its bottom bar. */
+  readonly onCollapse?: () => void
 }
 
 function sceneLabel(activity: SceneMember['activity'], t: AgentTeamsTranslate): string {
@@ -21,7 +23,7 @@ function sceneLabel(activity: SceneMember['activity'], t: AgentTeamsTranslate): 
   return t('office.idle')
 }
 
-export function PixelOffice({ team, t, onOpenMember, onShowBoard }: PixelOfficeProps) {
+export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: PixelOfficeProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const hostRef = useRef<HTMLDivElement | null>(null)
   const sceneRef = useRef<ReturnType<typeof createPixelScene> | null>(null)
@@ -111,6 +113,11 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard }: PixelOfficeP
         {onShowBoard !== undefined && (
           <button type="button" className={css.viewButton} onClick={onShowBoard} title={t('office.showBoard')}>
             {t('office.showBoard')}
+          </button>
+        )}
+        {onCollapse !== undefined && (
+          <button type="button" className={css.viewButton} data-control="office-collapse" onClick={onCollapse} title={t('office.collapse')} aria-label={t('office.collapse')}>
+            <span aria-hidden>▾</span>
           </button>
         )}
       </header>

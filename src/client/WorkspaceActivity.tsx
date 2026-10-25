@@ -20,6 +20,8 @@ export const TEAM_TAB_ID = 'agent-teams-pixel/activity'
 
 /** Persisted workspace-tab preference: progress board vs setup page. */
 const WORKSPACE_VIEW_KEY = 'agent-teams-pixel.workspaceView'
+/** Persisted pixel-office collapsed state (bottom bar when closed). */
+const OFFICE_OPEN_KEY = 'agent-teams-pixel.officeOpen'
 /** Persisted pixel-office pane height (px); unset uses the CSS default. */
 const WORKSPACE_OFFICE_HEIGHT_KEY = 'agent-teams-pixel.workspaceOfficeHeight'
 const OFFICE_MIN_HEIGHT = 140
@@ -107,6 +109,15 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   const setWorkspaceView = (next: 'board' | 'config'): void => {
     setView(next)
     try { window.localStorage.setItem(WORKSPACE_VIEW_KEY, next) } catch { /* private mode */ }
+  }
+  // The office dock sits at the very bottom and can be collapsed to a slim bar.
+  const [officeOpen, setOfficeOpen] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true
+    try { return window.localStorage.getItem(OFFICE_OPEN_KEY) !== '0' } catch { return true }
+  })
+  const setOfficeOpenPersist = (next: boolean): void => {
+    setOfficeOpen(next)
+    try { window.localStorage.setItem(OFFICE_OPEN_KEY, next ? '1' : '0') } catch { /* private mode */ }
   }
   const containerRef = useRef<HTMLDivElement | null>(null)
   const officePaneRef = useRef<HTMLElement | null>(null)
@@ -207,30 +218,47 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
         )}
       </div>
       {selected !== undefined && live.includes(selected) && (
-        <>
-          <div
-            className={css.splitter}
-            data-control="office-splitter"
-            role="separator"
-            aria-orientation="horizontal"
-            aria-label={t('office.resize')}
-            title={t('office.resize')}
-            onMouseDown={beginSplit}
-          />
-          <section
-            ref={officePaneRef}
-            className={css.officePane}
-            data-office-pane
-            aria-label={t('office.title')}
-            style={officeHeight === undefined ? undefined : { height: `${Math.round(officeHeight)}px`, flex: '0 0 auto' }}
-          >
-            <PixelOffice
-              team={selected}
-              t={t}
-              onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
+        officeOpen ? (
+          <>
+            <div
+              className={css.splitter}
+              data-control="office-splitter"
+              role="separator"
+              aria-orientation="horizontal"
+              aria-label={t('office.resize')}
+              title={t('office.resize')}
+              onMouseDown={beginSplit}
             />
-          </section>
-        </>
+            <section
+              ref={officePaneRef}
+              className={css.officePane}
+              data-office-pane
+              aria-label={t('office.title')}
+              style={officeHeight === undefined ? undefined : { height: `${Math.round(officeHeight)}px`, flex: '0 0 auto' }}
+            >
+              <PixelOffice
+                team={selected}
+                t={t}
+                onCollapse={() => { setOfficeOpenPersist(false) }}
+                onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
+              />
+            </section>
+          </>
+        ) : (
+          <div className={css.officeBar}>
+            <button
+              type="button"
+              className={css.officeBarButton}
+              data-control="office-expand"
+              aria-label={t('office.expand')}
+              title={t('office.expand')}
+              onClick={() => { setOfficeOpenPersist(true) }}
+            >
+              <span aria-hidden>🏢</span>
+              {t('office.expand')}
+            </button>
+          </div>
+        )
       )}
     </div>
   )

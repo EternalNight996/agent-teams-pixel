@@ -8,5 +8,7 @@ export interface PixelOfficeProps {
     readonly onOpenMember?: (memberId: string) => void;
     /** Switch the floater back to the board view. */
     readonly onShowBoard?: () => void;
+    /** Collapse the office back to its bottom bar. */
+    readonly onCollapse?: () => void;
 }
-export declare function PixelOffice({ team, t, onOpenMember, onShowBoard }: PixelOfficeProps): import("react").JSX.Element;
+export declare function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: PixelOfficeProps): import("react").JSX.Element;

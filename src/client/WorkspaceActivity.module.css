@@ -1,4 +1,4 @@
-﻿.root {
+.root {
   --dsw-alias-state-business-primary: light-dark(#2866d7, #82b4ff);
   container: team-workspace / inline-size;
   height: 100%;
@@ -22,7 +22,18 @@
   margin: 0 auto;
   padding: 10px 12px 12px;
   box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--dsw-alias-label-secondary) 45%, transparent) transparent;
 }
+.content::-webkit-scrollbar { width: 9px; height: 9px; }
+.content::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--dsw-alias-label-secondary) 42%, transparent);
+}
+.content::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--dsw-alias-label-secondary) 62%, transparent); }
+.content::-webkit-scrollbar-track { background: transparent; }
 /* Draggable divider between the configuration panel and the pixel office. */
 .splitter {
   flex: 0 0 auto;
@@ -64,6 +75,33 @@
   background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 55%, transparent);
   overflow: hidden;
 }
+/* Collapsed office: a slim dock bar pinned to the bottom edge. */
+.officeBar {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 4px 12px;
+  box-sizing: border-box;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 55%, transparent);
+}
+.officeBarButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+.officeBarButton:hover { color: var(--dsw-alias-label-primary); border-color: var(--dsw-alias-state-business-primary); }
 .heading { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; margin-bottom: 8px; }
 .heading img { width: 26px; height: 26px; object-fit: contain; }
 .heading h2 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.4px; }
