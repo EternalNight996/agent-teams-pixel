@@ -35,16 +35,21 @@ export interface SceneLabels {
     readonly idle?: string;
     readonly unknownState?: string;
 }
-/** 墙面数据碑：宗门气运的关键数字，已由调用方本地化。 */
+/** 墙面数据碑：宗门气运的关键数字，标签由调用方本地化。 */
 export interface SceneWall {
     readonly title: string;
-    readonly running: string;
-    readonly waiting: string;
-    readonly done: string;
-    readonly stats: string;
     readonly doneCount: number;
     readonly total: number;
+    readonly runningCount: number;
+    readonly waitingCount: number;
     readonly failedCount: number;
+}
+/** One wall facility the scene should label and make clickable. */
+export interface SceneFacility {
+    readonly action: SceneAction;
+    readonly label: string;
+    /** Unread / attention count painted on the facility (e.g. the message rack). */
+    readonly badge?: number;
 }
 /** One immutable snapshot of the office to draw. */
 export interface SceneModel {
@@ -54,17 +59,25 @@ export interface SceneModel {
     readonly members: readonly SceneMember[];
     readonly labels?: SceneLabels;
     readonly wall?: SceneWall;
+    /** Facilities to label and hit-test; omitted draws the wall decor only. */
+    readonly facilities?: readonly SceneFacility[];
+    /** Facility whose panel is currently open (drawn as selected). */
+    readonly activeAction?: SceneAction;
 }
+export type { SceneAction } from './office-actions.ts';
 export interface SceneHandle {
     /** Replace the model; the running loop picks it up on the next frame. */
     render(model: SceneModel): void;
     /** Resize in CSS pixels; devicePixelRatio is handled internally. */
     resize(width: number, height: number): void;
-    /** Hit-test a pointer in CSS pixels; returns the member id under it. */
-    hitTest(x: number, y: number): string | undefined;
+    /** Hit-test a pointer in CSS pixels; resolves a desk or a wall facility. */
+    hitTest(x: number, y: number): SceneHit | undefined;
+    /** Mark the element under the pointer so the scene can highlight it. */
+    setHover(hit: SceneHit | undefined): void;
     /** Cancel the loop and release the context. */
     dispose(): void;
 }
+import { type SceneAction, type SceneHit } from './office-actions.ts';
 export declare function createPixelScene(canvas: HTMLCanvasElement, options?: {
     readonly zoom?: number;
 }): SceneHandle;

@@ -1,72 +1,21 @@
-/* Pixel-office view: the AgentTeams right-side pane, and the floater toggle. */
+/* Pixel-office view: the whole team tab (and the floater's office mode). */
 
 .office {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  /* Grow into the dock pane instead of sizing to the roster: a percentage height
+  /* Fill the dock pane instead of sizing to the roster: a percentage height
      alone left the pane's bottom slack empty once the dock was dragged taller. */
   flex: 1 1 auto;
-  height: auto;
+  height: 100%;
   min-height: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-.head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  min-height: 18px;
-}
-
-.title {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  color: var(--dsw-alias-text-primary, #e8eef8);
-}
-
-.count {
-  font-size: 11px;
-  font-weight: 400;
-  opacity: 0.65;
-}
-
-.meta {
-  font-size: 11px;
-  color: var(--dsw-alias-text-secondary, #a8b3c7);
-  margin-left: auto;
-  white-space: nowrap;
-}
-
-.meta[data-working] {
-  color: var(--dsw-alias-state-success, #67d9a5);
-}
-
-.viewButton {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--dsw-alias-border-subtle, rgba(160, 176, 200, 0.28));
-  background: transparent;
-  color: var(--dsw-alias-text-secondary, #a8b3c7);
-  cursor: pointer;
-}
-
-.viewButton:hover {
-  color: var(--dsw-alias-text-primary, #e8eef8);
-  border-color: var(--dsw-alias-border-strong, rgba(160, 176, 200, 0.5));
-}
-
 .canvasHost {
   position: relative;
   flex: 1 1 auto;
-  min-height: 140px;
+  min-height: 160px;
   border-radius: 10px;
   overflow: hidden;
   background: #1c2320;
@@ -76,6 +25,19 @@
   display: block;
   position: absolute;
   inset: 0;
+}
+
+/* Screen-reader-only live summary; the canvas carries the visual copy. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .tooltip {
@@ -98,6 +60,10 @@
   box-shadow: 0 4px 14px rgb(0 0 0 / 35%);
 }
 
+.tooltip[data-placement='below'] {
+  transform: translate(-50%, 16%);
+}
+
 .tooltip strong {
   font-size: 11px;
 }
@@ -115,124 +81,65 @@
   color: #9fb0c8;
 }
 
-.chips {
+/* Keyboard/screen-reader duplicate of the wall facilities. It stays visually
+   hidden so it never covers the art; tabbing into it reveals a small rail. */
+.rail {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 0;
+  gap: 3px;
+  width: 1px;
+  height: 1px;
   padding: 0;
-  list-style: none;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  max-width: 190px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--dsw-alias-border-subtle, rgba(160, 176, 200, 0.24));
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--dsw-alias-text-secondary, #a8b3c7);
+.rail:focus-within {
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid rgba(160, 176, 200, 0.35);
+  background: rgba(18, 22, 26, 0.92);
+  pointer-events: auto;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 35%);
+}
+
+.railButton {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: #d8c48a;
   font-size: 11px;
-  cursor: pointer;
-  overflow: hidden;
+  line-height: 1;
 }
 
-.chip:disabled {
-  cursor: default;
+.railButton:hover {
+  color: #ffe9a8;
+  border-color: rgba(212, 175, 55, 0.55);
+  background: rgba(212, 175, 55, 0.12);
 }
 
-.chip:hover:not(:disabled) {
-  color: var(--dsw-alias-text-primary, #e8eef8);
-  border-color: var(--dsw-alias-border-strong, rgba(160, 176, 200, 0.5));
+.railButton[aria-pressed='true'] {
+  color: #241a08;
+  background: #d4af37;
+  border-color: #ffe9a8;
 }
 
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex: none;
-  background: #8fa0bb;
+.railButton:focus-visible {
+  outline: 2px solid #d4af37;
+  outline-offset: 1px;
 }
-
-.chip[data-activity='working'] .dot {
-  background: #67d9a5;
-  box-shadow: 0 0 6px rgba(103, 217, 165, 0.7);
-}
-
-.chip[data-activity='unknown'] .dot {
-  background: #ef6b6b;
-}
-
-.chipName {
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chipTask {
-  opacity: 0.6;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chip[data-unread] {
-  border-color: rgba(239, 107, 107, 0.6);
-  color: var(--dsw-alias-text-primary, #e8eef8);
-}
-/* 掌门收件箱：一行横向滚动，省出画布高度。 */
-.inbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  padding-top: 4px;
-  border-top: 1px dashed color-mix(in srgb, var(--dsw-alias-border-l2) 70%, transparent);
-  color: var(--dsw-alias-label-secondary);
-  font-size: 10.5px;
-  line-height: 16px;
-}
-
-.inboxTitle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex: none;
-  color: var(--dsw-alias-label-tertiary);
-  font-weight: 600;
-}
-
-.inboxList {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-  overflow-x: auto;
-  list-style: none;
-  scrollbar-width: thin;
-}
-
-.inboxList li {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-  min-width: 0;
-  max-width: 240px;
-  white-space: nowrap;
-}
-
-.inboxFrom {
-  color: var(--dsw-alias-state-business-primary);
-  font-weight: 600;
-}
-
-.inboxText {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-

@@ -1,5 +1,26 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- The 山门洞府 is now the team tab itself: the wall's four facilities (藏经阁 /
+  山门 / 功德碑 / 传音阁) open the setup, roster, progress and inbox sheets, so the
+  permanent header, board column, member chips and inbox row no longer consume
+  page height. History pages keep the old board/setup switch.
+- The wall is a real menu: facilities get hover outlines, labelled wooden tags,
+  live counts (progress on 功德碑, unread badge on 传音阁) and pointer cursors. The
+  floater only enables the 功德碑 (board) facility.
+- Tall panes paint the hall floor to the bottom edge instead of floating the
+  world in dead bands; rows spread and centre themselves, an incomplete last row
+  is centred, and a faint 聚灵阵 gives the courtyard floor structure.
+
+### Added
+- `office.facility.*`, `office.action.*Hint`, `office.sceneAria`, `office.rail`
+  and `office.closePanel` locale keys (zh/en).
+- `src/client/pixel-office/office-actions.ts`: one shared facility layout for the
+  renderer and the React hit surface, with a unit test for non-overlap and
+  centre hit-testing.
+
 ## [0.3.0-rc.1] - 2026-10-25
 
 Derivative baseline: imported `@nanmicoder/dsh-agent-teams@0.1.26` (MIT) as the

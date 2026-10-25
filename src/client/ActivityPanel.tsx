@@ -1387,7 +1387,8 @@ export function ActivityPanel({ sessionsList, modelDirectories, openMember, t, c
                 <PixelOffice
                   team={officeTeam}
                   t={t}
-                  onShowBoard={() => { setOfficeView(false) }}
+                  enabledActions={['board']}
+                  onAction={(action) => { if (action === 'board') setOfficeView(false) }}
                   onOpenMember={(memberId) => {
                     navigateToSession(officeTeam.captainSessionId as SessionId, memberId as SessionId)
                   }}
