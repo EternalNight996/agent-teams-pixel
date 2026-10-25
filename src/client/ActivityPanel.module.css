@@ -2053,6 +2053,115 @@
   line-height: 14px;
 }
 
+/* Workspace task chain: dependency, owner and state in one compact row, so the
+   board does not spend a full DAG card on a short plan. */
+.taskChain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 10px 0 4px;
+}
+
+.taskChainTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10.5px;
+  line-height: 16px;
+}
+
+.taskChainTitle svg {
+  width: 13px;
+  height: 13px;
+}
+
+.taskChainTrack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 2px 1px;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--dsw-alias-label-secondary) 40%, transparent) transparent;
+}
+
+.taskChip {
+  --chip-tone: var(--dsw-alias-label-tertiary);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  max-width: 230px;
+  padding: 3px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 80%, transparent);
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 10.5px;
+  line-height: 15px;
+  white-space: nowrap;
+}
+
+.taskChip:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+.taskChip[data-state='running'],
+.taskChip[data-state='claimed'] { --chip-tone: var(--dsw-alias-state-business-primary); }
+.taskChip[data-state='completed'] { --chip-tone: var(--dsw-alias-state-success-primary); }
+.taskChip[data-state='failed'] { --chip-tone: var(--dsw-alias-state-error-primary); }
+.taskChip[data-state='blocked'] { --chip-tone: var(--dsw-alias-state-warning-primary); }
+.taskChip[data-state='cancelled'] { --chip-tone: var(--dsw-alias-label-tertiary); }
+
+.taskChip[data-selected] {
+  border-color: var(--dsw-alias-state-business-primary);
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 14%, var(--dsw-alias-bg-layer-1));
+  color: var(--dsw-alias-label-primary);
+}
+
+.taskChipDot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--chip-tone);
+}
+
+.taskChipId {
+  color: var(--dsw-alias-label-primary);
+  font-weight: 600;
+}
+
+.taskChipOwner {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taskChipDep {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9.5px;
+}
+
+.taskChipGlyph {
+  color: var(--chip-tone);
+  font-size: 9px;
+}
+
+/* 结丹以上：立绘透出灵光，和山门洞府里发光的本命法器呼应。 */
+.memberBlock[data-realm='high'] .memberArt {
+  filter: drop-shadow(0 1px 1px rgb(18 45 72 / 20%)) drop-shadow(0 0 5px rgb(255 217 122 / 70%));
+}
+
+.memberBlock[data-realm='high'] .memberRow {
+  border-color: color-mix(in srgb, #ffd97a 26%, var(--dsw-alias-border-l2));
+}
+
+
 @media (prefers-reduced-motion: reduce) {
   .panel,
   .badge,

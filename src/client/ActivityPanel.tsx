@@ -545,6 +545,67 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
   )
 }
 
+/**
+ * Workspace-only dependency chain: task order, owner and state in one compact
+ * row. The workspace board used to spend a full DAG card on a three-task plan;
+ * folding the edges into the chips (← t1) keeps the dependency readable while
+ * the member tree carries the per-person detail.
+ */
+function TaskChain({ tasks, t, discarded, selectedTaskId, onSelectTask }: {
+  readonly tasks: readonly ActivityTask[]
+  readonly t: AgentTeamsTranslate
+  readonly discarded: boolean
+  readonly selectedTaskId: string | null
+  readonly onSelectTask: (id: string | null) => void
+}) {
+  if (tasks.length === 0) return null
+  const ordered = [...tasks].sort((a, b) => (a.depth - b.depth) || a.id.localeCompare(b.id))
+  return (
+    <section className={css.taskChain} aria-label={t('dependency.aria')} data-task-chain>
+      <span className={css.taskChainTitle}><IconBranchOutline16 />{t('dependency.title')}</span>
+      <div className={css.taskChainTrack}>
+        {ordered.map((task) => {
+          const owner = task.assignee === undefined || task.assignee === '' ? t('task.assignee.unclaimed') : task.assignee
+          const state = discarded ? 'cancelled' : taskTone(task.state, task.status)
+          const status = discarded ? t('task.status.notRun') : taskStatusLabel(task.status, t)
+          const glyph = discarded || task.status === 'cancelled'
+            ? '–'
+            : task.status === 'completed'
+              ? '✓'
+              : task.status === 'failed'
+                ? '✕'
+                : task.state === 'running'
+                  ? '▶'
+                  : task.state === 'blocked'
+                    ? '⏸'
+                    : '·'
+          return (
+            <button
+              key={task.id}
+              type="button"
+              className={css.taskChip}
+              data-state={state}
+              data-selected={task.id === selectedTaskId || undefined}
+              title={`${task.id} · ${task.subject} · ${owner} · ${status}`}
+              onClick={() => { onSelectTask(task.id === selectedTaskId ? null : task.id) }}
+            >
+              <span className={css.taskChipDot} aria-hidden />
+              <span className={css.taskChipId}>{task.id}</span>
+              <span className={css.taskChipOwner}>{owner}</span>
+              {task.dependencies.length > 0 && (
+                <span className={css.taskChipDep} aria-label={t('task.detail.waitingOn', { tasks: formatTaskIds(task.dependencies, t) })}>
+                  ← {task.dependencies.join(' ')}
+                </span>
+              )}
+              <span className={css.taskChipGlyph} aria-hidden>{glyph}</span>
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscarded, onNavigate, t, historic = false, workspace = false }: {
   readonly team: ActivityTeam
   readonly modelDirectory?: ModelDirectory
@@ -681,6 +742,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
         </div>
 
         <ProgressOverview team={team} t={t} discarded={discarded} />
+      {workspace && <TaskChain tasks={team.tasks} t={t} discarded={discarded} selectedTaskId={selectedTaskId} onSelectTask={setSelectedTaskId} />}
 
         {(() => {
           const orderedMembers = orderDelegationMembers(team.members, team.tasks)
@@ -709,7 +771,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                   const owned = team.tasks.filter((task) => task.assignee === member.name)
                   const memberModel = memberRouteLabel(member)
                   return (
-              <div key={member.id || member.name} className={css.memberBlock} data-activity={member.activity} data-selected-member={workspace && selectedAssignee === member.name || undefined}>
+              <div key={member.id || member.name} className={css.memberBlock} data-activity={member.activity} data-realm={(member.progress ?? 0) >= 40 ? 'high' : undefined} data-selected-member={workspace && selectedAssignee === member.name || undefined}>
                 <span className={css.memberBranch} aria-hidden><span /></span>
                 <button
                   type="button"
@@ -802,7 +864,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
         })()}
       </section>
 
-      <DependencyMap tasks={team.tasks} members={team.members} t={t} discarded={discarded} workspace={workspace} onSelectTask={setSelectedTaskId} />
+      {!workspace && <DependencyMap tasks={team.tasks} members={team.members} t={t} discarded={discarded} workspace={workspace} onSelectTask={setSelectedTaskId} />}
       {workspace && <WorkspaceSummary team={team} t={t} discarded={discarded} />}
       </section>
       <Modal

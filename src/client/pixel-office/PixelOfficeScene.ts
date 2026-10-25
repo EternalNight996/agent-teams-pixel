@@ -114,6 +114,11 @@ function roundRect(g: CanvasRenderingContext2D, x: number, y: number, w: number,
   g.closePath()
 }
 
+/** Hex color + alpha as a CSS rgba() string (canvas gradients). */
+function rgba(hex: string, alpha: number): string {
+  return `rgba(${parseInt(hex.slice(1, 3), 16)}, ${parseInt(hex.slice(3, 5), 16)}, ${parseInt(hex.slice(5, 7), 16)}, ${alpha})`
+}
+
 function stateTone(activity: SceneMember['activity']): string {
   if (activity === 'working') return COLORS.good
   if (activity === 'unknown') return COLORS.alert
@@ -214,6 +219,29 @@ export function createPixelScene(
     const base = deskY - 22
     const accent = visual.accent
     const trim = visual.trim
+    // 结丹以上：本命法器自发灵光；元婴以上再加绕器灵屑。
+    if (realm >= 2) {
+      const radius = 18 + realm * 5
+      const halo = g.createRadialGradient(cx, base - 16, 2, cx, base - 16, radius)
+      halo.addColorStop(0, rgba(accent, 0.2 + realm * 0.05))
+      halo.addColorStop(0.6, rgba(accent, 0.08 + realm * 0.02))
+      halo.addColorStop(1, rgba(accent, 0))
+      g.fillStyle = halo
+      g.beginPath(); g.arc(cx, base - 16, radius, 0, Math.PI * 2); g.fill()
+      g.save()
+      g.shadowColor = rgba(accent, 0.9)
+      g.shadowBlur = 4 + realm * 2
+      g.fillStyle = rgba(accent, 0.55)
+      g.fillRect(cx - 1, base - 24, 2, 2)
+      g.restore()
+    }
+    if (realm >= 3) {
+      g.fillStyle = rgba(accent, 0.9)
+      for (let i = 0; i < 3; i += 1) {
+        const angle = time / 900 + i * 2.1
+        g.fillRect(cx + Math.cos(angle) * 16 - 1, base - 16 + Math.sin(angle) * 9 - 1, 2, 2)
+      }
+    }
     switch (visual.weapon) {
       case 'sword': {
         // 剑架
