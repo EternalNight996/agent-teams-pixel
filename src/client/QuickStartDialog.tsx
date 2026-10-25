@@ -1,4 +1,4 @@
-/** Click-to-dispatch entry: a header button that stages a plan from a small form. */
+﻿/** Click-to-dispatch entry: a header button that stages a plan from a small form. */
 import { useEffect, useRef, useState } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
@@ -147,13 +147,26 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
       >
         <div className={css.form}>
           <p className={css.hint}>{t('quickstart.desc')}</p>
-          <label className={css.field}>
+          <div className={css.field}>
             <span>{t('quickstart.template')}</span>
-            <select value={template} disabled={busy} onChange={(event) => { chooseTemplate(event.target.value) }}>
-              {TEMPLATES.map(entry => <option key={entry.id} value={entry.id}>{t(entry.labelKey)}</option>)}
-            </select>
-            <small className={css.templateDesc}>{t(templateOf(template).descKey as Parameters<typeof t>[0])}</small>
-          </label>
+            <div className={css.templates} role="radiogroup" aria-label={t('quickstart.template')}>
+              {TEMPLATES.map(entry => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={template === entry.id}
+                  className={css.templateCard}
+                  data-template={entry.id}
+                  disabled={busy}
+                  onClick={() => { chooseTemplate(entry.id) }}
+                >
+                  <span className={css.templateName}>{t(entry.labelKey)}</span>
+                  <span className={css.templateDesc}>{t(entry.descKey as Parameters<typeof t>[0])}</span>
+                </button>
+              ))}
+            </div>
+          </div>
           <label className={css.field}>
             <span>{t('quickstart.goal')}</span>
             <textarea
