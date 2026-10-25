@@ -183,3 +183,56 @@
   border-color: rgba(239, 107, 107, 0.6);
   color: var(--dsw-alias-text-primary, #e8eef8);
 }
+/* 掌门收件箱：一行横向滚动，省出画布高度。 */
+.inbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 4px;
+  border-top: 1px dashed color-mix(in srgb, var(--dsw-alias-border-l2) 70%, transparent);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10.5px;
+  line-height: 16px;
+}
+
+.inboxTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  font-weight: 600;
+}
+
+.inboxList {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  overflow-x: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+
+.inboxList li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  max-width: 240px;
+  white-space: nowrap;
+}
+
+.inboxFrom {
+  color: var(--dsw-alias-state-business-primary);
+  font-weight: 600;
+}
+
+.inboxText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

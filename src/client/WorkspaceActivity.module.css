@@ -14,7 +14,7 @@
 /* Top panel: configuration and interaction. Sized to its content and capped,
    so short content leaves the room to the pixel office instead of scrolling. */
 .content {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
   overflow: auto;
   width: 100%;
@@ -64,7 +64,8 @@
 }
 /* Bottom panel: a fixed-height animated pixel office dock. */
 .officePane {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-height: 200px;
   /* A flex column so the office body stretches to the dock's full height even
      when a persisted drag height (inline style) is larger than its content. */
   display: flex;

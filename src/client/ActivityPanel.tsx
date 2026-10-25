@@ -340,52 +340,6 @@ function ProgressOverview({ team, t, discarded = false }: { readonly team: Activ
   )
 }
 
-/** Workspace-only summary of durable completion and the current unread inbox.
- * The snapshot is not a chat transcript: it provides at most five unread
- * captain messages, with no timestamps, so do not imply a complete history.
- */
-function WorkspaceSummary({ team, t, discarded }: { readonly team: ActivityTeam; readonly t: AgentTeamsTranslate; readonly discarded: boolean }) {
-  const completed = discarded ? 0 : team.tasks.filter(task => task.status === 'completed').length
-  const total = team.tasks.length
-  return (
-    <div className={css.workspaceSummary}>
-      <section className={css.completionCard} aria-label={t('progress.aria')}>
-        <h3>{t('progress.title')}</h3>
-        <div className={css.completionBody}>
-          <div className={css.completionRing} role="img" aria-label={t('team.stats.completed', { completed, total })} data-completed={completed} data-total={total}>
-            <svg viewBox="0 0 120 120" aria-hidden>
-              <circle className={css.ringTrack} cx="60" cy="60" r="51" />
-              <circle className={css.ringValue} cx="60" cy="60" r="51" pathLength="100" strokeDasharray={`${total === 0 ? 0 : completed / total * 100} 100`} />
-            </svg>
-            <span aria-hidden><strong>{completed}<small> / {total}</small></strong><span>{t(discarded ? 'task.status.notRun' : 'workspace.completed')}</span></span>
-          </div>
-          {total === 0 ? <p className={css.summaryEmpty}>{t('workspace.noTasks')}</p> : <ul className={css.completionTasks} tabIndex={0} aria-label={t('workspace.taskSummary')}>
-            {team.tasks.map(task => <li key={task.id} data-state={discarded ? 'cancelled' : taskTone(task.state, task.status)} data-verdict-stale={task.verdictStale === undefined ? undefined : 'true'} title={taskTitle(task, taskModelLabel(task, team.members))}>
-              <span className={css.completionDot} aria-hidden>{task.verdictStale !== undefined ? '!' : !discarded && task.status === 'completed' ? '✓' : '·'}</span>
-              <span className={css.completionTaskId}>{task.id}</span>
-              <span className={css.completionTaskSubject} title={task.subject}>{task.subject}</span>
-              <span className={css.completionTaskStatus}>{discarded ? t('task.status.notRun') : task.verdictStale !== undefined ? t('workspace.verdictStale') : taskStatusLabel(task.status, t)}</span>
-            </li>)}
-          </ul>}
-        </div>
-      </section>
-      <section className={css.inboxCard} aria-label={t('workspace.inbox')}>
-        <header><h3>{t('workspace.inbox')}</h3><span>{t('workspace.inboxHint')}</span></header>
-        {team.captainInbox.length === 0 ? <p className={css.summaryEmpty}>{t('workspace.inboxEmpty')}</p> : <ul className={css.inboxMessages} tabIndex={0} aria-label={t('workspace.inbox')}>
-          {team.captainInbox.map((message, index) => {
-            const member = team.members.find(candidate => candidate.name === message.from)
-            const art = message.from === CAPTAIN_ASSIGNEE ? LEAD_ART : memberArtUrl(message.from, member?.role ?? '')
-            return <li key={`${index}:${message.from}`}>
-              {art === null ? <span className={css.inboxInitial} aria-hidden>{memberInitial(message.from)}</span> : <img src={art} alt="" aria-hidden />}
-              <div><strong>{message.from}</strong><p>{message.content}</p></div>
-            </li>
-          })}
-        </ul>}
-      </section>
-    </div>
-  )
-}
-
 function DependencyMap({ tasks, members, t, discarded = false, workspace = false, onSelectTask }: {
   readonly tasks: readonly ActivityTask[]
   readonly members: readonly ActivityMember[]
@@ -741,7 +695,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
           </span>
         </div>
 
-        <ProgressOverview team={team} t={t} discarded={discarded} />
+        {!workspace && <ProgressOverview team={team} t={t} discarded={discarded} />}
       {workspace && <TaskChain tasks={team.tasks} t={t} discarded={discarded} selectedTaskId={selectedTaskId} onSelectTask={setSelectedTaskId} />}
 
         {(() => {
@@ -865,7 +819,6 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
       </section>
 
       {!workspace && <DependencyMap tasks={team.tasks} members={team.members} t={t} discarded={discarded} workspace={workspace} onSelectTask={setSelectedTaskId} />}
-      {workspace && <WorkspaceSummary team={team} t={t} discarded={discarded} />}
       </section>
       <Modal
         open={stopOpen}

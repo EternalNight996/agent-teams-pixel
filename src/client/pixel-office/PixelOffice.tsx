@@ -217,6 +217,20 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
           ))}
         </ul>
       )}
+      {/* 掌门收件箱：从面板搬进洞府，横向一行，不占画布高度。 */}
+      {team.captainInbox.length > 0 && (
+        <div className={css.inbox} data-office-inbox>
+          <span className={css.inboxTitle}><span aria-hidden>✉</span>{t('workspace.inbox')}</span>
+          <ul className={css.inboxList} aria-label={t('workspace.inbox')}>
+            {team.captainInbox.slice(0, 4).map((message, index) => (
+              <li key={`${index}:${message.from}`} title={`${message.from}: ${message.content}`}>
+                <span className={css.inboxFrom}>{message.from}</span>
+                <span className={css.inboxText}>{message.content}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   )
 }
