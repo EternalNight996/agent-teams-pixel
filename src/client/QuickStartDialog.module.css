@@ -79,3 +79,101 @@
   font-size: 12px;
   color: var(--dsw-alias-state-success-primary, #3fbf9a);
 }
+
+/* Role multi-select */
+.multi { position: relative; }
+
+.multiTrigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 34px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 12px;
+  box-sizing: border-box;
+  text-align: left;
+  cursor: pointer;
+}
+
+.multiTrigger:hover { border-color: var(--dsw-alias-state-business-primary, #5b8def); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; min-width: 0; }
+
+.chip {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary, #5b8def) 14%, transparent);
+  color: var(--dsw-alias-state-business-primary, #5b8def);
+  font-size: 11px;
+}
+
+.placeholder { color: var(--dsw-alias-label-secondary); font-size: 12px; }
+
+.caret { margin-left: auto; color: var(--dsw-alias-label-secondary); font-size: 10px; }
+
+.multiPanel {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 230px;
+  overflow: auto;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-module-platform);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 35%);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.option:hover { background: var(--dsw-alias-bg-layer-1); }
+
+.option input { accent-color: var(--dsw-alias-state-business-primary, #5b8def); }
+
+.customRow {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 6px 4px 2px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+}
+
+.customRow input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 12px;
+}
+
+.customRow button {
+  padding: 6px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.customRow button:disabled { opacity: 0.5; cursor: default; }

@@ -248,6 +248,10 @@ export declare const zh: {
     'quickstart.tplFeat': string;
     'quickstart.tplResearch': string;
     'quickstart.tplAudit': string;
+    'quickstart.rolesEmpty': string;
+    'quickstart.customRole': string;
+    'quickstart.addRole': string;
+    'quickstart.teamExists': string;
     'quickstart.cancel': string;
     'quickstart.submit': string;
     'quickstart.busy': string;
@@ -534,6 +538,10 @@ export declare const en: {
     'quickstart.tplFeat': string;
     'quickstart.tplResearch': string;
     'quickstart.tplAudit': string;
+    'quickstart.rolesEmpty': string;
+    'quickstart.customRole': string;
+    'quickstart.addRole': string;
+    'quickstart.teamExists': string;
     'quickstart.cancel': string;
     'quickstart.submit': string;
     'quickstart.busy': string;

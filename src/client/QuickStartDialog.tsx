@@ -1,5 +1,5 @@
 /** Click-to-dispatch entry: a header button that stages a plan from a small form. */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import css from './QuickStartDialog.module.css'
@@ -17,6 +17,13 @@ const TEMPLATES: readonly QuickTemplate[] = [
   { id: 'audit', labelKey: 'quickstart.tplAudit', roles: ['auditor', 'reviewer'] },
 ]
 
+/** Roles offered by the multi-select; custom names can be added on top. */
+const ROLE_OPTIONS: readonly string[] = [
+  'planner', 'implementer', 'verifier', 'reviewer',
+  'researcher', 'analyst', 'writer', 'auditor',
+  'architect', 'tester', 'documenter', 'operator',
+]
+
 function templateOf(id: string): QuickTemplate {
   return TEMPLATES.find(entry => entry.id === id) ?? TEMPLATES[0] as QuickTemplate
 }
@@ -25,20 +32,43 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
   const [open, setOpen] = useState(false)
   const [goal, setGoal] = useState('')
   const [template, setTemplate] = useState<string>(TEMPLATES[0]?.id ?? 'fix')
-  const [rolesText, setRolesText] = useState<string>(TEMPLATES[0]?.roles.join(', ') ?? '')
+  const [roles, setRoles] = useState<string[]>([...(TEMPLATES[0]?.roles ?? [])])
+  const [customRole, setCustomRole] = useState('')
+  const [rolesOpen, setRolesOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [created, setCreated] = useState<string | undefined>()
+  const multiRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!rolesOpen) return
+    const onPointerDown = (event: PointerEvent): void => {
+      if (multiRef.current === null) return
+      if (!multiRef.current.contains(event.target as Node)) setRolesOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => { document.removeEventListener('pointerdown', onPointerDown) }
+  }, [rolesOpen])
 
   const reset = (): void => {
     setGoal('')
     setError('')
     setCreated(undefined)
     setBusy(false)
+    setRolesOpen(false)
   }
   const chooseTemplate = (id: string): void => {
     setTemplate(id)
-    setRolesText(templateOf(id).roles.join(', '))
+    setRoles([...templateOf(id).roles])
+  }
+  const toggleRole = (role: string): void => {
+    setRoles((current) => current.includes(role) ? current.filter(entry => entry !== role) : [...current, role])
+  }
+  const addCustomRole = (): void => {
+    const trimmed = customRole.trim()
+    if (trimmed === '') return
+    setRoles((current) => current.includes(trimmed) ? current : [...current, trimmed])
+    setCustomRole('')
   }
   const submit = async (): Promise<void> => {
     const trimmed = goal.trim()
@@ -53,11 +83,14 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
           sessionId,
           goal: trimmed,
           template,
-          roles: rolesText.split(/[,，\s]+/).map(role => role.trim()).filter(role => role !== ''),
+          roles,
         }),
       })
       const body = await response.json().catch(() => null) as { ok?: boolean; teamId?: string; error?: string } | null
-      if (!response.ok || body?.ok !== true) throw new Error(body?.error ?? `HTTP ${response.status}`)
+      if (!response.ok || body?.ok !== true) {
+        const raw = body?.error ?? `HTTP ${response.status}`
+        throw new Error(/already lead team/i.test(raw) ? t('quickstart.teamExists') : raw)
+      }
       setCreated(body.teamId ?? '')
       setGoal('')
       window.setTimeout(() => { setOpen(false); reset() }, 1400)
@@ -106,10 +139,48 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
               onChange={(event) => { setGoal(event.target.value) }}
             />
           </label>
-          <label className={css.field}>
+          <div className={css.field}>
             <span>{t('quickstart.roles')}</span>
-            <input value={rolesText} disabled={busy} onChange={(event) => { setRolesText(event.target.value) }} />
-          </label>
+            <div className={css.multi} ref={multiRef}>
+              <button
+                type="button"
+                className={css.multiTrigger}
+                data-control="quickstart-roles"
+                aria-expanded={rolesOpen}
+                aria-haspopup="listbox"
+                disabled={busy}
+                onClick={() => { setRolesOpen((current) => !current) }}
+              >
+                <span className={css.chips}>
+                  {roles.length === 0
+                    ? <span className={css.placeholder}>{t('quickstart.rolesEmpty')}</span>
+                    : roles.map(role => <span key={role} className={css.chip}>{role}</span>)}
+                </span>
+                <span className={css.caret} aria-hidden>▾</span>
+              </button>
+              {rolesOpen && (
+                <div className={css.multiPanel} role="listbox" aria-multiselectable="true" aria-label={t('quickstart.roles')}>
+                  {ROLE_OPTIONS.map(role => (
+                    <label key={role} className={css.option}>
+                      <input type="checkbox" checked={roles.includes(role)} onChange={() => { toggleRole(role) }} />
+                      <span>{role}</span>
+                    </label>
+                  ))}
+                  <div className={css.customRow}>
+                    <input
+                      value={customRole}
+                      placeholder={t('quickstart.customRole')}
+                      onChange={(event) => { setCustomRole(event.target.value) }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') { event.preventDefault(); addCustomRole() }
+                      }}
+                    />
+                    <button type="button" disabled={customRole.trim() === ''} onClick={addCustomRole}>{t('quickstart.addRole')}</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           {error !== '' && <p className={css.error} role="alert">{error}</p>}
           {created !== undefined && <p className={css.success} role="status">{t('quickstart.created', { team: created })}</p>}
         </div>
