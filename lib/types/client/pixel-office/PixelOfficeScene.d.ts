@@ -31,6 +31,17 @@ export interface SceneLabels {
     readonly awaiting?: string;
     readonly empty?: string;
 }
+/** 墙面数据碑：宗门气运的关键数字，已由调用方本地化。 */
+export interface SceneWall {
+    readonly title: string;
+    readonly running: string;
+    readonly waiting: string;
+    readonly done: string;
+    readonly stats: string;
+    readonly doneCount: number;
+    readonly total: number;
+    readonly failedCount: number;
+}
 /** One immutable snapshot of the office to draw. */
 export interface SceneModel {
     readonly teamName: string;
@@ -38,6 +49,7 @@ export interface SceneModel {
     readonly halted?: boolean;
     readonly members: readonly SceneMember[];
     readonly labels?: SceneLabels;
+    readonly wall?: SceneWall;
 }
 export interface SceneHandle {
     /** Replace the model; the running loop picks it up on the next frame. */
