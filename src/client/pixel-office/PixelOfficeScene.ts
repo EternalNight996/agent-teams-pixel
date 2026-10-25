@@ -32,6 +32,10 @@ export interface SceneLabels {
   readonly stalled?: string
   readonly awaiting?: string
   readonly empty?: string
+  /** 常驻状态词：修炼中 / 静修 / 未知，显示在名牌上并驱动灵气颜色。 */
+  readonly working?: string
+  readonly idle?: string
+  readonly unknownState?: string
 }
 
 /** 墙面数据碑：宗门气运的关键数字，已由调用方本地化。 */
@@ -640,6 +644,25 @@ export function createPixelScene(
     const headY = deskY - 92 + bob
     const bodyY = headY + 16
 
+    // 灵气：以颜色常驻标示状态（修炼/静修/异常），修炼中带上升灵屑。
+    const tone = stateTone(member.activity)
+    const auraPulse = 0.5 + Math.abs(Math.sin(time / (working ? 420 : 900))) * 0.5
+    const auraY = bodyY + 8
+    const auraR = (member.isLeader ? 40 : 34) + auraPulse * 4
+    const aura = g.createRadialGradient(cx, auraY, 4, cx, auraY, auraR)
+    aura.addColorStop(0, rgba(tone, 0.26 + (working ? 0.1 : 0.02)))
+    aura.addColorStop(0.55, rgba(tone, 0.12))
+    aura.addColorStop(1, rgba(tone, 0))
+    g.fillStyle = aura
+    g.beginPath(); g.arc(cx, auraY, auraR, 0, Math.PI * 2); g.fill()
+    if (working) {
+      for (let i = 0; i < 3; i += 1) {
+        const phase = (time / 1200 + i / 3) % 1
+        g.fillStyle = rgba(tone, 0.75 * (1 - phase))
+        g.fillRect(cx - 16 + i * 12, Math.round(auraY + 14 - phase * 46), 2, 2)
+      }
+    }
+
     // 落影 + 轮廓（1px 深色边，和立绘同一套画法）
     g.fillStyle = 'rgba(56, 44, 30, 0.16)'
     g.beginPath(); g.ellipse(cx, deskY - 6, 24, 8, 0, 0, Math.PI * 2); g.fill()
@@ -740,8 +763,14 @@ export function createPixelScene(
     const bob = working ? Math.round(Math.sin(time / 130 + seed % 7) * 1.5) : Math.round(Math.sin(time / 700 + seed % 5) * 1)
     const headY = deskY - 92 + bob
 
-    // Name plate under the desk edge.
-    const label = truncate(member.name, 10)
+    // Name plate under the desk edge: name + persistent state word.
+    const labels = model?.labels
+    const stateText = member.activity === 'working'
+      ? labels?.working
+      : member.activity === 'idle' ? labels?.idle : labels?.unknownState
+    const label = stateText === undefined || stateText === ''
+      ? truncate(member.name, 10)
+      : `${truncate(member.name, 8)} · ${stateText}`
     g.font = '9px "Segoe UI", monospace'
     const textW = g.measureText(label).width
     g.fillStyle = COLORS.labelBg

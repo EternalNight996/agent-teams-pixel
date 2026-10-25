@@ -30,6 +30,10 @@ export interface SceneLabels {
     readonly stalled?: string;
     readonly awaiting?: string;
     readonly empty?: string;
+    /** 常驻状态词：修炼中 / 静修 / 未知，显示在名牌上并驱动灵气颜色。 */
+    readonly working?: string;
+    readonly idle?: string;
+    readonly unknownState?: string;
 }
 /** 墙面数据碑：宗门气运的关键数字，已由调用方本地化。 */
 export interface SceneWall {

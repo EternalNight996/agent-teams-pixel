@@ -51,6 +51,7 @@ import {
 } from './activity-model.ts'
 import {
   ACTIVITY_HALT_URL,
+  ACTIVITY_RESUME_URL,
   getActivityMonitorTargetsSnapshot,
   getActivitySnapshotsSnapshot,
   startActivityPolling,
@@ -577,6 +578,8 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
   const [stopOpen, setStopOpen] = useState(false)
   const [stopping, setStopping] = useState(false)
   const [stopError, setStopError] = useState('')
+  const [resuming, setResuming] = useState(false)
+  const [resumeError, setResumeError] = useState('')
   const discarded = historic && team.phase === 'staged'
   const stopped = !historic && team.halted === true
   const busyCount = team.members.filter((member) => member.activity === 'working').length
@@ -594,6 +597,32 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
     task.status !== 'completed' && task.status !== 'failed' && task.status !== 'cancelled'
   )).length
   const canStop = !historic && team.phase === 'running' && team.halted !== true && teamIsActive(team)
+  // 停止后从面板重新开始：与掌门工具 agent_teams_resume 同一条宿主路径。
+  const resumeTeam = async (): Promise<void> => {
+    if (resuming) return
+    setResuming(true)
+    setResumeError('')
+    try {
+      const response = await fetch(ACTIVITY_RESUME_URL, {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: team.captainSessionId, reason: t('team.resumeReason') }),
+      })
+      if (!response.ok) {
+        let message = `HTTP ${response.status}`
+        try {
+          const body = await response.json() as { error?: unknown }
+          if (typeof body.error === 'string' && body.error.trim() !== '') message = body.error
+        } catch {}
+        throw new Error(message)
+      }
+    } catch (error: unknown) {
+      setResumeError(t('team.resumeFailed', { message: error instanceof Error ? error.message : String(error) }))
+    } finally {
+      setResuming(false)
+    }
+  }
   const stopTeam = async (): Promise<void> => {
     if (stopping) return
     setStopping(true)
@@ -627,6 +656,19 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
           <span className={css.teamName} title={team.name}>{team.name}</span>
           {historic && <span className={css.historicPill}>{t(discarded ? 'team.discarded' : 'team.ended')}</span>}
           {stopped && <span className={css.historicPill}>{t('team.stopped')}</span>}
+          {stopped && (
+            <button
+              type="button"
+              className={css.teamResumeButton}
+              data-control="team-resume"
+              disabled={resuming}
+              onClick={() => { void resumeTeam() }}
+              title={t('team.resume')}
+            >
+              <span aria-hidden>▶</span>
+              {resuming ? t('team.resuming') : t('team.resume')}
+            </button>
+          )}
           <span className={css.teamStats}>
             <span data-stat="members">{t('team.stats.members', { count: team.members.length })}</span>
             <span data-stat="tasks">{t('team.stats.completed', { completed: completedCount, total: team.tasks.length })}</span>
@@ -644,6 +686,8 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
             </button>
           )}
         </header>
+
+        {resumeError !== '' && <p className={css.teamResumeError} role="alert">{resumeError}</p>}
 
         {team.phase === 'staged' && !historic && modelDirectory !== undefined && onContinuePlanning !== undefined && onDiscarded !== undefined && (
           <StagingPlanEditor

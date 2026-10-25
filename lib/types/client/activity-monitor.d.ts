@@ -101,6 +101,8 @@ export declare const ACTIVITY_PROBE_MS = 5000;
 /** Host route serving live and archived team snapshots. */
 export declare const ACTIVITY_STATE_URL = "/plugins/dsh-agent-teams/state";
 export declare const ACTIVITY_HALT_URL = "/plugins/dsh-agent-teams/halt";
+/** Host route that resumes a halted team (same path as the captain tool). */
+export declare const ACTIVITY_RESUME_URL = "/plugins/dsh-agent-teams/resume";
 interface ActivityFetchResponse {
     readonly ok: boolean;
     json(): Promise<unknown>;

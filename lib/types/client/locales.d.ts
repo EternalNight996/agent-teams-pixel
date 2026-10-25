@@ -46,6 +46,10 @@ export declare const zh: {
     'team.stopping': string;
     'team.stopFailed': string;
     'team.stopRequestFailed': string;
+    'team.resume': string;
+    'team.resuming': string;
+    'team.resumeReason': string;
+    'team.resumeFailed': string;
     'team.discarded': string;
     'format.listSeparator': string;
     'task.status.pending': string;
@@ -398,6 +402,10 @@ export declare const en: {
     'team.stopping': string;
     'team.stopFailed': string;
     'team.stopRequestFailed': string;
+    'team.resume': string;
+    'team.resuming': string;
+    'team.resumeReason': string;
+    'team.resumeFailed': string;
     'team.discarded': string;
     'format.listSeparator': string;
     'task.status.pending': string;

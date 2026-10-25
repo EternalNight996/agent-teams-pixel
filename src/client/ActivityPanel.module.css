@@ -341,6 +341,42 @@
   white-space: nowrap;
 }
 
+/* 停止后保留“重新开始”，与停止按钮同一位置语言。 */
+.teamResumeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, #4ec98a 55%, var(--dsw-alias-border-l2));
+  border-radius: 7px;
+  background: color-mix(in srgb, #4ec98a 12%, var(--dsw-alias-bg-layer-1));
+  color: #4ec98a;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.teamResumeButton:hover:not(:disabled) {
+  background: color-mix(in srgb, #4ec98a 22%, var(--dsw-alias-bg-layer-1));
+  border-color: #4ec98a;
+}
+
+.teamResumeButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.teamResumeError {
+  margin: 2px 14px 6px;
+  color: var(--dsw-alias-state-error-primary);
+  font-size: 11px;
+}
+
 .teamStopButton {
   display: grid;
   width: 26px;

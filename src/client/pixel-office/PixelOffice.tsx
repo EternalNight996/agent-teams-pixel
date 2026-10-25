@@ -67,6 +67,9 @@ export function PixelOffice({ team, t, onOpenMember, onShowBoard, onCollapse }: 
         stalled: t('office.stalled'),
         awaiting: t('office.awaiting'),
         empty: t('office.empty'),
+        working: t('office.working'),
+        idle: t('office.idle'),
+        unknownState: t('office.unknown'),
       },
       // 墙面数据碑：把「宗门气运」的关键数字搬到洞府墙上，随轮询实时刷新。
       wall: {

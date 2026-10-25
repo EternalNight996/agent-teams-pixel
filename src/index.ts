@@ -338,6 +338,66 @@ export function apply(ctx: Context, config: Config): void {
       },
     }), 'agent-teams: halt route')
 
+    // Panel "重新开始": resume a halted team through the same tool the captain
+    // would call, so the durable state, the session event and the scheduler kick
+    // stay identical to agent_teams_resume.
+    ctx.effect(() => webServer.register({
+      kind: 'exact',
+      path: '/plugins/dsh-agent-teams/resume',
+      handler: async (req, res) => {
+        if (req.method !== 'POST') {
+          res.writeHead(405, { allow: 'POST', 'cache-control': 'no-store' })
+          res.end()
+          return
+        }
+        let payload: Record<string, unknown>
+        try {
+          payload = await readJsonRequest(req)
+        } catch (error: unknown) {
+          res.writeHead(error instanceof RequestBodyError ? error.status : 400, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ error: error instanceof Error ? error.message : 'invalid request body' }))
+          return
+        }
+        const sessionId = typeof payload.sessionId === 'string' ? payload.sessionId.trim() : ''
+        if (sessionId === '') {
+          res.writeHead(400, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ error: 'sessionId is required' }))
+          return
+        }
+        const captain = ctx.agents.get(sessionId as import('@deepseek-ai/dsh-session').SessionId)
+        if (captain === undefined) {
+          res.writeHead(409, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ error: 'session is not attached' }))
+          return
+        }
+        const tools = ctx.get('tools') as { get?: (name: string) => { execute?: (args: unknown, exec: unknown) => Promise<unknown> } | undefined } | undefined
+        const definition = tools?.get?.('agent_teams_resume')
+        if (definition?.execute === undefined) {
+          res.writeHead(503, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ error: 'team resume tool is unavailable' }))
+          return
+        }
+        const reason = typeof payload.reason === 'string' && payload.reason.trim() !== ''
+          ? payload.reason.trim()
+          : 'Resumed from the Web panel'
+        const abort = new AbortController()
+        const timeout = setTimeout(() => { abort.abort() }, 30_000)
+        const run = { agent: captain, signal: abort.signal, deferContext() {}, concludeTurn() {} }
+        try {
+          const value = await definition.execute({ reason }, run) as { status?: string; team_id?: string }
+          res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ ok: true, status: value.status, teamId: value.team_id }))
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error)
+          ctx.logger.warn(`agent-teams: resume failed for ${sessionId}: ${message}`)
+          res.writeHead(422, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+          res.end(JSON.stringify({ error: message }))
+        } finally {
+          clearTimeout(timeout)
+        }
+      },
+    }), 'agent-teams: resume route')
+
     // Click-to-dispatch: the Web "开团" dialog asks the host to stage exactly
     // what the captain tool would stage, so the user never has to type a
     // command. Approval stays required; this route never spawns members.
