@@ -364,6 +364,23 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
     () => focusedTaskId === null ? null : relatedTaskIds(focusedTaskId, tasks),
     [focusedTaskId, tasks],
   )
+  // 实时链路：正在执行/已认领任务及其全部前置，用流动线条标出「当前工作」。
+  const livePath = useMemo(() => {
+    const byId = new Map(tasks.map((task) => [task.id, task]))
+    const path = new Set<string>()
+    const stack = tasks
+      .filter((task) => task.state === 'running' || task.state === 'claimed')
+      .map((task) => task.id)
+    while (stack.length > 0) {
+      const id = stack.pop() as string
+      if (path.has(id)) continue
+      path.add(id)
+      const task = byId.get(id)
+      if (task === undefined) continue
+      for (const dependency of task.dependencies) stack.push(dependency)
+    }
+    return path
+  }, [tasks])
   const scheduleHover = (id: string | null): void => {
     if (hoverTimer.current !== null) {
       clearTimeout(hoverTimer.current)
@@ -420,7 +437,8 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
               {!parallel && <svg className={css.dagEdges} width={layout.width} height={layout.height} aria-hidden>
                 {layout.edges.map((edge) => {
                   const active = related !== null && related.has(edge.from) && related.has(edge.to)
-                  return <path key={`${edge.from}:${edge.to}`} d={edge.path} data-active={active} data-dimmed={related !== null && !active} />
+                  const live = livePath.has(edge.from) && livePath.has(edge.to)
+                  return <path key={`${edge.from}:${edge.to}`} d={edge.path} data-active={active} data-live={live || undefined} data-dimmed={related !== null && !active} />
                 })}
               </svg>}
               {layout.nodes.map(({ task, x, y }) => {
@@ -439,6 +457,8 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
                     data-task-model={model || undefined}
                     data-focused={related?.has(task.id) ?? false}
                     data-dimmed={related !== null && !related.has(task.id)}
+                    data-live={livePath.has(task.id) || undefined}
+                    data-live-active={(task.state === 'running' || task.state === 'claimed') || undefined}
                     aria-pressed={pinnedTaskId === task.id}
                     title={taskTitle(task, model)}
                     onClick={() => { const next = pinnedTaskId === task.id ? null : task.id; setPinnedTaskId(next); onSelectTask?.(next) }}
@@ -496,88 +516,6 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
           </section>
         </>
       )}
-    </section>
-  )
-}
-
-/**
- * 任务依赖主视图（工作台）：以任务为中心的列表，按依赖深度排序，每行给出
- * 负责人、前置与状态；点击一行展开说明与解锁关系。工作台用它替代修士列表，
- * 修士的状态/灵气则在下方山门洞府里看。
- */
-function TaskBoard({ tasks, members, t, discarded, selectedTaskId, onSelectTask }: {
-  readonly tasks: readonly ActivityTask[]
-  readonly members: readonly ActivityMember[]
-  readonly t: AgentTeamsTranslate
-  readonly discarded: boolean
-  readonly selectedTaskId: string | null
-  readonly onSelectTask: (id: string | null) => void
-}) {
-  if (tasks.length === 0) return null
-  const ordered = [...tasks].sort((a, b) => (a.depth - b.depth) || a.id.localeCompare(b.id))
-  return (
-    <section className={css.taskBoard} aria-label={t('dependency.aria')} data-task-board>
-      <header className={css.taskBoardHead}>
-        <span><IconBranchOutline16 />{t('dependency.title')}</span>
-        <span className={css.taskBoardHint}>{t('dependency.hint.chain')}</span>
-      </header>
-      <ul className={css.taskBoardList}>
-        {ordered.map((task) => {
-          const selected = task.id === selectedTaskId
-          const owner = task.assignee === undefined || task.assignee === '' ? t('task.assignee.unclaimed') : task.assignee
-          const state = discarded ? 'cancelled' : taskTone(task.state, task.status)
-          const status = discarded ? t('task.status.notRun') : taskStatusLabel(task.status, t)
-          const waitingOn = task.dependencies.filter((id) => {
-            const dependency = tasks.find((candidate) => candidate.id === id)
-            return dependency !== undefined && dependency.status !== 'completed'
-          })
-          const dependents = tasks.filter((candidate) => candidate.dependencies.includes(task.id))
-          const model = taskModelLabel(task, members)
-          const detail = discarded
-            ? t('task.detail.notRun')
-            : task.status === 'completed'
-              ? t('task.detail.completed')
-              : task.status === 'cancelled'
-                ? t('task.detail.cancelled')
-                : task.status === 'failed'
-                  ? t('task.detail.failed')
-                  : task.dependencies.length === 0
-                    ? t('task.detail.noPrerequisite')
-                    : waitingOn.length === 0
-                      ? t('task.detail.ready')
-                      : t('task.detail.waitingOn', { tasks: formatTaskIds(waitingOn, t) })
-          return (
-            <li key={task.id}>
-              <button
-                type="button"
-                className={css.taskRow}
-                data-state={state}
-                data-selected={selected || undefined}
-                aria-expanded={selected}
-                title={`${task.id} · ${task.subject} · ${owner} · ${status}`}
-                onClick={() => { onSelectTask(selected ? null : task.id) }}
-              >
-                <span className={css.taskRowDot} aria-hidden />
-                <span className={css.taskRowId}>{task.id}</span>
-                <span className={css.taskRowSubject}>{task.subject}</span>
-                <span className={css.taskRowOwner}>{owner}</span>
-                <span className={css.taskRowDeps}>{task.dependencies.length === 0 ? '—' : `← ${task.dependencies.join(' ')}`}</span>
-                <span className={css.taskRowStatus}>{status}</span>
-              </button>
-              {selected && (
-                <div className={css.taskRowDetail} role="region" aria-label={task.id}>
-                  {task.description !== undefined && task.description !== '' && <p>{task.description}</p>}
-                  <span>{detail}{model === '' ? '' : ` · ${t('task.model', { model })}`}{' · '}
-                    {dependents.length === 0
-                      ? t('task.detail.noDownstream')
-                      : t('task.detail.unlocks', { tasks: formatTaskIds(dependents.map((candidate) => candidate.id), t) })}
-                  </span>
-                </div>
-              )}
-            </li>
-          )
-        })}
-      </ul>
     </section>
   )
 }
@@ -767,7 +705,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
         </div>
 
         {!workspace && <ProgressOverview team={team} t={t} discarded={discarded} />}
-      {workspace && <TaskBoard tasks={team.tasks} members={team.members} t={t} discarded={discarded} selectedTaskId={selectedTaskId} onSelectTask={setSelectedTaskId} />}
+      {workspace && <DependencyMap tasks={team.tasks} members={team.members} t={t} discarded={discarded} workspace onSelectTask={setSelectedTaskId} />}
 
         {!workspace && (() => {
           const orderedMembers = orderDelegationMembers(team.members, team.tasks)
