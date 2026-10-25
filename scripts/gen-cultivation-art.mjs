@@ -32,6 +32,14 @@ const AVATARS = {
   'avatar-tester.png': { robe: '#8a3f3f', robeDark: '#612a2a', robeLight: '#ad5c5c', trim: '#ffd9c2', hair: '#241f2c', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffd9c2', kind: 'fist' },
   'avatar-documenter.png': { robe: '#8a6a3a', robeDark: '#614a26', robeLight: '#ad8a56', trim: '#ffe9c2', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffe9c2', kind: 'book' },
   'avatar-operator.png': { robe: '#6a5a3f', robeDark: '#4a3f2b', robeLight: '#8a7856', trim: '#ffe9b8', hair: '#241f2c', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffe9b8', kind: 'hammer' },
+  'avatar-talisman.png': { robe: '#a85a3a', robeDark: '#7a3f28', robeLight: '#c97a56', trim: '#f2d97a', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffd27a', kind: 'talisman' },
+  'avatar-healer.png': { robe: '#cfd8d4', robeDark: '#9fada8', robeLight: '#eef4f0', trim: '#7fb89a', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#d9f2e6', kind: 'needle' },
+  'avatar-beastmaster.png': { robe: '#7a6a3f', robeDark: '#544a2b', robeLight: '#9a8a56', trim: '#d9c27a', hair: '#241f2c', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffe9b8', kind: 'whistle' },
+  'avatar-puppeteer.png': { robe: '#5f4a6a', robeDark: '#3f3149', robeLight: '#806a8c', trim: '#c7a8d8', hair: '#1c1a22', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#e0d0ff', kind: 'puppet' },
+  'avatar-musician.png': { robe: '#8a9ec2', robeDark: '#5f7291', robeLight: '#a8bcdc', trim: '#e8f0ff', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#cfe4ff', hairStyle: 'long', kind: 'flute' },
+  'avatar-poisoner.png': { robe: '#4a6a4a', robeDark: '#33503a', robeLight: '#648a64', trim: '#b8e08a', hair: '#241f2c', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#d4ff9a', kind: 'vial' },
+  'avatar-monk.png': { robe: '#a06a3a', robeDark: '#754a24', robeLight: '#c08a56', trim: '#f2c14e', hair: '#2a2230', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ffe9a8', kind: 'beads' },
+  'avatar-demon.png': { robe: '#5a2a3a', robeDark: '#3c1a28', robeLight: '#7a3f52', trim: '#d43a4a', hair: '#1c1a22', skin: '#f2cfae', skinShade: '#d9ab8a', accent: '#ff9aa8', kind: 'blade' },
 }
 
 /** 状态小像：修炼 / 静修 / 推演。 */
@@ -194,6 +202,45 @@ function drawAvatar(p) {
       rect(13, 0, 6, 2, p.accent); set(13, 0, p.accent); set(18, 0, p.accent)
       set(15, 1, p.trim); set(16, 1, p.trim)
       break
+    case 'talisman':
+      rect(24, 8, 7, 13, '#f2e6c4'); rect(25, 9, 5, 11, '#fff6dd')
+      hline(24, 8, 7, p.trim); rect(25, 11, 5, 1, p.trim); rect(25, 13, 3, 1, p.trim)
+      rect(26, 16, 3, 3, '#c23a3a'); set(27, 17, '#f2d97a')
+      break
+    case 'needle':
+      vline(25, 6, 13, '#dfe9f2'); vline(28, 8, 11, '#dfe9f2'); vline(30, 6, 13, '#dfe9f2')
+      set(25, 6, '#ffffff'); set(30, 6, '#ffffff')
+      rect(24, 20, 7, 3, p.trim); set(27, 21, p.accent)
+      break
+    case 'whistle':
+      rect(23, 14, 7, 5, p.accent); hline(23, 14, 7, '#ffffff')
+      rect(21, 12, 2, 9, p.trim); rect(30, 15, 1, 3, p.trim)
+      set(25, 16, p.robeDark); set(27, 16, p.robeDark)
+      break
+    case 'puppet':
+      vline(26, 2, 7, '#d8d2c8'); vline(29, 2, 7, '#d8d2c8')
+      rect(26, 9, 4, 4, p.accent); set(27, 10, p.robeDark); set(29, 10, p.robeDark)
+      rect(25, 13, 6, 6, p.robeLight); rect(25, 19, 2, 2, p.accent); rect(29, 19, 2, 2, p.accent)
+      break
+    case 'flute':
+      rect(21, 14, 11, 2, '#8a6a3a'); hline(21, 14, 11, '#b07a52')
+      rect(20, 13, 1, 4, p.trim); rect(31, 13, 1, 4, p.trim)
+      set(24, 15, p.robeDark); set(27, 15, p.robeDark); set(30, 15, p.robeDark)
+      break
+    case 'vial':
+      rect(24, 16, 7, 6, p.accent); hline(24, 16, 7, '#ffffff')
+      rect(26, 13, 3, 3, p.trim); set(26, 17, p.robeDark); set(29, 19, p.trim)
+      break
+    case 'beads':
+      set(24, 12, p.accent); set(27, 10, p.accent); set(30, 12, p.accent)
+      set(31, 15, p.accent); set(30, 18, p.accent); set(27, 20, p.accent)
+      set(24, 18, p.accent); set(23, 15, p.accent); rect(27, 15, 2, 2, p.trim)
+      break
+    case 'blade':
+      rect(24, 8, 3, 3, '#3a2230'); rect(26, 11, 3, 3, '#3a2230'); rect(28, 14, 2, 6, '#3a2230')
+      vline(24, 8, 3, p.accent); vline(26, 11, 3, p.accent); vline(28, 14, 6, p.accent)
+      rect(22, 18, 5, 2, p.trim); rect(23, 20, 3, 3, '#7a3f52')
+      break
     default: break
   }
   outline(px)
@@ -314,7 +361,7 @@ function emitRoleVisuals() {
     ' * office and the roster portraits show the same character.',
     ' */',
     '',
-    "export type RoleWeapon = 'crown' | 'sword' | 'fan' | 'pill' | 'scroll' | 'gourd' | 'compass' | 'brush' | 'lantern' | 'array' | 'fist' | 'book' | 'hammer'",
+    `export type RoleWeapon = ${[...new Set(Object.values(AVATARS).map(entry => entry.kind))].map(kind => `'${kind}'`).join(' | ')}`,
     '',
     'export interface RoleVisual {',
     '  readonly weapon: RoleWeapon',

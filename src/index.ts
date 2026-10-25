@@ -579,6 +579,9 @@ export function apply(ctx: Context, config: Config): void {
     'avatar-reviewer.png', 'avatar-researcher.png', 'avatar-analyst.png',
     'avatar-writer.png', 'avatar-auditor.png', 'avatar-architect.png',
     'avatar-tester.png', 'avatar-documenter.png', 'avatar-operator.png',
+    'avatar-talisman.png', 'avatar-healer.png', 'avatar-beastmaster.png',
+    'avatar-puppeteer.png', 'avatar-musician.png', 'avatar-poisoner.png',
+    'avatar-monk.png', 'avatar-demon.png',
     'state-working.png', 'state-idle.png', 'state-unknown.png',
   ])
     ctx.effect(() => webServer.register({

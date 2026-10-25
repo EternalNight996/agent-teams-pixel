@@ -295,6 +295,9 @@ const expectedArtwork = [
   'avatar-reviewer.png', 'avatar-researcher.png', 'avatar-analyst.png',
   'avatar-writer.png', 'avatar-auditor.png', 'avatar-architect.png',
   'avatar-tester.png', 'avatar-documenter.png', 'avatar-operator.png',
+  'avatar-talisman.png', 'avatar-healer.png', 'avatar-beastmaster.png',
+  'avatar-puppeteer.png', 'avatar-musician.png', 'avatar-poisoner.png',
+  'avatar-monk.png', 'avatar-demon.png',
   'state-working.png', 'state-idle.png', 'state-unknown.png',
 ].sort()
 const artworkDir = new URL('../assets/agent-teams/', import.meta.url)
@@ -335,15 +338,17 @@ check(
     && artworkSource.includes('avatar-operator.png'),
   'a packaged image is unreachable or one of the role mappings is missing',
 )
-const twelveRoleArtwork = [
+const allRoleArtwork = [
   'planner', 'implementer', 'verifier', 'reviewer', 'researcher', 'analyst',
   'writer', 'auditor', 'architect', 'tester', 'documenter', 'operator',
+  'talisman', 'healer', 'beastmaster', 'puppeteer', 'musician', 'poisoner',
+  'monk', 'demon',
 ].map(role => memberArtUrl(role, role))
 check(
   'every built-in 道途 resolves to its own embedded portrait, including a bare role id as the name',
-  twelveRoleArtwork.every(uri => typeof uri === 'string' && uri.startsWith('data:image/png;base64,'))
-    && new Set(twelveRoleArtwork).size === 12,
-  `resolved artwork = ${JSON.stringify(twelveRoleArtwork.map(uri => (uri ?? '').slice(0, 32)))}`,
+  allRoleArtwork.every(uri => typeof uri === 'string' && uri.startsWith('data:image/png;base64,'))
+    && new Set(allRoleArtwork).size === allRoleArtwork.length,
+  `resolved artwork = ${JSON.stringify(allRoleArtwork.map(uri => (uri ?? '').slice(0, 32)))}`,
 )
 check(
   'the embedded artwork module carries every packaged image',

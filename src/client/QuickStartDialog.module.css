@@ -1,24 +1,95 @@
-﻿/* Click-to-dispatch header button and its small staging dialog. */
+/* Click-to-dispatch header button and its small staging dialog. */
 
+/* 开宗入口：金玉渐变 + 灵光呼吸 + 流光扫过，做成会话头部的主行动点。 */
 .entry {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  height: 26px;
-  padding: 0 9px;
-  border-radius: 8px;
-  border: 1px solid var(--dsw-alias-border-l2);
-  background: var(--dsw-alias-bg-layer-1);
-  color: var(--dsw-alias-label-secondary);
+  gap: 6px;
+  height: 28px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, #f2c14e 72%, #4ec98a);
+  border-radius: 999px;
+  background: linear-gradient(118deg, #f8e6b0 0%, #f2c14e 38%, #8fdcae 72%, #4ec98a 100%);
+  color: #16241b;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.3px;
   cursor: pointer;
   white-space: nowrap;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    0 0 0 1px rgb(242 193 78 / 22%),
+    0 3px 12px rgb(78 201 138 / 26%),
+    inset 0 1px 0 rgb(255 255 255 / 55%);
+  text-shadow: 0 1px 0 rgb(255 255 255 / 35%);
+  animation: entryBreathe 3.6s ease-in-out infinite;
+  transition: transform 120ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+.entry > span[aria-hidden] {
+  font-size: 15px;
+  line-height: 1;
+  filter: drop-shadow(0 0 4px rgb(255 255 255 / 80%));
+}
+
+.entry::after {
+  position: absolute;
+  z-index: -1;
+  top: -60%;
+  bottom: -60%;
+  left: -34%;
+  width: 22%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 78%), transparent);
+  transform: skewX(-18deg);
+  content: '';
+  animation: entryShine 4.4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .entry:hover {
-  color: var(--dsw-alias-label-primary);
-  border-color: var(--dsw-alias-state-business-primary, #5b8def);
+  transform: translateY(-1px);
+  filter: saturate(1.12) brightness(1.05);
+  box-shadow:
+    0 0 0 1px rgb(242 193 78 / 48%),
+    0 6px 20px rgb(78 201 138 / 45%),
+    inset 0 1px 0 rgb(255 255 255 / 70%);
+}
+
+.entry:active {
+  transform: scale(0.97);
+}
+
+.entry:focus-visible {
+  outline: 2px solid #f2c14e;
+  outline-offset: 2px;
+}
+
+@keyframes entryBreathe {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgb(242 193 78 / 22%),
+      0 3px 12px rgb(78 201 138 / 26%),
+      inset 0 1px 0 rgb(255 255 255 / 55%);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgb(242 193 78 / 38%),
+      0 4px 16px rgb(78 201 138 / 42%),
+      inset 0 1px 0 rgb(255 255 255 / 70%);
+  }
+}
+
+@keyframes entryShine {
+  0%, 52% { left: -34%; opacity: 0; }
+  60% { opacity: 1; }
+  86%, 100% { left: 128%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry { animation: none; }
+  .entry::after { display: none; }
 }
 
 .actions {

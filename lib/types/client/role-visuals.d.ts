@@ -3,7 +3,7 @@
  * The canvas scene dresses each desk with the 道途 robe and 本命法器 so the
  * office and the roster portraits show the same character.
  */
-export type RoleWeapon = 'crown' | 'sword' | 'fan' | 'pill' | 'scroll' | 'gourd' | 'compass' | 'brush' | 'lantern' | 'array' | 'fist' | 'book' | 'hammer';
+export type RoleWeapon = 'crown' | 'fan' | 'sword' | 'pill' | 'scroll' | 'gourd' | 'compass' | 'brush' | 'lantern' | 'array' | 'fist' | 'book' | 'hammer' | 'talisman' | 'needle' | 'whistle' | 'puppet' | 'flute' | 'vial' | 'beads' | 'blade';
 export interface RoleVisual {
     readonly weapon: RoleWeapon;
     readonly robe: string;
