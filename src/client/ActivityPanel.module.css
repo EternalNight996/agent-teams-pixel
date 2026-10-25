@@ -642,6 +642,41 @@
   white-space: nowrap;
 }
 
+.sectionHeadRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* 依赖图样式切换：DAT 版（原横向连线）/ 拓扑流（纵向 + 像素人）。 */
+.dependencyViews {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 65%, transparent);
+}
+
+.dependencyViews button {
+  padding: 1px 7px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font: inherit;
+  font-size: 9.5px;
+  line-height: 14px;
+  cursor: pointer;
+}
+
+.dependencyViews button[aria-pressed='true'] {
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+}
+
 /* captain to member delegation tree */
 .delegationSection {
   min-width: 0;

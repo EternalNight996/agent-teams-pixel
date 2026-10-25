@@ -106,6 +106,9 @@ export declare const zh: {
     'progress.blocked': string;
     'progress.delivered': string;
     'dependency.aria': string;
+    'dependency.viewAria': string;
+    'dependency.viewDat': string;
+    'dependency.viewFlow': string;
     'dependency.parallel': string;
     'dependency.title': string;
     'dependency.hint.parallel': string;
@@ -487,6 +490,9 @@ export declare const en: {
     'progress.blocked': string;
     'progress.delivered': string;
     'dependency.aria': string;
+    'dependency.viewAria': string;
+    'dependency.viewDat': string;
+    'dependency.viewFlow': string;
     'dependency.parallel': string;
     'dependency.title': string;
     'dependency.hint.parallel': string;

@@ -112,6 +112,8 @@ type PanelGesture = {
 
 /** Persisted floater preference: board view vs pixel-office view. */
 const OFFICE_VIEW_KEY = 'agent-teams-pixel.officeView'
+/** Persisted dependency rendering: the original DAT map or the vertical flow. */
+const DEPENDENCY_VIEW_KEY = 'agent-teams-pixel.dependencyView'
 
 function initialPanelLayout(): PanelLayout {
   if (typeof window === 'undefined') return DEFAULT_PANEL_LAYOUT
@@ -353,13 +355,26 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
   const [hoverTaskId, setHoverTaskId] = useState<string | null>(null)
   const [keyboardTaskId, setKeyboardTaskId] = useState<string | null>(null)
   const [pinnedTaskId, setPinnedTaskId] = useState<string | null>(null)
+  // 依赖图两种呈现：DAT 版（原横向连线）与纵向拓扑 flow（带修士像素人）。
+  const [dependencyView, setDependencyView] = useState<'dat' | 'flow'>(() => {
+    if (typeof window === 'undefined') return 'flow'
+    try { return window.localStorage.getItem(DEPENDENCY_VIEW_KEY) === 'dat' ? 'dat' : 'flow' } catch { return 'flow' }
+  })
+  const chooseDependencyView = (next: 'dat' | 'flow'): void => {
+    setDependencyView(next)
+    try { window.localStorage.setItem(DEPENDENCY_VIEW_KEY, next) } catch { /* private mode */ }
+  }
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const focusedTaskId = dependencyFocusTaskId(pinnedTaskId, keyboardTaskId, hoverTaskId)
-  // 工作台用纵向拓扑流（每个依赖深度一层，自上而下），浮窗保持紧凑横向。
-  const nodeWidth = workspace ? 190 : COMPACT_DAG_NODE_WIDTH
+  // 工作台可选「DAT 版横向连线」或「纵向拓扑 flow」；浮窗保持紧凑横向。
+  const flow = workspace && dependencyView === 'flow'
+  const nodeWidth = flow ? 190 : workspace ? 164 : COMPACT_DAG_NODE_WIDTH
   const nodeHeight = workspace ? 76 : COMPACT_DAG_NODE_HEIGHT
-  const layout = useMemo(() => compactDagLayout(tasks, workspace
-    ? { nodeWidth: 190, nodeHeight: 76, columnGap: 24, rowGap: 28, direction: 'vertical' } : undefined), [tasks, workspace])
+  const layout = useMemo(() => {
+    if (flow) return compactDagLayout(tasks, { nodeWidth: 190, nodeHeight: 76, columnGap: 24, rowGap: 28, direction: 'vertical' })
+    if (workspace) return compactDagLayout(tasks, { nodeWidth: 164, nodeHeight: 76, columnGap: 36, rowGap: 16 })
+    return compactDagLayout(tasks)
+  }, [tasks, flow, workspace])
   const parallel = useMemo(() => usesParallelTaskGrid(tasks), [tasks])
   const memberByName = useMemo(() => new Map(members.map((member) => [member.name, member])), [members])
   const related = useMemo(
@@ -407,9 +422,17 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
         <button type="button" className={css.sectionToggleTitle} onClick={() => { setOpen((current) => !current) }} aria-expanded={open}>
           <Chevron open={open} /><IconBranchOutline16 /> {t(parallel ? 'dependency.parallel' : 'dependency.title')}
         </button>
-        <span className={css.sectionHint}>{pinnedTaskId === null
-          ? t(parallel ? 'dependency.hint.parallel' : workspace ? 'workspace.dependencies' : 'dependency.hint.chain')
-          : t('dependency.hint.pinned', { taskId: pinnedTaskId })}</span>
+        <span className={css.sectionHeadRight}>
+          <span className={css.sectionHint}>{pinnedTaskId === null
+            ? t(parallel ? 'dependency.hint.parallel' : workspace ? 'workspace.dependencies' : 'dependency.hint.chain')
+            : t('dependency.hint.pinned', { taskId: pinnedTaskId })}</span>
+          {workspace && (
+            <span className={css.dependencyViews} role="group" aria-label={t('dependency.viewAria')}>
+              <button type="button" data-control="dependency-view-dat" aria-pressed={dependencyView === 'dat'} onClick={() => { chooseDependencyView('dat') }}>{t('dependency.viewDat')}</button>
+              <button type="button" data-control="dependency-view-flow" aria-pressed={dependencyView === 'flow'} onClick={() => { chooseDependencyView('flow') }}>{t('dependency.viewFlow')}</button>
+            </span>
+          )}
+        </span>
       </header>
       {open && (
         <>
@@ -427,8 +450,8 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
               </svg>}
               {layout.nodes.map(({ task, x, y }) => {
                 const model = taskModelLabel(task, members)
-                const member = workspace ? memberByName.get(task.assignee) : undefined
-                const art = workspace ? memberArtUrl(task.assignee, member?.role ?? '') : null
+                const member = flow ? memberByName.get(task.assignee) : undefined
+                const art = flow ? memberArtUrl(task.assignee, member?.role ?? '') : null
                 return (
                   <button
                     key={task.id}
