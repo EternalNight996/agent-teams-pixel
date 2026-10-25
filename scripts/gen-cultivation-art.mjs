@@ -20,6 +20,10 @@ const PALETTES = {
   'member-security-v2.png': { robe: '#5a5a6a', trim: '#353542', hair: '#1e1e1e', skin: '#f0c9a8', accent: '#e0e0ff', kind: 'sword' },
   'member-docs-v2.png': { robe: '#6a7a4a', trim: '#3f4b2c', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#f0f2d9', kind: 'scroll' },
   'member-operator-v2.png': { robe: '#3a6a6a', trim: '#234444', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#d9f2f2', kind: 'fan' },
+  'member-array-v2.png': { robe: '#3f6a8a', trim: '#274358', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#bfe3ff', kind: 'array' },
+  'member-body-v2.png': { robe: '#8a3f3f', trim: '#5a2626', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffd9c2', kind: 'fist' },
+  'member-beast-v2.png': { robe: '#6a5a3f', trim: '#40351f', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#ffe9b8', kind: 'beast' },
+  'member-puppet-v2.png': { robe: '#5f5f7a', trim: '#3a3a52', hair: '#2a2a2a', skin: '#f0c9a8', accent: '#e0e0ff', kind: 'puppet' },
 }
 
 function canvas() {
@@ -57,6 +61,10 @@ function draw(p) {
   if (p.kind === 'hammer') { rect(18, 10, 2, 8, '#8a6a3a'); rect(17, 8, 4, 3, p.accent) }
   if (p.kind === 'brush') { rect(19, 7, 1, 10, '#8a6a3a'); rect(18, 16, 3, 2, p.accent) }
   if (p.kind === 'fan') { rect(18, 12, 3, 5, p.accent); rect(19, 10, 1, 2, p.trim) }
+  if (p.kind === 'array') { rect(17, 12, 5, 5, p.accent); rect(18, 13, 3, 3, p.trim); set(19, 14, p.accent) }
+  if (p.kind === 'fist') { rect(17, 14, 4, 4, p.accent); rect(18, 15, 2, 2, p.trim) }
+  if (p.kind === 'beast') { rect(18, 14, 3, 3, p.accent); set(18, 13, p.accent); set(20, 13, p.accent) }
+  if (p.kind === 'puppet') { rect(18, 10, 3, 3, p.accent); rect(19, 13, 1, 4, p.trim) }
   if (p.kind === 'crown') { rect(9, 1, 6, 1, p.accent); set(11, 0, p.accent); set(13, 0, p.accent) }
   return px
 }
