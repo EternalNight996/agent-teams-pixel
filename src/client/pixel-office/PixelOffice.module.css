@@ -1,4 +1,4 @@
-/* Pixel-office view: the AgentTeams right-side pane, and the floater toggle. */
+﻿/* Pixel-office view: the AgentTeams right-side pane, and the floater toggle. */
 
 .office {
   display: flex;
@@ -66,7 +66,7 @@
   min-height: 140px;
   border-radius: 10px;
   overflow: hidden;
-  background: #20252f;
+  background: #1c2320;
 }
 
 .canvas {

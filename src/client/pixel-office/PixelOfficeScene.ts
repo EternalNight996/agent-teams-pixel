@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Deterministic pixel-office canvas renderer for one AgentTeams snapshot.
  *
  * The scene is framework-agnostic: React owns the canvas element, sizing and
@@ -62,13 +62,13 @@ const MAX_COLUMNS = 4
 const DESK_W = 92
 
 const COLORS = {
-  wall: '#3a4152',
-  wallShade: '#323848',
-  floor: '#dcc9a4',
-  floorLine: '#cdb891',
-  desk: '#9c7651',
-  deskTop: '#c39668',
-  monitor: '#242a36',
+  wall: '#2f3b33',
+  wallShade: '#27322b',
+  floor: '#e2d6b8',
+  floorLine: '#d3c5a2',
+  desk: '#7c5b3a',
+  deskTop: '#a67c4f',
+  monitor: '#8a6a3a',
   screen: '#7fd4ff',
   screenIdle: '#39445a',
   label: '#e8eef8',

@@ -147,27 +147,13 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
       >
         <div className={css.form}>
           <p className={css.hint}>{t('quickstart.desc')}</p>
-          <div className={css.field}>
-            <span>{t('quickstart.template')}</span>
-            <div className={css.templates} role="radiogroup" aria-label={t('quickstart.template')}>
-              {TEMPLATES.map(entry => (
-                <button
-                  key={entry.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={template === entry.id}
-                  className={css.templateCard}
-                  data-template={entry.id}
-                  disabled={busy}
-                  onClick={() => { chooseTemplate(entry.id) }}
-                >
-                  <span className={css.templateName}>{t(entry.labelKey)}</span>
-                  <span className={css.templateDesc}>{t(entry.descKey as Parameters<typeof t>[0])}</span>
-                </button>
-              ))}
-            </div>
-          </div>
           <label className={css.field}>
+            <span>{t('quickstart.template')}</span>
+            <select value={template} disabled={busy} onChange={(event) => { chooseTemplate(event.target.value) }}>
+              {TEMPLATES.map(entry => <option key={entry.id} value={entry.id}>{t(entry.labelKey)}</option>)}
+            </select>
+            <small className={css.templateDesc}>{t(templateOf(template).descKey as Parameters<typeof t>[0])}</small>
+          </label>          <label className={css.field}>
             <span>{t('quickstart.goal')}</span>
             <textarea
               value={goal}
