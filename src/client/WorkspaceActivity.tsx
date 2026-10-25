@@ -217,7 +217,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
                 value={selected?.teamId ?? ''}
                 aria-label={t('workspace.switchTeam')}
                 data-control="team-picker"
-                data-current={live.includes(selected)}
+                data-current={selected !== undefined && live.includes(selected)}
                 onChange={(event) => { state.select(sessionId, event.target.value) }}
               >
                 {records.map(team => (
