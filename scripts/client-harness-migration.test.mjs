@@ -9,6 +9,23 @@ test('panel follows mainView ownership including retained subagents outside the 
   const byId = { root: { id: 'root', retainedBy: { background: 1 } }, child: { id: 'child', retainedBy: { mainView: 1 } } }
   assert.equal(currentSessionId({ byId, ids: ['root'] }), 'child')
   assert.equal(currentSessionId({ byId: { root: byId.root } }), undefined)
+  // Legacy hosts can keep the parent as `current` while a durable child is the
+  // panel actually on screen; the child must win, or idle XP goes to the captain.
+  assert.equal(currentSessionId({
+    current: 'root',
+    byId: {
+      root: { id: 'root', retainedBy: { mainView: 1 } },
+      child: { id: 'child', parentId: 'root', origin: 'subagent', retainedBy: { mainView: 1 } },
+      background: { id: 'background', parentId: 'root', origin: 'subagent', retainedBy: { background: 1 } },
+    },
+  }), 'child')
+  assert.equal(currentSessionId({
+    current: 'root',
+    byId: {
+      root: { id: 'root', retainedBy: { mainView: 1 } },
+      background: { id: 'background', parentId: 'root', origin: 'subagent', retainedBy: { background: 1 } },
+    },
+  }), 'root')
 })
 
 test('new workspace navigation opens an exact durable member address without removed session methods', async () => {

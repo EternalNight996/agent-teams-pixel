@@ -18,10 +18,28 @@ export interface AgentTeamsSessionNavigator {
 /** Newer sessions retain view ownership instead of publishing list.current. */
 export function currentSessionId(state: {
   readonly current?: SessionId
-  readonly byId: Readonly<Record<string, { readonly id: SessionId; readonly retainedBy?: Readonly<Record<string, number>> }>>
+  readonly byId: Readonly<Record<string, {
+    readonly id: SessionId
+    readonly retainedBy?: Readonly<Record<string, number>>
+    /** Present on a durable subagent transcript row. */
+    readonly parentId?: SessionId
+    readonly origin?: 'subagent'
+  }>>
 }): SessionId | undefined {
-  if ('current' in state) return state.current
-  return Object.values(state.byId).find(row => (row.retainedBy?.mainView ?? 0) > 0)?.id
+  if ('current' in state) {
+    const current = state.current
+    if (current === undefined) return undefined
+    // Some hosts keep the parent as `current` while the user is reading a
+    // durable subagent transcript. If that child owns mainView, it is the panel
+    // the user is actually looking at (and the one idle XP belongs to).
+    const child = Object.values(state.byId).find(row => row.id !== current
+      && (row.retainedBy?.mainView ?? 0) > 0
+      && (row.parentId === current || row.origin === 'subagent'))
+    return child?.id ?? current
+  }
+  const retained = Object.values(state.byId).filter(row => (row.retainedBy?.mainView ?? 0) > 0)
+  const child = retained.find(row => row.parentId !== undefined || row.origin === 'subagent')
+  return (child ?? retained[0])?.id
 }
 
 export interface AgentTeamsWorkspaceNavigator {

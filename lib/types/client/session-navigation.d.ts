@@ -18,6 +18,9 @@ export declare function currentSessionId(state: {
     readonly byId: Readonly<Record<string, {
         readonly id: SessionId;
         readonly retainedBy?: Readonly<Record<string, number>>;
+        /** Present on a durable subagent transcript row. */
+        readonly parentId?: SessionId;
+        readonly origin?: 'subagent';
     }>>;
 }): SessionId | undefined;
 export interface AgentTeamsWorkspaceNavigator {

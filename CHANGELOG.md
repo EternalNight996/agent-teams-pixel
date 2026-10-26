@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ### Changed
+- Idle XP attribution now follows a **durable subagent transcript** even when the
+  host keeps the parent captain as `current`: if a retained child owns the main
+  view, that member is the one who idles. This fixes member conversations awarding
+  XP to the captain instead.
 - Software-delivery roles now carry concise contracts appended to the member
   persona: frontend (UI states/a11y/browser evidence, no server edits), backend
   (contract/migration/authz/tests, no UI edits), integrator (contract drift/E2E),
