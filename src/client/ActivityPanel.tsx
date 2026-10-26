@@ -741,6 +741,20 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                 {visibleMembers.map((member) => {
                   const owned = team.tasks.filter((task) => task.assignee === member.name)
                   const memberModel = memberRouteLabel(member)
+                  // 进度与协作都直接写进成员卡：完成比例条 + 交给下一个修士的任务。
+                  const progressTotal = member.total ?? 0
+                  const progressDone = member.done ?? 0
+                  const progressPct = progressTotal > 0
+                    ? Math.round((progressDone / progressTotal) * 100)
+                    : Math.max(0, Math.min(100, member.progress ?? 0))
+                  const progressState = progressTotal > 0 && progressDone >= progressTotal
+                    ? 'completed'
+                    : owned.some((task) => task.state === 'failed') ? 'failed' : undefined
+                  const handoff = team.tasks.find((task) => (
+                    task.status !== 'completed'
+                    && task.assignee !== member.name
+                    && task.dependencies.some((id) => owned.some((own) => own.id === id && own.status === 'completed'))
+                  ))
                   return (
               <div key={member.id || member.name} className={css.memberBlock} data-activity={member.activity} data-realm={(member.progress ?? 0) >= 40 ? 'high' : undefined} data-selected-member={workspace && selectedAssignee === member.name || undefined}>
                 <span className={css.memberBranch} aria-hidden><span /></span>
@@ -796,6 +810,16 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                       ))
                         ? t('member.status.settled')
                       : memberStatusText(member, team.tasks, t)}</span>
+                    <span className={css.memberProgress} data-state={progressState}>
+                      <span className={css.memberProgressTrack}>
+                        <span className={css.memberProgressFill} data-state={progressState} style={{ width: `${progressPct}%` }} />
+                      </span>
+                    </span>
+                    {handoff !== undefined && (
+                      <span className={css.memberRel}>
+                        <span aria-hidden>→</span>{t('member.rel.handoff', { name: handoff.assignee || t('task.assignee.unclaimed'), taskId: handoff.id })}
+                      </span>
+                    )}
                   </span>
                   <span className={css.memberCount}>{member.done}/{member.total}</span>
                 </button>
@@ -835,7 +859,8 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
         })()}
       </section>
 
-      <DependencyMap tasks={team.tasks} members={team.members} t={t} discarded={discarded} workspace={workspace} onSelectTask={setSelectedTaskId} />
+      {/* 宗门进度页不再画独立的依赖图：交互关系与进度写在成员卡里，避免和上方像素人重复。 */}
+      {!workspace && <DependencyMap tasks={team.tasks} members={team.members} t={t} discarded={discarded} workspace={workspace} onSelectTask={setSelectedTaskId} />}
       </section>
       <Modal
         open={stopOpen}

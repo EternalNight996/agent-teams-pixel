@@ -76,6 +76,7 @@ export declare const zh: {
     'member.status.executingModel': string;
     'member.status.working': string;
     'member.status.waitingOn': string;
+    'member.rel.handoff': string;
     'member.status.waitingPrerequisite': string;
     'member.status.waitingAssignment': string;
     'member.status.delivered': string;
@@ -523,6 +524,7 @@ export declare const en: {
     'member.status.executingModel': string;
     'member.status.working': string;
     'member.status.waitingOn': string;
+    'member.rel.handoff': string;
     'member.status.waitingPrerequisite': string;
     'member.status.waitingAssignment': string;
     'member.status.delivered': string;

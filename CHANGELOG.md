@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ### Changed
+- 宗门进度 no longer draws the separate task-dependency graph: each member card
+  now carries its own progress bar and a "交给 {name} · {task}" handoff line, so
+  the panel content itself shows who works on what, how far along it is and who
+  receives the result next (the scene above already shows the live activity).
 - Closing the post-founding 道统配置 review with × now jumps straight to the
   宗门进度 sheet (opening another facility simply leaves review mode).
 - A 修士 child session no longer shows an empty hall: the overlay resolves the

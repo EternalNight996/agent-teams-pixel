@@ -778,6 +778,51 @@
   white-space: nowrap;
 }
 
+/* 成员卡自带进度条与交接关系：不再需要单独的任务依赖图。 */
+.memberProgress {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.memberProgressTrack {
+  flex: 1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--dsw-alias-border-l3);
+}
+
+.memberProgressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--dsw-alias-state-business-primary);
+  transition: width 160ms ease;
+}
+
+.memberProgressFill[data-state='completed'] {
+  background: var(--dsw-alias-state-success-primary);
+}
+
+.memberProgressFill[data-state='failed'] {
+  background: var(--dsw-alias-state-error-primary);
+}
+
+.memberRel {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--dsw-alias-state-business-primary);
+  font-size: 10px;
+  line-height: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .taskDetailModel {
   overflow: hidden;
   color: var(--dsw-alias-label-tertiary);
