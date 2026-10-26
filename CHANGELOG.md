@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 ### Changed
+- Idle cultivation is much more generous: 2 + level/2 XP every 10 seconds, with a
+  continuous-online streak up to 3x (each 2 minutes +0.5x) and up to 8 hours of
+  offline catch-up. The character sheet shows the current idle rate.
+- The 封神榜 also exists as a fifth wall facility (golden board with names and a
+  vermilion seal); clicking it opens the ranks sheet, and opening ranks highlights
+  the wall board.
 - Added the 封神榜 board (bottom bar 榜): sect roll by cultivation, the 15-realm
   ladder with per-realm level ranges and descriptions, the current speaker's
   cultivation card, leveling tips (task/captain/idle formulas, first-seen

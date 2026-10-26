@@ -110,9 +110,14 @@ export function captainTaskXpFor(level: number): number {
   return 40 + Math.max(1, Math.floor(level)) * 8
 }
 
-/** 每 10 秒挂机修为：等级越高越多。 */
+/** 每 10 秒挂机修为：等级越高越多，挂机也有明显成长感。 */
 export function idleXpPer10s(level: number): number {
-  return 1 + Math.floor(Math.max(1, level) / 10)
+  return 2 + Math.floor(Math.max(1, level) / 2)
+}
+
+/** 连续挂机加成：每 2 分钟 +0.5 倍，最高 3 倍（离线补结按基础值）。 */
+export function idleStreakMultiplier(streakTicks: number): number {
+  return Math.min(3, 1 + Math.floor(Math.max(0, streakTicks) / 12) * 0.5)
 }
 
 export interface Cultivation {

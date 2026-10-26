@@ -8,7 +8,7 @@
  */
 
 /** One panel a wall facility can open. */
-export type SceneAction = 'teams' | 'board' | 'config' | 'inbox' | 'gear'
+export type SceneAction = 'teams' | 'board' | 'config' | 'inbox' | 'gear' | 'ranks'
 
 /** Scene-space rectangle (the renderer draws in a 520-wide world). */
 export interface FacilityRect {
@@ -20,19 +20,20 @@ export interface FacilityRect {
 
 /** Fixed wall layout: bookshelf, gate, merit stele and message rack. */
 export const FACILITIES: Readonly<Record<SceneAction, FacilityRect>> = {
-  config: { x: 18, y: 10, w: 92, h: 60 },
-  teams: { x: 148, y: 6, w: 156, h: 66 },
-  board: { x: 332, y: 10, w: 80, h: 60 },
-  gear: { x: 430, y: 10, w: 80, h: 60 },
+  config: { x: 8, y: 10, w: 80, h: 60 },
+  teams: { x: 96, y: 6, w: 124, h: 66 },
+  board: { x: 228, y: 10, w: 70, h: 60 },
+  ranks: { x: 306, y: 10, w: 70, h: 60 },
+  gear: { x: 384, y: 10, w: 74, h: 60 },
   // 传音阁入口已移除；保留矩形仅为类型兼容，不在 FACILITY_ORDER 中绘制/命中。
-  inbox: { x: 430, y: 10, w: 80, h: 60 },
+  inbox: { x: 466, y: 10, w: 60, h: 60 },
 }
 
 /** The wall band reserved for facilities; desks start below it. */
 export const WALL_HEIGHT = 96
 
 /** Order used by the rail and by tests (left to right on the wall). */
-export const FACILITY_ORDER: readonly SceneAction[] = ['config', 'teams', 'board', 'gear']
+export const FACILITY_ORDER: readonly SceneAction[] = ['config', 'teams', 'board', 'ranks', 'gear']
 
 /** A scene hit from `hitTest`: a cultivator desk or a wall facility. */
 export type SceneHit =

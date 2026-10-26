@@ -42,6 +42,7 @@ export interface PixelOfficeProps {
 const FACILITY_LABEL: Readonly<Record<SceneAction, AgentTeamsLocaleKey>> = {
   teams: 'office.facility.teams',
   board: 'office.facility.board',
+  ranks: 'office.facility.ranks',
   config: 'office.facility.config',
   gear: 'office.facility.gear',
   inbox: 'office.facility.inbox',
@@ -50,6 +51,7 @@ const FACILITY_LABEL: Readonly<Record<SceneAction, AgentTeamsLocaleKey>> = {
 const FACILITY_HINT: Readonly<Record<SceneAction, AgentTeamsLocaleKey>> = {
   teams: 'office.action.teamsHint',
   board: 'office.action.boardHint',
+  ranks: 'office.action.ranksHint',
   config: 'office.action.configHint',
   gear: 'office.action.gearHint',
   inbox: 'office.action.inboxHint',
@@ -59,6 +61,7 @@ const FACILITY_HINT: Readonly<Record<SceneAction, AgentTeamsLocaleKey>> = {
 const FACILITY_GLYPH: Readonly<Record<SceneAction, string>> = {
   teams: '山',
   board: '碑',
+  ranks: '榜',
   config: '经',
   gear: '阁',
   inbox: '信',

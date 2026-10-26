@@ -28,8 +28,10 @@ export declare function xpNeed(level: number): number;
 export declare function taskXpFor(level: number): number;
 /** 掌门带队完成任务获得的修为。 */
 export declare function captainTaskXpFor(level: number): number;
-/** 每 10 秒挂机修为：等级越高越多。 */
+/** 每 10 秒挂机修为：等级越高越多，挂机也有明显成长感。 */
 export declare function idleXpPer10s(level: number): number;
+/** 连续挂机加成：每 2 分钟 +0.5 倍，最高 3 倍（离线补结按基础值）。 */
+export declare function idleStreakMultiplier(streakTicks: number): number;
 export interface Cultivation {
     readonly level: number;
     readonly xp: number;

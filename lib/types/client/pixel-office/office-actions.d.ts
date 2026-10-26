@@ -7,7 +7,7 @@
  * the hit area can never drift away from the art.
  */
 /** One panel a wall facility can open. */
-export type SceneAction = 'teams' | 'board' | 'config' | 'inbox' | 'gear';
+export type SceneAction = 'teams' | 'board' | 'config' | 'inbox' | 'gear' | 'ranks';
 /** Scene-space rectangle (the renderer draws in a 520-wide world). */
 export interface FacilityRect {
     readonly x: number;

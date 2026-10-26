@@ -302,6 +302,7 @@ export declare const zh: {
     'skill.immortalArt': string;
     'skill.daoArt': string;
     'office.levelEarnHint': string;
+    'office.idleGain': string;
     'office.mountSword': string;
     'office.mountBeast': string;
     'office.mountWalk': string;
@@ -352,6 +353,7 @@ export declare const zh: {
     'office.facility.board': string;
     'office.facility.config': string;
     'office.facility.gear': string;
+    'office.facility.ranks': string;
     'office.facility.inbox': string;
     'office.floorRanks': string;
     'office.ascension': string;
@@ -366,6 +368,7 @@ export declare const zh: {
     'office.action.boardHint': string;
     'office.action.configHint': string;
     'office.action.gearHint': string;
+    'office.action.ranksHint': string;
     'office.action.inboxHint': string;
     'app.title': string;
     'quickstart.entry': string;
@@ -860,6 +863,7 @@ export declare const en: {
     'skill.immortalArt': string;
     'skill.daoArt': string;
     'office.levelEarnHint': string;
+    'office.idleGain': string;
     'office.mountSword': string;
     'office.mountBeast': string;
     'office.mountWalk': string;
@@ -910,6 +914,7 @@ export declare const en: {
     'office.facility.board': string;
     'office.facility.config': string;
     'office.facility.gear': string;
+    'office.facility.ranks': string;
     'office.facility.inbox': string;
     'office.floorRanks': string;
     'office.ascension': string;
@@ -924,6 +929,7 @@ export declare const en: {
     'office.action.boardHint': string;
     'office.action.configHint': string;
     'office.action.gearHint': string;
+    'office.action.ranksHint': string;
     'office.action.inboxHint': string;
     'app.title': string;
     'quickstart.entry': string;

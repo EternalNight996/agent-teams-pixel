@@ -15,7 +15,7 @@ import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
 import { QuickStartWizard } from './QuickStartDialog.tsx'
-import { CULTIVATION_ITEMS, captainKey, cultivationFromXp, memberKey } from './cultivation.ts'
+import { CULTIVATION_ITEMS, captainKey, cultivationFromXp, idleXpPer10s, memberKey } from './cultivation.ts'
 import { useCultivationVersion, xpOf } from './cultivation-store.ts'
 import { OPEN_HALL_SHEET_EVENT, type HallSheetAction } from './hall-events.ts'
 import { ASCENSION_RANKS, ASCENSION_STORY, ASCENSION_TIPS, rankAtLevel } from './immortals.ts'
@@ -612,6 +612,7 @@ export function SectHallOverlay({
                 <div className={css.xpTrack}><span style={{ width: `${Math.round(characterCultivation.ratio * 100)}%` }} /></div>
                 <p className={css.settingsMeta}>{characterCultivation.xp} / {characterCultivation.next} XP</p>
                 <p className={css.settingsMeta}>{t('office.levelEarnHint')}</p>
+                <p className={css.settingsMeta}>{t('office.idleGain', { xp: idleXpPer10s(characterCultivation.level) })}</p>
                 {([
                   { kind: 'weapon', title: t('office.weapon'), hint: undefined },
                   { kind: 'mount', title: t('office.mounts'), hint: t('office.mountHint') },
@@ -863,7 +864,7 @@ export function SectHallOverlay({
                   t={t}
                   activeAction={
                     sheet === 'character' ? 'gear'
-                      : sheet === 'settings' || sheet === 'start' || sheet === 'ranks' ? null
+                      : sheet === 'settings' || sheet === 'start' ? null
                         : sheet ?? null
                   }
                   onAction={(action) => {
