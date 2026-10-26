@@ -593,6 +593,16 @@
   background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 10%, transparent);
 }
 
+.historyItem[data-current='true'] {
+  border-color: color-mix(in srgb, var(--dsw-alias-state-success-primary) 55%, var(--dsw-alias-border-l2));
+  background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 8%, transparent);
+}
+
+.historyItem[data-current='true'][data-active='true'] {
+  border-color: var(--dsw-alias-state-success-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--dsw-alias-state-success-primary) 45%, transparent);
+}
+
 .historyName {
   font-size: 12px;
   font-weight: 600;

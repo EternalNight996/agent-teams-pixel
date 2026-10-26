@@ -27,6 +27,8 @@ const COLLAPSED_KEY = 'agent-teams-pixel.hallCollapsed'
 const DOCKED_KEY = 'agent-teams-pixel.hallDocked'
 const PANEL_RECT_KEY = 'agent-teams-pixel.hallRect'
 const TOKEN_KEY = 'agent-teams-pixel.hallToken'
+/** 名册历史列表里的“当前宗门”哨兵。 */
+const CURRENT_TEAM_SENTINEL = '__current__'
 
 /** 展开的面板给对话让位：写在 html 上的属性与位移变量（与右侧栏同一手法）。 */
 const HALL_OPEN_ATTRIBUTE = 'data-agent-teams-hall-open'
@@ -469,7 +471,8 @@ export function SectHallOverlay({
         </button>
       </div>
     )
-    const selectedHistory = history.find(team => team.teamId === historyTeamId) ?? history[0]
+    const viewingCurrent = hasTeam && (historyTeamId === undefined || historyTeamId === CURRENT_TEAM_SENTINEL)
+    const selectedHistory = history.find(team => team.teamId === historyTeamId)
     const historyTasks = hall.tasks.filter(task => task.status === 'completed' || task.status === 'failed' || task.status === 'cancelled')
     const taskStatusLabel = (status: string): string => status === 'completed'
       ? t('task.status.completed')
@@ -642,21 +645,29 @@ export function SectHallOverlay({
               <button type="button" className={css.historyStart} onClick={startSect} title={t('quickstart.entryTitle')}>
                 <span aria-hidden>⛩</span>{t('quickstart.entry')}
               </button>
-              {hasTeam && (
-                <div className={css.historyCurrent} data-current="true">
-                  <span className={css.historyCurrentDot} aria-hidden />
-                  <span className={css.historyCurrentBadge}>{t('office.historyCurrent')}</span>
-                  <span className={css.historyCurrentName}>{hall.name}</span>
-                  <span className={css.historyCurrentMeta}>{done}/{total} · {t('team.stats.members', { count: hall.members.length })}</span>
-                </div>
-              )}
-              {history.length === 0 && historyTasks.length === 0 && (
+              {!hasTeam && history.length === 0 && historyTasks.length === 0 && (
                 <p className={css.settingsHint}>{t('office.historyEmpty')}</p>
               )}
-              {history.length > 0 && (
+              {(hasTeam || history.length > 0) && (
                 <div className={css.historyBlock}>
                   <span className={css.historyTitle}>{t('office.historyTeams')}</span>
                   <div className={css.historyList}>
+                    {hasTeam && (
+                      <button
+                        type="button"
+                        className={css.historyItem}
+                        data-current="true"
+                        data-active={viewingCurrent || undefined}
+                        onClick={() => { setHistoryTeamId(CURRENT_TEAM_SENTINEL) }}
+                      >
+                        <span className={css.historyName}>
+                          <span className={css.historyCurrentDot} aria-hidden />
+                          {hall.name}
+                          <span className={css.historyCurrentBadge}>{t('office.historyCurrent')}</span>
+                        </span>
+                        <span className={css.historyMeta}>{done}/{total} · {t('team.stats.members', { count: hall.members.length })}</span>
+                      </button>
+                    )}
                     {history.map(team => {
                       const done = team.tasks.filter(task => task.status === 'completed').length
                       return (
@@ -664,7 +675,7 @@ export function SectHallOverlay({
                           key={team.teamId}
                           type="button"
                           className={css.historyItem}
-                          data-active={selectedHistory?.teamId === team.teamId || undefined}
+                          data-active={!viewingCurrent && selectedHistory?.teamId === team.teamId || undefined}
                           onClick={() => { setHistoryTeamId(team.teamId) }}
                         >
                           <span className={css.historyName}>
@@ -677,7 +688,7 @@ export function SectHallOverlay({
                       )
                     })}
                   </div>
-                  {selectedHistory !== undefined && (
+                  {selectedHistory !== undefined ? (
                     <div className={css.historyDetail}>
                       <TeamSection
                         team={selectedHistory}
@@ -688,7 +699,7 @@ export function SectHallOverlay({
                         onNavigate={(_parent, child) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, child) }}
                       />
                     </div>
-                  )}
+                  ) : null}
                 </div>
               )}
               {historyTasks.length > 0 && (

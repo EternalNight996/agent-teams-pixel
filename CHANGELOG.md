@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Changed
+- 名册的历史宗门列表 now includes a green 当前 entry for the live sect (selectable,
+  marked 当前); historical runs remain selectable for their historic roster, while
+  the live detail stays in 宗门进度 to avoid duplicating it again.
 - 法器、坐骑、技能 now equip independently in the inventory (three separate
   selections instead of one global slot).
 - Added the 天机阁 wall facility (and a bottom-bar entry) that opens the gear
