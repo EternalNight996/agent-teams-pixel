@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 ### Changed
+- Closing the post-founding 道统配置 review with × now jumps straight to the
+  宗门进度 sheet (opening another facility simply leaves review mode).
+- A 修士 child session no longer shows an empty hall: the overlay resolves the
+  team that owns the session by member session id and keeps showing that team's
+  task progress; member navigation uses the captain session as the parent, so
+  clicking another cultivator from a child session still opens the right
+  transcript.
 - After 开宗立派 succeeds, the hall waits for the new team to land and then opens
   the 道统配置 (team config) sheet automatically, so the founder can review the
   roster and doctrine right away instead of the wizard just closing.

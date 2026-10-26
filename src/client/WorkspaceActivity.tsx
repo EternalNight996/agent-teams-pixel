@@ -85,9 +85,14 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDi
   const local = useSyncExternalStore(state.subscribe, state.getSnapshot)
   const sessionTeams = current === undefined ? [] : snapshots.teams.filter(team => team.captainSessionId === current)
   const wanted = current === undefined ? undefined : local.selected.get(current)
+  // 修士子会话里没有自己的队伍：按成员会话 id 反查它所属的主队伍，
+  // 这样点进子进程也能继续看到主任务的进度，而不是一座空洞府。
+  const linkedTeam = current === undefined
+    ? undefined
+    : [...snapshots.teams, ...snapshots.archivedTeams].find(team => team.members.some(member => member.id === current))
   // 洞府常驻：只要会话里还有队伍，浮层就保持存在——即使队伍 0 任务、
   // 或任务全部已弃（已停止），也不自动收起（用户明确要求）。
-  const hallTeam = sessionTeams.find(team => team.teamId === wanted) ?? sessionTeams[0]
+  const hallTeam = sessionTeams.find(team => team.teamId === wanted) ?? sessionTeams[0] ?? linkedTeam
   const targets = useSyncExternalStore(subscribeActivityMonitorTargets, getActivityMonitorTargetsSnapshot)
   const currentTargets = useMemo(() => targets.filter(target => target.sessionId === current), [targets, current])
   // One discovery tracker per visit, outside polling effects restarted by card registration.
@@ -351,8 +356,14 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     && !live.some(item => item.teamId === team.teamId) && !archived.some(item => item.teamId === team.teamId))
     .map(team => historicCardTeam(team, sessionId))
   const records = [...live, ...archived, ...historic]
-  const selected = records.find(team => team.teamId === local.selected.get(sessionId)) ?? records[0]
-  const liveSelected = selected !== undefined && live.includes(selected)
+  // 子会话（修士进程）没有自己的队伍时，展示它所属主队伍的同一条进度。
+  const linked = records.length === 0
+    ? [...snapshots.teams, ...snapshots.archivedTeams].find(team => team.members.some(member => member.id === sessionId))
+    : undefined
+  const candidates = linked === undefined ? records : [linked]
+  const selected = candidates.find(team => team.teamId === local.selected.get(sessionId)) ?? candidates[0]
+  const liveSelected = selected !== undefined
+    && (live.includes(selected) || snapshots.teams.some(team => team.teamId === selected.teamId))
   const history = selected !== undefined && !liveSelected
   const status = local.statuses.get(sessionId) ?? 'loading'
   const completedCount = selected === undefined ? 0 : selected.tasks.filter(task => task.status === 'completed').length

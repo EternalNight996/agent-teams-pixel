@@ -131,8 +131,9 @@ export function SectHallOverlay({
   const [collapsed, setCollapsed] = useState(() => readBool(COLLAPSED_KEY))
   const [docked, setDocked] = useState(() => readBool(DOCKED_KEY))
   const [sheet, setSheet] = useState<SheetKind | undefined>()
-  // 开宗成功后等新队伍落地，再自动打开道统配置让掌门审核。
+  // 开宗成功后等新队伍落地，再自动打开道统配置让掌门审核；审核完跳到宗门进度。
   const [pendingReview, setPendingReview] = useState(false)
+  const [reviewing, setReviewing] = useState(false)
   const [sheetAnchor, setSheetAnchor] = useState<{ left: number; top: number; width: number; maxHeight: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
   const [token, setToken] = useState<TokenPoint>(() => readTokenPoint())
@@ -150,10 +151,13 @@ export function SectHallOverlay({
 
   // 洞府常驻：即使当前会话还没有队伍，也保留浮层（空洞府里只有掌门）。
   const hasTeam = team !== undefined
+  // 在修士子会话里洞府展示的是主队伍，成员跳转必须用主会话 id 作为 parent。
+  const ownerSessionId = (team?.captainSessionId ?? sessionId) as SessionId | undefined
 
   useEffect(() => {
     if (!pendingReview || !hasTeam) return
     setPendingReview(false)
+    setReviewing(true)
     setSheet('config')
   }, [pendingReview, hasTeam])
   const hall: ActivityTeam = team ?? {
@@ -366,8 +370,19 @@ export function SectHallOverlay({
     writePanelRect({ ...rect, ...next })
   }
 
+  // 关掉“审核道统”这一步时直接去宗门进度，而不是回到空洞府。
+  const finishSheet = (): void => {
+    if (reviewing) {
+      setReviewing(false)
+      setSheet('board')
+      return
+    }
+    setSheet(undefined)
+  }
   const toggleSheet = (kind: SheetKind): void => {
-    setSheet(current => (current === kind ? undefined : kind))
+    if (sheet === kind) { finishSheet(); return }
+    setReviewing(false)
+    setSheet(kind)
   }
 
   // 自由缩放：浮空与归栏窗口都能拖右下角改大小，尺寸记在 localStorage。
@@ -442,7 +457,7 @@ export function SectHallOverlay({
       >
         <header className={css.sheetHead}>
           <span className={css.sheetTitle}>{title}</span>
-          <button type="button" className={css.sheetClose} onClick={() => { setSheet(undefined) }} aria-label={t('office.closePanel')}>×</button>
+          <button type="button" className={css.sheetClose} onClick={finishSheet} aria-label={t('office.closePanel')}>×</button>
         </header>
         <div className={css.sheetBody}>
           {sheet === 'settings' ? (
@@ -500,7 +515,7 @@ export function SectHallOverlay({
                   team={hall}
                   t={t}
                   workspace
-                  onNavigate={(_parent, child) => { if (sessionId !== undefined) openMember(sessionId, child) }}
+                  onNavigate={(_parent, child) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, child) }}
                   onContinuePlanning={() => { setSheet(undefined) }}
                   onDiscarded={() => { setSheet(undefined) }}
                 />
@@ -563,7 +578,7 @@ export function SectHallOverlay({
                     if (action === 'teams' && !hasTeam) { startSect(); return }
                     toggleSheet(action)
                   }}
-                  onOpenMember={(memberId) => { if (sessionId !== undefined) openMember(sessionId, memberId as SessionId) }}
+                  onOpenMember={(memberId) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, memberId as SessionId) }}
                   onUnavailable={() => { /* 无会话修士：由场景内提示承担 */ }}
                   onDock={dockToSidebar}
                   onSettings={() => { toggleSheet('settings') }}
