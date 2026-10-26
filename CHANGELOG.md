@@ -7,7 +7,9 @@
   role (preset roster, selected roles, the role picker and the oath summary);
   custom roles fall back to an initial-letter badge.
 - The wizard's decision bar (取消 / 上一步 / 下一步) is pinned flush to the bottom
-  edge of the sheet instead of floating in the middle of the content.
+  edge of the sheet instead of floating in the middle of the content. The
+  开宗立派 sheet itself keeps a fixed height equal to the hall panel (other
+  sheets still shrink to their content), so switching steps never resizes it.
 - 开宗立派 now renders inline in the hall's left-hand content sheet, exactly like
   功德碑/进度 — the header 开宗 button opens that sheet too, and there is no
   standalone quick-start modal any more.

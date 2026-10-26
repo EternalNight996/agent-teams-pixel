@@ -420,7 +420,8 @@ export function SectHallOverlay({
           left: sheetAnchor.left,
           bottom: sheetAnchor.bottom,
           width: sheetAnchor.width,
-          // 高度随内容收缩，最多到当前洞府高度（用 CSS 变量同时兜住视口上限）。
+          // 开宗立派固定与洞府同高，其余气泡随内容收缩（视口上限统一由 CSS 兜住）。
+          height: sheet === 'start' ? size.h : undefined,
           ['--hall-sheet-max' as string]: `${size.h}px`,
         } as React.CSSProperties}
         role="dialog"
