@@ -1,12 +1,14 @@
 /**
  * 宗门洞府浮层：整块洞府场景浮在 DSH 窗口上，可拖动、可收起、可传送回右侧栏。
  *
- * 由 shell.overlay 的常驻监视器渲染，所以不依赖右侧栏标签页；墙面设施、剑盒、
- * 名册等在浮层内部展开（内容气泡贴在面板左侧），传送阵在地板上切换「浮空 / 归栏」。
+ * 由 shell.overlay 的常驻监视器渲染；墙面设施、剑盒、名册等在浮层内部展开
+ * （内容气泡贴在面板左侧）。展开时像右侧栏一样给对话让位；收起成一枚可拖动的
+ * 令牌；「归栏」收起浮层并在右侧栏打开洞府页面。
  */
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { ModelDirectoryResolver } from '@deepseek-ai/dsh-client-ui-model-selection/client'
+import type { ISidebarRight, TabId } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { ActivityTeam } from './activity-monitor.ts'
 import type { AgentTeamsTranslate } from './locales.ts'
@@ -22,7 +24,11 @@ const DOCKED_KEY = 'agent-teams-pixel.hallDocked'
 const PANEL_RECT_KEY = 'agent-teams-pixel.hallRect'
 const TOKEN_KEY = 'agent-teams-pixel.hallToken'
 
-/** 收起后的令牌尺寸（含流苏上方的牌身）。 */
+/** 展开的面板给对话让位：写在 html 上的属性与位移变量（与右侧栏同一手法）。 */
+const HALL_OPEN_ATTRIBUTE = 'data-agent-teams-hall-open'
+const HALL_SHIFT_PROPERTY = '--agent-teams-hall-shift'
+
+/** 收起后的令牌基准尺寸（标准面板），实际按面板大小缩放。 */
 const TOKEN_SIZE = { w: 38, h: 68 } as const
 
 interface TokenPoint {
@@ -31,12 +37,12 @@ interface TokenPoint {
 }
 
 /** 把令牌夹在窗口内；留 8px 边缘，拖不出屏。 */
-function clampToken(x: number, y: number): TokenPoint {
+function clampToken(x: number, y: number, w: number, h: number): TokenPoint {
   const vw = typeof window === 'undefined' ? 1280 : window.innerWidth
   const vh = typeof window === 'undefined' ? 800 : window.innerHeight
   return {
-    x: Math.max(8, Math.min(x, vw - TOKEN_SIZE.w - 8)),
-    y: Math.max(8, Math.min(y, vh - TOKEN_SIZE.h - 8)),
+    x: Math.max(8, Math.min(x, vw - w - 8)),
+    y: Math.max(8, Math.min(y, vh - h - 8)),
   }
 }
 
@@ -48,12 +54,12 @@ function readTokenPoint(): TokenPoint {
       const parsed = JSON.parse(raw) as Partial<TokenPoint>
       if (typeof parsed.x === 'number' && Number.isFinite(parsed.x)
         && typeof parsed.y === 'number' && Number.isFinite(parsed.y)) {
-        return clampToken(parsed.x, parsed.y)
+        return clampToken(parsed.x, parsed.y, TOKEN_SIZE.w, TOKEN_SIZE.h)
       }
     }
   } catch { /* private mode */ }
   // 默认停在右下角：与展开面板同一处，收起时不跳。
-  return clampToken(window.innerWidth - TOKEN_SIZE.w - 16, window.innerHeight - TOKEN_SIZE.h - 16)
+  return clampToken(window.innerWidth - TOKEN_SIZE.w - 16, window.innerHeight - TOKEN_SIZE.h - 16, TOKEN_SIZE.w, TOKEN_SIZE.h)
 }
 
 function writeTokenPoint(point: TokenPoint): void {
@@ -105,9 +111,12 @@ const PANEL_SIZES = {
   compact: { w: 460, h: 380 },
   normal: { w: 620, h: 500 },
   large: { w: 820, h: 640 },
+  huge: { w: 1040, h: 760 },
 } as const
 
-export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMember }: {
+export function SectHallOverlay({
+  team, t, sessionId, modelDirectories, openMember, sidebar, tabKind,
+}: {
   /** 无队伍时缺省：浮层仍常驻，渲染一座只有掌门的空洞府。 */
   readonly team?: ActivityTeam
   readonly t: AgentTeamsTranslate
@@ -115,6 +124,10 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
   readonly sessionId?: SessionId
   readonly modelDirectories: ModelDirectoryResolver
   readonly openMember: (parentId: SessionId, childId: SessionId) => void
+  /** 右侧栏服务：归栏时在这里打开洞府页面；缺失时只收成令牌。 */
+  readonly sidebar?: ISidebarRight
+  /** 洞府页面在右侧栏的 kind。 */
+  readonly tabKind?: string
 }) {
   const [collapsed, setCollapsed] = useState(() => readBool(COLLAPSED_KEY))
   const [docked, setDocked] = useState(() => readBool(DOCKED_KEY))
@@ -150,6 +163,13 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
   const done = hall.tasks.filter(task => task.status === 'completed').length
   const total = hall.tasks.length
   const staged = hall.phase === 'staged'
+  // 令牌随面板配置缩放：标准 620×500 = 1.0，超大面板最多 1.8 倍。
+  const tokenScale = Math.min(1.8, Math.max(0.8, size.h / PANEL_SIZES.normal.h))
+  const tokenSize = {
+    w: Math.round(TOKEN_SIZE.w * tokenScale),
+    h: Math.round(TOKEN_SIZE.h * tokenScale),
+  }
+  const tokenAt = clampToken(token.x, token.y, tokenSize.w, tokenSize.h)
 
   // 墙面设施/剑盒/名册 → 面板上方的内容气泡。
   useEffect(() => {
@@ -178,7 +198,7 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
   const beginDrag = (event: React.PointerEvent<HTMLElement>): void => {
     if ((event.target as HTMLElement).closest('button') !== null) return
     const panel = panelRef.current
-    if (panel === null || docked) return
+    if (panel === null) return
     event.preventDefault()
     dragRef.current = { startX: event.clientX, startY: event.clientY, baseX: rect.x, baseY: rect.y }
     const move = (moveEvent: PointerEvent): void => {
@@ -204,12 +224,39 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
     window.addEventListener('pointerup', up)
   }
 
+  // 右侧栏里洞府页面的开关（宿主没有注册页面类型时安静降级）。
+  const openSidebarPage = (): void => {
+    if (sidebar === undefined || tabKind === undefined) return
+    try {
+      sidebar.openTab(tabKind)
+    } catch { /* 页面类型未注册：只保留令牌 */ }
+  }
+
+  const closeSidebarPage = (): void => {
+    if (sidebar === undefined || tabKind === undefined || sessionId === undefined) return
+    const withTabs = sidebar as ISidebarRight & {
+      tabsIn?: (id: SessionId) => readonly { id: string; kind?: string }[]
+    }
+    const page = (withTabs.tabsIn?.(sessionId) ?? []).find((tab) => tab.kind === tabKind)
+    if (page === undefined) return
+    try { sidebar.close(page.id as TabId) } catch { /* 已经关掉 */ }
+  }
+
   const toggleCollapsed = (): void => {
     const next = !collapsed
     setCollapsed(next)
     writeBool(COLLAPSED_KEY, next)
-    // 收起成一枚令牌时，内容气泡也一并收起，避免令牌旁边挂着一块面板。
-    if (next) setSheet(undefined)
+    if (next) {
+      // 收起成一枚令牌时，内容气泡也一并收起，避免令牌旁边挂着一块面板。
+      setSheet(undefined)
+      return
+    }
+    // 展开即回到浮空：退出归栏，并关掉右侧栏里的洞府页面。
+    if (docked) {
+      setDocked(false)
+      writeBool(DOCKED_KEY, false)
+      closeSidebarPage()
+    }
   }
 
   // 令牌可拖动：拖到任意角落，位置记在 localStorage；没拖动就是点击展开。
@@ -220,10 +267,10 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
     const drag = {
       startX: event.clientX,
       startY: event.clientY,
-      baseX: token.x,
-      baseY: token.y,
-      lastX: token.x,
-      lastY: token.y,
+      baseX: tokenAt.x,
+      baseY: tokenAt.y,
+      lastX: tokenAt.x,
+      lastY: tokenAt.y,
       moved: false,
     }
     tokenDrag.current = drag
@@ -238,7 +285,7 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
       const dy = moveEvent.clientY - drag.startY
       if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4) return
       drag.moved = true
-      const next = clampToken(drag.baseX + dx, drag.baseY + dy)
+      const next = clampToken(drag.baseX + dx, drag.baseY + dy, tokenSize.w, tokenSize.h)
       drag.lastX = next.x
       drag.lastY = next.y
       setToken(next)
@@ -262,24 +309,47 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
     window.addEventListener('pointercancel', cancel)
   }
 
-  // 窗口缩小时把令牌夹回可视区。
+  // 面板尺寸变化 → 令牌跟着变大/变小，并夹回可视区。
   useEffect(() => {
-    const clamp = (): void => {
-      setToken((current) => {
-        const next = clampToken(current.x, current.y)
-        return next.x === current.x && next.y === current.y ? current : next
-      })
-    }
-    window.addEventListener('resize', clamp)
-    return () => { window.removeEventListener('resize', clamp) }
-  }, [])
+    setToken((current) => {
+      const next = clampToken(current.x, current.y, tokenSize.w, tokenSize.h)
+      return next.x === current.x && next.y === current.y ? current : next
+    })
+  }, [tokenSize.w, tokenSize.h])
 
-  const toggleDocked = (): void => {
-    const next = !docked
-    setDocked(next)
-    writeBool(DOCKED_KEY, next)
+  // 归栏：收起成令牌 + 在右侧栏打开洞府页面。
+  const dockToSidebar = (): void => {
+    setDocked(true)
+    writeBool(DOCKED_KEY, true)
+    setCollapsed(true)
+    writeBool(COLLAPSED_KEY, true)
     setSheet(undefined)
+    openSidebarPage()
   }
+
+  // 展开的洞府像右侧栏一样让对话内容向左收，避免被面板盖住。
+  useEffect(() => {
+    const root = document.documentElement
+    const apply = (): void => {
+      if (collapsed) {
+        root.removeAttribute(HALL_OPEN_ATTRIBUTE)
+        root.style.removeProperty(HALL_SHIFT_PROPERTY)
+        return
+      }
+      const vw = window.innerWidth
+      const width = Math.min(size.w, Math.max(0, vw - 32))
+      const shift = Math.max(0, Math.min(width + 32, vw - 360))
+      root.setAttribute(HALL_OPEN_ATTRIBUTE, '')
+      root.style.setProperty(HALL_SHIFT_PROPERTY, `${shift}px`)
+    }
+    apply()
+    window.addEventListener('resize', apply)
+    return () => {
+      window.removeEventListener('resize', apply)
+      root.removeAttribute(HALL_OPEN_ATTRIBUTE)
+      root.style.removeProperty(HALL_SHIFT_PROPERTY)
+    }
+  }, [collapsed, size.w])
 
   const applySize = (next: { w: number; h: number }): void => {
     setSize(next)
@@ -315,7 +385,7 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
   if (typeof document === 'undefined') return null
 
   const panelStyle = {
-    transform: docked ? undefined : `translate(${rect.x}px, ${rect.y}px)`,
+    transform: `translate(${rect.x}px, ${rect.y}px)`,
     width: `${size.w}px`,
     height: `${size.h}px`,
   }
@@ -402,24 +472,25 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
           type="button"
           className={css.token}
           data-hall-token
-          style={{ left: token.x, top: token.y }}
+          style={{ left: tokenAt.x, top: tokenAt.y, width: tokenSize.w, height: tokenSize.h }}
           onPointerDown={beginTokenDrag}
           onClick={(event) => { if (event.detail === 0) toggleCollapsed() }}
           aria-label={t('office.expand')}
           aria-expanded={false}
           title={`${t('office.expand')} · ${tokenTitle}`}
         >
-          <span className={css.tokenBody} aria-hidden>
-            <span className={css.tokenGlyph} aria-hidden>山</span>
+          <span className={css.tokenInner} style={{ transform: `scale(${tokenScale})` }} aria-hidden>
+            <span className={css.tokenBody}>
+              <span className={css.tokenGlyph} aria-hidden>山</span>
+            </span>
+            <span className={css.tokenTassel} aria-hidden />
           </span>
-          <span className={css.tokenTassel} aria-hidden />
         </button>
       ), document.body) : createPortal((
         <section
           ref={panelRef}
           className={css.window}
           data-hall-window
-          data-docked={docked || undefined}
           style={panelStyle}
           aria-label={t('office.sceneAria', { name: hall.name })}
         >
@@ -447,12 +518,11 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
                   type="button"
                   className={css.portal}
                   data-control="hall-dock"
-                  data-mode={docked ? 'docked' : 'floating'}
-                  onClick={toggleDocked}
-                  title={docked ? t('office.dockFloating') : t('office.dockSidebar')}
+                  onClick={dockToSidebar}
+                  title={t('office.dockSidebar')}
                 >
                   <span className={css.portalGlyph} aria-hidden>✥</span>
-                  <span>{docked ? t('office.dockFloating') : t('office.dockSidebar')}</span>
+                  <span>{t('office.dockSidebar')}</span>
                 </button>
                 <button type="button" className={css.floorButton} data-control="hall-settings" data-active={sheet === 'settings' || undefined} onClick={() => { toggleSheet('settings') }}>
                   <span aria-hidden>⚙</span>{t('office.panelConfig')}

@@ -20,21 +20,21 @@
   box-shadow: 0 22px 60px rgb(0 0 0 / 52%), inset 0 2px rgb(255 255 255 / 4%);
 }
 
-/* 归栏：在右侧栏区域另开一个窗口（保持自身大小，不拉长成整列）。 */
-.window[data-docked='true'] {
-  top: 16px;
-  right: 16px;
-  bottom: auto;
-  border-color: color-mix(in srgb, var(--dsw-alias-state-success-primary) 45%, var(--dsw-alias-border-l2));
-  box-shadow: 0 22px 60px rgb(0 0 0 / 52%), 0 0 0 1px color-mix(in srgb, var(--dsw-alias-state-success-primary) 22%, transparent);
+/* 展开的面板像右侧栏一样给对话让位：html 属性 + 位移变量，对话右侧让出面板宽度。 */
+:global(html) {
+  --agent-teams-hall-shift: 0px;
+}
+
+:global(html[data-agent-teams-hall-open]) :global([data-phase='active']) {
+  box-sizing: border-box;
+  padding-right: var(--agent-teams-hall-shift);
+  transition: padding-right 180ms ease;
 }
 
 /* 收起：整座洞府缩成一枚可拖动的令牌，点一下展开。 */
 .token {
   position: fixed;
   z-index: 11000;
-  width: 38px;
-  height: 68px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -53,6 +53,15 @@
   outline: 2px solid var(--dsw-alias-state-business-primary);
   outline-offset: 3px;
   border-radius: 9px;
+}
+
+.tokenInner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 38px;
+  height: 68px;
+  transform-origin: top left;
 }
 
 .tokenBody {
@@ -176,10 +185,6 @@
   cursor: grabbing;
 }
 
-[data-docked='true'] .head {
-  cursor: default;
-}
-
 .caret {
   flex: none;
   color: var(--dsw-alias-label-tertiary);
@@ -263,17 +268,6 @@
   font-size: 12px;
   line-height: 1;
   transition: transform 240ms ease;
-}
-
-/* 传送阵：浮空/归栏两种状态在颜色与旋转上可见。 */
-.portal[data-mode='docked'] {
-  border-color: var(--dsw-alias-state-success-primary);
-  color: var(--dsw-alias-state-success-primary);
-  background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 12%, transparent);
-}
-
-.portal[data-mode='docked'] .portalGlyph {
-  transform: rotate(90deg);
 }
 
 .portal:active .portalGlyph {

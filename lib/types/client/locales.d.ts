@@ -258,6 +258,7 @@ export declare const zh: {
     'office.panelSize.compact': string;
     'office.panelSize.normal': string;
     'office.panelSize.large': string;
+    'office.panelSize.huge': string;
     'office.resetPosition': string;
     'office.chatter.1': string;
     'office.chatter.2': string;
@@ -679,6 +680,7 @@ export declare const en: {
     'office.panelSize.compact': string;
     'office.panelSize.normal': string;
     'office.panelSize.large': string;
+    'office.panelSize.huge': string;
     'office.resetPosition': string;
     'office.chatter.1': string;
     'office.chatter.2': string;

@@ -161,6 +161,8 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDi
       sessionId={current}
       modelDirectories={modelDirectories}
       openMember={openMember}
+      sidebar={sidebar}
+      tabKind={TEAM_TAB_KIND}
     />
   )
 }

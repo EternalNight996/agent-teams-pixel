@@ -38,28 +38,33 @@
 ### Added
 - The 宗门协作 tab is gone: the hall is the single surface. The floating panel now
   drags by its header, collapses to a compact one-line container, and carries a
-  floor bar with a 传送阵 (dock/floating toggle, state shown by colour + glyph
-  rotation), a 面板配置 button (size presets: 紧凑/标准/宽大, live size readout,
-  reset position) and a 名册 toggle. Floor buttons toggle their popover on second
-  click.
+  floor bar with a 传送阵 (dock to the right sidebar), a 面板配置 button (size
+  presets: 紧凑/标准/宽大/超大, live size readout, reset position) and a 名册
+  toggle. Floor buttons toggle their popover on second click.
 - The panel is freely resizable from its bottom-right corner (size persisted in
   `agent-teams-pixel.hallRect`) and starts larger (620×500). Popovers open fully to
   the **left of the panel** with their right edge exactly 8px from the panel's left
   edge (clamped inside the viewport), treating the panel as reserved right-side
   space: a wider panel pushes the dialog further left.
 - 收起 now shrinks the whole hall into a jade-and-gold 宗门令牌 (gate glyph,
-  engraved frame, red tassel). The token can be dragged anywhere in the window —
+  engraved frame, red tassel). The token scales with the panel preset/resized
+  panel: a 460×380 compact panel gives a smaller token, a 1040×760 超大 panel a
+  token almost twice the standard one. It can be dragged anywhere in the window —
   its position is remembered separately (`agent-teams-pixel.hallToken`) — and a
   click (not a drag) expands the hall again. Collapsing closes any open popover.
+- An expanded hall reserves its width in the conversation column, like the right
+  sidebar does: `html[data-agent-teams-hall-open]` plus
+  `--agent-teams-hall-shift` pads `[data-phase='active']`, so changing the panel
+  size reflows the chat content instead of covering it.
 - The floating hall is persistent by design: it keeps existing for any team in
   the session even when the team has no tasks or every task was cancelled (a
   stopped team still shows its hall), and it is there before any team exists —
   an empty hall with only the captain and a 未开宗 badge. It no longer depends on
   the right-sidebar service: closing/reclaiming the right column no longer
   replaces the hall with the legacy panel or drops it.
-- 归栏 opens a second window at the top-right of the right-side area (16px inset)
-  at the panel's own size, still resizable from its bottom-right corner (green
-  accent, not a stretched full-height column); 浮空 returns it to the floating card.
+- 归栏 now minimizes the floating hall to the token and opens the hall page in the
+  right sidebar (`sidebar.right.pane.tab`, kind `agent-teams`); clicking the token
+  brings the floating hall back and closes that sidebar page.
 - The sect hall itself is now a **window-level floating layer**: mounted from the
   shell overlay (so it survives leaving the tab), anchored bottom-right of the
   main content area, collapsible to a one-line bar (state remembered in
