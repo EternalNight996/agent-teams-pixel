@@ -156,7 +156,11 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
 
   const renderSheet = (): React.ReactNode => {
     if (sheet === undefined || sheetAnchor === undefined) return null
-    const title = sheet === 'inbox' ? t('workspace.inbox') : sheet === 'teams' ? t('workspace.switchTeam') : t('workspace.tabConfig')
+    const title = sheet === 'inbox'
+      ? t('workspace.inbox')
+      : sheet === 'teams' ? t('office.facility.teams')
+        : sheet === 'board' ? t('workspace.tabBoard')
+          : t('workspace.tabConfig')
     return createPortal((
       <aside
         className={css.sheet}
@@ -180,7 +184,7 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
                 </li>
               ))}
             </ul>
-          ) : sheet === 'config' || sheet === 'board' ? (
+          ) : sheet === 'config' ? (
             staged
               ? <StagingPlanEditor team={team} modelDirectory={modelDirectories.directoryFor(sessionId)} onContinuePlanning={() => { setSheet(undefined) }} onDiscarded={() => { setSheet(undefined) }} t={t} />
               : <TeamConfigPanel team={team} t={t} />
