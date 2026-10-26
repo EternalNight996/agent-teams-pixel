@@ -36,6 +36,11 @@
   blank column.
 
 ### Added
+- 开宗立派改为**四步向导**：道统（8 个模板卡）→ 立派之志（目标 + 字数 +
+  Ctrl/⌘+Enter 快捷进入下一步）→ 宗门（随机重抽 / 预设 / 自定道途）→ 立誓（道统、
+  宗门、首批修士、立派之志的名录预览 + 立誓说明）。步骤条可回看已完成步骤，
+  上一步/下一步按步校验（志向至少 2 字、自定道途至少 1 名修士），立誓后仍只生成
+  草案，批准才开工。洞府里的两处「开宗」入口与对话头部按钮共用同一个弹窗与事件。
 - The 宗门协作 tab is gone: the hall is the single surface. The floating panel now
   drags by its header, collapses to a compact one-line container, and carries a
   floor bar with a 传送阵 (dock to the right sidebar), a 面板配置 button (size

@@ -1,5 +1,5 @@
-/** Click-to-dispatch entry: a header button that stages a plan from a small form. */
-import { useEffect, useRef, useState } from 'react'
+/** Click-to-dispatch entry: a header button that stages a plan from a small wizard. */
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import css from './QuickStartDialog.module.css'
@@ -31,12 +31,23 @@ const TEMPLATES: readonly QuickTemplate[] = [
   { id: 'debate', labelKey: 'quickstart.tplDebate', descKey: 'quickstart.desc.debate', roles: ['researcher', 'analyst', 'reviewer'] },
 ]
 
+/** 开宗四步：道统 → 立派之志 → 宗门 → 立誓。 */
+const STEPS = ['doctrine', 'vow', 'sect', 'oath'] as const
+type Step = typeof STEPS[number]
+const STEP_LABEL: Record<Step, 'quickstart.stepDoctrine' | 'quickstart.stepVow' | 'quickstart.stepSect' | 'quickstart.stepOath'> = {
+  doctrine: 'quickstart.stepDoctrine',
+  vow: 'quickstart.stepVow',
+  sect: 'quickstart.stepSect',
+  oath: 'quickstart.stepOath',
+}
+
 function templateOf(id: string): QuickTemplate {
   return TEMPLATES.find(entry => entry.id === id) ?? TEMPLATES[0] as QuickTemplate
 }
 
 export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.session.header.actions'> & PropsLocale<'agentTeams'>) {
   const [open, setOpen] = useState(false)
+  const [step, setStep] = useState(0)
   const [goal, setGoal] = useState('')
   const [template, setTemplate] = useState<string>(TEMPLATES[0]?.id ?? 'fix')
   const [roles, setRoles] = useState<string[]>([...(TEMPLATES[0]?.roles ?? [])])
@@ -50,6 +61,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
   const [blocked, setBlocked] = useState(false)
   const [created, setCreated] = useState<string | undefined>()
   const multiRef = useRef<HTMLDivElement | null>(null)
+  const goalRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
     if (!rolesOpen) return
@@ -65,6 +77,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
   useEffect(() => {
     const openDialog = (): void => {
       setOpen(true)
+      setStep(0)
       setError('')
       setBlocked(false)
       setCreated(undefined)
@@ -80,6 +93,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
     setCreated(undefined)
     setBusy(false)
     setRolesOpen(false)
+    setStep(0)
   }
   const activeSect = sectMode === 'custom' ? undefined : sectPreset(sectMode === 'random' ? rolledSect : sectMode)
   const sectRoles = activeSect?.roles ?? roles
@@ -116,20 +130,31 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
     setRoles((current) => current.includes(trimmed) ? current : [...current, trimmed])
     setCustomRole('')
   }
+
+  const goalTrimmed = goal.trim()
+  const currentStep: Step = STEPS[step] ?? STEPS[0] as Step
+  const canAdvance = useMemo(() => {
+    if (busy) return false
+    switch (currentStep) {
+      case 'vow': return goalTrimmed.length >= 2
+      case 'sect': return sectMode !== 'custom' || sectRoles.length > 0
+      default: return true
+    }
+  }, [busy, currentStep, goalTrimmed, sectMode, sectRoles.length])
+
   const submit = async (replace: boolean): Promise<void> => {
-    const trimmed = goal.trim()
-    if (trimmed === '') { setError(t('quickstart.goalRequired')); return }
+    if (goalTrimmed === '') { setError(t('quickstart.goalRequired')); setStep(1); return }
     setBusy(true)
     setError('')
     try {
       const response = await fetch('/plugins/dsh-agent-teams/quick-start', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ sessionId, goal: trimmed, template, roles: sectMode === 'custom' ? roles : [...(activeSect?.roles ?? roles)], replace }),
+        body: JSON.stringify({ sessionId, goal: goalTrimmed, template, roles: sectMode === 'custom' ? roles : [...(activeSect?.roles ?? roles)], replace }),
       })
       const body = await response.json().catch(() => null) as { ok?: boolean; teamId?: string; error?: string } | null
       if (!response.ok || body?.ok !== true) {
-        const raw = body?.error ?? `HTTP ${response.status}`
+        const raw = body?.error ?? ('HTTP ' + response.status)
         const existing = /already lead team/i.test(raw)
         setBlocked(existing)
         throw new Error(existing ? t('quickstart.teamExists') : raw)
@@ -140,7 +165,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
       }))
       if (body.teamId !== undefined) window.dispatchEvent(new CustomEvent(TEAM_CREATED_EVENT, { detail: { teamId: body.teamId } }))
       setGoal('')
-      window.setTimeout(() => { setOpen(false); reset() }, 1400)
+      window.setTimeout(() => { setOpen(false); reset() }, 1800)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
@@ -148,9 +173,23 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
     }
   }
 
+  const goTo = (next: number): void => {
+    if (busy) return
+    setError('')
+    setStep(Math.max(0, Math.min(STEPS.length - 1, next)))
+  }
+  const next = (): void => {
+    if (step === STEPS.length - 1) { void submit(false); return }
+    if (!canAdvance) return
+    goTo(step + 1)
+  }
+  const doctrineName = t(templateOf(template).labelKey)
+  const sectName = activeSect === undefined ? t('quickstart.sectCustom') : t(activeSect.nameKey)
+  const roster = sectMode === 'custom' ? roles : [...sectRoles]
+
   return (
     <>
-      <button type="button" className={css.entry} data-quick-start-entry title={t('quickstart.entryTitle')} onClick={() => { setOpen(true); setError(''); setBlocked(false); setCreated(undefined) }}>
+      <button type="button" className={css.entry} data-quick-start-entry title={t('quickstart.entryTitle')} onClick={() => { setOpen(true); setStep(0); setError(''); setBlocked(false); setCreated(undefined) }}>
         <span aria-hidden>⛩</span>{t('quickstart.entry')}
       </button>
       <Modal
@@ -161,112 +200,192 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
         footer={(
           <span className={css.actions}>
             <button type="button" disabled={busy} onClick={() => { setOpen(false); reset() }}>{t('quickstart.cancel')}</button>
-            <button type="button" disabled={busy} data-primary onClick={() => { void submit(false) }}>
-              {busy ? t('quickstart.busy') : t('quickstart.submit')}
-            </button>
+            {step > 0 && (
+              <button type="button" data-control="quickstart-back" disabled={busy} onClick={() => { goTo(step - 1) }}>{t('quickstart.back')}</button>
+            )}
+            {step < STEPS.length - 1 ? (
+              <button type="button" data-primary data-control="quickstart-next" disabled={!canAdvance} onClick={next}>
+                {t('quickstart.next')}
+              </button>
+            ) : (
+              <button type="button" data-primary data-control="quickstart-submit" disabled={busy || !canAdvance} onClick={() => { void submit(false) }}>
+                {busy ? t('quickstart.busy') : t('quickstart.found')}
+              </button>
+            )}
           </span>
         )}
       >
         <div className={css.form}>
-          <p className={css.hint}>{t('quickstart.desc')}</p>
-          <label className={css.field}>
-            <span>{t('quickstart.template')}</span>
-            <select value={template} disabled={busy} onChange={(event) => { chooseTemplate(event.target.value) }}>
-              {TEMPLATES.map(entry => <option key={entry.id} value={entry.id}>{t(entry.labelKey)}</option>)}
-            </select>
-            <small className={css.templateDesc}>{t(templateOf(template).descKey as Parameters<typeof t>[0])}</small>
-          </label>          <label className={css.field}>
-            <span>{t('quickstart.goal')}</span>
-            <textarea
-              value={goal}
-              rows={3}
-              autoFocus
-              disabled={busy}
-              placeholder={t('quickstart.goalPlaceholder')}
-              onChange={(event) => { setGoal(event.target.value) }}
-            />
-          </label>
-          <div className={css.field}>
-            <span>{t('quickstart.sect')}</span>
-            <div className={css.sectRow}>
-              <button type="button" className={css.sectChip} data-active={sectMode === 'random' || undefined} disabled={busy} onClick={rollSect}>
-                <span aria-hidden>🎲</span>{t('quickstart.sectRandom')}
-              </button>
-              {SECT_PRESETS.map(preset => (
-                <button
-                  key={preset.id}
-                  type="button"
-                  className={css.sectChip}
-                  data-active={sectMode === preset.id || undefined}
+          <ol className={css.steps} aria-label={t('quickstart.title')}>
+            {STEPS.map((entry, index) => {
+              const state = index === step ? 'current' : index < step ? 'done' : 'todo'
+              return (
+                <li key={entry} className={css.stepItem} data-state={state}>
+                  <button
+                    type="button"
+                    className={css.stepButton}
+                    data-control={'quickstart-step-' + index}
+                    aria-current={state === 'current' ? 'step' : undefined}
+                    disabled={busy || index > step}
+                    onClick={() => { goTo(index) }}
+                  >
+                    <span className={css.stepDot}>{index < step ? '✓' : index + 1}</span>
+                    <span className={css.stepLabel}>{t(STEP_LABEL[entry])}</span>
+                  </button>
+                </li>
+              )
+            })}
+          </ol>
+
+          {currentStep === 'doctrine' && (
+            <section className={css.stepPane} data-step="doctrine">
+              <p className={css.hint}>{t('quickstart.doctrineHint')}</p>
+              <div className={css.templates} role="radiogroup" aria-label={t('quickstart.template')}>
+                {TEMPLATES.map(entry => (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={template === entry.id}
+                    className={css.templateCard}
+                    data-control={'quickstart-template-' + entry.id}
+                    disabled={busy}
+                    onClick={() => { chooseTemplate(entry.id) }}
+                  >
+                    <span className={css.templateName}>{t(entry.labelKey)}</span>
+                    <span className={css.templateDesc}>{t(entry.descKey as Parameters<typeof t>[0])}</span>
+                    <span className={css.templateMeta}>{entry.roles.length} {t('quickstart.roleCount')}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {currentStep === 'vow' && (
+            <section className={css.stepPane} data-step="vow">
+              <p className={css.hint}>{t('quickstart.vowHint')}</p>
+              <label className={css.field}>
+                <span>{t('quickstart.goal')}</span>
+                <textarea
+                  ref={goalRef}
+                  value={goal}
+                  rows={5}
+                  autoFocus
                   disabled={busy}
-                  onClick={() => { chooseSect(preset.id) }}
-                >
-                  {t(preset.nameKey)}
-                </button>
-              ))}
-              <button type="button" className={css.sectChip} data-active={sectMode === 'custom' || undefined} disabled={busy} onClick={chooseCustom}>
-                {t('quickstart.sectCustom')}
-              </button>
-            </div>
-            <small className={css.templateDesc}>
-              {sectMode === 'custom'
-                ? t('quickstart.sectCustomHint')
-                : sectMode === 'random'
-                  ? t('quickstart.sectRolled', { sect: activeSect === undefined ? '' : t(activeSect.nameKey) })
-                  : activeSect === undefined ? '' : t(activeSect.descKey)}
-            </small>
-            {sectMode !== 'custom' && (
-              <span className={css.sectRoster}>
-                {sectRoles.map(role => <span key={role} className={css.chip}>{roleName(role)}</span>)}
-              </span>
-            )}
-          </div>
-          {sectMode === 'custom' && (
-          <div className={css.field}>
-            <span>{t('quickstart.roles')}</span>
-            <div className={css.multi} ref={multiRef}>
-              <button
-                type="button"
-                className={css.multiTrigger}
-                data-control="quickstart-roles"
-                aria-expanded={rolesOpen}
-                aria-haspopup="listbox"
-                disabled={busy}
-                onClick={() => { setRolesOpen((current) => !current) }}
-              >
-                <span className={css.chips}>
-                  {roles.length === 0
-                    ? <span className={css.placeholder}>{t('quickstart.rolesEmpty')}</span>
-                    : roles.map(role => <span key={role} className={css.chip}>{roleName(role)}</span>)}
-                </span>
-                <span className={css.caret} aria-hidden>▾</span>
-              </button>
-              {rolesOpen && (
-                <div className={css.multiPanel} role="listbox" aria-multiselectable="true" aria-label={t('quickstart.roles')}>
-                  {ROLE_META.map(meta => (
-                    <label key={meta.id} className={css.option}>
-                      <input type="checkbox" checked={roles.includes(meta.id)} onChange={() => { toggleRole(meta.id) }} />
-                      <span className={css.optionName}>{t(meta.nameKey)}</span>
-                      <span className={css.optionId}>{meta.id}</span>
-                      <span className={css.optionAbility}>{t(meta.abilityKey)}</span>
-                    </label>
+                  placeholder={t('quickstart.goalPlaceholder')}
+                  onChange={(event) => { setGoal(event.target.value) }}
+                  onKeyDown={(event) => {
+                    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') { event.preventDefault(); next() }
+                  }}
+                />
+              </label>
+              <p className={css.goalMeta}>
+                <span>{t('quickstart.goalLength', { count: goalTrimmed.length })}</span>
+                <span>{t('quickstart.goalShortcut')}</span>
+              </p>
+            </section>
+          )}
+
+          {currentStep === 'sect' && (
+            <section className={css.stepPane} data-step="sect">
+              <p className={css.hint}>{t('quickstart.sectHint')}</p>
+              <div className={css.field}>
+                <span>{t('quickstart.sect')}</span>
+                <div className={css.sectRow}>
+                  <button type="button" className={css.sectChip} data-active={sectMode === 'random' || undefined} disabled={busy} onClick={rollSect}>
+                    <span aria-hidden>🎲</span>{t('quickstart.sectRandom')}
+                  </button>
+                  {SECT_PRESETS.map(preset => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      className={css.sectChip}
+                      data-active={sectMode === preset.id || undefined}
+                      disabled={busy}
+                      onClick={() => { chooseSect(preset.id) }}
+                    >
+                      {t(preset.nameKey)}
+                    </button>
                   ))}
-                  <div className={css.customRow}>
-                    <input
-                      value={customRole}
-                      placeholder={t('quickstart.customRole')}
-                      onChange={(event) => { setCustomRole(event.target.value) }}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') { event.preventDefault(); addCustomRole() }
-                      }}
-                    />
-                    <button type="button" disabled={customRole.trim() === ''} onClick={addCustomRole}>{t('quickstart.addRole')}</button>
+                  <button type="button" className={css.sectChip} data-active={sectMode === 'custom' || undefined} disabled={busy} onClick={chooseCustom}>
+                    {t('quickstart.sectCustom')}
+                  </button>
+                </div>
+                <small className={css.templateDesc}>
+                  {sectMode === 'custom'
+                    ? t('quickstart.sectCustomHint')
+                    : sectMode === 'random'
+                      ? t('quickstart.sectRolled', { sect: activeSect === undefined ? '' : t(activeSect.nameKey) })
+                      : activeSect === undefined ? '' : t(activeSect.descKey)}
+                </small>
+                {sectMode !== 'custom' && (
+                  <span className={css.sectRoster}>
+                    {sectRoles.map(role => <span key={role} className={css.chip}>{roleName(role)}</span>)}
+                  </span>
+                )}
+              </div>
+              {sectMode === 'custom' && (
+                <div className={css.field}>
+                  <span>{t('quickstart.roles')}</span>
+                  <div className={css.multi} ref={multiRef}>
+                    <button
+                      type="button"
+                      className={css.multiTrigger}
+                      data-control="quickstart-roles"
+                      aria-expanded={rolesOpen}
+                      aria-haspopup="listbox"
+                      disabled={busy}
+                      onClick={() => { setRolesOpen((current) => !current) }}
+                    >
+                      <span className={css.chips}>
+                        {roles.length === 0
+                          ? <span className={css.placeholder}>{t('quickstart.rolesEmpty')}</span>
+                          : roles.map(role => <span key={role} className={css.chip}>{roleName(role)}</span>)}
+                      </span>
+                      <span className={css.caret} aria-hidden>▾</span>
+                    </button>
+                    {rolesOpen && (
+                      <div className={css.multiPanel} role="listbox" aria-multiselectable="true" aria-label={t('quickstart.roles')}>
+                        {ROLE_META.map(meta => (
+                          <label key={meta.id} className={css.option}>
+                            <input type="checkbox" checked={roles.includes(meta.id)} onChange={() => { toggleRole(meta.id) }} />
+                            <span className={css.optionName}>{t(meta.nameKey)}</span>
+                            <span className={css.optionId}>{meta.id}</span>
+                            <span className={css.optionAbility}>{t(meta.abilityKey)}</span>
+                          </label>
+                        ))}
+                        <div className={css.customRow}>
+                          <input
+                            value={customRole}
+                            placeholder={t('quickstart.customRole')}
+                            onChange={(event) => { setCustomRole(event.target.value) }}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter') { event.preventDefault(); addCustomRole() }
+                            }}
+                          />
+                          <button type="button" disabled={customRole.trim() === ''} onClick={addCustomRole}>{t('quickstart.addRole')}</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
-            </div>
-          </div>
+            </section>
           )}
+
+          {currentStep === 'oath' && (
+            <section className={css.stepPane} data-step="oath">
+              <p className={css.hint}>{t('quickstart.oathHint')}</p>
+              <dl className={css.summary}>
+                <div className={css.summaryRow}><dt>{t('quickstart.summaryDoctrine')}</dt><dd>{doctrineName}</dd></div>
+                <div className={css.summaryRow}><dt>{t('quickstart.summarySect')}</dt><dd>{sectName}</dd></div>
+                <div className={css.summaryRow}><dt>{t('quickstart.summaryRoster')}</dt><dd>{roster.map(role => roleName(role)).join(' · ')}</dd></div>
+                <div className={css.summaryRow}><dt>{t('quickstart.summaryVow')}</dt><dd>{goalTrimmed}</dd></div>
+              </dl>
+              <p className={css.oath}>{t('quickstart.oathNotice')}</p>
+            </section>
+          )}
+
           {error !== '' && <p className={css.error} role="alert">{error}</p>}
           {blocked && (
             <p className={css.replaceRow}>
