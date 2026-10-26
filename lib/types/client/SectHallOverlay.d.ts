@@ -5,7 +5,8 @@ import type { AgentTeamsTranslate } from './locales.ts';
 /** 常驻洞府浮层里的墙面设施被点击时广播的事件（供监视器等复用）。 */
 export declare const OPEN_HALL_SHEET_EVENT = "agent-teams:open-sheet";
 export declare function SectHallOverlay({ team, t, sessionId, modelDirectories, openMember }: {
-    readonly team: ActivityTeam;
+    /** 无队伍时缺省：浮层仍常驻，渲染一座只有掌门的空洞府。 */
+    readonly team?: ActivityTeam;
     readonly t: AgentTeamsTranslate;
     readonly sessionId: SessionId;
     readonly modelDirectories: ModelDirectoryResolver;

@@ -69,7 +69,8 @@ const PANEL_SIZES = {
 } as const
 
 export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMember }: {
-  readonly team: ActivityTeam
+  /** 无队伍时缺省：浮层仍常驻，渲染一座只有掌门的空洞府。 */
+  readonly team?: ActivityTeam
   readonly t: AgentTeamsTranslate
   readonly sessionId: SessionId
   readonly modelDirectories: ModelDirectoryResolver
@@ -89,9 +90,22 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
   const latestRect = useRef(rect)
   latestRect.current = rect
 
-  const done = team.tasks.filter(task => task.status === 'completed').length
-  const total = team.tasks.length
-  const staged = team.phase === 'staged'
+  // 洞府常驻：即使当前会话还没有队伍，也保留浮层（空洞府里只有掌门）。
+  const hasTeam = team !== undefined
+  const hall: ActivityTeam = team ?? {
+    workspace: '',
+    teamId: '',
+    name: t('office.hallEmptyName'),
+    captainSessionId: '',
+    phase: 'running',
+    members: [],
+    tasks: [],
+    messageCount: 0,
+    captainInbox: [],
+  }
+  const done = hall.tasks.filter(task => task.status === 'completed').length
+  const total = hall.tasks.length
+  const staged = hall.phase === 'staged'
 
   // 墙面设施/剑盒/名册 → 面板上方的内容气泡。
   useEffect(() => {
@@ -200,6 +214,8 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
 
   const renderSheet = (): React.ReactNode => {
     if (sheet === undefined || sheetAnchor === undefined) return null
+    // 尚未开宗时只有面板配置可用；队伍内容要等快照到达后再渲染。
+    if (!hasTeam && sheet !== 'settings') return null
     const title = sheet === 'settings' ? t('office.panelConfig')
       : sheet === 'inbox' ? t('workspace.inbox')
         : sheet === 'teams' ? t('office.facility.teams')
@@ -240,7 +256,7 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
             </div>
           ) : sheet === 'inbox' ? (
             <ul className={css.inboxList}>
-              {team.captainInbox.map((message, index) => (
+              {hall.captainInbox.map((message, index) => (
                 <li key={`${index}:${message.from}`} className={css.inboxRow}>
                   <span className={css.inboxFrom}>{message.from}</span>
                   <span className={css.inboxText}>{message.content}</span>
@@ -249,11 +265,11 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
             </ul>
           ) : sheet === 'config' ? (
             staged
-              ? <StagingPlanEditor team={team} modelDirectory={modelDirectories.directoryFor(sessionId)} onContinuePlanning={() => { setSheet(undefined) }} onDiscarded={() => { setSheet(undefined) }} t={t} />
-              : <TeamConfigPanel team={team} t={t} />
+              ? <StagingPlanEditor team={hall} modelDirectory={modelDirectories.directoryFor(sessionId)} onContinuePlanning={() => { setSheet(undefined) }} onDiscarded={() => { setSheet(undefined) }} t={t} />
+              : <TeamConfigPanel team={hall} t={t} />
           ) : (
             <TeamSection
-              team={team}
+              team={hall}
               t={t}
               workspace
               onNavigate={(_parent, child) => { openMember(sessionId, child) }}
@@ -276,12 +292,12 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
           data-collapsed={collapsed || undefined}
           data-docked={docked || undefined}
           style={panelStyle}
-          aria-label={t('office.sceneAria', { name: team.name })}
+          aria-label={t('office.sceneAria', { name: hall.name })}
         >
           <header className={css.head} onPointerDown={beginDrag}>
             <span className={css.caret} aria-hidden>{collapsed ? '▸' : '▾'}</span>
-            <span className={css.title}>⛩ {team.name}</span>
-            <span className={css.meta}>{done}/{total}</span>
+            <span className={css.title}>⛩ {hall.name}</span>
+            <span className={css.meta}>{hasTeam ? `${done}/${total}` : t('office.hallNoTeam')}</span>
             <button type="button" className={css.headButton} data-control="hall-collapse" aria-expanded={!collapsed} onClick={toggleCollapsed}>
               {collapsed ? t('office.expand') : t('office.collapse')}
             </button>
@@ -290,8 +306,9 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
             <>
               <div className={css.canvas}>
                 <PixelOffice
-                  team={team}
+                  team={hall}
                   t={t}
+                  enabledActions={hasTeam ? undefined : []}
                   activeAction={sheet === 'settings' ? null : sheet ?? null}
                   onAction={(action) => { toggleSheet(action) }}
                   onOpenMember={(memberId) => { openMember(sessionId, memberId as SessionId) }}
@@ -313,9 +330,11 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
                 <button type="button" className={css.floorButton} data-control="hall-settings" data-active={sheet === 'settings' || undefined} onClick={() => { toggleSheet('settings') }}>
                   <span aria-hidden>⚙</span>{t('office.panelConfig')}
                 </button>
-                <button type="button" className={css.floorButton} data-control="hall-roster" data-active={sheet === 'teams' || undefined} onClick={() => { toggleSheet('teams') }}>
-                  <span aria-hidden>☰</span>{t('office.roster')}
-                </button>
+                {hasTeam && (
+                  <button type="button" className={css.floorButton} data-control="hall-roster" data-active={sheet === 'teams' || undefined} onClick={() => { toggleSheet('teams') }}>
+                    <span aria-hidden>☰</span>{t('office.roster')}
+                  </button>
+                )}
               </footer>
             </>
           )}

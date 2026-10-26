@@ -242,6 +242,8 @@ export declare const zh: {
     'office.showBoard': string;
     'office.noConversation': string;
     'office.showOffice': string;
+    'office.hallEmptyName': string;
+    'office.hallNoTeam': string;
     'office.collapse': string;
     'office.expand': string;
     'office.resize': string;
@@ -661,6 +663,8 @@ export declare const en: {
     'office.showBoard': string;
     'office.noConversation': string;
     'office.showOffice': string;
+    'office.hallEmptyName': string;
+    'office.hallNoTeam': string;
     'office.collapse': string;
     'office.expand': string;
     'office.resize': string;

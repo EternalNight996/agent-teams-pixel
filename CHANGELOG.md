@@ -49,7 +49,8 @@
   space: a wider panel pushes the dialog further left.
 - The floating hall is persistent by design: it keeps existing for any team in
   the session even when the team has no tasks or every task was cancelled (a
-  stopped team still shows its hall).
+  stopped team still shows its hall), and it is there before any team exists —
+  an empty hall with only the captain and a 未开宗 badge.
 - 归栏 opens a second window at the top-right of the right-side area (16px inset)
   at the panel's own size, still resizable from its bottom-right corner (green
   accent, not a stretched full-height column); 浮空 returns it to the floating card.
