@@ -265,6 +265,14 @@ export declare const zh: {
     'office.historyTeams': string;
     'office.historyCurrent': string;
     'office.viewingState': string;
+    'office.levelUp': string;
+    'skill.none': string;
+    'skill.aura': string;
+    'skill.weapon': string;
+    'skill.sword': string;
+    'skill.shield': string;
+    'skill.beast': string;
+    'skill.treasure': string;
     'office.viewingCaptain': string;
     'office.viewingMember': string;
     'office.viewingHint': string;
@@ -434,6 +442,8 @@ export declare const zh: {
     'realm.golden': string;
     'realm.nascent': string;
     'realm.spirit': string;
+    'realm.void': string;
+    'realm.mahayana': string;
     'config.realm': string;
     'office.realm': string;
     'config.phaseStaged': string;
@@ -729,6 +739,14 @@ export declare const en: {
     'office.historyTeams': string;
     'office.historyCurrent': string;
     'office.viewingState': string;
+    'office.levelUp': string;
+    'skill.none': string;
+    'skill.aura': string;
+    'skill.weapon': string;
+    'skill.sword': string;
+    'skill.shield': string;
+    'skill.beast': string;
+    'skill.treasure': string;
     'office.viewingCaptain': string;
     'office.viewingMember': string;
     'office.viewingHint': string;
@@ -898,6 +916,8 @@ export declare const en: {
     'realm.golden': string;
     'realm.nascent': string;
     'realm.spirit': string;
+    'realm.void': string;
+    'realm.mahayana': string;
     'config.realm': string;
     'office.realm': string;
     'config.phaseStaged': string;

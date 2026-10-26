@@ -62,7 +62,8 @@ import {
   type ActivityTeam,
 } from './activity-monitor.ts'
 import { ACTION_ART, LEAD_ART, memberArtUrl } from './artwork.ts'
-import { cultivationOf } from './cultivation.ts'
+import { captainKey, cultivationFromXp, memberKey } from './cultivation.ts'
+import { useCultivationVersion, xpOf } from './cultivation-store.ts'
 import { OPEN_PANEL_EVENT } from './AgentTeamsCard.tsx'
 import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import type { AgentTeamsCardData } from './agent-teams-card-definition.ts'
@@ -557,7 +558,8 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
   const stopped = !historic && team.halted === true
   const busyCount = team.members.filter((member) => member.activity === 'working').length
   const captainViewing = viewingSessionId !== undefined && viewingSessionId === team.captainSessionId
-  const captainCultivation = cultivationOf(team.tasks.filter(task => task.status === 'completed').length, team.tasks.length, team.createdAt)
+  useCultivationVersion()
+  const captainCultivation = cultivationFromXp(xpOf(captainKey(team.name)))
   const assignedCount = team.tasks.filter((task) => task.assignee !== '' && task.assignee !== CAPTAIN_ASSIGNEE).length
   const captainOwned = team.tasks.filter((task) => task.assignee === CAPTAIN_ASSIGNEE
     && task.status !== 'completed' && task.status !== 'failed' && task.status !== 'cancelled')
@@ -699,7 +701,10 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
             <span className={css.captainLine}>
               <span className={css.captainName}>{t('captain.name')}</span>
               <span className={css.captainRole}>{t('captain.role')}</span>
-              <span className={css.memberLevel} title={`${captainCultivation.xp} / ${captainCultivation.next} XP`}>
+              <span
+                className={css.memberLevel}
+                title={`${captainCultivation.xp} / ${captainCultivation.next} XP · ${captainCultivation.skills.length === 0 ? t('skill.none') : captainCultivation.skills.map(key => t(key)).join(' / ')}`}
+              >
                 Lv.{captainCultivation.level} {t(captainCultivation.rankKey)}
               </span>
               {captainViewing && <span className={css.viewingBadge}>{t('office.viewingState')}</span>}
@@ -769,7 +774,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                     ? Math.round((progressDone / progressTotal) * 100)
                     : Math.max(0, Math.min(100, member.progress ?? 0))
                   const viewing = viewingSessionId !== undefined && member.id === viewingSessionId
-                  const cultivation = cultivationOf(member.done, member.total, team.createdAt)
+                  const cultivation = cultivationFromXp(xpOf(memberKey(member.name)))
                   const progressState = progressTotal > 0 && progressDone >= progressTotal
                     ? 'completed'
                     : owned.some((task) => task.state === 'failed') ? 'failed' : undefined
@@ -803,7 +808,10 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                     <span className={css.memberLine}>
                       <span className={css.memberName}>{member.name}</span>
                       {member.role !== '' && <span className={css.memberRole}>{roleLabel(member.role, member.name, t)}</span>}
-                      <span className={css.memberLevel} title={`${cultivation.xp} / ${cultivation.next} XP`}>
+                      <span
+                        className={css.memberLevel}
+                        title={`${cultivation.xp} / ${cultivation.next} XP · ${cultivation.skills.length === 0 ? t('skill.none') : cultivation.skills.map(key => t(key)).join(' / ')}`}
+                      >
                         Lv.{cultivation.level} {t(cultivation.rankKey)}
                       </span>
                       {/* Inline member model badge: compact visible label, full route in

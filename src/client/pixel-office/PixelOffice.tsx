@@ -1,9 +1,9 @@
 /** Pixel-office view of one AgentTeams snapshot, driven by the shared activity model. */
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { ActivityTeam } from '../activity-monitor.ts'
-import { cultivationOf } from '../cultivation.ts'
+import { captainKey, cultivationFromXp, memberKey } from '../cultivation.ts'
+import { useCultivationVersion, xpOf } from '../cultivation-store.ts'
 import type { AgentTeamsLocaleKey, AgentTeamsTranslate } from '../locales.ts'
-import { realmKey } from '../realm.ts'
 import { roleLabel } from '../role-labels.ts'
 import { createPixelScene, type SceneFacility, type SceneMember, type SceneModel } from './PixelOfficeScene.ts'
 import { FACILITY_ORDER, type SceneAction, type SceneHit } from './office-actions.ts'
@@ -98,6 +98,7 @@ export function PixelOffice({
   const hostRef = useRef<HTMLDivElement | null>(null)
   const sceneRef = useRef<ReturnType<typeof createPixelScene> | null>(null)
   const clickTimer = useRef<number | undefined>(undefined)
+  const cultivationVersion = useCultivationVersion()
   const [hover, setHover] = useState<Hover | undefined>()
   const actions = enabledActions ?? ALL_ACTIONS
   // 没有队伍时，山门就是开宗入口：墙上的标签/提示与底部「开宗」保持一致。
@@ -117,7 +118,7 @@ export function PixelOffice({
   const model = useMemo<SceneModel>(() => {
     // 全部任务了结后掌门不再显示“修炼中”，与进度页的“已完成”保持一致。
     const allCompleted = team.tasks.length > 0 && team.tasks.every(task => task.status === 'completed')
-    const captainCultivation = cultivationOf(team.tasks.filter(task => task.status === 'completed').length, team.tasks.length, team.createdAt)
+    const captainCultivation = cultivationFromXp(xpOf(captainKey(team.name)))
     const captainActive = team.phase === 'running' && team.halted !== true && !allCompleted
       && team.tasks.some(task => task.status === 'pending' || task.status === 'claimed' || task.status === 'in_progress')
     const captain: SceneMember = {
@@ -130,10 +131,11 @@ export function PixelOffice({
       viewing: viewingSessionId !== undefined && viewingSessionId === team.captainSessionId,
       level: captainCultivation.level,
       realm: t(captainCultivation.rankKey),
-      xpRatio: Math.min(1, Math.max(0, (captainCultivation.xp - captainCultivation.floor) / Math.max(1, captainCultivation.next - captainCultivation.floor))),
+      xp: captainCultivation.xp,
+      xpRatio: captainCultivation.ratio,
     }
     const members: SceneMember[] = [captain, ...live.map((member): SceneMember => {
-      const cultivation = cultivationOf(member.done, member.total, team.createdAt)
+      const cultivation = cultivationFromXp(xpOf(memberKey(member.name)))
       return {
         id: member.id,
         name: member.name,
@@ -148,7 +150,8 @@ export function PixelOffice({
         viewing: viewingSessionId !== undefined && viewingSessionId === member.id,
         level: cultivation.level,
         realm: t(cultivation.rankKey),
-        xpRatio: Math.min(1, Math.max(0, (cultivation.xp - cultivation.floor) / Math.max(1, cultivation.next - cultivation.floor))),
+        xp: cultivation.xp,
+        xpRatio: cultivation.ratio,
       }
     })]
     const facilities: SceneFacility[] = onAction === undefined
@@ -186,6 +189,7 @@ export function PixelOffice({
         idle: t('office.idle'),
         unknownState: t('office.unknown'),
         viewing: t('office.viewingState'),
+        levelUp: t('office.levelUp'),
       },
       // 墙面功德碑：把「宗门气运」的关键数字搬进洞府，点碑看完整进度。
       wall: {
@@ -197,7 +201,7 @@ export function PixelOffice({
         failedCount: failed,
       },
     }
-  }, [actions, activeAction, done, failed, live, onAction, onDock, onSettings, running, settingsOpen, t, team, teamless, waiting])
+  }, [actions, activeAction, cultivationVersion, done, failed, live, onAction, onDock, onSettings, running, settingsOpen, t, team, teamless, waiting])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -266,7 +270,9 @@ export function PixelOffice({
       name: member.name,
       role: member.role,
       activity: member.activity,
-      realm: t(realmKey(member.progress ?? 0)),
+      realm: member.isLeader === true
+        ? `Lv.${cultivationFromXp(xpOf(captainKey(team.name))).level} ${t(cultivationFromXp(xpOf(captainKey(team.name))).rankKey)}`
+        : `Lv.${cultivationFromXp(xpOf(memberKey(member.name))).level} ${t(cultivationFromXp(xpOf(memberKey(member.name))).rankKey)}`,
       task: member.currentTask ?? '',
       x,
       y,

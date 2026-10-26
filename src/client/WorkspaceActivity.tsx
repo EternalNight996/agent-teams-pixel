@@ -16,6 +16,7 @@ import { currentSessionId } from './session-navigation.ts'
 import { TEAM_CREATED_EVENT, shouldRevealTeam } from './team-reveal.ts'
 import { getActivityMonitorTargetsSnapshot, getActivitySnapshotsSnapshot, startActivityPolling, subscribeActivityMonitorTargets, subscribeActivitySnapshots, updateActivitySnapshots } from './activity-monitor.ts'
 import { createTeamDiscovery, type WorkspaceActivityState } from './workspace-state.ts'
+import { ingestCultivation } from './cultivation-store.ts'
 import { LEAD_ART } from './artwork.ts'
 import css from './WorkspaceActivity.module.css'
 
@@ -87,6 +88,10 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, openCap
   const wanted = current === undefined ? undefined : local.selected.get(current)
   // 修士子会话里没有自己的队伍：按成员会话 id 反查它所属的主队伍，
   // 这样点进子进程也能继续看到主任务的进度，而不是一座空洞府。
+  // 全局修为结算：任务完成 + 当前对话角色挂机，跨宗门持久化。
+  useEffect(() => {
+    ingestCultivation(snapshots.teams, current)
+  }, [snapshots, current])
   const linkedTeam = current === undefined
     ? undefined
     : [...snapshots.teams, ...snapshots.archivedTeams].find(team => team.members.some(member => member.id === current))

@@ -31,6 +31,8 @@ export interface SceneMember {
     readonly realm?: string;
     /** Progress toward the next cultivation level (0..1). */
     readonly xpRatio?: number;
+    /** Absolute global cultivation XP (drives +N popups). */
+    readonly xp?: number;
 }
 /** Copy the scene needs but must not translate itself. */
 export interface SceneLabels {
@@ -44,6 +46,8 @@ export interface SceneLabels {
     readonly unknownState?: string;
     /** 当前打开对话时名牌上的状态词（如：对话中）。 */
     readonly viewing?: string;
+    /** 升级横幅文案（如：升级！）。 */
+    readonly levelUp?: string;
 }
 /** 墙面数据碑：宗门气运的关键数字，标签由调用方本地化。 */
 export interface SceneWall {

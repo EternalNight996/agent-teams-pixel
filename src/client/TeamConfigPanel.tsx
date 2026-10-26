@@ -1,7 +1,8 @@
 /** Read-only configuration view: roster, routing and task contracts. */
 import type { AgentTeamsTranslate } from './locales.ts'
 import type { ActivityTeam } from './activity-monitor.ts'
-import { realmKey } from './realm.ts'
+import { cultivationFromXp, memberKey } from './cultivation.ts'
+import { useCultivationVersion, xpOf } from './cultivation-store.ts'
 import { roleLabel } from './role-labels.ts'
 import css from './TeamConfigPanel.module.css'
 
@@ -42,6 +43,7 @@ function kindLabel(kind: string | undefined, t: AgentTeamsTranslate): string {
 }
 
 export function TeamConfigPanel({ team, t }: { team: ActivityTeam; t: AgentTeamsTranslate }) {
+  useCultivationVersion()
   const completed = team.tasks.filter(task => task.status === 'completed').length
   // 进度页已显示“已完成”时，道统页的阶段也必须一致，不能还写“进行中”。
   const allCompleted = team.tasks.length > 0 && completed === team.tasks.length
@@ -69,15 +71,18 @@ export function TeamConfigPanel({ team, t }: { team: ActivityTeam; t: AgentTeams
         <table className={css.table}>
           <thead><tr><th>{t('config.name')}</th><th>{t('config.role')}</th><th>{t('config.realm')}</th><th>{t('config.model')}</th><th>{t('config.effort')}</th></tr></thead>
           <tbody>
-            {team.members.map(member => (
-              <tr key={member.id}>
-                <td>{member.name}</td>
-                <td>{roleLabel(member.role, member.name, t)}</td>
-                <td>{t(realmKey(member.progress ?? 0))}</td>
-                <td className={css.mono}>{memberRoute(member)}</td>
-                <td>{member.reasoningEffort ?? '—'}</td>
-              </tr>
-            ))}
+            {team.members.map(member => {
+              const cultivation = cultivationFromXp(xpOf(memberKey(member.name)))
+              return (
+                <tr key={member.id}>
+                  <td>{member.name}</td>
+                  <td>{roleLabel(member.role, member.name, t)}</td>
+                  <td>{`Lv.${cultivation.level} ${t(cultivation.rankKey)}`}</td>
+                  <td className={css.mono}>{memberRoute(member)}</td>
+                  <td>{member.reasoningEffort ?? '—'}</td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

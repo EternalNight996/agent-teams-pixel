@@ -3,6 +3,17 @@
 ## [Unreleased]
 
 ### Changed
+- Cultivation is now global and persistent: XP is stored per member name and per
+  sect captain in localStorage, so 魔修's level follows them across sects/sessions
+  while different sect captains keep separate levels.
+- XP sources: completing a task gives 60 (historical completions settle once),
+  the captain earns 40 per completed sect task, and idling gives 0.25/min — but
+  only for the character whose conversation is currently open.
+- Full progression added: 20 levels, seven realms (炼气→筑基→金丹→元婴→化神→炼虚→
+  大乘), and unlock milestones at Lv.2 灵光护体, Lv.3 本命法器, Lv.5 御剑术,
+  Lv.7 护体灵盾, Lv.8 驭兽术, Lv.10 灵宝 (shown in the level-chip tooltip).
+- Gaining XP pops a green "+N" above the head; levelling up adds a golden ring,
+  sparks and an "升级！Lv.N" banner.
 - The overhead level badge is now a light-green chip with a small XP bar toward
   the next level, instead of the old dark pill.
 - Completed/idle cultivators keep their cultivation state (wandering, sword or
