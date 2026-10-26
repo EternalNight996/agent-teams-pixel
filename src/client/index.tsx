@@ -19,7 +19,7 @@ import type { UsePanelInfo } from '@deepseek-ai/dsh-client-ui-layout/client'
 // provider/model/effort metadata without mutating the captain's own selection.
 import type {} from '@deepseek-ai/dsh-client-ui-model-selection/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
-import { ActivitySurface, WorkspaceActivity, createWorkspaceBridge, TEAM_TAB_ID, TEAM_TAB_KIND } from './WorkspaceActivity.tsx'
+import { ActivitySurface, createWorkspaceBridge } from './WorkspaceActivity.tsx'
 import { TeamChatEntry, TeamTurnCard } from './TeamChatEntry.tsx'
 import { TeamQuickStart } from './QuickStartDialog.tsx'
 import { createWorkspaceState } from './workspace-state.ts'
@@ -86,12 +86,7 @@ export function apply(ctx: ClientContext): void {
   }
   // Optional service scope keeps legacy hosts working and removes every native
   // contribution when the host provider disappears (including HMR).
-  ctx.inject(['sidebarRight', 'sidebarRightTabs'], (native) => {
-    const t = native.locale.bind(AGENT_TEAMS_LOCALE_NAMESPACE)
-    native.effect(() => native.sidebarRightTabs.register({
-      id: TEAM_TAB_ID, kind: TEAM_TAB_KIND,
-      title: () => t('workspace.title'),
-    }))
+  ctx.inject(['sidebarRight'], (native) => {
     native.slots.inject('conversation.session.header.actions', () => native.slots.register({
       name: 'conversation.session.header.actions', id: 'agent-teams-create', order: 49,
       locale: AGENT_TEAMS_LOCALE_NAMESPACE,
@@ -105,15 +100,8 @@ export function apply(ctx: ClientContext): void {
       locale: AGENT_TEAMS_LOCALE_NAMESPACE,
       inject: () => ({ openMember }),
     }, TeamTurnCard))
-    native.slots.inject('sidebar.right.pane.tab', () => {
-      const dispose = native.slots.register({
-        name: 'sidebar.right.pane.tab', key: TEAM_TAB_ID,
-        locale: AGENT_TEAMS_LOCALE_NAMESPACE,
-        inject: () => ({ state, modelDirectories: native.modelDirectories, openMember }),
-      }, WorkspaceActivity)
-      bridge.set(native.sidebarRight)
-      return () => { bridge.set(undefined); dispose() }
-    })
+    // 右侧栏不再注册「宗门协作」标签页：洞府以窗口级浮层常驻。
+    bridge.set(native.sidebarRight)
   })
 
   ctx.slots.inject('shell.overlay', () => ctx.slots.register({

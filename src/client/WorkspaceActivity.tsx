@@ -73,7 +73,7 @@ export function ActivitySurface({ bridge, state, ...props }: ActivityPanelProps 
   return sidebar === undefined ? <ActivityPanel {...props} /> : <WorkspaceMonitor {...props} sidebar={sidebar} state={state} />
 }
 
-function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember }: ActivityPanelProps & {
+function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDirectories }: ActivityPanelProps & {
   sidebar: ISidebarRight
   state: WorkspaceActivityState
 }) {
@@ -109,7 +109,6 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember }: Activ
           expanded: sidebar.isExpanded(),
         })) return
         state.select(current, added)
-        sidebar.openTab(TEAM_TAB_KIND)
       },
     })
     return () => { controller.stop() }
@@ -120,7 +119,6 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember }: Activ
       const data = (event as CustomEvent<AgentTeamsCardData>).detail
       if (data?.captainSessionId && data.captainSessionId !== current) return
       if (data?.teamId) state.remember(current, data)
-      sidebar.openTab(TEAM_TAB_KIND)
     }
     window.addEventListener(OPEN_PANEL_EVENT, open)
     return () => { window.removeEventListener(OPEN_PANEL_EVENT, open) }
@@ -143,21 +141,20 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember }: Activ
         expanded: sidebar.isExpanded(),
       })) return
       state.select(current, teamId)
-      sidebar.openTab(TEAM_TAB_KIND)
+      // 新草案：在浮层里直接打开「藏经阁」内容气泡，策划审阅。
+      window.dispatchEvent(new CustomEvent(OPEN_HALL_SHEET_EVENT, { detail: { action: 'config' } }))
     }
     window.addEventListener(TEAM_CREATED_EVENT, reveal)
     return () => { window.removeEventListener(TEAM_CREATED_EVENT, reveal) }
   }, [current, sidebar, state])
-  // 洞府作为窗口级浮层常驻：切到对话/别的页面也在，可收起成一条。
-  return hallTeam === undefined ? null : (
+  // 洞府作为窗口级浮层常驻：切到对话/别的页面也在，可拖动、收起、传送归栏。
+  return hallTeam === undefined || current === undefined ? null : (
     <SectHallOverlay
       team={hallTeam}
       t={t}
-      onOpenMember={(memberId) => { openMember(hallTeam.captainSessionId as SessionId, memberId as SessionId) }}
-      onAction={(action) => {
-        window.dispatchEvent(new CustomEvent(OPEN_HALL_SHEET_EVENT, { detail: { action } }))
-        sidebar.openTab(TEAM_TAB_KIND)
-      }}
+      sessionId={current}
+      modelDirectories={modelDirectories}
+      openMember={openMember}
     />
   )
 }

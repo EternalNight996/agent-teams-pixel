@@ -1,4 +1,4 @@
-/* 常驻洞府浮层：窗口级浮窗，可收起成一条。 */
+/* 宗门洞府浮层：可拖动 / 收起 / 传送回右侧栏。 */
 
 .window {
   position: fixed;
@@ -15,38 +15,44 @@
   box-shadow: 0 22px 60px rgb(0 0 0 / 52%), inset 0 2px rgb(255 255 255 / 4%);
 }
 
+/* 收起：只剩一条紧凑容器。 */
 .window[data-collapsed='true'] {
-  width: min(320px, calc(100vw - 32px));
-}
-
-.head {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  width: min(300px, calc(100vw - 32px));
 }
 
 .window[data-collapsed='true'] .head {
   border-bottom: 0;
 }
 
-.headButton {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 7px 10px;
-  border: 0;
-  background: transparent;
-  color: var(--dsw-alias-label-primary);
-  font: inherit;
-  font-size: 11.5px;
-  line-height: 16px;
-  text-align: left;
-  cursor: pointer;
+/* 归栏：吸附成右侧整列，不再浮空。 */
+.window[data-docked='true'] {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(420px, 46vw);
+  border-radius: 0;
+  border-right: 0;
+  box-shadow: -18px 0 50px rgb(0 0 0 / 45%);
 }
 
-.headButton:hover {
-  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 8%, transparent);
+.head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 10px;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.head:active {
+  cursor: grabbing;
+}
+
+[data-docked='true'] .head {
+  cursor: default;
 }
 
 .caret {
@@ -57,7 +63,10 @@
 
 .title {
   overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font-size: 11.5px;
   font-weight: 650;
+  line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -67,10 +76,178 @@
   margin-left: auto;
   color: var(--dsw-alias-label-secondary);
   font-size: 10px;
-  white-space: nowrap;
+}
+
+.headButton {
+  flex: none;
+  padding: 2px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.headButton:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary);
 }
 
 .canvas {
+  flex: 1 1 auto;
   height: 320px;
   min-height: 0;
+}
+
+[data-collapsed='true'] .canvas {
+  display: none;
+}
+
+/* 地板操作条：传送阵 / 剑盒 / 名册。 */
+.floor {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+  background: color-mix(in srgb, var(--dsw-alias-bg-module-platform) 55%, #151a21);
+}
+
+.portal,
+.floorButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 70%, transparent);
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 10.5px;
+  line-height: 14px;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, background-color 140ms ease;
+}
+
+.portal:hover,
+.floorButton:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary);
+}
+
+.portalGlyph {
+  font-size: 12px;
+  line-height: 1;
+  transition: transform 240ms ease;
+}
+
+/* 传送阵：浮空/归栏两种状态在颜色与旋转上可见。 */
+.portal[data-mode='docked'] {
+  border-color: var(--dsw-alias-state-success-primary);
+  color: var(--dsw-alias-state-success-primary);
+  background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 12%, transparent);
+}
+
+.portal[data-mode='docked'] .portalGlyph {
+  transform: rotate(90deg);
+}
+
+.portal:active .portalGlyph {
+  transform: rotate(180deg) scale(0.9);
+}
+
+/* 内容气泡：贴在面板上方展开。 */
+.sheet {
+  position: fixed;
+  z-index: 12000;
+  display: flex;
+  flex-direction: column;
+  width: min(460px, calc(100vw - 32px));
+  max-height: min(60vh, calc(100vh - 140px));
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 85%, transparent);
+  border-radius: 12px;
+  background: #151a21;
+  box-shadow: 0 18px 48px rgb(0 0 0 / 50%);
+}
+
+.sheetHead {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 10px;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+
+.sheetTitle {
+  flex: 1 1 auto;
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font-size: 11.5px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sheetClose {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.sheetClose:hover {
+  border-color: var(--dsw-alias-border-l2);
+  color: var(--dsw-alias-label-primary);
+}
+
+.sheetBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 10px 12px 12px;
+  scrollbar-width: thin;
+}
+
+.inboxList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inboxRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.inboxFrom {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10px;
+}
+
+.inboxText {
+  color: var(--dsw-alias-label-primary);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }

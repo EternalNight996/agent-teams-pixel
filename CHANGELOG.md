@@ -36,6 +36,11 @@
   blank column.
 
 ### Added
+- The 宗门协作 tab is gone: the hall is the single surface. The floating panel now
+  drags by its header, collapses to a compact one-line container, and carries a
+  floor bar with a 传送阵 (dock/floating toggle, state shown by colour + glyph
+  rotation), a 剑盒 (opens the 道统 config popover) and a 名册 button. All
+  content panels open **above the panel** as anchored popovers.
 - The sect hall itself is now a **window-level floating layer**: mounted from the
   shell overlay (so it survives leaving the tab), anchored bottom-right of the
   main content area, collapsible to a one-line bar (state remembered in

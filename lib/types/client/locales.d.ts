@@ -247,6 +247,10 @@ export declare const zh: {
     'office.resize': string;
     'office.hint': string;
     'office.hintShort': string;
+    'office.dockSidebar': string;
+    'office.dockFloating': string;
+    'office.swordBox': string;
+    'office.roster': string;
     'office.chatter.1': string;
     'office.chatter.2': string;
     'office.chatter.3': string;
@@ -656,6 +660,10 @@ export declare const en: {
     'office.resize': string;
     'office.hint': string;
     'office.hintShort': string;
+    'office.dockSidebar': string;
+    'office.dockFloating': string;
+    'office.swordBox': string;
+    'office.roster': string;
     'office.chatter.1': string;
     'office.chatter.2': string;
     'office.chatter.3': string;
