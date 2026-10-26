@@ -10,6 +10,8 @@
   width: min(620px, calc(100vw - 32px));
   min-width: 380px;
   min-height: 240px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
   overflow: hidden;
   resize: both;
   border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 85%, transparent);
@@ -27,7 +29,6 @@
   border-bottom: 0;
 }
 
-/* 归栏：吸附成右侧整列，不再浮空。 */
 /* 归栏：在右侧栏区域另开一个窗口（保持自身大小，不拉长成整列）。 */
 .window[data-docked='true'] {
   top: 16px;
@@ -232,13 +233,14 @@
   color: var(--dsw-alias-label-primary);
 }
 
-/* 内容气泡：贴在面板上方展开。 */
+/* 内容气泡：贴在面板左侧（右缘 = 面板左缘 − 8px），宽度由 hall-geometry 计算后内联。 */
 .sheet {
   position: fixed;
   z-index: 12000;
   display: flex;
   flex-direction: column;
-  width: min(460px, calc(100vw - 32px));
+  box-sizing: border-box;
+  width: min(480px, calc(100vw - 32px));
   max-height: min(60vh, calc(100vh - 140px));
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 85%, transparent);
