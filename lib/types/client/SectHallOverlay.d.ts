@@ -8,7 +8,8 @@ export declare function SectHallOverlay({ team, t, sessionId, modelDirectories, 
     /** 无队伍时缺省：浮层仍常驻，渲染一座只有掌门的空洞府。 */
     readonly team?: ActivityTeam;
     readonly t: AgentTeamsTranslate;
-    readonly sessionId: SessionId;
+    /** 当前会话；应用级浮层在个别宿主上可能拿不到，此时只能渲染空洞府。 */
+    readonly sessionId?: SessionId;
     readonly modelDirectories: ModelDirectoryResolver;
     readonly openMember: (parentId: SessionId, childId: SessionId) => void;
 }): import("react").JSX.Element | null;

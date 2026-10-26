@@ -72,7 +72,8 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
   /** 无队伍时缺省：浮层仍常驻，渲染一座只有掌门的空洞府。 */
   readonly team?: ActivityTeam
   readonly t: AgentTeamsTranslate
-  readonly sessionId: SessionId
+  /** 当前会话；应用级浮层在个别宿主上可能拿不到，此时只能渲染空洞府。 */
+  readonly sessionId?: SessionId
   readonly modelDirectories: ModelDirectoryResolver
   readonly openMember: (parentId: SessionId, childId: SessionId) => void
 }) {
@@ -264,7 +265,7 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
               ))}
             </ul>
           ) : sheet === 'config' ? (
-            staged
+            staged && sessionId !== undefined
               ? <StagingPlanEditor team={hall} modelDirectory={modelDirectories.directoryFor(sessionId)} onContinuePlanning={() => { setSheet(undefined) }} onDiscarded={() => { setSheet(undefined) }} t={t} />
               : <TeamConfigPanel team={hall} t={t} />
           ) : (
@@ -272,7 +273,7 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
               team={hall}
               t={t}
               workspace
-              onNavigate={(_parent, child) => { openMember(sessionId, child) }}
+              onNavigate={(_parent, child) => { if (sessionId !== undefined) openMember(sessionId, child) }}
               onContinuePlanning={() => { setSheet(undefined) }}
               onDiscarded={() => { setSheet(undefined) }}
             />
@@ -311,7 +312,7 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
                   enabledActions={hasTeam ? undefined : []}
                   activeAction={sheet === 'settings' ? null : sheet ?? null}
                   onAction={(action) => { toggleSheet(action) }}
-                  onOpenMember={(memberId) => { openMember(sessionId, memberId as SessionId) }}
+                  onOpenMember={(memberId) => { if (sessionId !== undefined) openMember(sessionId, memberId as SessionId) }}
                   onUnavailable={() => { /* 无会话修士：由场景内提示承担 */ }}
                 />
               </div>

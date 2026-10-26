@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSPro
 import { createPortal } from 'react-dom'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
-import { ActivityPanel, TeamSection, historicCardTeam, type ActivityPanelProps } from './ActivityPanel.tsx'
+import { TeamSection, historicCardTeam, type ActivityPanelProps } from './ActivityPanel.tsx'
 import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import type { SceneAction } from './pixel-office/PixelOffice.tsx'
@@ -70,11 +70,13 @@ export function ActivitySurface({ bridge, state, ...props }: ActivityPanelProps 
   state: WorkspaceActivityState
 }) {
   const sidebar = useSyncExternalStore(bridge.subscribe, bridge.getSnapshot)
-  return sidebar === undefined ? <ActivityPanel {...props} /> : <WorkspaceMonitor {...props} sidebar={sidebar} state={state} />
+  // 洞府不再依赖右侧栏服务：右侧栏关闭/被宿主回收时，浮层仍然常驻。
+  return <WorkspaceMonitor {...props} sidebar={sidebar} state={state} />
 }
 
 function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDirectories }: ActivityPanelProps & {
-  sidebar: ISidebarRight
+  /** 右侧栏服务可能被宿主回收（右侧栏关闭、懒加载）；缺失时按「当前会话在前台」处理。 */
+  sidebar?: ISidebarRight
   state: WorkspaceActivityState
 }) {
   const current = currentSessionId(useSyncExternalStore(sessionsList.subscribe, sessionsList.getSnapshot))
@@ -106,9 +108,9 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDi
         if (!shouldRevealTeam({
           source: 'discovered',
           sessionId: current,
-          onScreenSessionId: sidebar.mounted.getSnapshot(),
+          onScreenSessionId: sidebar?.mounted.getSnapshot() ?? current,
           teamId: added,
-          expanded: sidebar.isExpanded(),
+          expanded: sidebar?.isExpanded() ?? false,
         })) return
         state.select(current, added)
       },
@@ -117,7 +119,8 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDi
   }, [current, currentTargets, discover, sidebar, state])
   useEffect(() => {
     const open = (event: Event): void => {
-      if (current === undefined || sidebar.mounted.getSnapshot() !== current) return
+      if (current === undefined) return
+      if (sidebar !== undefined && sidebar.mounted.getSnapshot() !== current) return
       const data = (event as CustomEvent<AgentTeamsCardData>).detail
       if (data?.captainSessionId && data.captainSessionId !== current) return
       if (data?.teamId) state.remember(current, data)
@@ -138,9 +141,9 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDi
       if (!shouldRevealTeam({
         source: 'created',
         sessionId: current,
-        onScreenSessionId: sidebar.mounted.getSnapshot(),
+        onScreenSessionId: sidebar?.mounted.getSnapshot() ?? current,
         teamId,
-        expanded: sidebar.isExpanded(),
+        expanded: sidebar?.isExpanded() ?? false,
       })) return
       state.select(current, teamId)
       // 新草案：在浮层里直接打开「藏经阁」内容气泡，策划审阅。
@@ -149,9 +152,9 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDi
     window.addEventListener(TEAM_CREATED_EVENT, reveal)
     return () => { window.removeEventListener(TEAM_CREATED_EVENT, reveal) }
   }, [current, sidebar, state])
-  // 洞府作为窗口级浮层常驻：切到对话/别的页面也在，即使会话里还没有队伍，
-  // 也保留一座空洞府（只有掌门），可拖动、收起、传送归栏。
-  return current === undefined ? null : (
+  // 洞府作为窗口级浮层常驻：切到对话/别的页面也在，即使会话里还没有队伍、
+  // 甚至宿主暂时没有 current 会话，也保留一座空洞府（只有掌门）。
+  return (
     <SectHallOverlay
       team={hallTeam}
       t={t}
