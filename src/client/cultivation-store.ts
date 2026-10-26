@@ -3,7 +3,7 @@
  *
  * - 任务完成：给对应修士加较多修为（历史已完成任务在首次见到时结算一次）；
  * - 掌门：按宗门已完成任务获得带队修为；
- * - 挂机：只给“当前打开对话”的那个角色少量修为；
+ * - 挂机：全队每个角色都会累积；当前打开对话的角色额外享受连击倍率；
  * - 数据落在 localStorage，跨宗门、跨会话共享。
  */
 import { useSyncExternalStore } from 'react'
@@ -90,10 +90,46 @@ export function useCultivationVersion(): number {
   return useSyncExternalStore(subscribeCultivation, cultivationVersion, cultivationVersion)
 }
 
+/** 当前前台会话对应的修为键（掌门或成员）；找不到返回 undefined。 */
+function resolveCurrentKey(teams: readonly ActivityTeam[], sessionId: string): string | undefined {
+  const team = teams.find(item => item.captainSessionId === sessionId)
+    ?? teams.find(item => item.members.some(member => member.id === sessionId))
+  if (team === undefined) return undefined
+  if (team.captainSessionId === sessionId) return captainKey(team.name)
+  const member = team.members.find(item => item.id === sessionId)
+  return member === undefined ? undefined : memberKey(member.name)
+}
+
 /**
- * 消费一次队伍快照：结算新完成的任务、掌门带队修为，以及当前对话角色的挂机修为。
+ * 结算一个角色的挂机修为：每满 10 秒一笔。
+ * 当前打开对话的角色连续在线每 1 分钟 +0.5 倍（最高 3 倍）；同队其他人按基础值。
+ * 离线批量补结按基础值，最多补 8 小时。
+ */
+function settleIdleXp(key: string, now: number, active: boolean): boolean {
+  const last = state.idleAt[key] ?? now
+  const gap = now - last
+  const intervals = Math.min(2880, Math.floor(gap / 10_000))
+  if (intervals <= 0) {
+    if (state.idleAt[key] === undefined) {
+      state.idleAt[key] = now
+      state.streak[key] = 0
+    }
+    return false
+  }
+  const online = gap <= 30_000
+  const prior = active && online ? (state.streak[key] ?? 0) : 0
+  const multiplier = active && online && intervals === 1 ? idleStreakMultiplier(prior) : 1
+  const level = cultivationFromXp(xpOf(key)).level
+  const gained = addXp(key, Math.round(intervals * idleXpPer10s(level) * multiplier))
+  state.idleAt[key] = last + intervals * 10_000
+  if (active) state.streak[key] = prior + intervals
+  return gained
+}
+
+/**
+ * 消费一次队伍快照：结算新完成的任务、掌门带队修为，以及全队的挂机修为。
  * @param teams - 所有实时队伍（同一份 activity 快照）。
- * @param currentSessionId - 当前前台会话，用于确定挂机角色。
+ * @param currentSessionId - 当前前台会话；它的角色额外享受连续挂机倍率。
  */
 export function ingestCultivation(teams: readonly ActivityTeam[], currentSessionId?: string): void {
   const now = Date.now()
@@ -130,34 +166,17 @@ export function ingestCultivation(teams: readonly ActivityTeam[], currentSession
     }
   }
 
-  // 挂机：只给当前对话里的那个角色，慢速累积。
-  if (currentSessionId !== undefined && currentSessionId !== '') {
-    const team = teams.find(item => item.captainSessionId === currentSessionId)
-      ?? teams.find(item => item.members.some(member => member.id === currentSessionId))
-    if (team !== undefined) {
-      const isCaptain = team.captainSessionId === currentSessionId
-      const member = team.members.find(item => item.id === currentSessionId)
-      const key = isCaptain ? captainKey(team.name) : member === undefined ? undefined : memberKey(member.name)
-      if (key !== undefined) {
-        // 每满 10 秒结算一次；连续在线每 2 分钟 +0.5 倍，最高 3 倍；离线最多补 8 小时。
-        const last = state.idleAt[key] ?? now
-        const gap = now - last
-        const intervals = Math.min(2880, Math.floor(gap / 10_000))
-        if (intervals > 0) {
-          const online = gap <= 30_000
-          const prior = online ? (state.streak[key] ?? 0) : 0
-          // 离线批量补结按基础值，不叠连续挂机倍率。
-          const multiplier = online && intervals === 1 ? idleStreakMultiplier(prior) : 1
-          const level = cultivationFromXp(xpOf(key)).level
-          changed = addXp(key, Math.round(intervals * idleXpPer10s(level) * multiplier)) || changed
-          state.idleAt[key] = last + intervals * 10_000
-          state.streak[key] = prior + intervals
-        } else if (state.idleAt[key] === undefined) {
-          state.idleAt[key] = now
-          state.streak[key] = 0
-        }
-      }
-    }
+  // 挂机：全队（掌门 + 每位修士）都结算；当前打开对话的角色额外吃连续挂机倍率。
+  const currentKey = currentSessionId === undefined || currentSessionId === ''
+    ? undefined
+    : resolveCurrentKey(teams, currentSessionId)
+  const idleKeys = new Set<string>()
+  for (const team of teams) {
+    idleKeys.add(captainKey(team.name))
+    for (const member of team.members) idleKeys.add(memberKey(member.name))
+  }
+  for (const key of idleKeys) {
+    changed = settleIdleXp(key, now, key === currentKey) || changed
   }
 
   state.tick = now

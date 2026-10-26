@@ -53,18 +53,22 @@ for (const status of ['running', 'idle', 'absent']) test(`claimed remains distin
   ])
 })
 
-test('snapshot reaches sidebar and workspace legends, summary, DAG and assignment chips', async t => {
+test('snapshot reaches sidebar DAG and workspace assignment chips', async t => {
   const { projected } = await snapshot(t)
   for (const dict of [en, zh]) for (const workspace of [false, true]) {
     const html = render(projected, dict, { workspace })
     if (process.env.ISSUE262_CAPTURE_DIR && dict === en && workspace) await writeFile(join(process.env.ISSUE262_CAPTURE_DIR, 'panel.html'), html)
-    assert.match(html, /data-task-id="t1" data-state="claimed"/)
-    assert.match(html, new RegExp(`<span data-state="claimed">■ ${dict === en ? 'Claimed 1' : '已认领 1'}</span>`))
-    assert.match(html, new RegExp(dict === en ? 'Claimed: t1' : '已认领：t1'))
+    // 依赖图只在侧栏视图渲染；7ebff8a 之后 workspace 视图改为按成员进度/交接，
+    // claimed 的生命周期事实由 assignment chip 承担。
+    if (!workspace) {
+      assert.match(html, /data-task-id="t1" data-state="claimed"/)
+      assert.match(html, new RegExp(`<span data-state="claimed">■ ${dict === en ? 'Claimed 1' : '已认领 1'}</span>`))
+      assert.match(html, new RegExp(dict === en ? 'Claimed: t1' : '已认领：t1'))
+      assert.match(html, new RegExp(`<span class="dagClaimedState">${dict['task.status.claimed']}</span>`))
+      assert.match(html, /data-task-id="t2" data-state="open"/)
+      assert.match(html, /data-task-id="t3" data-state="blocked"/)
+    }
     assert.doesNotMatch(html, new RegExp(dict === en ? 'Ready: t1' : 't1.*等待领取'))
-    assert.match(html, new RegExp(`<span class="dagClaimedState">${dict['task.status.claimed']}</span>`))
-    assert.match(html, /data-task-id="t2" data-state="open"/)
-    assert.match(html, /data-task-id="t3" data-state="blocked"/)
     assert.match(html, /class="assignmentChip"[^>]*data-state="claimed"/)
   }
 })

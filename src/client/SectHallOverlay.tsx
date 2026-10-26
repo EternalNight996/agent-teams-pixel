@@ -11,6 +11,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { ActivityTeam } from './activity-monitor.ts'
 import type { AgentTeamsTranslate } from './locales.ts'
 import { TeamSection } from './ActivityPanel.tsx'
+import { HallInbox } from './HallInbox.tsx'
 import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
@@ -879,18 +880,7 @@ export function SectHallOverlay({
               </div>
             )
           ) : sheet === 'inbox' ? (
-            hall.captainInbox.length === 0
-              ? <p className={css.settingsHint}>{t('workspace.inboxEmpty')}</p>
-              : (
-                <ul className={css.inboxList}>
-                  {hall.captainInbox.map((message, index) => (
-                    <li key={`${index}:${message.from}`} className={css.inboxRow}>
-                      <span className={css.inboxFrom}>{message.from}</span>
-                      <span className={css.inboxText}>{message.content}</span>
-                    </li>
-                  ))}
-                </ul>
-              )
+            <HallInbox messages={hall.captainInbox} t={t} />
           ) : sheet === 'config' ? (
             !hasTeam
               ? noTeamHint
