@@ -20,6 +20,45 @@ import css from './SectHallOverlay.module.css'
 const COLLAPSED_KEY = 'agent-teams-pixel.hallCollapsed'
 const DOCKED_KEY = 'agent-teams-pixel.hallDocked'
 const PANEL_RECT_KEY = 'agent-teams-pixel.hallRect'
+const TOKEN_KEY = 'agent-teams-pixel.hallToken'
+
+/** 收起后的令牌尺寸（含流苏上方的牌身）。 */
+const TOKEN_SIZE = { w: 38, h: 68 } as const
+
+interface TokenPoint {
+  readonly x: number
+  readonly y: number
+}
+
+/** 把令牌夹在窗口内；留 8px 边缘，拖不出屏。 */
+function clampToken(x: number, y: number): TokenPoint {
+  const vw = typeof window === 'undefined' ? 1280 : window.innerWidth
+  const vh = typeof window === 'undefined' ? 800 : window.innerHeight
+  return {
+    x: Math.max(8, Math.min(x, vw - TOKEN_SIZE.w - 8)),
+    y: Math.max(8, Math.min(y, vh - TOKEN_SIZE.h - 8)),
+  }
+}
+
+function readTokenPoint(): TokenPoint {
+  if (typeof window === 'undefined') return { x: 16, y: 16 }
+  try {
+    const raw = window.localStorage.getItem(TOKEN_KEY)
+    if (raw !== null) {
+      const parsed = JSON.parse(raw) as Partial<TokenPoint>
+      if (typeof parsed.x === 'number' && Number.isFinite(parsed.x)
+        && typeof parsed.y === 'number' && Number.isFinite(parsed.y)) {
+        return clampToken(parsed.x, parsed.y)
+      }
+    }
+  } catch { /* private mode */ }
+  // 默认停在右下角：与展开面板同一处，收起时不跳。
+  return clampToken(window.innerWidth - TOKEN_SIZE.w - 16, window.innerHeight - TOKEN_SIZE.h - 16)
+}
+
+function writeTokenPoint(point: TokenPoint): void {
+  try { window.localStorage.setItem(TOKEN_KEY, JSON.stringify(point)) } catch { /* private mode */ }
+}
 
 interface PanelRect {
   readonly x: number
@@ -82,6 +121,10 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
   const [sheet, setSheet] = useState<SheetKind | undefined>()
   const [sheetAnchor, setSheetAnchor] = useState<{ left: number; bottom: number; width: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
+  const [token, setToken] = useState<TokenPoint>(() => readTokenPoint())
+  const tokenDrag = useRef<{
+    startX: number; startY: number; baseX: number; baseY: number; lastX: number; lastY: number; moved: boolean
+  } | null>(null)
   const [size, setSize] = useState(() => {
     const stored = readPanelRect()
     return { w: stored.w ?? PANEL_SIZES.normal.w, h: stored.h ?? PANEL_SIZES.normal.h }
@@ -165,9 +208,71 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
     const next = !collapsed
     setCollapsed(next)
     writeBool(COLLAPSED_KEY, next)
-    // 收起成一枚水晶球时，内容气泡也一并收起，避免球旁边挂着一块面板。
+    // 收起成一枚令牌时，内容气泡也一并收起，避免令牌旁边挂着一块面板。
     if (next) setSheet(undefined)
   }
+
+  // 令牌可拖动：拖到任意角落，位置记在 localStorage；没拖动就是点击展开。
+  const beginTokenDrag = (event: React.PointerEvent<HTMLButtonElement>): void => {
+    if (event.button !== 0) return
+    event.preventDefault()
+    event.currentTarget.focus()
+    const drag = {
+      startX: event.clientX,
+      startY: event.clientY,
+      baseX: token.x,
+      baseY: token.y,
+      lastX: token.x,
+      lastY: token.y,
+      moved: false,
+    }
+    tokenDrag.current = drag
+    const cleanup = (): void => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', cancel)
+    }
+    const move = (moveEvent: PointerEvent): void => {
+      if (tokenDrag.current !== drag) return
+      const dx = moveEvent.clientX - drag.startX
+      const dy = moveEvent.clientY - drag.startY
+      if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4) return
+      drag.moved = true
+      const next = clampToken(drag.baseX + dx, drag.baseY + dy)
+      drag.lastX = next.x
+      drag.lastY = next.y
+      setToken(next)
+    }
+    const up = (): void => {
+      cleanup()
+      if (tokenDrag.current !== drag) return
+      tokenDrag.current = null
+      if (drag.moved) {
+        writeTokenPoint({ x: drag.lastX, y: drag.lastY })
+        return
+      }
+      toggleCollapsed()
+    }
+    const cancel = (): void => {
+      cleanup()
+      if (tokenDrag.current === drag) tokenDrag.current = null
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', cancel)
+  }
+
+  // 窗口缩小时把令牌夹回可视区。
+  useEffect(() => {
+    const clamp = (): void => {
+      setToken((current) => {
+        const next = clampToken(current.x, current.y)
+        return next.x === current.x && next.y === current.y ? current : next
+      })
+    }
+    window.addEventListener('resize', clamp)
+    return () => { window.removeEventListener('resize', clamp) }
+  }, [])
 
   const toggleDocked = (): void => {
     const next = !docked
@@ -285,29 +390,29 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
     ), document.body)
   }
 
-  const orbTitle = hasTeam
+  const tokenTitle = hasTeam
     ? `${hall.name} · ${done}/${total}`
     : `${hall.name} · ${t('office.hallNoTeam')}`
 
   return (
     <>
       {collapsed ? createPortal((
-        // 收起：整座洞府缩成一枚水晶球，点一下展开。
+        // 收起：整座洞府缩成一枚可拖动的令牌，点一下展开。
         <button
           type="button"
-          className={css.orb}
-          data-hall-orb
-          data-docked={docked || undefined}
-          style={{ transform: docked ? undefined : `translate(${rect.x}px, ${rect.y}px)` }}
-          onClick={toggleCollapsed}
+          className={css.token}
+          data-hall-token
+          style={{ left: token.x, top: token.y }}
+          onPointerDown={beginTokenDrag}
+          onClick={(event) => { if (event.detail === 0) toggleCollapsed() }}
           aria-label={t('office.expand')}
           aria-expanded={false}
-          title={`${t('office.expand')} · ${orbTitle}`}
+          title={`${t('office.expand')} · ${tokenTitle}`}
         >
-          <span className={css.orbGlass} aria-hidden>
-            <span className={css.orbGlyph} aria-hidden>⛩</span>
+          <span className={css.tokenBody} aria-hidden>
+            <span className={css.tokenGlyph} aria-hidden>山</span>
           </span>
-          <span className={css.orbStand} aria-hidden />
+          <span className={css.tokenTassel} aria-hidden />
         </button>
       ), document.body) : createPortal((
         <section

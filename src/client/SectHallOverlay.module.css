@@ -29,113 +29,127 @@
   box-shadow: 0 22px 60px rgb(0 0 0 / 52%), 0 0 0 1px color-mix(in srgb, var(--dsw-alias-state-success-primary) 22%, transparent);
 }
 
-/* 收起：整座洞府缩成一枚水晶球，点一下展开。 */
-.orb {
+/* 收起：整座洞府缩成一枚可拖动的令牌，点一下展开。 */
+.token {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
   z-index: 11000;
-  width: 58px;
-  height: 58px;
+  width: 38px;
+  height: 68px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
   background: transparent;
-  cursor: pointer;
-  transition: filter 160ms ease;
-  animation: hall-orb-fade 160ms ease-out;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  animation: hall-token-fade 160ms ease-out;
 }
 
-.orb[data-docked='true'] {
-  top: 16px;
-  bottom: auto;
+.token:active {
+  cursor: grabbing;
 }
 
-.orb:hover {
-  filter: brightness(1.14);
-}
-
-.orb:focus-visible {
+.token:focus-visible {
   outline: 2px solid var(--dsw-alias-state-business-primary);
   outline-offset: 3px;
+  border-radius: 9px;
 }
 
-.orbGlass {
+.tokenBody {
   position: absolute;
-  inset: 0;
+  inset: 0 0 12px;
   overflow: hidden;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 32% 26%, rgb(255 255 255 / 96%) 0 7%, rgb(214 241 255 / 92%) 12%, rgb(126 200 255 / 88%) 32%, rgb(45 110 194 / 92%) 58%, rgb(14 30 56 / 96%) 88%);
+  border: 1px solid rgb(201 164 95 / 85%);
+  border-radius: 9px 9px 6px 6px;
+  background: linear-gradient(158deg, rgb(76 110 106 / 96%), rgb(24 45 49 / 98%) 45%, rgb(10 22 24 / 100%));
   box-shadow:
-    inset 0 -7px 12px rgb(3 10 24 / 55%),
-    inset 0 5px 9px rgb(255 255 255 / 45%),
-    0 0 0 1px rgb(180 220 255 / 35%),
-    0 8px 20px rgb(20 80 160 / 35%),
-    0 0 26px rgb(90 170 255 / 28%);
-  animation: hall-orb-pop 200ms ease-out;
+    inset 0 0 0 2px rgb(232 195 120 / 16%),
+    inset 0 7px 10px rgb(255 240 205 / 9%),
+    inset 0 -7px 10px rgb(0 0 0 / 45%),
+    0 7px 18px rgb(0 0 0 / 42%),
+    0 0 18px rgb(255 198 96 / 14%);
+  transition: filter 160ms ease;
+  animation: hall-token-sway 4.6s ease-in-out infinite;
 }
 
-.orbGlass::before {
+.tokenBody::before {
   content: '';
   position: absolute;
-  left: 15%;
-  top: 11%;
-  width: 36%;
-  height: 24%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgb(255 255 255 / 92%), transparent 70%);
-  filter: blur(0.5px);
-}
-
-.orbGlass::after {
-  content: '';
-  position: absolute;
-  inset: 24%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 34% 68%, rgb(150 230 255 / 45%), transparent 62%);
-  animation: hall-orb-swirl 7s linear infinite;
-}
-
-.orbGlyph {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: rgb(235 248 255 / 82%);
-  font-size: 18px;
-  line-height: 1;
-  text-shadow: 0 0 8px rgb(170 225 255 / 85%);
-}
-
-.orbStand {
-  position: absolute;
+  top: 8px;
   left: 50%;
-  bottom: -6px;
-  width: 32px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   translate: -50% 0;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgb(255 214 140 / 45%), rgb(120 84 30 / 25%) 55%, transparent 72%);
-  box-shadow: 0 0 10px rgb(255 206 120 / 22%);
+  background: #0a1416;
+  box-shadow: inset 0 0 0 1px rgb(232 195 120 / 70%);
 }
 
-@keyframes hall-orb-fade {
+.tokenBody::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1px rgb(232 195 120 / 18%);
+  pointer-events: none;
+}
+
+.tokenGlyph {
+  position: absolute;
+  inset: 14px 0 0;
+  display: grid;
+  place-items: center;
+  color: #f2d9a0;
+  font-family: "STKaiti", "KaiTi", var(--dsw-alias-font-family, serif);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 9px rgb(255 208 112 / 55%);
+}
+
+.token:hover .tokenBody {
+  filter: brightness(1.16);
+}
+
+.token:hover .tokenGlyph {
+  text-shadow: 0 0 13px rgb(255 214 130 / 85%);
+}
+
+.tokenTassel {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 2px;
+  height: 12px;
+  translate: -50% 0;
+  background: linear-gradient(rgb(201 164 95), rgb(122 47 42));
+}
+
+.tokenTassel::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 9px;
+  height: 8px;
+  translate: -50% 0;
+  border-radius: 0 0 50% 50%;
+  background: radial-gradient(circle at 50% 20%, #cf5a4e, #7d211d 72%);
+  box-shadow: 0 0 7px rgb(180 60 50 / 35%);
+}
+
+@keyframes hall-token-fade {
   from { opacity: 0; }
 }
 
-@keyframes hall-orb-pop {
-  from { opacity: 0; transform: scale(0.55); }
-}
-
-@keyframes hall-orb-swirl {
-  to { transform: rotate(360deg); }
+@keyframes hall-token-sway {
+  0%, 100% { transform: translateY(0) rotate(-1.4deg); }
+  50% { transform: translateY(-2px) rotate(1.4deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .orb,
-  .orbGlass,
-  .orbGlass::after {
+  .token,
+  .tokenBody {
     animation: none;
   }
 }

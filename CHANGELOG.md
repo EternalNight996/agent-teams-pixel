@@ -47,9 +47,10 @@
   the **left of the panel** with their right edge exactly 8px from the panel's left
   edge (clamped inside the viewport), treating the panel as reserved right-side
   space: a wider panel pushes the dialog further left.
-- 收起 now shrinks the whole hall into a glowing crystal orb on a small stand;
-  clicking the orb expands the hall again (collapsed/docked state and the
-  remembered position survive, and collapsing closes any open popover).
+- 收起 now shrinks the whole hall into a jade-and-gold 宗门令牌 (gate glyph,
+  engraved frame, red tassel). The token can be dragged anywhere in the window —
+  its position is remembered separately (`agent-teams-pixel.hallToken`) — and a
+  click (not a drag) expands the hall again. Collapsing closes any open popover.
 - The floating hall is persistent by design: it keeps existing for any team in
   the session even when the team has no tasks or every task was cancelled (a
   stopped team still shows its hall), and it is there before any team exists —
