@@ -235,8 +235,10 @@ export function PixelOffice({
 
   useEffect(() => {
     const onMount = (event: Event): void => {
-      const detail = (event as CustomEvent<{ id?: string; form?: 'auto' | 'sword' | 'beast' | 'off'; mountId?: string }>).detail
-      if (detail?.id !== undefined && detail.form !== undefined) sceneRef.current?.setMount(detail.id, detail.form, detail.mountId)
+      const detail = (event as CustomEvent<{ id?: string; form?: 'auto' | 'sword' | 'beast' | 'off'; mountId?: string; label?: string }>).detail
+      if (detail?.id !== undefined && detail.form !== undefined) {
+        sceneRef.current?.setMount(detail.id, detail.form, detail.mountId, detail.label)
+      }
     }
     window.addEventListener('agent-teams:mount', onMount)
     return () => { window.removeEventListener('agent-teams:mount', onMount) }
@@ -244,9 +246,9 @@ export function PixelOffice({
 
   useEffect(() => {
     const onEquip = (event: Event): void => {
-      const detail = (event as CustomEvent<{ id?: string; kind?: 'weapon' | 'skill'; tier?: number }>).detail
+      const detail = (event as CustomEvent<{ id?: string; kind?: 'weapon' | 'skill'; tier?: number; itemId?: string; label?: string }>).detail
       if (detail?.id !== undefined && detail.kind !== undefined && detail.tier !== undefined) {
-        sceneRef.current?.setEquip(detail.id, detail.kind, detail.tier)
+        sceneRef.current?.setEquip(detail.id, detail.kind, detail.tier, detail.itemId, detail.label)
       }
     }
     window.addEventListener('agent-teams:equip', onEquip)

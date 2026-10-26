@@ -830,6 +830,7 @@ export function SectHallOverlay({
                 <div className={css.xpTrack}><span style={{ width: `${Math.round(characterCultivation.ratio * 100)}%` }} /></div>
                 <p className={css.settingsMeta}>{characterCultivation.xp} / {characterCultivation.next} XP</p>
                 <p className={css.settingsMeta}>{t('office.levelEarnHint')}</p>
+                <p className={css.settingsMeta}>{t('office.equipLiveHint')}</p>
                 <p className={css.settingsMeta}>{t('office.idleGain', { xp: idleXpPer10s(characterCultivation.level) })}</p>
                 {([
                   { kind: 'weapon', title: t('office.weapon'), hint: undefined },
@@ -871,13 +872,14 @@ export function SectHallOverlay({
                                   ...current,
                                   [character.id]: { ...current[character.id], [item.kind]: item.id },
                                 }))
+                                const label = t(item.key as Parameters<typeof t>[0])
                                 if (item.kind === 'mount') {
                                   window.dispatchEvent(new CustomEvent('agent-teams:mount', {
-                                    detail: { id: character.id, form: item.form ?? 'off', mountId: item.id },
+                                    detail: { id: character.id, form: item.form ?? 'off', mountId: item.id, label },
                                   }))
                                 } else {
                                   window.dispatchEvent(new CustomEvent('agent-teams:equip', {
-                                    detail: { id: character.id, kind: item.kind, tier: item.level },
+                                    detail: { id: character.id, kind: item.kind, tier: item.level, itemId: item.id, label },
                                   }))
                                 }
                               }}

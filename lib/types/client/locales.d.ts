@@ -302,6 +302,7 @@ export declare const zh: {
     'skill.immortalArt': string;
     'skill.daoArt': string;
     'office.levelEarnHint': string;
+    'office.equipLiveHint': string;
     'office.idleGain': string;
     'office.mountSword': string;
     'office.mountBeast': string;
@@ -907,6 +908,7 @@ export declare const en: {
     'skill.immortalArt': string;
     'skill.daoArt': string;
     'office.levelEarnHint': string;
+    'office.equipLiveHint': string;
     'office.idleGain': string;
     'office.mountSword': string;
     'office.mountBeast': string;

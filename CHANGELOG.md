@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### Changed
+- 天机阁 equipment changes are now visible in the hall: each artifact id has its
+  own weapon silhouette and tier colour, mounts switch model families, and
+  selecting any weapon/mount/skill makes the cultivator hop with a floating
+  item name and a 1.4s colour ring. The character sheet explains the immediate
+  preview.
 - Added the 宗门志 (志) bottom-bar entry with five tabs: local cultivation
   breakthrough history (200 entries), the author's QQ group QR, voluntary
   sponsorship QRs and MIT note, an About tab (version/author/other projects/old

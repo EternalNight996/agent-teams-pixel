@@ -111,9 +111,9 @@ export interface SceneHandle {
   /** Cycle one member's travel form: walking → flying sword → divine beast → walking. */
   cycleMount(id: string): void
   /** Force one member's travel form (equipment sheet); auto/off mean walking. */
-  setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off', variant?: string): void
+  setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off', variant?: string, label?: string): void
   /** Equip one member's artifact/skill (equipment sheet). */
-  setEquip(id: string, kind: 'weapon' | 'skill', tier: number): void
+  setEquip(id: string, kind: 'weapon' | 'skill', tier: number, itemId?: string, label?: string): void
   /** Cancel the loop and release the context. */
   dispose(): void
 }
@@ -123,6 +123,7 @@ import {
   CHARACTER_DISPLAY_HEIGHT, CHARACTER_SCALE, SHOE_HEIGHT, TRAVEL_LIFT, characterRig, nextTravelForm, travelFormFor, type TravelForm,
 } from './travel.ts'
 import { FACILITIES, FACILITY_ORDER, WALL_HEIGHT, type FacilityRect, type SceneAction, type SceneHit } from './office-actions.ts'
+import { mountModelFor, toneForTier, weaponShapeFor, type EquipTone, type MountModel, type WeaponShape } from '../equipment-visuals.ts'
 
 const WORLD_W = 520
 const WORLD_MIN_H = 300
@@ -226,8 +227,12 @@ export function createPixelScene(
   // 具体坐骑 id（灵兽/仙鹤/麒麟/龙/凤凰/道兽…），决定画哪套模型。
   const mountVariant = new Map<string, string>()
   // 已装备的法器/技能（由「天机阁」物品栏写入），用于即时外观切换。
-  const weaponEquip = new Map<string, number>()
+  const weaponEquip = new Map<string, { tier: number; itemId?: string; label?: string }>()
   const skillEquip = new Map<string, number>()
+  // 换装反馈：头顶飘出「⚔ 桃木剑」，脚下扩散一圈灵光（1.4 秒）。
+  const equipFlash = new Map<string, { at: number; text: string; kind: 'weapon' | 'mount' | 'skill' }>()
+  const EQUIP_FLASH_MS = 1400
+  const nowMs = (): number => (typeof performance === 'undefined' ? Date.now() : performance.now())
   // 修为飘字与升级特效。
   type CultFx = { x: number; y: number; groundY: number; text: string; start: number; kind: 'xp' | 'level' }
   let cultivationFx: CultFx[] = []
@@ -1568,14 +1573,7 @@ export function createPixelScene(
 
   /** 神兽：鞍座托着骑手、四足悬空，整只兽浮在案面上方。 */
   function paintBeastMount(cx: number, feetY: number, time: number, variant?: string): void {
-    const kind = variant === undefined ? 'beast'
-      : variant.includes('crane') ? 'crane'
-        : variant.includes('qilin') || variant.includes('kirin') ? 'qilin'
-          : variant.includes('phoenix') ? 'phoenix'
-            : variant.includes('dao') ? 'dao'
-              : variant.includes('jiao') ? 'jiao'
-                : variant.includes('dragon') ? 'dragon'
-                  : 'beast'
+    const kind = mountModelFor(variant)
     if (kind !== 'beast') { paintSpecialMount(cx, feetY, time, kind); return }
     const bob = Math.sin(time / 460) * 1.1
     const body = '#3d5c52'
@@ -1890,30 +1888,145 @@ export function createPixelScene(
     g.restore()
   }
 
+  /** 已装备法器：按物品 id 换外形，按品阶换灵光。 */
+  function paintEquippedWeapon(cx: number, baseY: number, shape: WeaponShape, tone: EquipTone, time: number): void {
+    const bob = Math.sin(time / 620) * 2
+    const tilt = Math.sin(time / 900) * 0.1
+    g.save()
+    // 放在持器手外侧，别压到身体（mini 身形只有 ~20 宽）。
+    g.translate(cx + 24, baseY - 34 + bob)
+    g.rotate(tilt)
+    g.scale(tone.scale, tone.scale)
+    // 灵光
+    const glow = g.createRadialGradient(0, 0, 1, 0, 0, 16)
+    glow.addColorStop(0, `rgba(${tone.glow}, 0.34)`)
+    glow.addColorStop(1, `rgba(${tone.glow}, 0)`)
+    g.fillStyle = glow
+    g.beginPath(); g.arc(0, 0, 16, 0, Math.PI * 2); g.fill()
+    g.fillStyle = tone.color
+    g.strokeStyle = tone.color
+    switch (shape) {
+      case 'sword': {
+        g.fillRect(-1, -12, 2, 16)
+        g.fillRect(-4, -6, 8, 2)
+        g.fillRect(-1, -4, 2, 6)
+        g.fillRect(-2, 2, 4, 2)
+        break
+      }
+      case 'saber': {
+        g.lineWidth = 3
+        g.lineCap = 'round'
+        g.beginPath(); g.moveTo(-2, -12); g.quadraticCurveTo(6, -5, 3, 2); g.stroke()
+        g.fillRect(-4, -3, 8, 2)
+        g.fillRect(-1, -1, 2, 6)
+        break
+      }
+      case 'orb': {
+        g.globalAlpha = 0.95
+        g.beginPath(); g.arc(0, -2, 6, 0, Math.PI * 2); g.fill()
+        g.globalAlpha = 0.5
+        g.beginPath(); g.ellipse(0, -2, 10, 3.5, -0.4, 0, Math.PI * 2); g.stroke()
+        break
+      }
+      case 'staff': {
+        g.fillRect(-1, -12, 2, 24)
+        g.beginPath(); g.arc(0, -13, 3.5, 0, Math.PI * 2); g.fill()
+        g.fillStyle = 'rgba(255, 255, 255, 0.7)'
+        g.fillRect(-1, -14, 2, 2)
+        break
+      }
+      case 'bolt': {
+        g.beginPath()
+        g.moveTo(-3, -12); g.lineTo(4, -3); g.lineTo(0, -2); g.lineTo(5, 7)
+        g.lineTo(-3, -1); g.lineTo(1, -2); g.lineTo(-5, -9)
+        g.closePath(); g.fill()
+        break
+      }
+      case 'trident': {
+        g.fillRect(-1, -8, 2, 20)
+        g.fillRect(-5, -13, 2, 7)
+        g.fillRect(-1, -15, 2, 9)
+        g.fillRect(3, -13, 2, 7)
+        g.fillRect(-5, -7, 10, 2)
+        break
+      }
+      case 'star': {
+        g.beginPath()
+        for (let i = 0; i < 10; i += 1) {
+          const angle = -Math.PI / 2 + (i / 10) * Math.PI * 2
+          const radius = i % 2 === 0 ? 8 : 3.4
+          const x = Math.cos(angle) * radius
+          const y = Math.sin(angle) * radius - 2
+          if (i === 0) g.moveTo(x, y); else g.lineTo(x, y)
+        }
+        g.closePath(); g.fill()
+        break
+      }
+      case 'planet': {
+        g.beginPath(); g.arc(0, -2, 6, 0, Math.PI * 2); g.fill()
+        g.lineWidth = 1.4
+        g.beginPath(); g.ellipse(0, -2, 11, 4, -0.35, 0, Math.PI * 2); g.stroke()
+        g.fillStyle = 'rgba(255, 255, 255, 0.65)'
+        g.fillRect(-2, -4, 2, 2)
+        break
+      }
+    }
+    // 两粒环绕灵屑，让换装后的法器有存在感。
+    for (let i = 0; i < 2; i += 1) {
+      const angle = time / 700 + i * Math.PI
+      g.globalAlpha = 0.55 + 0.25 * Math.sin(time / 420 + i)
+      g.fillRect(Math.cos(angle) * 12 - 1, Math.sin(angle) * 12 - 1, 2, 2)
+    }
+    g.restore()
+  }
+
+  /** 换装反馈：脚下灵光扩散 + 头顶飘出装备名。 */
+  function paintEquipFlash(cx: number, baseY: number, member: SceneMember, time: number): void {
+    const key = member.id || member.name
+    const flash = equipFlash.get(key)
+    if (flash === undefined) return
+    const age = time - flash.at
+    if (age < 0) return
+    if (age > EQUIP_FLASH_MS) {
+      equipFlash.delete(key)
+      return
+    }
+    const progress = age / EQUIP_FLASH_MS
+    const color = flash.kind === 'mount' ? '#6fd6c8' : flash.kind === 'skill' ? '#9be36f' : '#f2c14e'
+    g.save()
+    // 脚下灵光
+    g.globalAlpha = Math.max(0, 1 - progress) * 0.85
+    g.strokeStyle = color
+    g.lineWidth = 1.5
+    const radius = 8 + progress * 26
+    g.beginPath(); g.ellipse(cx, baseY - 2, radius, radius * 0.32, 0, 0, Math.PI * 2); g.stroke()
+    // 头顶飘字
+    g.globalAlpha = Math.min(1, (1 - progress) * 2.4)
+    const text = truncate(flash.text, 10)
+    g.font = 'bold 7px "Segoe UI", sans-serif'
+    const width = g.measureText(text).width + 10
+    const x = Math.max(2, Math.min(WORLD_W - width - 2, cx - width / 2))
+    const y = baseY - CHARACTER_DISPLAY_HEIGHT - 40 - progress * 10
+    g.fillStyle = 'rgba(12, 18, 22, 0.9)'
+    roundRect(g, x, y, width, 13, 3); g.fill()
+    g.strokeStyle = color
+    g.lineWidth = 1
+    roundRect(g, x, y, width, 13, 3); g.stroke()
+    g.fillStyle = color
+    g.fillText(text, x + 5, y + 9)
+    g.restore()
+  }
+
   /** 已装备外观：法器悬浮在身侧，技能多一层灵环。 */
   function paintEquipFx(cx: number, baseY: number, member: SceneMember, time: number): void {
     const key = member.id || member.name
-    const weaponTier = weaponEquip.get(key)
+    const weapon = weaponEquip.get(key)
     const skillTier = skillEquip.get(key)
-    if (weaponTier !== undefined) {
-      const color = weaponTier >= 1000 ? '#c39bff' : weaponTier >= 100 ? '#8fe3ff' : '#f2c14e'
-      const bob = Math.sin(time / 620) * 2
-      g.save()
-      g.translate(cx + 15, baseY - 36 + bob)
-      g.globalAlpha = 0.28
-      g.fillStyle = color
-      g.beginPath(); g.ellipse(0, 0, 9, 10, 0, 0, Math.PI * 2); g.fill()
-      g.globalAlpha = 0.95
-      g.fillStyle = color
-      g.fillRect(-1, -8, 2, 15)
-      g.fillRect(-3, -10, 6, 3)
-      g.fillRect(-2, 7, 4, 2)
-      g.font = 'bold 7px "Segoe UI", sans-serif'
-      g.fillText('✦', 5, -6)
-      g.restore()
+    if (weapon !== undefined) {
+      paintEquippedWeapon(cx, baseY, weaponShapeFor(weapon.itemId), toneForTier(weapon.tier), time)
     }
     if (skillTier !== undefined) {
-      const color = skillTier >= 1000 ? '#c39bff' : skillTier >= 100 ? '#8fe3ff' : '#9be36f'
+      const color = toneForTier(skillTier).color
       g.save()
       g.globalAlpha = 0.5 + 0.15 * Math.sin(time / 480)
       g.strokeStyle = color
@@ -1927,6 +2040,7 @@ export function createPixelScene(
       g.restore()
     }
   }
+
 
   /** Name plate, state dot, progress bar, task bubble and unread badge. */
   function paintOverlay(cx: number, deskY: number, member: SceneMember, time: number, lift = 0): void {
@@ -2266,6 +2380,7 @@ export function createPixelScene(
         const lift = TRAVEL_LIFT[travelForm(spot.member)]
         paintOverlay(spot.cx, spot.baseY, spot.member, time, lift)
         paintEquipFx(spot.cx, spot.baseY - lift, spot.member, time)
+        paintEquipFlash(spot.cx, spot.baseY - lift, spot.member, time)
       }
       for (const spot of spots) {
         if (spot.member.viewing !== true) continue
@@ -2369,13 +2484,17 @@ export function createPixelScene(
       const next = nextTravelForm(member.level ?? 0, travelForm(member))
       mountOverride.set(key, next === 'walk' ? 'off' : next)
     },
-    setMount(id, form, variant) {
+    setMount(id, form, variant, label) {
       mountOverride.set(id, form)
       if (variant !== undefined) mountVariant.set(id, variant)
+      if (label !== undefined) equipFlash.set(id, { at: nowMs(), text: label, kind: 'mount' })
+      jumps.set(id, -1)
     },
-    setEquip(id, kind, tier) {
-      if (kind === 'weapon') weaponEquip.set(id, tier)
+    setEquip(id, kind, tier, itemId, label) {
+      if (kind === 'weapon') weaponEquip.set(id, { tier, itemId, label })
       else skillEquip.set(id, tier)
+      if (label !== undefined) equipFlash.set(id, { at: nowMs(), text: label, kind })
+      jumps.set(id, -1)
     },
     dispose() {
       disposed = true
