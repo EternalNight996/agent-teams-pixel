@@ -172,6 +172,20 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   const [sheet, setSheet] = useState<SceneAction | undefined>()
   const sheetRef = useRef<HTMLElement | null>(null)
   // 悬浮面板：可拖动（拖标题栏）、可拖右下角改大小，位置/大小记在 localStorage。
+  const stageRef = useRef<HTMLElement | null>(null)
+  // 悬浮窗贴住「主内容区」右下角：右侧栏（本插件所在栏）不参与，避免看起来像栏内面板。
+  const [sheetRight, setSheetRight] = useState(16)
+  useEffect(() => {
+    if (sheet === undefined) return
+    const measure = (): void => {
+      const stage = stageRef.current
+      const paneLeft = stage === null ? window.innerWidth : stage.getBoundingClientRect().left
+      setSheetRight(Math.max(16, Math.round(window.innerWidth - paneLeft + 16)))
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => { window.removeEventListener('resize', measure) }
+  }, [sheet])
   const [sheetOffset, setSheetOffset] = useState(() => {
     const rect = readSheetRect()
     return { x: rect.x, y: rect.y }
@@ -486,7 +500,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
           </div>
         )
       ) : liveSelected ? (
-        <section className={css.stage} data-office-stage>
+        <section ref={stageRef} className={css.stage} data-office-stage>
           <PixelOffice
             team={selected}
             t={t}
@@ -520,6 +534,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
                 style={{
                   '--sheet-dx': `${sheetOffset.x}px`,
                   '--sheet-dy': `${sheetOffset.y}px`,
+                  right: `${sheetRight}px`,
                   ...(sheetSize.w === undefined ? {} : { width: `${sheetSize.w}px` }),
                   ...(sheetSize.h === undefined ? {} : { height: `${sheetSize.h}px` }),
                 } as CSSProperties}
