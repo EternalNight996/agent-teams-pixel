@@ -17,6 +17,8 @@ import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
 import { QuickStartWizard } from './QuickStartDialog.tsx'
+import { captainKey, cultivationFromXp, memberKey, xpForLevel } from './cultivation.ts'
+import { setCultivationXp, useCultivationVersion, xpOf } from './cultivation-store.ts'
 import { OPEN_HALL_SHEET_EVENT, type HallSheetAction } from './hall-events.ts'
 import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
 import css from './SectHallOverlay.module.css'
@@ -103,7 +105,7 @@ function writePanelRect(rect: PanelRect): void {
   try { window.localStorage.setItem(PANEL_RECT_KEY, JSON.stringify(rect)) } catch { /* private mode */ }
 }
 
-type SheetKind = HallSheetAction
+type SheetKind = HallSheetAction | 'character'
 
 /** 面板预设尺寸：初始给大一些。 */
 const PANEL_SIZES = {
@@ -139,6 +141,8 @@ export function SectHallOverlay({
   const [pendingReview, setPendingReview] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   const [historyTeamId, setHistoryTeamId] = useState<string | undefined>()
+  const [characterId, setCharacterId] = useState<string | undefined>()
+  useCultivationVersion()
   const [sheetAnchor, setSheetAnchor] = useState<{ left: number; top: number; width: number; maxHeight: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
   const [token, setToken] = useState<TokenPoint>(() => readTokenPoint())
@@ -458,12 +462,24 @@ export function SectHallOverlay({
     const taskStatusLabel = (status: string): string => status === 'completed'
       ? t('task.status.completed')
       : status === 'failed' ? t('task.status.failed') : t('task.status.cancelled')
+    const character = characterId === undefined
+      ? undefined
+      : characterId === hall.captainSessionId
+        ? { id: hall.captainSessionId, name: t('office.captain'), key: captainKey(hall.name), isCaptain: true }
+        : (() => {
+            const member = hall.members.find(item => item.id === characterId)
+            return member === undefined
+              ? undefined
+              : { id: member.id, name: member.name, key: memberKey(member.name), isCaptain: false }
+          })()
+    const characterCultivation = character === undefined ? undefined : cultivationFromXp(xpOf(character.key))
     const title = sheet === 'settings' ? t('office.panelConfig')
       : sheet === 'start' ? t('quickstart.title')
-        : sheet === 'inbox' ? t('workspace.inbox')
-          : sheet === 'teams' ? t('office.facility.teams')
-            : sheet === 'board' ? t('workspace.tabBoard')
-              : t('workspace.tabConfig')
+        : sheet === 'character' ? t('office.equipment')
+          : sheet === 'inbox' ? t('workspace.inbox')
+            : sheet === 'teams' ? t('office.facility.teams')
+              : sheet === 'board' ? t('workspace.tabBoard')
+                : t('workspace.tabConfig')
     return createPortal((
       <aside
         className={css.sheet}
@@ -519,6 +535,61 @@ export function SectHallOverlay({
                   onDone={() => { setSheet(undefined) }}
                   onFounded={() => { setPendingReview(true) }}
                 />
+          ) : sheet === 'character' ? (
+            character === undefined || characterCultivation === undefined ? (
+              <p className={css.settingsHint}>{t('workspace.emptyTitle')}</p>
+            ) : (
+              <div className={css.character}>
+                <div className={css.characterHead}>
+                  <span className={css.characterName}>{character.name}</span>
+                  <span className={css.characterLevel}>Lv.{characterCultivation.level} {t(characterCultivation.rankKey)}</span>
+                </div>
+                <div className={css.xpTrack}><span style={{ width: `${Math.round(characterCultivation.ratio * 100)}%` }} /></div>
+                <p className={css.settingsMeta}>{characterCultivation.xp} / {characterCultivation.next} XP</p>
+                <span className={css.historyTitle}>{t('office.levelTest')}</span>
+                <div className={css.sizeRow}>
+                  {[1, 3, 5, 8, 10, 15, 20].map(level => (
+                    <button
+                      key={level}
+                      type="button"
+                      className={css.sizeChip}
+                      data-active={characterCultivation.level === level || undefined}
+                      onClick={() => { setCultivationXp(character.key, xpForLevel(level)) }}
+                    >
+                      Lv.{level}
+                    </button>
+                  ))}
+                </div>
+                <span className={css.historyTitle}>{t('office.equipment')}</span>
+                <div className={css.sizeRow}>
+                  {(['auto', 'sword', 'beast', 'off'] as const).map((form) => {
+                    const disabled = (form === 'sword' && characterCultivation.level < 5)
+                      || (form === 'beast' && characterCultivation.level < 8)
+                    const label = form === 'auto'
+                      ? t('office.mountAuto')
+                      : form === 'sword'
+                        ? t('office.mountSword')
+                        : form === 'beast' ? t('office.mountBeast') : t('office.mountWalk')
+                    return (
+                      <button
+                        key={form}
+                        type="button"
+                        className={css.sizeChip}
+                        disabled={disabled}
+                        onClick={() => { window.dispatchEvent(new CustomEvent('agent-teams:mount', { detail: { id: character.id, form } })) }}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className={css.settingsMeta}>
+                  {t('office.skills')}: {characterCultivation.skills.length === 0
+                    ? t('skill.none')
+                    : characterCultivation.skills.map(skill => t(skill)).join(' / ')}
+                </p>
+              </div>
+            )
           ) : sheet === 'inbox' ? (
             hall.captainInbox.length === 0
               ? <p className={css.settingsHint}>{t('workspace.inboxEmpty')}</p>
@@ -669,11 +740,20 @@ export function SectHallOverlay({
             <span className={css.title}>⛩ {hall.name}</span>
             <span className={css.meta}>{hasTeam ? `${done}/${total}` : t('office.hallNoTeam')}</span>
             {hasTeam && (viewingCaptain || viewingMember !== undefined) && (
-              <span className={css.viewer} data-kind={viewingCaptain ? 'captain' : 'member'} title={t('office.viewingHint')}>
+              <button
+                type="button"
+                className={css.viewer}
+                data-kind={viewingCaptain ? 'captain' : 'member'}
+                title={t('office.equipment')}
+                onClick={() => {
+                  const id = viewingCaptain ? hall.captainSessionId : viewingMember?.id
+                  if (id !== undefined && id !== '') { setCharacterId(id); setSheet('character') }
+                }}
+              >
                 {viewingCaptain
                   ? `👑 ${t('office.viewingCaptain')}`
                   : `◈ ${t('office.viewingMember', { name: viewingMember?.name ?? '' })}`}
-              </span>
+              </button>
             )}
             <button type="button" className={css.headButton} data-control="hall-collapse" aria-expanded onClick={toggleCollapsed}>
               {t('office.collapse')}
@@ -683,7 +763,7 @@ export function SectHallOverlay({
                 <PixelOffice
                   team={hall}
                   t={t}
-                  activeAction={sheet === 'settings' || sheet === 'start' ? null : sheet ?? null}
+                  activeAction={sheet === 'settings' || sheet === 'start' || sheet === 'character' ? null : sheet ?? null}
                   onAction={(action) => {
                     // 无队伍时山门就是开宗入口（与底部「开宗」双向对应）；有队伍时开名册。
                     if (action === 'teams' && !hasTeam) { startSect(); return }
@@ -691,6 +771,7 @@ export function SectHallOverlay({
                   }}
                   onOpenMember={(memberId) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, memberId as SessionId) }}
                   onOpenCaptain={goHome}
+                  onOpenCharacter={(memberId) => { setCharacterId(memberId); setSheet('character') }}
                   viewingSessionId={sessionId}
                   onUnavailable={() => { /* 无会话修士：由场景内提示承担 */ }}
                   onDock={dockToSidebar}

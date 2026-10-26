@@ -266,6 +266,13 @@ export declare const zh: {
     'office.historyCurrent': string;
     'office.viewingState': string;
     'office.levelUp': string;
+    'office.equipment': string;
+    'office.levelTest': string;
+    'office.mountAuto': string;
+    'office.mountSword': string;
+    'office.mountBeast': string;
+    'office.mountWalk': string;
+    'office.skills': string;
     'skill.none': string;
     'skill.aura': string;
     'skill.weapon': string;
@@ -740,6 +747,13 @@ export declare const en: {
     'office.historyCurrent': string;
     'office.viewingState': string;
     'office.levelUp': string;
+    'office.equipment': string;
+    'office.levelTest': string;
+    'office.mountAuto': string;
+    'office.mountSword': string;
+    'office.mountBeast': string;
+    'office.mountWalk': string;
+    'office.skills': string;
     'skill.none': string;
     'skill.aura': string;
     'skill.weapon': string;

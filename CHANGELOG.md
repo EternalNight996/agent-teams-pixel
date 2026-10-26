@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ### Changed
+- Clicking a cultivator's overhead level badge (or the hall's identity chip) opens
+  an equipment sheet: current Lv/境界/XP, level-test presets (Lv.1/3/5/8/10/15/20)
+  that write the global XP directly, unlocked skills, and travel-form buttons
+  (自动 / 御剑 / 神兽 / 步行) gated by their unlock levels.
 - Creating a sect while another exists no longer auto-deletes the current team:
   the wizard asks to replace, and replacement is refused while any task is
   pending/running, so a live run (and its trail) can no longer be wiped by a

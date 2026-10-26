@@ -21,6 +21,8 @@ export interface PixelOfficeProps {
   readonly onOpenCaptain?: () => void
   /** Session whose conversation is open; its cultivator is painted as active. */
   readonly viewingSessionId?: string
+  /** Clicking a member's level badge opens their equipment sheet. */
+  readonly onOpenCharacter?: (memberId: string) => void
   /** A member without a conversation was clicked (nothing to open yet). */
   readonly onUnavailable?: (name: string) => void
   /** A wall facility was picked: the parent decides which panel to open. */
@@ -91,7 +93,7 @@ type Hover =
   | { readonly kind: 'settings'; readonly label: string; readonly hint: string; readonly x: number; readonly y: number }
 
 export function PixelOffice({
-  team, t, onOpenMember, onOpenCaptain, viewingSessionId, onUnavailable, onAction, activeAction, enabledActions,
+  team, t, onOpenMember, onOpenCaptain, onOpenCharacter, viewingSessionId, onUnavailable, onAction, activeAction, enabledActions,
   onDock, onSettings, settingsOpen, teamless,
 }: PixelOfficeProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -230,6 +232,15 @@ export function PixelOffice({
     sceneRef.current?.render(model)
   }, [model])
 
+  useEffect(() => {
+    const onMount = (event: Event): void => {
+      const detail = (event as CustomEvent<{ id?: string; form?: 'auto' | 'sword' | 'beast' | 'off' }>).detail
+      if (detail?.id !== undefined && detail.form !== undefined) sceneRef.current?.setMount(detail.id, detail.form)
+    }
+    window.addEventListener('agent-teams:mount', onMount)
+    return () => { window.removeEventListener('agent-teams:mount', onMount) }
+  }, [])
+
   const sceneMembers = useMemo(() => new Map(model.members.map(member => [member.id, member])), [model])
   const hitAt = (event: ReactPointerEvent<HTMLCanvasElement>): SceneHit | undefined => {
     const canvas = canvasRef.current
@@ -238,7 +249,9 @@ export function PixelOffice({
     return sceneRef.current?.hitTest(event.clientX - rect.left, event.clientY - rect.top)
   }
   const onPointerMove = (event: ReactPointerEvent<HTMLCanvasElement>): void => {
-    const hit = hitAt(event)
+    const rawHit = hitAt(event)
+    // 等级框等同修士热区：悬停显示修士信息。
+    const hit = rawHit?.kind === 'level' ? { kind: 'member' as const, id: rawHit.id } : rawHit
     sceneRef.current?.setHover(hit)
     const canvas = canvasRef.current
     if (hit === undefined) {
@@ -286,6 +299,10 @@ export function PixelOffice({
   const onClick = (event: ReactPointerEvent<HTMLCanvasElement>): void => {
     const hit = hitAt(event)
     if (hit === undefined) return
+    if (hit.kind === 'level') {
+      onOpenCharacter?.(hit.id)
+      return
+    }
     if (hit.kind === 'action') {
       onAction?.(hit.action)
       return

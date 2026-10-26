@@ -14,6 +14,8 @@ export declare const SKILL_UNLOCKS: ReadonlyArray<{
 }>;
 /** 升到下一级还需要的修为（随等级线性增长）。 */
 export declare function xpNeed(level: number): number;
+/** 指定等级所需的累计修为（用于调试/直接提级）。 */
+export declare function xpForLevel(level: number): number;
 export interface Cultivation {
     readonly level: number;
     readonly xp: number;

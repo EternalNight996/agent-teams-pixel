@@ -112,6 +112,8 @@ export interface SceneHandle {
   jump(id: string): void
   /** Cycle one member's travel form: auto → sword → beast → walking. */
   cycleMount(id: string): void
+  /** Force one member's travel form (equipment sheet). */
+  setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off'): void
   /** Cancel the loop and release the context. */
   dispose(): void
 }
@@ -198,7 +200,7 @@ export function createPixelScene(
 ): SceneHandle {
   const context = canvas.getContext('2d')
   if (context === null) {
-    return { render() {}, resize() {}, dispose() {}, setHover() {}, jump() {}, cycleMount() {}, hitTest() { return undefined } }
+    return { render() {}, resize() {}, dispose() {}, setHover() {}, jump() {}, cycleMount() {}, setMount() {}, hitTest() { return undefined } }
   }
   const g = context
   let model: SceneModel | undefined
@@ -1817,6 +1819,18 @@ export function createPixelScene(
       }
     }
 
+    // 头顶等级框也可点：打开该修士的装备页。
+    for (const spot of spots) {
+      if ((spot.member.level ?? 0) <= 0 || spot.member.id === '') continue
+      hitAreas.push({
+        x: Math.max(2, Math.min(WORLD_W - 62, spot.cx - 31)),
+        y: spot.baseY - 122,
+        w: 62,
+        h: 18,
+        hit: { kind: 'level', id: spot.member.id },
+      })
+    }
+
     // 中庭物件最后入表：它们排在点击命中的最前面，不被案几热区吞掉。
     if (model?.sceneObjects?.dock === true) {
       hitAreas.push({
@@ -1969,6 +1983,9 @@ export function createPixelScene(
           ? (level >= 8 ? 'beast' : 'off')
           : current === 'beast' ? 'off' : 'auto'
       mountOverride.set(key, next)
+    },
+    setMount(id, form) {
+      mountOverride.set(id, form)
     },
     dispose() {
       disposed = true

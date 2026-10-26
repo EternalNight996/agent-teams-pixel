@@ -39,6 +39,14 @@ export function xpNeed(level: number): number {
   return 60 + (level - 1) * 45
 }
 
+/** 指定等级所需的累计修为（用于调试/直接提级）。 */
+export function xpForLevel(level: number): number {
+  const target = Math.min(LEVEL_CAP, Math.max(1, Math.floor(level)))
+  let xp = 0
+  for (let current = 1; current < target; current += 1) xp += xpNeed(current)
+  return xp
+}
+
 export interface Cultivation {
   readonly level: number
   readonly xp: number

@@ -105,6 +105,8 @@ export interface SceneHandle {
     jump(id: string): void;
     /** Cycle one member's travel form: auto → sword → beast → walking. */
     cycleMount(id: string): void;
+    /** Force one member's travel form (equipment sheet). */
+    setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off'): void;
     /** Cancel the loop and release the context. */
     dispose(): void;
 }

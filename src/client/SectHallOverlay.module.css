@@ -223,6 +223,8 @@
 .viewer {
   flex: none;
   padding: 1px 7px;
+  font: inherit;
+  cursor: pointer;
   border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 999px;
   font-size: 10.5px;
@@ -399,6 +401,51 @@
 }
 
 /* 名册页的开宗入口：首次开宗与“再开一宗”共用同一条路径。 */
+.character {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.characterHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.characterName {
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.characterLevel {
+  color: #f2c14e;
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.xpTrack {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--dsw-alias-border-l3);
+}
+
+.xpTrack > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #4f9a57;
+  transition: width 160ms ease;
+}
+
+.sizeChip:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
 .historyStart {
   display: inline-flex;
   align-items: center;

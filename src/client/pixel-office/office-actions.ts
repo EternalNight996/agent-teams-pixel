@@ -38,6 +38,8 @@ export type SceneHit =
   | { readonly kind: 'action'; readonly action: SceneAction }
   | { readonly kind: 'dock' }
   | { readonly kind: 'settings' }
+  /** Clicking a cultivator's overhead level badge opens their equipment sheet. */
+  | { readonly kind: 'level'; readonly id: string }
 
 /** Resolve a scene-space point to a facility. */
 export function facilityAt(x: number, y: number): SceneAction | undefined {
