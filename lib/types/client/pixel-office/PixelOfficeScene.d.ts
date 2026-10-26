@@ -29,6 +29,8 @@ export interface SceneMember {
     readonly level?: number;
     /** Localized realm name shown with the level above the head. */
     readonly realm?: string;
+    /** Progress toward the next cultivation level (0..1). */
+    readonly xpRatio?: number;
 }
 /** Copy the scene needs but must not translate itself. */
 export interface SceneLabels {
@@ -97,6 +99,8 @@ export interface SceneHandle {
     setHover(hit: SceneHit | undefined): void;
     /** Make one member hop (double-click feedback). */
     jump(id: string): void;
+    /** Cycle one member's travel form: auto → sword → beast → walking. */
+    cycleMount(id: string): void;
     /** Cancel the loop and release the context. */
     dispose(): void;
 }

@@ -130,6 +130,7 @@ export function PixelOffice({
       viewing: viewingSessionId !== undefined && viewingSessionId === team.captainSessionId,
       level: captainCultivation.level,
       realm: t(captainCultivation.rankKey),
+      xpRatio: Math.min(1, Math.max(0, (captainCultivation.xp - captainCultivation.floor) / Math.max(1, captainCultivation.next - captainCultivation.floor))),
     }
     const members: SceneMember[] = [captain, ...live.map((member): SceneMember => {
       const cultivation = cultivationOf(member.done, member.total, team.createdAt)
@@ -147,6 +148,7 @@ export function PixelOffice({
         viewing: viewingSessionId !== undefined && viewingSessionId === member.id,
         level: cultivation.level,
         realm: t(cultivation.rankKey),
+        xpRatio: Math.min(1, Math.max(0, (cultivation.xp - cultivation.floor) / Math.max(1, cultivation.next - cultivation.floor))),
       }
     })]
     const facilities: SceneFacility[] = onAction === undefined
@@ -295,7 +297,9 @@ export function PixelOffice({
     // 双击：原地跳一下，不切换对话。
     if (event.detail >= 2) {
       if (clickTimer.current !== undefined) { window.clearTimeout(clickTimer.current); clickTimer.current = undefined }
-      sceneRef.current?.jump(member.id || member.name)
+      // 能御剑/骑兽的修士双击切换形态；其余仍用弹跳反馈。
+      if ((member.level ?? 0) >= 5 && member.activity !== 'working') sceneRef.current?.cycleMount(member.id || member.name)
+      else sceneRef.current?.jump(member.id || member.name)
       return
     }
     if (clickTimer.current !== undefined) window.clearTimeout(clickTimer.current)

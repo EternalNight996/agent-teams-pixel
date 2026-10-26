@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### Changed
+- The overhead level badge is now a light-green chip with a small XP bar toward
+  the next level, instead of the old dark pill.
+- Completed/idle cultivators keep their cultivation state (wandering, sword or
+  beast): once tasks are done, double-clicking an eligible cultivator cycles
+  auto → 御剑 → 坐骑 → 步行; low-level or busy cultivators still hop instead.
 - 山门·名册 keeps an 开宗立派 entry even after the sect has run tasks: opening it
   stages a new sect, and the wizard's replace flow takes over when a team already
   exists, so a finished run no longer dead-ends the hall.
