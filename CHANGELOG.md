@@ -8,13 +8,12 @@
   selecting any weapon/mount/skill makes the cultivator hop with a floating
   item name and a 1.4s colour ring. The character sheet explains the immediate
   preview.
-- Added the 宗门志 (志) bottom-bar entry with five tabs: local cultivation
-  breakthrough history (200 entries), the author's QQ group QR, voluntary
-  sponsorship QRs and MIT note, an About tab (version/author/other projects/old
-  dsh-desktop notice), and a feedback tab with privacy-bounded diagnostics,
-  prefilled GitHub issue, copy-diagnostics and copy-AI-prompt actions. Support
-  QRs are served through an allowlisted host route; SPONSOR.md and
-  assets/support are packaged.
+- Added the 宗门志 (志) bottom-bar entry with four tabs in this order: voluntary
+  sponsorship (WeChat QRs + MIT note), the author's QQ group QR, an About tab
+  (version/author/other projects/old dsh-desktop notice) and a feedback tab with
+  privacy-bounded diagnostics, prefilled GitHub issue, copy-diagnostics and
+  copy-AI-prompt actions; it opens on 赞助. Support QRs are served through an
+  allowlisted host route; SPONSOR.md and assets/support are packaged.
 - Idle cultivation follows a faster retention curve: 10 XP/10s at Lv.1,
   accelerating to ~10s/level at Lv.100 (1→100 in ~23 minutes at 3x), then slowly
   stretching (200≈16s, 500≈31s, 1000≈50s, cap≈4.2min). The online streak reaches

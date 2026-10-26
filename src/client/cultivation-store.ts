@@ -10,23 +10,7 @@ import { useSyncExternalStore } from 'react'
 import type { ActivityTeam } from './activity-monitor.ts'
 import {
   captainKey, captainTaskXpFor, cultivationFromXp, idleStreakMultiplier, idleXpPer10s, memberKey, taskXpFor,
-  type CultivationRealmKey,
 } from './cultivation.ts'
-
-/** 一次境界突破记录（修仙历史里展示）。 */
-export interface CultivationMilestone {
-  /** 记录时间（毫秒时间戳）。 */
-  readonly at: number
-  /** 修为键：member:名字 / captain:宗门。 */
-  readonly key: string
-  /** 突破后的等级。 */
-  readonly level: number
-  /** 突破后的境界。 */
-  readonly realm: CultivationRealmKey
-}
-
-/** 修仙历史最多保留的条目数，避免 localStorage 无限增长。 */
-export const CULTIVATION_HISTORY_LIMIT = 200
 
 interface CultivationState {
   xp: Record<string, number>
@@ -35,32 +19,13 @@ interface CultivationState {
   idleAt: Record<string, number>
   /** 连续挂机节拍数，用于 1x→3x 的留存加成。 */
   streak: Record<string, number>
-  /** 境界突破记录，最近的在最后。 */
-  history: CultivationMilestone[]
   tick: number
 }
 
 const STORAGE_KEY = 'agent-teams-pixel.cultivation.v1'
 
 function emptyState(): CultivationState {
-  return { xp: {}, seen: {}, idleAt: {}, streak: {}, history: [], tick: Date.now() }
-}
-
-/** 只接受形状正确的历史条目，坏数据直接丢弃而不是让整份修为存储作废。 */
-function readHistory(value: unknown): CultivationMilestone[] {
-  if (!Array.isArray(value)) return []
-  return value.flatMap((entry): CultivationMilestone[] => {
-    if (typeof entry !== 'object' || entry === null) return []
-    const record = entry as Partial<CultivationMilestone>
-    if (typeof record.at !== 'number' || typeof record.key !== 'string'
-      || typeof record.level !== 'number' || typeof record.realm !== 'string') return []
-    return [{
-      at: record.at,
-      key: record.key,
-      level: record.level,
-      realm: record.realm as CultivationRealmKey,
-    }]
-  }).slice(-CULTIVATION_HISTORY_LIMIT)
+  return { xp: {}, seen: {}, idleAt: {}, streak: {}, tick: Date.now() }
 }
 
 function load(): CultivationState {
@@ -75,7 +40,6 @@ function load(): CultivationState {
       seen: typeof parsed.seen === 'object' && parsed.seen !== null ? parsed.seen : {},
       idleAt: typeof parsed.idleAt === 'object' && parsed.idleAt !== null ? parsed.idleAt : {},
       streak: typeof parsed.streak === 'object' && parsed.streak !== null ? parsed.streak : {},
-      history: readHistory(parsed.history),
       tick: typeof parsed.tick === 'number' ? parsed.tick : Date.now(),
     }
   } catch {
@@ -103,16 +67,7 @@ function notify(): void {
 
 function addXp(key: string, amount: number): boolean {
   if (!(amount > 0)) return false
-  const before = cultivationFromXp(state.xp[key] ?? 0).level
   state.xp[key] = (state.xp[key] ?? 0) + amount
-  const after = cultivationFromXp(state.xp[key] ?? 0)
-  if (after.level > before) {
-    // 一记突破：修仙历史按时间顺序追加，超出上限时丢最旧的。
-    state.history.push({ at: Date.now(), key, level: after.level, realm: after.rankKey })
-    if (state.history.length > CULTIVATION_HISTORY_LIMIT) {
-      state.history = state.history.slice(-CULTIVATION_HISTORY_LIMIT)
-    }
-  }
   return true
 }
 
@@ -133,18 +88,6 @@ export function xpOf(key: string): number {
 
 export function useCultivationVersion(): number {
   return useSyncExternalStore(subscribeCultivation, cultivationVersion, cultivationVersion)
-}
-
-/** 修仙历史快照（最新的在前，最多 CULTIVATION_HISTORY_LIMIT 条）。 */
-export function readCultivationHistory(): readonly CultivationMilestone[] {
-  return state.history.slice().reverse()
-}
-
-/** 历史记录的显示名：把内部键还原成人能读的名字。 */
-export function milestoneName(key: string): string {
-  if (key.startsWith('captain:')) return key.slice('captain:'.length)
-  if (key.startsWith('member:')) return key.slice('member:'.length)
-  return key
 }
 
 /**

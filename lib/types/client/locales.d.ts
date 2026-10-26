@@ -367,7 +367,6 @@ export declare const zh: {
     'office.ascensionSect': string;
     'office.floorAbout': string;
     'office.aboutTitle': string;
-    'about.tab.history': string;
     'about.tab.group': string;
     'about.tab.sponsor': string;
     'about.tab.about': string;
@@ -539,10 +538,6 @@ export declare const zh: {
     'ascension.story.1': string;
     'ascension.story.2': string;
     'ascension.story.3': string;
-    'about.historyIntro': string;
-    'about.historyEmpty': string;
-    'about.historyCount': string;
-    'about.historyHint': string;
     'about.groupHint': string;
     'about.groupCaption': string;
     'about.groupNote': string;
@@ -973,7 +968,6 @@ export declare const en: {
     'office.ascensionSect': string;
     'office.floorAbout': string;
     'office.aboutTitle': string;
-    'about.tab.history': string;
     'about.tab.group': string;
     'about.tab.sponsor': string;
     'about.tab.about': string;
@@ -1145,10 +1139,6 @@ export declare const en: {
     'ascension.story.1': string;
     'ascension.story.2': string;
     'ascension.story.3': string;
-    'about.historyIntro': string;
-    'about.historyEmpty': string;
-    'about.historyCount': string;
-    'about.historyHint': string;
     'about.groupHint': string;
     'about.groupCaption': string;
     'about.groupNote': string;

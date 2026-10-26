@@ -8,7 +8,6 @@ import {
   PLUGIN_REPO, buildAgentPrompt, buildIssueBody, buildIssueTitle, buildIssueUrl, collectDiagnostics,
 } from '../lib/client/feedback.js'
 import { PLUGIN_VERSION } from '../lib/client/version.js'
-import { CULTIVATION_HISTORY_LIMIT, milestoneName, readCultivationHistory } from '../lib/client/cultivation-store.js'
 
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
 
@@ -62,15 +61,6 @@ test('diagnostics include version, environment and team summary', () => {
   assert.ok(text.includes('user agent:'))
   assert.ok(text.includes('viewport:'))
   assert.ok(collectDiagnostics({ version: '1.0.0' }).includes('team: none'))
-})
-
-test('cultivation milestones resolve readable names and start empty', () => {
-  assert.equal(milestoneName('member:剑修'), '剑修')
-  assert.equal(milestoneName('captain:斗法宗'), '斗法宗')
-  assert.equal(milestoneName('custom-key'), 'custom-key')
-  assert.ok(CULTIVATION_HISTORY_LIMIT >= 50 && CULTIVATION_HISTORY_LIMIT <= 1000)
-  // Node 里没有 localStorage：历史必须是空数组而不是抛错。
-  assert.deepEqual([...readCultivationHistory()], [])
 })
 
 test('support QR assets ship with the package', () => {

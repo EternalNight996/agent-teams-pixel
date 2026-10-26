@@ -995,7 +995,7 @@
 }
 
 
-/* 宗门志：修仙历史 / 交流群 / 赞助 / 关于 / 反馈异常。 */
+/* 宗门志：赞助 / 交流群 / 关于 / 反馈异常。 */
 .about {
   display: flex;
   flex-direction: column;
@@ -1105,47 +1105,6 @@
 .qrCard figcaption {
   color: var(--dsw-alias-label-secondary);
   font-size: 9.5px;
-}
-
-/* 修仙历史。 */
-.milestoneList {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.milestoneRow {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: baseline;
-  gap: 8px;
-  padding: 5px 9px;
-  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 70%, transparent);
-  border-radius: 7px;
-  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 55%, transparent);
-}
-
-.milestoneWhen {
-  overflow: hidden;
-  color: var(--dsw-alias-label-tertiary);
-  font-size: 9px;
-  font-variant-numeric: tabular-nums;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.milestoneWho {
-  color: var(--dsw-alias-label-primary);
-  font-size: 10px;
-}
-
-.milestoneRealm {
-  color: #f2c14e;
-  font-size: 9px;
-  white-space: nowrap;
 }
 
 /* 作者项目列表。 */

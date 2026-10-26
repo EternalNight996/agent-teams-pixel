@@ -16,7 +16,7 @@ import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
 import { QuickStartWizard } from './QuickStartDialog.tsx'
 import { CULTIVATION_ITEMS, captainKey, cultivationFromXp, idleXpPer10s, memberKey } from './cultivation.ts'
-import { milestoneName, readCultivationHistory, useCultivationVersion, xpOf } from './cultivation-store.ts'
+import { useCultivationVersion, xpOf } from './cultivation-store.ts'
 import { OPEN_HALL_SHEET_EVENT, type HallSheetAction } from './hall-events.ts'
 import { ASCENSION_RANKS, ASCENSION_STORY, ASCENSION_TIPS, rankAtLevel } from './immortals.ts'
 import { PLUGIN_REPO, buildAgentPrompt, buildIssueUrl, collectDiagnostics } from './feedback.ts'
@@ -138,8 +138,8 @@ function writePanelRect(rect: PanelRect): void {
 
 type SheetKind = HallSheetAction | 'character'
 
-/** 「宗门志」里的五个页签。 */
-type AboutTab = 'history' | 'group' | 'sponsor' | 'about' | 'feedback'
+/** 「宗门志」里的四个页签（赞助排第一）。 */
+type AboutTab = 'sponsor' | 'group' | 'about' | 'feedback'
 
 /** 物品品阶：按解锁等级着色，越晚解锁越贵气（纯展示，不参与数值）。 */
 function itemTier(level: number): 'mortal' | 'rare' | 'epic' | 'legendary' {
@@ -186,7 +186,7 @@ export function SectHallOverlay({
   const equipped: EquippedSlots = characterId === undefined ? {} : (equippedByCharacter[characterId] ?? {})
   useCultivationVersion()
   // 宗门志：页签 + 反馈草稿 + 复制结果提示。
-  const [aboutTab, setAboutTab] = useState<AboutTab>('history')
+  const [aboutTab, setAboutTab] = useState<AboutTab>('sponsor')
   const [feedbackText, setFeedbackText] = useState('')
   const [aboutNotice, setAboutNotice] = useState('')
   const [sheetAnchor, setSheetAnchor] = useState<{ left: number; top: number; width: number; maxHeight: number } | undefined>()
@@ -532,8 +532,7 @@ export function SectHallOverlay({
           })),
         ].sort((left, right) => right.cultivation.level - left.cultivation.level
           || right.cultivation.xp - left.cultivation.xp)
-    // 宗门志：修仙历史 + 反馈诊断（只在打开该页时采样）。
-    const milestones = sheet === 'about' ? readCultivationHistory() : []
+    // 宗门志：反馈诊断（只在打开该页时采样）。
     const diagnostics = sheet === 'about' && aboutTab === 'feedback'
       ? collectDiagnostics({
           version: PLUGIN_VERSION,
@@ -662,9 +661,8 @@ export function SectHallOverlay({
             <div className={css.about}>
               <div className={css.aboutTabs} role="tablist">
                 {([
-                  ['history', 'about.tab.history'],
-                  ['group', 'about.tab.group'],
                   ['sponsor', 'about.tab.sponsor'],
+                  ['group', 'about.tab.group'],
                   ['about', 'about.tab.about'],
                   ['feedback', 'about.tab.feedback'],
                 ] as const).map(([id, key]) => (
@@ -680,28 +678,7 @@ export function SectHallOverlay({
                   </button>
                 ))}
               </div>
-              {aboutTab === 'history' ? (
-                <div className={css.aboutSection}>
-                  <p className={css.settingsHint}>{t('about.historyIntro')}</p>
-                  {milestones.length === 0 ? (
-                    <p className={css.settingsHint}>{t('about.historyEmpty')}</p>
-                  ) : (
-                    <>
-                      <span className={css.settingsMeta}>{t('about.historyCount', { count: milestones.length })}</span>
-                      <ol className={css.milestoneList}>
-                        {milestones.map((entry, index) => (
-                          <li key={`${entry.at}:${entry.key}:${entry.level}:${index}`} className={css.milestoneRow}>
-                            <span className={css.milestoneWhen}>{new Date(entry.at).toLocaleString()}</span>
-                            <span className={css.milestoneWho}>{milestoneName(entry.key)}</span>
-                            <span className={css.milestoneRealm}>Lv.{entry.level} · {t(entry.realm)}</span>
-                          </li>
-                        ))}
-                      </ol>
-                      <p className={css.settingsMeta}>{t('about.historyHint')}</p>
-                    </>
-                  )}
-                </div>
-              ) : aboutTab === 'group' ? (
+              {aboutTab === 'group' ? (
                 <div className={css.aboutSection}>
                   <p className={css.settingsHint}>{t('about.groupHint')}</p>
                   <figure className={css.qrCard}>
