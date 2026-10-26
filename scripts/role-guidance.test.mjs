@@ -33,7 +33,8 @@ test('frontend/backend/integrator contracts stay in disjoint layers', () => {
   assert.match(backend, /contract|migration|authz/)
   assert.match(backend, /edit UI/)
   assert.match(integrator, /end-to-end smoke/)
-  assert.match(integrator, /contract drift/)
+  assert.match(integrator, /drift/)
+  assert.match(integrator, /draft the API\/UI contract/)
 })
 
 test('member persona appends the contract only for recognized software roles', () => {
@@ -55,7 +56,37 @@ test('the fullstack template builds a contract -> parallel layers -> integration
   assert.deepEqual(byId.get('integrate')?.dependencies, ['frontend', 'backend'])
   assert.deepEqual(byId.get('verify')?.dependencies, ['integrate'])
   assert.deepEqual(byId.get('review')?.dependencies, ['verify'])
-  assert.equal(byId.get('contract')?.assignee, '阵修')
+  assert.equal(byId.get('contract')?.assignee, '合契师')
   assert.equal(byId.get('frontend')?.assignee, '灵绘师')
   assert.equal(byId.get('backend')?.assignee, '地脉师')
+  // Lean roster: the integrator owns both the contract and the final glue.
+  assert.equal(plan.members.length, 5)
+  assert.ok(!roles.includes('architect'))
+  assert.equal(roles.filter(role => role === 'integrator').length, 1)
+})
+
+test('the full-stack prompt and DAG stay within an efficiency budget', () => {
+  const plan = buildQuickStartPlan('implement a booking flow', 'fullstack')
+  const byId = new Map(plan.tasks.map(task => [task.id, task]))
+  const depth = id => {
+    const task = byId.get(id)
+    return task === undefined || (task.dependencies ?? []).length === 0
+      ? 1
+      : 1 + Math.max(...(task.dependencies ?? []).map(dependency => depth(dependency)))
+  }
+  assert.equal(depth('review'), 5, 'contract -> layers -> integrate -> verify -> review')
+  assert.equal(byId.get('frontend')?.dependencies.length, 1)
+  assert.equal(byId.get('backend')?.dependencies.length, 1)
+  const widths = new Map()
+  for (const task of plan.tasks) {
+    const level = depth(task.id)
+    widths.set(level, (widths.get(level) ?? 0) + 1)
+  }
+  assert.equal(Math.max(...widths.values()), 2, 'only frontend/backend run in parallel')
+
+  const contracts = ['integrator', 'frontend', 'backend', 'verifier', 'reviewer']
+    .map(role => roleGuidance(role) ?? '')
+  const totalChars = contracts.reduce((sum, text) => sum + text.length, 0)
+  assert.ok(totalChars <= 5200, `five role contracts total ${totalChars} chars`)
+  for (const text of contracts) assert.match(text, /Working budget:/)
 })

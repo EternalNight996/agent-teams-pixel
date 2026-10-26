@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 ### Changed
+- Team efficiency / prompt score pass: the full-stack template is now a 5-person
+  team (integrator owns both the contract and final integration; no separate
+  architect), and every software role contract carries a Working budget (in-scope
+  reads only, no task restatement, evidence bullets, stop after two blocked
+  attempts). Frontend reuses existing components, verifier reuses implementation
+  evidence rather than rerunning everything, reviewer reviews the diff/evidence.
+  Tests cap the five contracts at 5,200 chars and the DAG at depth 5 / width 2.
 - Idle XP attribution now follows a **durable subagent transcript** even when the
   host keeps the parent captain as `current`: if a retained child owns the main
   view, that member is the one who idles. This fixes member conversations awarding

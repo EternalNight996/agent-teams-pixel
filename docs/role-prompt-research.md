@@ -43,16 +43,32 @@
 
 新增 fullstack 快速模板：
 
-    contract (architect)
+    contract (integrator, owns the contract)
       ├─ frontend (frontend) ─┐
-      └─ backend  (backend)  ─┴─ integrate (integrator)
+      └─ backend  (backend)  ─┴─ integrate (same integrator)
                                     └─ verify (verifier) └─ review (reviewer)
 
 模板在 [src/quick-start.ts](../src/quick-start.ts)，UI 入口在 QuickStartDialog。
+五人是刻意压过的编制：architect 不再单列，契约与最终联调都由 integrator 拥有，
+少一个成员前缀和一次跨角色交接。
 
-## 4. 成本与收益
+## 4. 成本与收益（当前实测）
 
-- 每个专业成员固定前缀增加约 150–250 tokens；但只在对应角色出现，且前缀稳定，缓存命中不受影响；
+角色 contract 实测（字符 / 约 tokens）：
+
+| 角色 | chars | ~tokens |
+|---|---:|---:|
+| integrator | 819 | 205 |
+| frontend | 891 | 223 |
+| backend | 797 | 199 |
+| verifier | 744 | 186 |
+| reviewer | 755 | 189 |
+| **合计** | **4,006** | **~1,002** |
+
+- 每个成员只看到自己那一段（约 190–225 tokens），不是五段全付；前缀固定，缓存不受影响。
+- 新增 Working budget：只读范围内文件、不复述任务/不粘贴大文件、证据化汇报、同一阻塞两次失败即停下报告；用于压返工与长输出。
+- fullstack 模板：6 个任务、5 名成员、DAG 深度 5、最大并行宽度 2（frontend/backend 并行）；契约与联调同一人，少一次交接。
+- 对比上一版 6 人（architect + frontend + backend + integrator + verifier + reviewer）：少一个成员前缀、少一次跨角色交接。真实模型基准里成员 system prompt 约 9.1k chars（~2.3k tokens/请求）；少一个成员在 12–16 个请求量级上可省约 2.8–3.7 万输入 tokens（多数为缓存读），但**这是结构估算，不是 A/B 实测**。
 - 收益应体现在“少返工、少跨层误改、验收证据齐”，而不是单次 token 更少；
 - 需要真实模型 A/B 验证：单 agent vs 团队、前端/后端角色有无专用 contract，比较墙钟、token、一次通过率。
 

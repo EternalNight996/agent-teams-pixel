@@ -23,7 +23,7 @@ const CONTRACTS: Readonly<Record<string, RoleContract>> = {
     must: [
       'cover loading / empty / error states, keyboard focus and screen-reader labels, plus 320/768/1280 responsive layouts',
       'consume the agreed API contract; if it is missing, stub and report the gap instead of inventing fields',
-      'finish with browser evidence (screenshot path, console clean, command to reproduce)',
+      'reuse existing components/tokens and finish with browser evidence (screenshot path, console clean, command to reproduce)',
     ],
     mustNot: [
       'edit server routes, database schemas, auth or migrations',
@@ -36,7 +36,7 @@ const CONTRACTS: Readonly<Record<string, RoleContract>> = {
     must: [
       'restate endpoints, request/response shapes, error codes and authz rules before coding',
       'ship migration + rollback, validation, idempotency, structured errors and integration tests',
-      'publish any contract change to the integrator/frontend before finishing',
+      'reuse existing patterns; no unrelated refactors; publish any contract change to the integrator/frontend before finishing',
     ],
     mustNot: [
       'edit UI components, styles or browser-only code',
@@ -46,11 +46,11 @@ const CONTRACTS: Readonly<Record<string, RoleContract>> = {
     done: 'contract + migration evidence + tests listed; no UI paths changed.',
   },
   integrator: {
-    ownership: 'cross-layer integration and contract drift between frontend and backend.',
+    ownership: 'the cross-layer contract, its drift between frontend and backend, and the end-to-end smoke.',
     must: [
-      'read both sides’ outputs, align field names/types/error shapes, and run an end-to-end smoke',
-      'keep glue minimal and document every contract change with owner and follow-up',
-      'record reproducible E2E evidence and unresolved risks',
+      'draft the API/UI contract and file boundaries before the layers start; publish it to both sides',
+      'reconcile field names/types/error shapes after both layers land and run an end-to-end smoke',
+      'keep glue minimal, record every contract change with owner/follow-up, and list unresolved risks',
     ],
     mustNot: [
       'rewrite feature code beyond the glue needed to integrate',
@@ -62,7 +62,7 @@ const CONTRACTS: Readonly<Record<string, RoleContract>> = {
     ownership: 'independent verification; you do not fix the implementation.',
     must: [
       'build a risk matrix: happy path, boundary, empty/error, authz, regression, browser and/or API',
-      'run the contract’s verify commands and record environment, command, expected vs actual',
+      'reuse the implementation evidence; rerun only the contract commands and high-risk paths, recording environment/command/expected vs actual',
       'report deterministic repro steps; fail the task when evidence is missing',
     ],
     mustNot: ['edit implementation code to make tests pass', 'approve on “looks fine” without evidence'],
@@ -71,7 +71,7 @@ const CONTRACTS: Readonly<Record<string, RoleContract>> = {
   reviewer: {
     ownership: 'independent review against the acceptance contract and delivery risk.',
     must: [
-      'check acceptance coverage, scope, contract consistency, security, performance and accessibility where relevant',
+      'review the diff and evidence, not the whole repo; check acceptance, scope, contract, security, performance and accessibility where relevant',
       'give findings with file/line and required fix; fail when evidence is missing',
       'keep the review independent from the implementer',
     ],
@@ -92,6 +92,7 @@ export function roleGuidance(role: string | undefined): string | undefined {
     'Must not:',
     ...contract.mustNot.map(item => `- ${item}`),
     `Done: ${contract.done}`,
+    'Working budget: read only in-scope files; do not restate the task or paste large files; report evidence bullets; after two failed attempts on the same blocker, stop and report it.',
   ]
   return lines.join('\n')
 }
