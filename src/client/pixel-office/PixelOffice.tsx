@@ -16,6 +16,8 @@ export interface PixelOfficeProps {
   readonly t: AgentTeamsTranslate
   /** Open one member's subagent transcript. */
   readonly onOpenMember?: (memberId: string) => void
+  /** Clicking the captain returns to the main conversation. */
+  readonly onOpenCaptain?: () => void
   /** A member without a conversation was clicked (nothing to open yet). */
   readonly onUnavailable?: (name: string) => void
   /** A wall facility was picked: the parent decides which panel to open. */
@@ -86,7 +88,7 @@ type Hover =
   | { readonly kind: 'settings'; readonly label: string; readonly hint: string; readonly x: number; readonly y: number }
 
 export function PixelOffice({
-  team, t, onOpenMember, onUnavailable, onAction, activeAction, enabledActions,
+  team, t, onOpenMember, onOpenCaptain, onUnavailable, onAction, activeAction, enabledActions,
   onDock, onSettings, settingsOpen, teamless,
 }: PixelOfficeProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -270,6 +272,8 @@ export function PixelOffice({
     }
     const member = sceneMembers.get(hit.id)
     if (member === undefined) return
+    // 掌门没有成员子会话：点他回到主对话。
+    if (member.isLeader) { onOpenCaptain?.(); return }
     // 还没有对话（未创建会话的修士）不跳转，只提示。
     if (member.id === '') { onUnavailable?.(member.name); return }
     onOpenMember?.(member.id)

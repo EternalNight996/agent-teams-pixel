@@ -8,6 +8,8 @@ export interface PixelOfficeProps {
     readonly t: AgentTeamsTranslate;
     /** Open one member's subagent transcript. */
     readonly onOpenMember?: (memberId: string) => void;
+    /** Clicking the captain returns to the main conversation. */
+    readonly onOpenCaptain?: () => void;
     /** A member without a conversation was clicked (nothing to open yet). */
     readonly onUnavailable?: (name: string) => void;
     /** A wall facility was picked: the parent decides which panel to open. */
@@ -25,4 +27,4 @@ export interface PixelOfficeProps {
     /** 还没有队伍：山门在场景里改作「开宗」入口，与底部按钮一致。 */
     readonly teamless?: boolean;
 }
-export declare function PixelOffice({ team, t, onOpenMember, onUnavailable, onAction, activeAction, enabledActions, onDock, onSettings, settingsOpen, teamless, }: PixelOfficeProps): import("react").JSX.Element;
+export declare function PixelOffice({ team, t, onOpenMember, onOpenCaptain, onUnavailable, onAction, activeAction, enabledActions, onDock, onSettings, settingsOpen, teamless, }: PixelOfficeProps): import("react").JSX.Element;

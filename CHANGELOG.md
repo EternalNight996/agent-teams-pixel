@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 ### Changed
+- 山门·名册 marks the live sect with a green 当前 banner and tags archived runs
+  as 历史; selecting a past run shows its historic roster/state.
+- Clicking the 掌门 in the hall scene (or the 掌门 card in 宗门进度) now returns to
+  the captain's main conversation instead of opening a member transcript.
+- The main-chat team card also lists the latest task start/completion events
+  alongside the captain↔member messages, so a task starting is visible in the
+  conversation in real time.
 - 山门·名册 no longer duplicates the live 宗门进度 member cards: it is now a
   history sheet listing archived sect runs (with their historic roster) plus the
   current sect's finished tasks.

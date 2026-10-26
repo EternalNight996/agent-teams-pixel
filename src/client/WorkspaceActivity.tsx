@@ -75,7 +75,7 @@ export function ActivitySurface({ bridge, state, ...props }: ActivityPanelProps 
   return <WorkspaceMonitor {...props} sidebar={sidebar} state={state} />
 }
 
-function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDirectories }: ActivityPanelProps & {
+function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, openCaptain, modelDirectories }: ActivityPanelProps & {
   /** 右侧栏服务可能被宿主回收（右侧栏关闭、懒加载）；缺失时按「当前会话在前台」处理。 */
   sidebar?: ISidebarRight
   state: WorkspaceActivityState
@@ -173,6 +173,7 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDi
       sessionId={current}
       modelDirectories={modelDirectories}
       openMember={openMember}
+      openCaptain={openCaptain}
       sidebar={sidebar}
       tabKind={TEAM_TAB_KIND}
     />

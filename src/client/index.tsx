@@ -28,7 +28,7 @@ import { agentTeamsCardDefinition } from './agent-teams-card-definition.ts'
 import {
   AGENT_TEAMS_LOCALE_NAMESPACE, en, zh, type AgentTeamsLocaleKey,
 } from './locales.ts'
-import { openAgentTeamMember, type AgentTeamsLayoutNavigator, type AgentTeamsWorkspaceNavigator } from './session-navigation.ts'
+import { openAgentTeamCaptain, openAgentTeamMember, type AgentTeamsLayoutNavigator, type AgentTeamsWorkspaceNavigator } from './session-navigation.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
@@ -63,6 +63,13 @@ export function apply(ctx: ClientContext): void {
     () => ctx.locale.register(AGENT_TEAMS_LOCALE_NAMESPACE, { zh, en }),
     'agent-teams: dictionaries',
   )
+  const openCaptain = (captainSessionId: SessionId): void => {
+    try {
+      openAgentTeamCaptain(ctx.sessions, captainSessionId, ctx.layout as AgentTeamsLayoutNavigator, ctx.get('uiWorkspace') as AgentTeamsWorkspaceNavigator | undefined)
+    } catch (error: unknown) {
+      console.warn(`agent-teams: failed to open captain transcript ${captainSessionId}: ${String(error)}`)
+    }
+  }
   const openMember = (parentId: SessionId, childId: SessionId): void => {
     void openAgentTeamMember(ctx.sessions, parentId, childId, ctx.layout as AgentTeamsLayoutNavigator, ctx.get('uiWorkspace') as AgentTeamsWorkspaceNavigator | undefined).catch((error: unknown) => {
       console.warn(`agent-teams: failed to open member transcript ${childId}: ${String(error)}`)
@@ -80,6 +87,7 @@ export function apply(ctx: ClientContext): void {
       sessionsList={ctx.sessions.list}
       modelDirectories={ctx.modelDirectories}
       openMember={openMember}
+      openCaptain={openCaptain}
       t={t}
     />
     )

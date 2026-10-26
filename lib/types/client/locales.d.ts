@@ -29,6 +29,9 @@ export declare const zh: {
     'workspace.verdictStale': string;
     'card.memberCount': string;
     'card.comms': string;
+    'card.task.start': string;
+    'card.task.completed': string;
+    'card.task.failed': string;
     'action.openActivityPanel': string;
     'activity.panelButton': string;
     'activity.badgeAria': string;
@@ -260,6 +263,8 @@ export declare const zh: {
     'office.floorInbox': string;
     'office.floorSettings': string;
     'office.historyTeams': string;
+    'office.historyCurrent': string;
+    'office.historyPast': string;
     'office.taskHistory': string;
     'office.historyEmpty': string;
     'office.scene.dockHint': string;
@@ -481,6 +486,9 @@ export declare const en: {
     'workspace.verdictStale': string;
     'card.memberCount': string;
     'card.comms': string;
+    'card.task.start': string;
+    'card.task.completed': string;
+    'card.task.failed': string;
     'action.openActivityPanel': string;
     'activity.panelButton': string;
     'activity.badgeAria': string;
@@ -712,6 +720,8 @@ export declare const en: {
     'office.floorInbox': string;
     'office.floorSettings': string;
     'office.historyTeams': string;
+    'office.historyCurrent': string;
+    'office.historyPast': string;
     'office.taskHistory': string;
     'office.historyEmpty': string;
     'office.scene.dockHint': string;

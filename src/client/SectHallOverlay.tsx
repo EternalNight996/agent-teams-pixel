@@ -114,7 +114,7 @@ const PANEL_SIZES = {
 } as const
 
 export function SectHallOverlay({
-  team, history = [], t, sessionId, modelDirectories, openMember, sidebar, tabKind,
+  team, history = [], t, sessionId, modelDirectories, openMember, openCaptain, sidebar, tabKind,
 }: {
   /** 无队伍时缺省：浮层仍常驻，渲染一座只有掌门的空洞府。 */
   readonly team?: ActivityTeam
@@ -125,6 +125,8 @@ export function SectHallOverlay({
   readonly sessionId?: SessionId
   readonly modelDirectories: ModelDirectoryResolver
   readonly openMember: (parentId: SessionId, childId: SessionId) => void
+  /** 回到掌门所在的主对话（点击场景里的掌门）。 */
+  readonly openCaptain?: (captainSessionId: SessionId) => void
   /** 右侧栏服务：归栏时在这里打开洞府页面；缺失时只收成令牌。 */
   readonly sidebar?: ISidebarRight
   /** 洞府页面在右侧栏的 kind。 */
@@ -156,6 +158,10 @@ export function SectHallOverlay({
   const hasTeam = team !== undefined
   // 在修士子会话里洞府展示的是主队伍，成员跳转必须用主会话 id 作为 parent。
   const ownerSessionId = (team?.captainSessionId ?? sessionId) as SessionId | undefined
+  // 点击掌门：回到他所在的主对话（而不是打开一个“成员子会话”）。
+  const goHome = (): void => {
+    if (openCaptain !== undefined && hall.captainSessionId !== '') openCaptain(hall.captainSessionId as SessionId)
+  }
 
   useEffect(() => {
     if (!pendingReview || !hasTeam) return
@@ -517,6 +523,14 @@ export function SectHallOverlay({
                 : <TeamConfigPanel team={hall} t={t} />
           ) : sheet === 'teams' ? (
             <div className={css.history}>
+              {hasTeam && (
+                <div className={css.historyCurrent} data-current="true">
+                  <span className={css.historyCurrentDot} aria-hidden />
+                  <span className={css.historyCurrentBadge}>{t('office.historyCurrent')}</span>
+                  <span className={css.historyCurrentName}>{hall.name}</span>
+                  <span className={css.historyCurrentMeta}>{done}/{total} · {t('team.stats.members', { count: hall.members.length })}</span>
+                </div>
+              )}
               {history.length === 0 && historyTasks.length === 0 && (
                 <p className={css.settingsHint}>{t('office.historyEmpty')}</p>
               )}
@@ -534,7 +548,11 @@ export function SectHallOverlay({
                           data-active={selectedHistory?.teamId === team.teamId || undefined}
                           onClick={() => { setHistoryTeamId(team.teamId) }}
                         >
-                          <span className={css.historyName}>{team.name}</span>
+                          <span className={css.historyName}>
+                            <span className={css.historyPastDot} aria-hidden />
+                            {team.name}
+                            <span className={css.historyPastBadge}>{t('office.historyPast')}</span>
+                          </span>
                           <span className={css.historyMeta}>{done}/{team.tasks.length} · {t('team.stats.members', { count: team.members.length })}</span>
                         </button>
                       )
@@ -547,6 +565,7 @@ export function SectHallOverlay({
                         t={t}
                         historic
                         workspace
+                        onOpenCaptain={openCaptain === undefined ? undefined : () => { openCaptain(selectedHistory.captainSessionId as SessionId) }}
                         onNavigate={(_parent, child) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, child) }}
                       />
                     </div>
@@ -577,6 +596,7 @@ export function SectHallOverlay({
                   team={hall}
                   t={t}
                   workspace
+                  onOpenCaptain={goHome}
                   onNavigate={(_parent, child) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, child) }}
                   onContinuePlanning={() => { setSheet(undefined) }}
                   onDiscarded={() => { setSheet(undefined) }}
@@ -641,6 +661,7 @@ export function SectHallOverlay({
                     toggleSheet(action)
                   }}
                   onOpenMember={(memberId) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, memberId as SessionId) }}
+                  onOpenCaptain={goHome}
                   onUnavailable={() => { /* 无会话修士：由场景内提示承担 */ }}
                   onDock={dockToSidebar}
                   onSettings={() => { toggleSheet('settings') }}

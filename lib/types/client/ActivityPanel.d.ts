@@ -24,11 +24,13 @@ import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/c
 import { type ActivityTeam } from './activity-monitor.ts';
 import type { AgentTeamsCardData } from './agent-teams-card-definition.ts';
 import type { AgentTeamsTranslate } from './locales.ts';
-export declare function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscarded, onNavigate, t, historic, workspace }: {
+export declare function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscarded, onNavigate, onOpenCaptain, t, historic, workspace }: {
     readonly team: ActivityTeam;
     readonly modelDirectory?: ModelDirectory;
     readonly onContinuePlanning?: () => void;
     readonly onDiscarded?: () => void;
+    /** Clicking the captain card returns to the main conversation. */
+    readonly onOpenCaptain?: () => void;
     /** Navigate to a member transcript (floater hides immediately). */
     readonly onNavigate: (parentId: SessionId, childId: SessionId) => void;
     readonly t: AgentTeamsTranslate;
@@ -46,5 +48,7 @@ export type ActivityPanelProps = {
     readonly sessionsList: ObservableSnapshot<SessionListState>;
     readonly modelDirectories: ModelDirectoryResolver;
     readonly openMember: (parentId: SessionId, childId: SessionId) => void;
+    /** Return to the team's main conversation (captain session). */
+    readonly openCaptain?: (captainSessionId: SessionId) => void;
 } & PropsLocale<'agentTeams'>;
 export declare function ActivityPanel({ sessionsList, modelDirectories, openMember, t, conversationVisible }: ActivityPanelProps): import("react").JSX.Element | null;

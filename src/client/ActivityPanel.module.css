@@ -682,6 +682,14 @@
   min-width: 0;
 }
 
+.captainNode[data-clickable='true'] {
+  cursor: pointer;
+}
+
+.captainNode[data-clickable='true']:hover {
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 13%, var(--dsw-alias-bg-layer-1));
+}
+
 .captainNode {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) auto;

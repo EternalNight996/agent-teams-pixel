@@ -85,6 +85,11 @@ export function AgentTeamsSummary({ data, openMember, sessionId, t }: AgentTeams
     members: snapshot?.members.map((member) => ({ id: member.id, name: member.name, role: member.role })) ?? data.members,
   }), [data, owner, snapshot])
   const messages = (snapshot?.messages ?? []).slice(-8)
+  // 任务开始/完成也同步进主对话卡片，而不只是修士之间的消息。
+  const taskEvents = [...(snapshot?.tasks ?? [])]
+    .filter(task => task.updatedAt !== undefined)
+    .sort((left, right) => (right.updatedAt ?? 0) - (left.updatedAt ?? 0))
+    .slice(0, 3)
   return (
     <section className={css.root} data-agent-teams-card data-team-id={resolved.teamId}>
       <header className={css.head}>
@@ -101,9 +106,28 @@ export function AgentTeamsSummary({ data, openMember, sessionId, t }: AgentTeams
           {t('workspace.focus')}
         </button>
       </header>
-      {messages.length > 0 && (
+      {(messages.length > 0 || taskEvents.length > 0) && (
         <div className={css.comms} data-team-comms>
           <span className={css.commsTitle}>{t('card.comms')}</span>
+          {taskEvents.length > 0 && (
+            <div className={css.commsTasks} data-team-comms-tasks>
+              {taskEvents.map((task) => {
+                const state = task.status === 'completed'
+                  ? 'completed'
+                  : task.status === 'failed' || task.status === 'cancelled' ? 'failed' : 'start'
+                const key = state === 'completed'
+                  ? 'card.task.completed'
+                  : state === 'failed' ? 'card.task.failed' : 'card.task.start'
+                const glyph = state === 'completed' ? '✓' : state === 'failed' ? '✕' : '▶'
+                return (
+                  <span key={task.id} className={css.commsTask} data-state={state}>
+                    <span aria-hidden>{glyph}</span>
+                    {t(key, { taskId: task.id, assignee: task.assignee || t('task.assignee.unclaimed') })}
+                  </span>
+                )
+              })}
+            </div>
+          )}
           <ul className={css.commsList}>
             {messages.map((message) => {
               const fromCaptain = message.from === 'captain' || message.from === ''

@@ -29,6 +29,11 @@ export interface AgentTeamsLayoutNavigator {
     beginNavigation?(): AbortSignal;
 }
 /**
+ * Return from a member transcript to the team's main conversation.
+ * Falls back to the workspace navigator when the legacy `open` action is absent.
+ */
+export declare function openAgentTeamCaptain(sessions: AgentTeamsSessionNavigator, sessionId: SessionId, layout?: AgentTeamsLayoutNavigator, workspace?: AgentTeamsWorkspaceNavigator): void;
+/**
  * Open one member's persisted transcript.
  *
  * Harness rc.8 intentionally removed cold subagents from the ordinary session

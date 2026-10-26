@@ -163,6 +163,34 @@
   line-height: 14px;
 }
 
+.commsTasks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.commsTask {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 10%, transparent);
+  color: var(--dsw-alias-state-business-primary);
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.commsTask[data-state='completed'] {
+  background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 10%, transparent);
+  color: var(--dsw-alias-state-success-primary);
+}
+
+.commsTask[data-state='failed'] {
+  background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 10%, transparent);
+  color: var(--dsw-alias-state-error-primary);
+}
+
 .commsList {
   display: flex;
   flex-direction: column;

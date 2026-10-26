@@ -3,7 +3,7 @@ import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/cli
 import type { SessionId } from '@deepseek-ai/dsh-session/types';
 import type { ActivityTeam } from './activity-monitor.ts';
 import type { AgentTeamsTranslate } from './locales.ts';
-export declare function SectHallOverlay({ team, history, t, sessionId, modelDirectories, openMember, sidebar, tabKind, }: {
+export declare function SectHallOverlay({ team, history, t, sessionId, modelDirectories, openMember, openCaptain, sidebar, tabKind, }: {
     /** 无队伍时缺省：浮层仍常驻，渲染一座只有掌门的空洞府。 */
     readonly team?: ActivityTeam;
     /** 本掌门会话下已归档的历史宗门（名册页展示）。 */
@@ -13,6 +13,8 @@ export declare function SectHallOverlay({ team, history, t, sessionId, modelDire
     readonly sessionId?: SessionId;
     readonly modelDirectories: ModelDirectoryResolver;
     readonly openMember: (parentId: SessionId, childId: SessionId) => void;
+    /** 回到掌门所在的主对话（点击场景里的掌门）。 */
+    readonly openCaptain?: (captainSessionId: SessionId) => void;
     /** 右侧栏服务：归栏时在这里打开洞府页面；缺失时只收成令牌。 */
     readonly sidebar?: ISidebarRight;
     /** 洞府页面在右侧栏的 kind。 */

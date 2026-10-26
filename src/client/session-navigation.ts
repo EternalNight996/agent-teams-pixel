@@ -35,6 +35,29 @@ export interface AgentTeamsLayoutNavigator {
 }
 
 /**
+ * Return from a member transcript to the team's main conversation.
+ * Falls back to the workspace navigator when the legacy `open` action is absent.
+ */
+export function openAgentTeamCaptain(
+  sessions: AgentTeamsSessionNavigator,
+  sessionId: SessionId,
+  layout?: AgentTeamsLayoutNavigator,
+  workspace?: AgentTeamsWorkspaceNavigator,
+): void {
+  if (sessions.open !== undefined) {
+    sessions.open(sessionId)
+    layout?.selectPanel?.(null)
+    return
+  }
+  if (workspace !== undefined) {
+    workspace.openSession(sessionId)
+    layout?.selectPanel?.(null)
+    return
+  }
+  throw new Error('Harness does not expose session navigation')
+}
+
+/**
  * Open one member's persisted transcript.
  *
  * Harness rc.8 intentionally removed cold subagents from the ordinary session

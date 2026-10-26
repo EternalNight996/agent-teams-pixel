@@ -529,11 +529,13 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
   )
 }
 
-export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscarded, onNavigate, t, historic = false, workspace = false }: {
+export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscarded, onNavigate, onOpenCaptain, t, historic = false, workspace = false }: {
   readonly team: ActivityTeam
   readonly modelDirectory?: ModelDirectory
   readonly onContinuePlanning?: () => void
   readonly onDiscarded?: () => void
+  /** Clicking the captain card returns to the main conversation. */
+  readonly onOpenCaptain?: () => void
   /** Navigate to a member transcript (floater hides immediately). */
   readonly onNavigate: (parentId: SessionId, childId: SessionId) => void
   readonly t: AgentTeamsTranslate
@@ -674,7 +676,16 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
         )}
 
       <section className={css.delegationSection} aria-label={t('delegation.aria')} data-delegation-map>
-        <div className={css.captainNode}>
+        <div
+          className={css.captainNode}
+          data-clickable={onOpenCaptain === undefined ? undefined : 'true'}
+          role={onOpenCaptain === undefined ? undefined : 'button'}
+          tabIndex={onOpenCaptain === undefined ? undefined : 0}
+          onClick={onOpenCaptain}
+          onKeyDown={onOpenCaptain === undefined ? undefined : (event) => {
+            if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onOpenCaptain() }
+          }}
+        >
           <span className={css.captainAvatar}>
             <img className={css.leadAvatar} src={LEAD_ART} alt="" aria-hidden />
           </span>
@@ -917,6 +928,8 @@ export type ActivityPanelProps = {
   readonly sessionsList: ObservableSnapshot<SessionListState>
   readonly modelDirectories: ModelDirectoryResolver
   readonly openMember: (parentId: SessionId, childId: SessionId) => void
+  /** Return to the team's main conversation (captain session). */
+  readonly openCaptain?: (captainSessionId: SessionId) => void
 } & PropsLocale<'agentTeams'>
 
 export function ActivityPanel({ sessionsList, modelDirectories, openMember, t, conversationVisible = true }: ActivityPanelProps) {
