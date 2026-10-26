@@ -23,11 +23,14 @@ test('idle XP grows with level and stays a whole number', () => {
   assert.ok(idleXpPer10s(100) > idleXpPer10s(1) * 20)
 })
 
-test('levels 1-100 accelerate to ~10s and later levels slowly slow down', () => {
+test('levels 1-100 settle around 20s and high levels taper harder', () => {
   assert.ok(secondsPerLevel(1) >= 18 && secondsPerLevel(1) <= 22, 'Lv.1 should take about 20s at 3x')
-  assert.ok(secondsPerLevel(100) <= 15, `Lv.100 should be about 10s, got ${secondsPerLevel(100).toFixed(1)}s`)
-  assert.ok(secondsPerLevel(1000) > secondsPerLevel(100) * 3,
-    `Lv.1000 should be much slower than Lv.100 (${secondsPerLevel(1000).toFixed(1)}s)`)
+  assert.ok(secondsPerLevel(100) >= 18 && secondsPerLevel(100) <= 24,
+    `Lv.100 should be about 20s after the half-speed pass, got ${secondsPerLevel(100).toFixed(1)}s`)
+  assert.ok(secondsPerLevel(1000) >= 120,
+    `Lv.1000 should take at least 2 minutes (${secondsPerLevel(1000).toFixed(1)}s)`)
+  assert.ok(secondsPerLevel(9999) >= 720,
+    `the cap should take at least 12 minutes (${(secondsPerLevel(9999) / 60).toFixed(1)} min)`)
   assert.ok(secondsPerLevel(9999) > secondsPerLevel(1000) * 3,
     'the cap should be the slowest part of the curve')
 })
@@ -39,7 +42,8 @@ test('simulated max-streak idle reaches level 100 within an hour', () => {
     seconds += secondsPerLevel(level)
     level += 1
   }
-  assert.ok(seconds < 1800, `1->100 took ${(seconds / 60).toFixed(1)} minutes at 3x`)
+  assert.ok(seconds < 3600, `1->100 took ${(seconds / 60).toFixed(1)} minutes at 3x`)
+  assert.ok(seconds > 1800, 'the half-speed pass must roughly double the old 1->100 time')
   // 后 100 级必须明显比前 100 级慢。
   let tail = 0
   for (let lv = 1000; lv < 1100; lv += 1) tail += secondsPerLevel(lv)

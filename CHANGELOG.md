@@ -21,11 +21,11 @@
   10 seconds; the currently open conversation keeps the 1x→3x online streak and
   everyone else earns base. Offline catch-up (8h) applies to all; time before the
   fix is not backfilled.
-- Idle cultivation follows a faster retention curve: 10 XP/10s at Lv.1,
-  accelerating to ~10s/level at Lv.100 (1→100 in ~23 minutes at 3x), then slowly
-  stretching (200≈16s, 500≈31s, 1000≈50s, cap≈4.2min). The online streak reaches
-  3x after 4 minutes (every minute +0.5x) with up to 8 hours of offline catch-up;
-  the character sheet shows the current idle rate.
+- Idle cultivation is half the fast curve (IDLE_XP_SCALE=0.5, taper 0.8):
+  10 XP/10s at Lv.1, ~20s/level at Lv.100 (1→100 in ~45 minutes at 3x), then
+  200≈35s, 500≈72s, 1000≈2.1min, cap≈13min. The online streak reaches 3x after
+  four minutes and offline catch-up is capped at 8 hours; the character sheet
+  shows the current idle rate.
 - The 封神榜 also exists as a fifth wall facility (golden board with names and a
   vermilion seal); clicking it opens the ranks sheet, and opening ranks highlights
   the wall board.
