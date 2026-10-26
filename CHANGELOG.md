@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 ### Changed
+- Added the 宗门志 (志) bottom-bar entry with five tabs: local cultivation
+  breakthrough history (200 entries), the author's QQ group QR, voluntary
+  sponsorship QRs and MIT note, an About tab (version/author/other projects/old
+  dsh-desktop notice), and a feedback tab with privacy-bounded diagnostics,
+  prefilled GitHub issue, copy-diagnostics and copy-AI-prompt actions. Support
+  QRs are served through an allowlisted host route; SPONSOR.md and
+  assets/support are packaged.
 - Idle cultivation is much more generous: 2 + level/2 XP every 10 seconds, with a
   continuous-online streak up to 3x (each 2 minutes +0.5x) and up to 8 hours of
   offline catch-up. The character sheet shows the current idle rate.

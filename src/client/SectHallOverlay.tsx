@@ -16,11 +16,42 @@ import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
 import { QuickStartWizard } from './QuickStartDialog.tsx'
 import { CULTIVATION_ITEMS, captainKey, cultivationFromXp, idleXpPer10s, memberKey } from './cultivation.ts'
-import { useCultivationVersion, xpOf } from './cultivation-store.ts'
+import { milestoneName, readCultivationHistory, useCultivationVersion, xpOf } from './cultivation-store.ts'
 import { OPEN_HALL_SHEET_EVENT, type HallSheetAction } from './hall-events.ts'
 import { ASCENSION_RANKS, ASCENSION_STORY, ASCENSION_TIPS, rankAtLevel } from './immortals.ts'
+import { PLUGIN_REPO, buildAgentPrompt, buildIssueUrl, collectDiagnostics } from './feedback.ts'
+import { PLUGIN_VERSION } from './version.ts'
 import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
 import css from './SectHallOverlay.module.css'
+
+/** 交流群 / 赞助码由宿主插件路由提供（assets/support）。 */
+const SUPPORT_BASE = '/plugins/dsh-agent-teams/support'
+const supportAsset = (file: string): string => `${SUPPORT_BASE}/${file}`
+
+/** 复制到剪贴板：Clipboard API 失败时退回 execCommand，保持一次点击能复制。 */
+async function copyText(text: string): Promise<boolean> {
+  if (text === '') return false
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard !== undefined) {
+      await navigator.clipboard.writeText(text)
+      return true
+    }
+  } catch { /* 落到 execCommand */ }
+  try {
+    const area = document.createElement('textarea')
+    area.value = text
+    area.setAttribute('readonly', '')
+    area.style.position = 'fixed'
+    area.style.left = '-9999px'
+    document.body.appendChild(area)
+    area.select()
+    const ok = document.execCommand('copy')
+    document.body.removeChild(area)
+    return ok
+  } catch {
+    return false
+  }
+}
 
 const COLLAPSED_KEY = 'agent-teams-pixel.hallCollapsed'
 const PANEL_RECT_KEY = 'agent-teams-pixel.hallRect'
@@ -107,6 +138,9 @@ function writePanelRect(rect: PanelRect): void {
 
 type SheetKind = HallSheetAction | 'character'
 
+/** 「宗门志」里的五个页签。 */
+type AboutTab = 'history' | 'group' | 'sponsor' | 'about' | 'feedback'
+
 /** 物品品阶：按解锁等级着色，越晚解锁越贵气（纯展示，不参与数值）。 */
 function itemTier(level: number): 'mortal' | 'rare' | 'epic' | 'legendary' {
   if (level >= 2800) return 'legendary'
@@ -151,6 +185,10 @@ export function SectHallOverlay({
   const [equippedByCharacter, setEquippedByCharacter] = useState<Record<string, EquippedSlots>>({})
   const equipped: EquippedSlots = characterId === undefined ? {} : (equippedByCharacter[characterId] ?? {})
   useCultivationVersion()
+  // 宗门志：页签 + 反馈草稿 + 复制结果提示。
+  const [aboutTab, setAboutTab] = useState<AboutTab>('history')
+  const [feedbackText, setFeedbackText] = useState('')
+  const [aboutNotice, setAboutNotice] = useState('')
   const [sheetAnchor, setSheetAnchor] = useState<{ left: number; top: number; width: number; maxHeight: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
   const [token, setToken] = useState<TokenPoint>(() => readTokenPoint())
@@ -440,6 +478,12 @@ export function SectHallOverlay({
     setSheet(current => current === 'start' ? undefined : 'start')
   }
 
+  // 宗门志里的复制结果：2.4 秒后自动消失。
+  const flashAbout = (text: string): void => {
+    setAboutNotice(text)
+    window.setTimeout(() => setAboutNotice(current => (current === text ? '' : current)), 2400)
+  }
+
   const renderSheet = (): React.ReactNode => {
     if (sheet === undefined || sheetAnchor === undefined) return null
     // 无队伍时墙面设施 / 名册仍然可点：给出「尚未开宗」的提示与开宗入口。
@@ -488,11 +532,53 @@ export function SectHallOverlay({
           })),
         ].sort((left, right) => right.cultivation.level - left.cultivation.level
           || right.cultivation.xp - left.cultivation.xp)
+    // 宗门志：修仙历史 + 反馈诊断（只在打开该页时采样）。
+    const milestones = sheet === 'about' ? readCultivationHistory() : []
+    const diagnostics = sheet === 'about' && aboutTab === 'feedback'
+      ? collectDiagnostics({
+          version: PLUGIN_VERSION,
+          team: hasTeam
+            ? {
+                name: hall.name,
+                phase: hall.phase,
+                members: hall.members.length,
+                tasks: {
+                  total: hall.tasks.length,
+                  done,
+                  failed: hall.tasks.filter(task => task.status === 'failed').length,
+                  running: hall.tasks.filter(task => task.state === 'running').length,
+                },
+              }
+            : undefined,
+        })
+      : ''
+    const openIssue = (): void => {
+      if (feedbackText.trim() === '') {
+        flashAbout(t('about.feedbackNeedText'))
+        return
+      }
+      const url = buildIssueUrl({ description: feedbackText, diagnostics, version: PLUGIN_VERSION })
+      try {
+        window.open(url, '_blank', 'noopener')
+      } catch {
+        flashAbout(t('about.feedbackOpenFail'))
+      }
+    }
+    const copyDiagnostics = async (): Promise<void> => {
+      const ok = await copyText(diagnostics)
+      flashAbout(t(ok ? 'about.feedbackCopied' : 'about.feedbackCopyFail'))
+    }
+    const copyPrompt = async (): Promise<void> => {
+      const locale = typeof navigator !== 'undefined' && String(navigator.language ?? '').toLowerCase().startsWith('en') ? 'en' : 'zh'
+      const ok = await copyText(buildAgentPrompt({ description: feedbackText, diagnostics, locale }))
+      flashAbout(t(ok ? 'about.feedbackCopied' : 'about.feedbackCopyFail'))
+    }
     const title = sheet === 'settings' ? t('office.panelConfig')
       : sheet === 'start' ? t('quickstart.title')
         : sheet === 'character' ? t('office.equipment')
           : sheet === 'ranks' ? t('office.ascension')
-            : sheet === 'inbox' ? t('workspace.inbox')
+            : sheet === 'about' ? t('office.aboutTitle')
+              : sheet === 'inbox' ? t('workspace.inbox')
               : sheet === 'teams' ? t('office.facility.teams')
                 : sheet === 'board' ? t('workspace.tabBoard')
                   : t('workspace.tabConfig')
@@ -571,6 +657,138 @@ export function SectHallOverlay({
               <div className={css.story}>
                 {ASCENSION_STORY.map(key => <p key={key}>{t(key)}</p>)}
               </div>
+            </div>
+          ) : sheet === 'about' ? (
+            <div className={css.about}>
+              <div className={css.aboutTabs} role="tablist">
+                {([
+                  ['history', 'about.tab.history'],
+                  ['group', 'about.tab.group'],
+                  ['sponsor', 'about.tab.sponsor'],
+                  ['about', 'about.tab.about'],
+                  ['feedback', 'about.tab.feedback'],
+                ] as const).map(([id, key]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    className={css.aboutTab}
+                    data-active={aboutTab === id || undefined}
+                    onClick={() => { setAboutTab(id); setAboutNotice('') }}
+                  >
+                    {t(key)}
+                  </button>
+                ))}
+              </div>
+              {aboutTab === 'history' ? (
+                <div className={css.aboutSection}>
+                  <p className={css.settingsHint}>{t('about.historyIntro')}</p>
+                  {milestones.length === 0 ? (
+                    <p className={css.settingsHint}>{t('about.historyEmpty')}</p>
+                  ) : (
+                    <>
+                      <span className={css.settingsMeta}>{t('about.historyCount', { count: milestones.length })}</span>
+                      <ol className={css.milestoneList}>
+                        {milestones.map((entry, index) => (
+                          <li key={`${entry.at}:${entry.key}:${entry.level}:${index}`} className={css.milestoneRow}>
+                            <span className={css.milestoneWhen}>{new Date(entry.at).toLocaleString()}</span>
+                            <span className={css.milestoneWho}>{milestoneName(entry.key)}</span>
+                            <span className={css.milestoneRealm}>Lv.{entry.level} · {t(entry.realm)}</span>
+                          </li>
+                        ))}
+                      </ol>
+                      <p className={css.settingsMeta}>{t('about.historyHint')}</p>
+                    </>
+                  )}
+                </div>
+              ) : aboutTab === 'group' ? (
+                <div className={css.aboutSection}>
+                  <p className={css.settingsHint}>{t('about.groupHint')}</p>
+                  <figure className={css.qrCard}>
+                    <img src={supportAsset('group-qr.jpg')} alt={t('about.groupCaption')} loading="lazy" />
+                    <figcaption>{t('about.groupCaption')}</figcaption>
+                  </figure>
+                  <p className={css.settingsHint}>{t('about.groupNote')}</p>
+                  <p className={css.settingsMeta}>{t('about.groupFallback')}</p>
+                  <div className={css.aboutActions}>
+                    <a className={css.aboutLink} href={PLUGIN_REPO} target="_blank" rel="noreferrer">⌂ {t('about.repo')} ↗</a>
+                  </div>
+                </div>
+              ) : aboutTab === 'sponsor' ? (
+                <div className={css.aboutSection}>
+                  <p className={css.settingsHint}>{t('about.sponsorHint')}</p>
+                  <div className={css.qrGrid}>
+                    <figure className={css.qrCard}>
+                      <img src={supportAsset('wechat-pay.jpg')} alt={t('about.sponsorPay')} loading="lazy" />
+                      <figcaption>{t('about.sponsorPay')}</figcaption>
+                    </figure>
+                    <figure className={css.qrCard}>
+                      <img src={supportAsset('wechat-reward.jpg')} alt={t('about.sponsorReward')} loading="lazy" />
+                      <figcaption>{t('about.sponsorReward')}</figcaption>
+                    </figure>
+                  </div>
+                  <p className={css.settingsHint}>{t('about.sponsorNote')}</p>
+                  <div className={css.aboutActions}>
+                    <a className={css.aboutLink} href={PLUGIN_REPO + '/blob/main/SPONSOR.md'} target="_blank" rel="noreferrer">☕ {t('about.sponsorLink')} ↗</a>
+                  </div>
+                </div>
+              ) : aboutTab === 'about' ? (
+                <div className={css.aboutSection}>
+                  <p className={css.settingsHint}>{t('about.intro')}</p>
+                  <div className={css.aboutMeta}>
+                    <span>{t('about.version')}: {PLUGIN_VERSION}</span>
+                    <span>{t('about.author')}: EternalNight996</span>
+                    <span>{t('about.license')}: MIT</span>
+                  </div>
+                  <span className={css.historyTitle}>{t('about.otherProjects')}</span>
+                  <ul className={css.projectList}>
+                    <li>
+                      <a className={css.aboutLink} href="https://github.com/EternalNight996/memory-eternal" target="_blank" rel="noreferrer">memory-eternal</a>
+                      <span>{t('about.project.memoryEternal')}</span>
+                    </li>
+                    <li>
+                      <a className={css.aboutLink} href="https://github.com/EternalNight996/dsh-theme" target="_blank" rel="noreferrer">dsh-theme</a>
+                      <span>{t('about.project.theme')}</span>
+                    </li>
+                    <li>
+                      <a className={css.aboutLink} href="https://github.com/EternalNight996/dsh-ui-three-body" target="_blank" rel="noreferrer">dsh-ui-three-body</a>
+                      <span>{t('about.project.threeBody')}</span>
+                    </li>
+                    <li>
+                      <a className={css.aboutLink} href="https://github.com/EternalNight996/publish-kit" target="_blank" rel="noreferrer">publish-kit</a>
+                      <span>{t('about.project.publishKit')}</span>
+                    </li>
+                  </ul>
+                  <p className={css.settingsMeta}>{t('about.project.desktopNote')}</p>
+                  <div className={css.aboutActions}>
+                    <a className={css.aboutLink} href={PLUGIN_REPO} target="_blank" rel="noreferrer">⌂ {t('about.repo')} ↗</a>
+                    <a className={css.aboutLink} href={PLUGIN_REPO + '/issues'} target="_blank" rel="noreferrer">🐞 {t('about.issues')} ↗</a>
+                    <a className={css.aboutLink} href={PLUGIN_REPO + '/releases'} target="_blank" rel="noreferrer">🏷 {t('about.releases')} ↗</a>
+                  </div>
+                </div>
+              ) : (
+                <div className={css.aboutSection}>
+                  <p className={css.settingsHint}>{t('about.feedbackWhy')}</p>
+                  <textarea
+                    className={css.feedbackText}
+                    value={feedbackText}
+                    onChange={(event) => setFeedbackText(event.target.value)}
+                    placeholder={t('about.feedbackPlaceholder')}
+                    rows={4}
+                  />
+                  <div className={css.feedbackDiagHead}>
+                    <span>{t('about.feedbackDiag')}</span>
+                    <button type="button" className={css.sheetAction} onClick={() => { void copyDiagnostics() }}>{t('about.feedbackCopyDiag')}</button>
+                  </div>
+                  <pre className={css.feedbackDiag}>{diagnostics}</pre>
+                  <p className={css.settingsMeta}>{t('about.feedbackPrivacy')}</p>
+                  <div className={css.aboutActions}>
+                    <button type="button" className={css.sheetAction} onClick={openIssue}>🚀 {t('about.feedbackOpenIssue')}</button>
+                    <button type="button" className={css.sheetAction} onClick={() => { void copyPrompt() }}>🤖 {t('about.feedbackCopyPrompt')}</button>
+                  </div>
+                  {aboutNotice !== '' && <p className={css.aboutNotice}>{aboutNotice}</p>}
+                </div>
+              )}
             </div>
           ) : sheet === 'settings' ? (
             <div className={css.settings}>
@@ -864,7 +1082,7 @@ export function SectHallOverlay({
                   t={t}
                   activeAction={
                     sheet === 'character' ? 'gear'
-                      : sheet === 'settings' || sheet === 'start' ? null
+                      : sheet === 'settings' || sheet === 'start' || sheet === 'about' ? null
                         : sheet ?? null
                   }
                   onAction={(action) => {
@@ -906,6 +1124,9 @@ export function SectHallOverlay({
                 </button>
                 <button type="button" className={css.floorButton} data-control="hall-ranks" data-active={sheet === 'ranks' || undefined} onClick={() => { toggleSheet('ranks') }}>
                   <span aria-hidden>榜</span>{t('office.floorRanks')}
+                </button>
+                <button type="button" className={css.floorButton} data-control="hall-about" data-active={sheet === 'about' || undefined} onClick={() => { toggleSheet('about') }}>
+                  <span aria-hidden>志</span>{t('office.floorAbout')}
                 </button>
                 <button type="button" className={css.floorButton} data-control="hall-gear" data-active={sheet === 'character' || undefined} onClick={openGear}>
                   <span aria-hidden>阁</span>{t('office.floorGear')}

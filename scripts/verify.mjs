@@ -166,8 +166,14 @@ check(
 )
 check(
   'files[] ships the bundle patch and lib',
-  ['lib', 'cordis.patch.yml'].every(entry => pkg.files?.includes(entry)),
+  ['lib', 'cordis.patch.yml', 'assets/support', 'SPONSOR.md'].every(entry => pkg.files?.includes(entry)),
   `files = ${JSON.stringify(pkg.files)}`,
+)
+const clientVersionSource = await readFile(new URL('../src/client/version.ts', import.meta.url), 'utf8')
+check(
+  'client version constant matches package.json',
+  clientVersionSource.includes(`'${pkg.version}'`),
+  `version.ts must declare PLUGIN_VERSION = '${pkg.version}'`,
 )
 check(
   'scoped package publishes publicly',

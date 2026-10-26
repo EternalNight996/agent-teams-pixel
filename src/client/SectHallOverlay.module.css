@@ -993,3 +993,224 @@
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
+
+
+/* 宗门志：修仙历史 / 交流群 / 赞助 / 关于 / 反馈异常。 */
+.about {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.aboutTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.aboutTab {
+  padding: 4px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.aboutTab:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary);
+}
+
+.aboutTab[data-active='true'] {
+  border-color: #f2c14e;
+  background: color-mix(in srgb, #f2c14e 12%, transparent);
+  color: var(--dsw-alias-label-primary);
+}
+
+.aboutSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aboutMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 70%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 55%, transparent);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 9.5px;
+}
+
+.aboutActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.aboutLink {
+  color: var(--dsw-alias-label-primary);
+  font-size: 10px;
+  text-decoration: none;
+  padding: 4px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 55%, transparent);
+}
+
+.aboutLink:hover {
+  border-color: #f2c14e;
+  color: #f2c14e;
+}
+
+.aboutNotice {
+  margin: 0;
+  color: #4f9a57;
+  font-size: 10px;
+}
+
+/* 二维码卡片：点击放大由浏览器默认行为承担，这里只保证排版。 */
+.qrGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.qrCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 70%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 55%, transparent);
+}
+
+.qrCard img {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  border-radius: 6px;
+  image-rendering: auto;
+}
+
+.qrCard figcaption {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 9.5px;
+}
+
+/* 修仙历史。 */
+.milestoneList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.milestoneRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 9px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 70%, transparent);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 55%, transparent);
+}
+
+.milestoneWhen {
+  overflow: hidden;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.milestoneWho {
+  color: var(--dsw-alias-label-primary);
+  font-size: 10px;
+}
+
+.milestoneRealm {
+  color: #f2c14e;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/* 作者项目列表。 */
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.projectList li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.projectList li span {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+
+.projectList .aboutLink {
+  align-self: flex-start;
+}
+
+/* 反馈异常。 */
+.feedbackText {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 80px;
+  padding: 7px 9px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.feedbackDiagHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 9.5px;
+}
+
+.feedbackDiag {
+  margin: 0;
+  max-height: 170px;
+  overflow: auto;
+  padding: 7px 9px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 70%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 55%, transparent);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 8.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+

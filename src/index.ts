@@ -677,6 +677,44 @@ export function apply(ctx: Context, config: Config): void {
       }
       },
     }), 'agent-teams: artwork route')
+
+    // Community / sponsor QR images: same allowlist discipline as the artwork
+    // route, but from assets/support with their real media types.
+    const supportDir = fileURLToPath(new URL('../assets/support/', import.meta.url))
+    const SUPPORT_ASSETS = new Map<string, string>([
+      ['group-qr.jpg', 'image/jpeg'],
+      ['wechat-pay.jpg', 'image/jpeg'],
+      ['wechat-reward.jpg', 'image/jpeg'],
+    ])
+    ctx.effect(() => webServer.register({
+      kind: 'prefix',
+      path: '/plugins/dsh-agent-teams/support',
+      handler: async (req, res) => {
+        let name: string
+        try {
+          name = decodeURIComponent(new URL(req.url ?? '/', 'http://x').pathname.split('/').pop() ?? '')
+        } catch {
+          res.writeHead(404)
+          res.end()
+          return
+        }
+        const mediaType = SUPPORT_ASSETS.get(name)
+        if (mediaType === undefined) {
+          res.writeHead(404)
+          res.end()
+          return
+        }
+        try {
+          const data = await readFile(join(supportDir, name))
+          res.writeHead(200, { 'content-type': mediaType, 'cache-control': 'public, max-age=86400' })
+          res.end(data)
+        } catch (error: unknown) {
+          ctx.logger.warn(`agent-teams: support asset read failed for ${name}: ${String(error)}`)
+          res.writeHead(404)
+          res.end()
+        }
+      },
+    }), 'agent-teams: support assets')
   }
 
   registerWebSurface()
