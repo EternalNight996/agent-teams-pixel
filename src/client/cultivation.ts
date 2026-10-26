@@ -62,7 +62,6 @@ export const CULTIVATION_ITEMS: readonly CultivationItem[] = [
   { id: 'weapon-immortal-high', kind: 'weapon', level: 2800, key: 'item.weapon.immortalHigh', icon: '🪄' },
   { id: 'weapon-true-immortal', kind: 'weapon', level: 5200, key: 'item.weapon.trueImmortal', icon: '🌟' },
   { id: 'weapon-dao', kind: 'weapon', level: 9000, key: 'item.weapon.dao', icon: '🪐' },
-  { id: 'mount-auto', kind: 'mount', level: 1, key: 'office.mountAuto', icon: '✦', form: 'auto' },
   { id: 'mount-walk', kind: 'mount', level: 1, key: 'office.mountWalk', icon: '🚶', form: 'off' },
   { id: 'mount-sword', kind: 'mount', level: 5, key: 'item.mount.sword', icon: '🗡', form: 'sword' },
   { id: 'mount-beast', kind: 'mount', level: 8, key: 'item.mount.beast', icon: '🐉', form: 'beast' },

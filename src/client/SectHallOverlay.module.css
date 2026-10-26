@@ -358,49 +358,104 @@
 .inventorySection {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
+  padding: 9px 10px 11px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 70%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 72%, transparent);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sectionCount {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.sectionHint {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9.5px;
+  line-height: 1.5;
 }
 
 .inventory {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 7px;
 }
 
+/* 品阶配色：解锁越晚，卡面越亮，扫一眼就知道练到哪一层。 */
 .item {
+  --item-tone: #8fa0bb;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  padding: 6px 3px;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 8px 4px 6px;
   min-width: 0;
-  border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 8px;
-  background: var(--dsw-alias-bg-layer-1);
+  border: 1px solid color-mix(in srgb, var(--item-tone) 26%, var(--dsw-alias-border-l2));
+  border-radius: 9px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 5%), rgb(255 255 255 / 1%)),
+    var(--dsw-alias-bg-layer-1);
   color: var(--dsw-alias-label-secondary);
   font: inherit;
   cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
 }
 
+.item[data-tier='rare'] { --item-tone: #6fd6c8; }
+.item[data-tier='epic'] { --item-tone: #b48cff; }
+.item[data-tier='legendary'] { --item-tone: #f2c14e; }
+
 .item:hover:not(:disabled) {
-  border-color: var(--dsw-alias-state-business-primary);
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, #f2c14e 48%, var(--dsw-alias-border-l2));
+  box-shadow: 0 2px 8px rgb(0 0 0 / 22%);
+}
+
+.item:focus-visible {
+  outline: 1px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 1px;
 }
 
 .item[data-equipped='true'] {
   border-color: #f2c14e;
-  background: color-mix(in srgb, #f2c14e 10%, var(--dsw-alias-bg-layer-1));
-  box-shadow: 0 0 0 1px color-mix(in srgb, #f2c14e 45%, transparent);
+  background: color-mix(in srgb, #f2c14e 9%, var(--dsw-alias-bg-layer-1));
+  box-shadow: 0 0 0 1px color-mix(in srgb, #f2c14e 40%, transparent);
 }
 
 .item[data-locked='true'] {
-  opacity: 0.42;
+  opacity: 0.52;
   cursor: not-allowed;
 }
 
+.item[data-locked='true'] .itemIcon {
+  filter: grayscale(0.7);
+}
+
 .itemIcon {
-  font-size: 15px;
-  line-height: 18px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--item-tone) 14%, transparent);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.item[data-equipped='true'] .itemIcon {
+  background: color-mix(in srgb, #f2c14e 20%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #f2c14e 55%, transparent);
 }
 
 .itemName {
@@ -414,26 +469,33 @@
   white-space: nowrap;
 }
 
+.itemFoot {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 10px;
+}
+
 .itemLevel {
   color: var(--dsw-alias-label-tertiary);
   font-size: 8px;
   line-height: 10px;
+  font-variant-numeric: tabular-nums;
 }
 
-.itemEquipped {
-  position: absolute;
-  top: 1px;
-  right: 4px;
+.itemBadge {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: color-mix(in srgb, #f2c14e 18%, transparent);
   color: #f2c14e;
-  font-size: 9px;
-  font-weight: 700;
+  font-size: 7.5px;
+  line-height: 10px;
+  white-space: nowrap;
 }
 
-.itemLock {
-  position: absolute;
-  top: 1px;
-  right: 4px;
-  font-size: 8px;
+.itemBadge[data-tone='locked'] {
+  background: color-mix(in srgb, var(--dsw-alias-label-tertiary) 16%, transparent);
+  color: var(--dsw-alias-label-tertiary);
 }
 
 .sizeChip {
@@ -486,7 +548,7 @@
 .character {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .characterHead {
@@ -494,6 +556,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  padding: 9px 11px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 70%, transparent);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgb(242 193 78 / 9%), transparent),
+    color-mix(in srgb, var(--dsw-alias-bg-layer-1) 72%, transparent);
 }
 
 .characterName {
@@ -509,10 +577,11 @@
 }
 
 .xpTrack {
-  height: 6px;
+  height: 7px;
   overflow: hidden;
-  border-radius: 3px;
+  border-radius: 4px;
   background: var(--dsw-alias-border-l3);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 18%);
 }
 
 .xpTrack > span {

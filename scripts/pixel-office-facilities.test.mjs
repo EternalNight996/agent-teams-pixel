@@ -5,7 +5,8 @@ import {
 } from '../lib/client/pixel-office/office-actions.js'
 
 test('the wall exposes four non-overlapping facilities inside the wall band', () => {
-  assert.deepEqual([...FACILITY_ORDER].sort(), ['board', 'config', 'inbox', 'teams'])
+  // 传音阁已移除，天机阁（gear）接替了墙上的第四个设施。
+  assert.deepEqual([...FACILITY_ORDER].sort(), ['board', 'config', 'gear', 'teams'])
   const rects = FACILITY_ORDER.map(action => ({ action, ...FACILITIES[action] }))
   for (const rect of rects) {
     assert.ok(rect.x >= 0 && rect.x + rect.w <= 520, `${rect.action} leaves the world horizontally`)

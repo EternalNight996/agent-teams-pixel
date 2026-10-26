@@ -25,7 +25,7 @@ export interface SceneMember {
     readonly isLeader?: boolean;
     /** The conversation currently open in the host (painted as active). */
     readonly viewing?: boolean;
-    /** Cultivation level; higher levels ride a flying sword or a divine beast. */
+    /** Cultivation level; gates which travel forms are unlocked (never auto-flies). */
     readonly level?: number;
     /** Localized realm name shown with the level above the head. */
     readonly realm?: string;
@@ -103,9 +103,9 @@ export interface SceneHandle {
     setHover(hit: SceneHit | undefined): void;
     /** Make one member hop (double-click feedback). */
     jump(id: string): void;
-    /** Cycle one member's travel form: auto → sword → beast → walking. */
+    /** Cycle one member's travel form: walking → flying sword → divine beast → walking. */
     cycleMount(id: string): void;
-    /** Force one member's travel form (equipment sheet). */
+    /** Force one member's travel form (equipment sheet); auto/off mean walking. */
     setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off'): void;
     /** Equip one member's artifact/skill (equipment sheet). */
     setEquip(id: string, kind: 'weapon' | 'skill', tier: number): void;

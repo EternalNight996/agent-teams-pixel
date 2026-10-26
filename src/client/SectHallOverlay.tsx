@@ -109,6 +109,14 @@ function writePanelRect(rect: PanelRect): void {
 
 type SheetKind = HallSheetAction | 'character'
 
+/** 物品品阶：按解锁等级着色，越晚解锁越贵气（纯展示，不参与数值）。 */
+function itemTier(level: number): 'mortal' | 'rare' | 'epic' | 'legendary' {
+  if (level >= 2800) return 'legendary'
+  if (level >= 350) return 'epic'
+  if (level >= 20) return 'rare'
+  return 'mortal'
+}
+
 /** 面板预设尺寸：初始给大一些。 */
 const PANEL_SIZES = {
   compact: { w: 460, h: 380 },
@@ -144,10 +152,11 @@ export function SectHallOverlay({
   const [reviewing, setReviewing] = useState(false)
   const [historyTeamId, setHistoryTeamId] = useState<string | undefined>()
   const [characterId, setCharacterId] = useState<string | undefined>()
-  // 法器 / 坐骑 / 技能各选各的，互不覆盖。
-  const [equipped, setEquipped] = useState<{ weapon?: string; mount?: string; skill?: string }>({})
+  // 法器 / 坐骑 / 技能各选各的，互不覆盖；按角色分开记，来回切换不会丢装备。
+  type EquippedSlots = { weapon?: string; mount?: string; skill?: string }
+  const [equippedByCharacter, setEquippedByCharacter] = useState<Record<string, EquippedSlots>>({})
+  const equipped: EquippedSlots = characterId === undefined ? {} : (equippedByCharacter[characterId] ?? {})
   useCultivationVersion()
-  useEffect(() => { setEquipped({}) }, [characterId])
   const [sheetAnchor, setSheetAnchor] = useState<{ left: number; top: number; width: number; maxHeight: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
   const [token, setToken] = useState<TokenPoint>(() => readTokenPoint())
@@ -576,48 +585,71 @@ export function SectHallOverlay({
                   ))}
                 </div>
                 {([
-                  { kind: 'weapon', title: t('office.weapon') },
-                  { kind: 'mount', title: t('office.mounts') },
-                  { kind: 'skill', title: t('office.skills') },
-                ] as const).map(section => (
-                  <div key={section.kind} className={css.inventorySection}>
-                    <span className={css.historyTitle}>{section.title}</span>
-                    <div className={css.inventory}>
-                      {CULTIVATION_ITEMS.filter(item => item.kind === section.kind).map(item => {
-                        const locked = characterCultivation.level < item.level
-                        const isEquipped = equipped[item.kind] === item.id
-                        return (
-                          <button
-                            key={item.id}
-                            type="button"
-                            className={css.item}
-                            data-locked={locked || undefined}
-                            data-equipped={isEquipped || undefined}
-                            disabled={locked}
-                            title={t(item.key as Parameters<typeof t>[0])}
-                            onClick={() => {
-                              if (locked) return
-                              setEquipped(current => ({ ...current, [item.kind]: item.id }))
-                              if (item.kind === 'mount' && item.form !== undefined) {
-                                window.dispatchEvent(new CustomEvent('agent-teams:mount', { detail: { id: character.id, form: item.form } }))
-                              } else if (item.kind !== 'mount') {
-                                window.dispatchEvent(new CustomEvent('agent-teams:equip', {
-                                  detail: { id: character.id, kind: item.kind, tier: item.level },
+                  { kind: 'weapon', title: t('office.weapon'), hint: undefined },
+                  { kind: 'mount', title: t('office.mounts'), hint: t('office.mountHint') },
+                  { kind: 'skill', title: t('office.skills'), hint: undefined },
+                ] as const).map(section => {
+                  const items = CULTIVATION_ITEMS.filter(item => item.kind === section.kind)
+                  const unlocked = items.filter(item => characterCultivation.level >= item.level).length
+                  // 未选坐骑时默认步行：装备栏要如实反映场景里的形态。
+                  const equippedMount = equipped.mount ?? 'mount-walk'
+                  return (
+                    <section key={section.kind} className={css.inventorySection} data-kind={section.kind}>
+                      <header className={css.sectionHead}>
+                        <span className={css.historyTitle}>{section.title}</span>
+                        <span className={css.sectionCount}>{unlocked}/{items.length}</span>
+                      </header>
+                      {section.hint !== undefined && <p className={css.sectionHint}>{section.hint}</p>}
+                      <div className={css.inventory}>
+                        {items.map(item => {
+                          const locked = characterCultivation.level < item.level
+                          const isEquipped = section.kind === 'mount'
+                            ? equippedMount === item.id
+                            : equipped[item.kind] === item.id
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              className={css.item}
+                              data-kind={item.kind}
+                              data-tier={itemTier(item.level)}
+                              data-locked={locked || undefined}
+                              data-equipped={isEquipped || undefined}
+                              disabled={locked}
+                              aria-pressed={isEquipped}
+                              title={`${t(item.key as Parameters<typeof t>[0])} · Lv.${item.level}`}
+                              onClick={() => {
+                                if (locked) return
+                                setEquippedByCharacter(current => ({
+                                  ...current,
+                                  [character.id]: { ...current[character.id], [item.kind]: item.id },
                                 }))
-                              }
-                            }}
-                          >
-                            <span className={css.itemIcon}>{item.icon}</span>
-                            <span className={css.itemName}>{t(item.key as Parameters<typeof t>[0])}</span>
-                            <span className={css.itemLevel}>Lv.{item.level}</span>
-                            {isEquipped && <span className={css.itemEquipped}>✓</span>}
-                            {locked && <span className={css.itemLock}>🔒</span>}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))}
+                                if (item.kind === 'mount') {
+                                  window.dispatchEvent(new CustomEvent('agent-teams:mount', {
+                                    detail: { id: character.id, form: item.form ?? 'off' },
+                                  }))
+                                } else {
+                                  window.dispatchEvent(new CustomEvent('agent-teams:equip', {
+                                    detail: { id: character.id, kind: item.kind, tier: item.level },
+                                  }))
+                                }
+                              }}
+                            >
+                              <span className={css.itemIcon} aria-hidden>{item.icon}</span>
+                              <span className={css.itemName}>{t(item.key as Parameters<typeof t>[0])}</span>
+                              <span className={css.itemFoot}>
+                                <span className={css.itemLevel}>Lv.{item.level}</span>
+                                {locked
+                                  ? <span className={css.itemBadge} data-tone="locked">{t('office.locked')}</span>
+                                  : isEquipped ? <span className={css.itemBadge}>{t('office.equipped')}</span> : null}
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </section>
+                  )
+                })}
               </div>
             )
           ) : sheet === 'inbox' ? (

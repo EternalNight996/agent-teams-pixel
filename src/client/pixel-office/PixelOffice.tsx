@@ -31,8 +31,6 @@ export interface PixelOfficeProps {
   readonly activeAction?: SceneAction | null
   /** Facilities this surface can actually open (the floater only has the board). */
   readonly enabledActions?: readonly SceneAction[]
-  /** 场景里的传送阵：收起面板并归栏到右侧栏。 */
-  readonly onDock?: () => void
   /** 场景里的阵盘：打开面板配置。 */
   readonly onSettings?: () => void
   /** 面板配置是否打开（阵盘高亮，和底部按钮双向联动）。 */
@@ -92,12 +90,11 @@ type Hover =
     readonly y: number
   }
   | { readonly kind: 'action'; readonly action: SceneAction; readonly label: string; readonly hint: string; readonly x: number; readonly y: number }
-  | { readonly kind: 'dock'; readonly label: string; readonly hint: string; readonly x: number; readonly y: number }
   | { readonly kind: 'settings'; readonly label: string; readonly hint: string; readonly x: number; readonly y: number }
 
 export function PixelOffice({
   team, t, onOpenMember, onOpenCaptain, onOpenCharacter, viewingSessionId, onUnavailable, onAction, activeAction, enabledActions,
-  onDock, onSettings, settingsOpen, teamless,
+  onSettings, settingsOpen, teamless,
 }: PixelOfficeProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const hostRef = useRef<HTMLDivElement | null>(null)
@@ -173,14 +170,12 @@ export function PixelOffice({
       members,
       activeAction: activeAction ?? undefined,
       facilities,
-      // 中庭里的两个可点物件：归栏传送阵 / 配置阵盘。
+      // 中庭里的可点物件：配置水晶。
       sceneObjects: {
-        dock: onDock !== undefined,
         settings: onSettings !== undefined,
         settingsActive: settingsOpen === true,
       },
       sceneLabels: {
-        dock: t('office.dockSidebar'),
         settings: t('office.floorSettings'),
       },
       // 闲置闲聊：设定好的短句，由场景按 seed 随机挑一句冒泡。
@@ -206,7 +201,7 @@ export function PixelOffice({
         failedCount: failed,
       },
     }
-  }, [actions, activeAction, cultivationVersion, done, failed, live, onAction, onDock, onSettings, running, settingsOpen, t, team, teamless, waiting])
+  }, [actions, activeAction, cultivationVersion, done, failed, live, onAction, onSettings, running, settingsOpen, t, team, teamless, waiting])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -282,10 +277,6 @@ export function PixelOffice({
       setHover({ kind: 'action', action: hit.action, label: labelFor(hit.action), hint: hintFor(hit.action), x, y })
       return
     }
-    if (hit.kind === 'dock') {
-      setHover({ kind: 'dock', label: t('office.dockSidebar'), hint: t('office.scene.dockHint'), x, y })
-      return
-    }
     if (hit.kind === 'settings') {
       setHover({ kind: 'settings', label: t('office.floorSettings'), hint: t('office.scene.settingsHint'), x, y })
       return
@@ -319,10 +310,6 @@ export function PixelOffice({
     }
     if (hit.kind === 'action') {
       onAction?.(hit.action)
-      return
-    }
-    if (hit.kind === 'dock') {
-      onDock?.()
       return
     }
     if (hit.kind === 'settings') {

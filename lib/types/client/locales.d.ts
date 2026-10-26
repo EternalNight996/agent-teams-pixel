@@ -304,10 +304,12 @@ export declare const zh: {
     'skill.immortalArt': string;
     'skill.daoArt': string;
     'office.levelTest': string;
-    'office.mountAuto': string;
     'office.mountSword': string;
     'office.mountBeast': string;
     'office.mountWalk': string;
+    'office.mountHint': string;
+    'office.equipped': string;
+    'office.locked': string;
     'office.skills': string;
     'skill.none': string;
     'skill.aura': string;
@@ -831,10 +833,12 @@ export declare const en: {
     'skill.immortalArt': string;
     'skill.daoArt': string;
     'office.levelTest': string;
-    'office.mountAuto': string;
     'office.mountSword': string;
     'office.mountBeast': string;
     'office.mountWalk': string;
+    'office.mountHint': string;
+    'office.equipped': string;
+    'office.locked': string;
     'office.skills': string;
     'skill.none': string;
     'skill.aura': string;
