@@ -112,12 +112,16 @@
 
 .wizardActions {
   position: sticky;
-  bottom: -2px;
+  z-index: 1;
+  bottom: 0;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 10px 0 2px;
-  background: linear-gradient(180deg, transparent, #151a21 32%);
+  margin: 0 -14px -14px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+  background: #151a21;
+  box-shadow: 0 -8px 16px rgb(0 0 0 / 18%);
 }
 
 .wizardActions > button {
@@ -268,11 +272,46 @@
 .chips { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; min-width: 0; }
 
 .chip {
-  padding: 1px 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 8px 1px 3px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--dsw-alias-state-business-primary, #5b8def) 14%, transparent);
   color: var(--dsw-alias-state-business-primary, #5b8def);
   font-size: 11px;
+}
+
+.chipAvatar {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 4px;
+  object-fit: cover;
+  image-rendering: pixelated;
+  background: rgb(0 0 0 / 25%);
+}
+
+.chipLetter {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary, #5b8def) 22%, transparent);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.optionAvatar {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 5px;
+  object-fit: cover;
+  image-rendering: pixelated;
+  background: rgb(0 0 0 / 20%);
 }
 
 .placeholder { color: var(--dsw-alias-label-secondary); font-size: 12px; }

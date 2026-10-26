@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import css from './QuickStartDialog.module.css'
+import { memberArtUrl } from './artwork.ts'
 import { OPEN_HALL_SHEET_EVENT } from './hall-events.ts'
 import type { AgentTeamsTranslate } from './locales.ts'
 import { TEAM_CREATED_EVENT } from './team-reveal.ts'
@@ -107,6 +108,19 @@ export function QuickStartWizard({ sessionId, t, onDone }: {
   const roleName = (id: string): string => {
     const meta = ROLE_META.find(entry => entry.id === id)
     return meta === undefined ? id : t(meta.nameKey)
+  }
+  /** 一枚修士 chip：优先用像素人立绘，找不到对应道途时退回首字徽记。 */
+  const personChip = (role: string) => {
+    const label = roleName(role)
+    const art = memberArtUrl(label, role)
+    return (
+      <span key={role} className={css.chip} title={role}>
+        {art === null
+          ? <span className={css.chipLetter} aria-hidden>{label.slice(0, 1)}</span>
+          : <img className={css.chipAvatar} src={art} alt="" />}
+        {label}
+      </span>
+    )
   }
   const addCustomRole = (): void => {
     const trimmed = customRole.trim()
@@ -278,7 +292,7 @@ export function QuickStartWizard({ sessionId, t, onDone }: {
                 </small>
                 {sectMode !== 'custom' && (
                   <span className={css.sectRoster}>
-                    {sectRoles.map(role => <span key={role} className={css.chip}>{roleName(role)}</span>)}
+                    {sectRoles.map(personChip)}
                   </span>
                 )}
               </div>
@@ -298,7 +312,7 @@ export function QuickStartWizard({ sessionId, t, onDone }: {
                       <span className={css.chips}>
                         {roles.length === 0
                           ? <span className={css.placeholder}>{t('quickstart.rolesEmpty')}</span>
-                          : roles.map(role => <span key={role} className={css.chip}>{roleName(role)}</span>)}
+                          : roles.map(personChip)}
                       </span>
                       <span className={css.caret} aria-hidden>▾</span>
                     </button>
@@ -307,6 +321,10 @@ export function QuickStartWizard({ sessionId, t, onDone }: {
                         {ROLE_META.map(meta => (
                           <label key={meta.id} className={css.option}>
                             <input type="checkbox" checked={roles.includes(meta.id)} onChange={() => { toggleRole(meta.id) }} />
+                            {(() => {
+                              const art = memberArtUrl(t(meta.nameKey), meta.id)
+                              return art === null ? null : <img className={css.optionAvatar} src={art} alt="" />
+                            })()}
                             <span className={css.optionName}>{t(meta.nameKey)}</span>
                             <span className={css.optionId}>{meta.id}</span>
                             <span className={css.optionAbility}>{t(meta.abilityKey)}</span>
@@ -337,7 +355,7 @@ export function QuickStartWizard({ sessionId, t, onDone }: {
               <dl className={css.summary}>
                 <div className={css.summaryRow}><dt>{t('quickstart.summaryDoctrine')}</dt><dd>{doctrineName}</dd></div>
                 <div className={css.summaryRow}><dt>{t('quickstart.summarySect')}</dt><dd>{sectName}</dd></div>
-                <div className={css.summaryRow}><dt>{t('quickstart.summaryRoster')}</dt><dd>{roster.map(role => roleName(role)).join(' · ')}</dd></div>
+                <div className={css.summaryRow}><dt>{t('quickstart.summaryRoster')}</dt><dd><span className={css.chips}>{roster.map(personChip)}</span></dd></div>
                 <div className={css.summaryRow}><dt>{t('quickstart.summaryVow')}</dt><dd>{goalTrimmed}</dd></div>
               </dl>
               <p className={css.oath}>{t('quickstart.oathNotice')}</p>
