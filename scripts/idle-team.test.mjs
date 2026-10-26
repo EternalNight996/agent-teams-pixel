@@ -1,5 +1,6 @@
 /**
- * 挂机归属回归：全队都吃挂机修为，当前对话角色额外吃连击倍率。
+ * 挂机归属回归：只有当前打开对话的角色会累积挂机修为。
+ * 其他成员/掌门在后台不涨，没有打开对话时任何人都不涨。
  */
 import assert from 'node:assert/strict'
 import test from 'node:test'
@@ -29,46 +30,42 @@ function withClock(run) {
   }
 }
 
-test('every member and the captain accrue idle XP, not only the open conversation', () => {
+test('only the open member earns idle XP; teammates and captain do not', () => {
   withClock(({ advance }) => {
-    const teams = [team('挂机宗甲', 'cap-a', [{ id: 'm-a1', name: '甲一' }, { id: 'm-a2', name: '甲二' }])]
-    ingestCultivation(teams, 'cap-a') // 第一次只初始化 idleAt
+    const teams = [team('solo-a', 'cap-a', [{ id: 'm-a1', name: 'alpha' }, { id: 'm-a2', name: 'beta' }])]
+    ingestCultivation(teams, 'm-a1')
     const before = {
-      a1: xpOf('member:甲一'),
-      a2: xpOf('member:甲二'),
-      captain: xpOf('captain:挂机宗甲'),
+      alpha: xpOf('member:alpha'),
+      beta: xpOf('member:beta'),
+      captain: xpOf('captain:solo-a'),
     }
     advance(10_000)
-    ingestCultivation(teams, 'cap-a')
-    assert.ok(xpOf('member:甲一') > before.a1, '非当前对话的成员也要涨修为')
-    assert.ok(xpOf('member:甲二') > before.a2, '第二位成员也要涨修为')
-    assert.ok(xpOf('captain:挂机宗甲') > before.captain, '掌门挂机也要涨修为')
+    ingestCultivation(teams, 'm-a1')
+    assert.ok(xpOf('member:alpha') > before.alpha, 'the open member must gain')
+    assert.equal(xpOf('member:beta'), before.beta, 'a background member must not gain')
+    assert.equal(xpOf('captain:solo-a'), before.captain, 'the captain must not gain while a member is open')
   })
 })
 
-test('the open conversation keeps the streak bonus over background teammates', () => {
+test('the open captain earns idle XP; members do not', () => {
   withClock(({ advance }) => {
-    const teams = [team('挂机宗乙', 'cap-b', [{ id: 'm-b1', name: '乙一' }])]
-    ingestCultivation(teams, 'm-b1') // 打开的是成员乙一
-    for (let tick = 0; tick < 12; tick += 1) {
-      advance(10_000)
-      ingestCultivation(teams, 'm-b1')
-    }
-    const open = xpOf('member:乙一')
-    const captain = xpOf('captain:挂机宗乙')
-    assert.ok(open > 0)
-    assert.ok(captain > 0, '掌门在后台也挂机')
-    assert.ok(open > captain, `当前对话应吃连击加成（open=${open}, captain=${captain}）`)
+    const teams = [team('solo-b', 'cap-b', [{ id: 'm-b1', name: 'gamma' }])]
+    ingestCultivation(teams, 'cap-b')
+    const memberBefore = xpOf('member:gamma')
+    advance(20_000)
+    ingestCultivation(teams, 'cap-b')
+    assert.ok(xpOf('captain:solo-b') > 0, 'the open captain must gain')
+    assert.equal(xpOf('member:gamma'), memberBefore, 'a member must not gain while the captain is open')
   })
 })
 
-test('idle XP keeps accruing even when no conversation is open', () => {
+test('idle XP does not accrue when no conversation is open', () => {
   withClock(({ advance }) => {
-    const teams = [team('挂机宗丙', 'cap-c', [{ id: 'm-c1', name: '丙一' }])]
+    const teams = [team('solo-c', 'cap-c', [{ id: 'm-c1', name: 'delta' }])]
     ingestCultivation(teams, undefined)
-    const before = xpOf('member:丙一')
     advance(20_000)
     ingestCultivation(teams, undefined)
-    assert.ok(xpOf('member:丙一') > before)
+    assert.equal(xpOf('member:delta'), 0)
+    assert.equal(xpOf('captain:solo-c'), 0)
   })
 })

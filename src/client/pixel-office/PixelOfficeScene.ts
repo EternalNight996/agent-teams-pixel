@@ -124,6 +124,7 @@ import {
 } from './travel.ts'
 import { FACILITIES, FACILITY_ORDER, WALL_HEIGHT, type FacilityRect, type SceneAction, type SceneHit } from './office-actions.ts'
 import { mountModelFor, toneForTier, weaponShapeFor, type EquipTone, type MountModel, type WeaponShape } from '../equipment-visuals.ts'
+import { realmPaletteForLevel } from '../realm-colors.ts'
 
 const WORLD_W = 520
 const WORLD_MIN_H = 300
@@ -2137,23 +2138,27 @@ export function createPixelScene(
       const lw = Math.max(44, g.measureText(levelText).width + 10)
       const lx = Math.max(2, Math.min(WORLD_W - lw - 2, cx - lw / 2))
       const ly = headY - 16
-      // 浅绿等级框：等级/境界 + 升级进度条（按 mini 身形收小）。
-      g.fillStyle = '#d9f2cf'
+      // 境界色等级框：每跨一重境界换一套底色/描边/进度条色。
+      const palette = realmPaletteForLevel(member.level ?? 1)
+      g.fillStyle = palette.background
       roundRect(g, lx, ly, lw, 16, 4)
       g.fill()
-      g.strokeStyle = '#7fb27a'
+      g.strokeStyle = palette.border
       g.lineWidth = 1
       roundRect(g, lx, ly, lw, 16, 4)
       g.stroke()
-      g.fillStyle = '#22452a'
+      g.fillStyle = palette.text
       g.fillText(levelText, lx + 5, ly + 8)
       const trackX = lx + 4
       const trackY = ly + 11
       const trackW = lw - 8
-      g.fillStyle = 'rgba(34, 69, 42, 0.18)'
+      g.save()
+      g.globalAlpha = 0.22
+      g.fillStyle = palette.border
       g.fillRect(trackX, trackY, trackW, 2.5)
+      g.restore()
       const ratio = Math.min(1, Math.max(0, member.xpRatio ?? 0))
-      g.fillStyle = '#4f9a57'
+      g.fillStyle = palette.bar
       g.fillRect(trackX, trackY, Math.max(1, Math.round(trackW * ratio)), 2.5)
     }
 

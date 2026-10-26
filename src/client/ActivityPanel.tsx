@@ -29,6 +29,7 @@ import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import { PixelOffice } from './pixel-office/PixelOffice.tsx'
 import { currentSessionId } from './session-navigation.ts'
 import { roleLabel } from './role-labels.ts'
+import { realmPaletteForLevel } from './realm-colors.ts'
 import type { ModelDirectory, ModelDirectoryResolver } from '@deepseek-ai/dsh-client-ui-model-selection/client'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
@@ -101,6 +102,16 @@ const PANEL_SHIFT_PROPERTY = '--agent-teams-panel-shift'
 const PANEL_CONVERSATION_GAP = 14
 const MOVE_THRESHOLD = 4
 const CAPTAIN_ASSIGNEE = 'captain'
+
+/** 等级牌用境界色：底色/文字/描边与洞府场景共用一套调色板。 */
+function realmChipStyle(level: number): CSSProperties {
+  const palette = realmPaletteForLevel(level)
+  return {
+    background: palette.background,
+    color: palette.text,
+    boxShadow: `inset 0 0 0 1px ${palette.border}`,
+  }
+}
 
 type PanelGesture = {
   readonly kind: 'move' | 'resize'
@@ -703,6 +714,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
               <span className={css.captainRole}>{t('captain.role')}</span>
               <span
                 className={css.memberLevel}
+                style={realmChipStyle(captainCultivation.level)}
                 title={`${captainCultivation.xp} / ${captainCultivation.next} XP · ${captainCultivation.skills.length === 0 ? t('skill.none') : captainCultivation.skills.map(key => t(key)).join(' / ')}`}
               >
                 Lv.{captainCultivation.level} {t(captainCultivation.rankKey)}
@@ -810,6 +822,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                       {member.role !== '' && <span className={css.memberRole}>{roleLabel(member.role, member.name, t)}</span>}
                       <span
                         className={css.memberLevel}
+                        style={realmChipStyle(cultivation.level)}
                         title={`${cultivation.xp} / ${cultivation.next} XP · ${cultivation.skills.length === 0 ? t('skill.none') : cultivation.skills.map(key => t(key)).join(' / ')}`}
                       >
                         Lv.{cultivation.level} {t(cultivation.rankKey)}

@@ -20,6 +20,7 @@ import { CULTIVATION_ITEMS, captainKey, cultivationFromXp, idleXpPer10s, memberK
 import { useCultivationVersion, xpOf } from './cultivation-store.ts'
 import { OPEN_HALL_SHEET_EVENT, type HallSheetAction } from './hall-events.ts'
 import { ASCENSION_RANKS, ASCENSION_STORY, ASCENSION_TIPS, rankAtLevel } from './immortals.ts'
+import { realmPaletteForLevel } from './realm-colors.ts'
 import { PLUGIN_REPO, buildAgentPrompt, buildIssueUrl, collectDiagnostics } from './feedback.ts'
 import { PLUGIN_VERSION } from './version.ts'
 import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
@@ -614,8 +615,10 @@ export function SectHallOverlay({
               <p className={css.settingsHint}>{t('office.ascensionIntro')}</p>
               {viewerCultivation !== undefined && viewerName !== undefined && (
                 <div className={css.rankHero}>
-                  <span className={css.rankHeroName}>{viewerName} · Lv.{viewerCultivation.level} {t(viewerCultivation.rankKey)}</span>
-                  <div className={css.xpTrack}><span style={{ width: `${Math.round(viewerCultivation.ratio * 100)}%` }} /></div>
+                  <span className={css.rankHeroName}>
+                    {viewerName} · <span style={{ color: realmPaletteForLevel(viewerCultivation.level).border }}>Lv.{viewerCultivation.level} {t(viewerCultivation.rankKey)}</span>
+                  </span>
+                  <div className={css.xpTrack}><span style={{ width: `${Math.round(viewerCultivation.ratio * 100)}%`, background: realmPaletteForLevel(viewerCultivation.level).bar }} /></div>
                   <span className={css.settingsMeta}>{viewerCultivation.xp} / {viewerCultivation.next} XP · {t('office.ascensionCurrent')}</span>
                 </div>
               )}
@@ -627,7 +630,9 @@ export function SectHallOverlay({
                       <li key={entry.key} className={css.rosterRow}>
                         <span className={css.rosterIndex}>{index + 1}</span>
                         <span className={css.rosterName}>{entry.name}</span>
-                        <span className={css.rosterLevel}>Lv.{entry.cultivation.level} · {t(entry.cultivation.rankKey)}</span>
+                        <span className={css.rosterLevel} style={{ color: realmPaletteForLevel(entry.cultivation.level).border }}>
+                          Lv.{entry.cultivation.level} · {t(entry.cultivation.rankKey)}
+                        </span>
                       </li>
                     ))}
                   </ol>
@@ -641,7 +646,9 @@ export function SectHallOverlay({
                     <li key={rank.realm} className={css.rankRow} data-current={current || undefined}>
                       <div className={css.rankTop}>
                         <span className={css.rankName}>{t(rank.realm)}</span>
-                        <span className={css.rankRange}>Lv.{rank.levelMin}–{rank.levelMax}</span>
+                        <span className={css.rankRange} style={{ color: realmPaletteForLevel(rank.levelMin).border }}>
+                          Lv.{rank.levelMin}–{rank.levelMax}
+                        </span>
                         {current && <span className={css.rankCurrent}>{t('office.ascensionYouAre')}</span>}
                       </div>
                       <p className={css.rankDesc}>{t(rank.descKey)}</p>
@@ -803,9 +810,11 @@ export function SectHallOverlay({
               <div className={css.character}>
                 <div className={css.characterHead}>
                   <span className={css.characterName}>{character.name}</span>
-                  <span className={css.characterLevel}>Lv.{characterCultivation.level} {t(characterCultivation.rankKey)}</span>
+                  <span className={css.characterLevel} style={{ color: realmPaletteForLevel(characterCultivation.level).border }}>
+                    Lv.{characterCultivation.level} {t(characterCultivation.rankKey)}
+                  </span>
                 </div>
-                <div className={css.xpTrack}><span style={{ width: `${Math.round(characterCultivation.ratio * 100)}%` }} /></div>
+                <div className={css.xpTrack}><span style={{ width: `${Math.round(characterCultivation.ratio * 100)}%`, background: realmPaletteForLevel(characterCultivation.level).bar }} /></div>
                 <p className={css.settingsMeta}>{characterCultivation.xp} / {characterCultivation.next} XP</p>
                 <p className={css.settingsMeta}>{t('office.levelEarnHint')}</p>
                 <p className={css.settingsMeta}>{t('office.equipLiveHint')}</p>

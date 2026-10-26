@@ -17,10 +17,10 @@
   privacy-bounded diagnostics, prefilled GitHub issue, copy-diagnostics and
   copy-AI-prompt actions; it opens on 赞助. Support QRs are served through an
   allowlisted host route; SPONSOR.md and assets/support are packaged.
-- Idle XP now settles for the **whole team** (captain + every member) every
-  10 seconds; the currently open conversation keeps the 1x→3x online streak and
-  everyone else earns base. Offline catch-up (8h) applies to all; time before the
-  fix is not backfilled.
+- Idle XP now settles **only for the character whose conversation is open**;
+  switching away stops accrual and background members/captain do not idle. The
+  open character keeps the 1x→3x online streak and up to 8h offline catch-up.
+- Level badges in the panel and the hall now use realm-specific colour palettes.
 - Idle cultivation is half the fast curve (IDLE_XP_SCALE=0.5, taper 0.8):
   10 XP/10s at Lv.1, ~20s/level at Lv.100 (1→100 in ~45 minutes at 3x), then
   200≈35s, 500≈72s, 1000≈2.1min, cap≈13min. The online streak reaches 3x after
