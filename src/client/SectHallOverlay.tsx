@@ -58,6 +58,15 @@ function writePanelRect(rect: PanelRect): void {
 /** 常驻洞府浮层里的墙面设施被点击时广播的事件（供监视器等复用）。 */
 export const OPEN_HALL_SHEET_EVENT = 'agent-teams:open-sheet'
 
+type SheetKind = SceneAction | 'settings'
+
+/** 面板预设尺寸：初始给大一些。 */
+const PANEL_SIZES = {
+  compact: { w: 460, h: 380 },
+  normal: { w: 620, h: 500 },
+  large: { w: 820, h: 640 },
+} as const
+
 export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMember }: {
   readonly team: ActivityTeam
   readonly t: AgentTeamsTranslate
@@ -67,9 +76,13 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
 }) {
   const [collapsed, setCollapsed] = useState(() => readBool(COLLAPSED_KEY))
   const [docked, setDocked] = useState(() => readBool(DOCKED_KEY))
-  const [sheet, setSheet] = useState<SceneAction | undefined>()
-  const [sheetAnchor, setSheetAnchor] = useState<{ bottom: number; right: number } | undefined>()
+  const [sheet, setSheet] = useState<SheetKind | undefined>()
+  const [sheetAnchor, setSheetAnchor] = useState<{ left: number; bottom: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
+  const [size, setSize] = useState(() => {
+    const stored = readPanelRect()
+    return { w: stored.w ?? PANEL_SIZES.normal.w, h: stored.h ?? PANEL_SIZES.normal.h }
+  })
   const panelRef = useRef<HTMLElement | null>(null)
   const dragRef = useRef<{ startX: number; startY: number; baseX: number; baseY: number } | null>(null)
   const latestRect = useRef(rect)
@@ -89,21 +102,22 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
     return () => { window.removeEventListener(OPEN_HALL_SHEET_EVENT, open) }
   }, [])
 
-  // 内容气泡贴在面板上方（归栏时贴在栏的左侧），随面板移动/窗口缩放重新测量。
+  // 内容气泡贴在面板上方：左对齐面板（面板越大越往左），归栏时贴在栏左侧。
   useEffect(() => {
     if (sheet === undefined) return
     const measure = (): void => {
       const panel = panelRef.current
       if (panel === null) return
       const bounds = panel.getBoundingClientRect()
+      const popoverWidth = Math.min(480, window.innerWidth - 32)
       setSheetAnchor(docked
-        ? { bottom: 16, right: Math.max(16, window.innerWidth - bounds.left + 16) }
-        : { bottom: Math.max(16, window.innerHeight - bounds.top + 8), right: Math.max(16, window.innerWidth - bounds.right) })
+        ? { left: Math.max(16, bounds.left - popoverWidth - 16), bottom: 16 }
+        : { left: Math.max(16, bounds.left), bottom: Math.max(16, window.innerHeight - bounds.top + 8) })
     }
     measure()
     window.addEventListener('resize', measure)
     return () => { window.removeEventListener('resize', measure) }
-  }, [sheet, docked, collapsed, rect])
+  }, [sheet, docked, collapsed, rect, size])
 
   const beginDrag = (event: React.PointerEvent<HTMLElement>): void => {
     if ((event.target as HTMLElement).closest('button') !== null) return
@@ -147,25 +161,55 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
     setSheet(undefined)
   }
 
+  const applySize = (next: { w: number; h: number }): void => {
+    setSize(next)
+    writePanelRect({ ...rect, ...next })
+  }
+
+  const toggleSheet = (kind: SheetKind): void => {
+    setSheet(current => (current === kind ? undefined : kind))
+  }
+
+  // 自由缩放：拖右下角改大小，尺寸记在 localStorage。
+  useEffect(() => {
+    if (docked) return
+    const panel = panelRef.current
+    if (panel === null || typeof ResizeObserver === 'undefined') return
+    let timer: number | undefined
+    const observer = new ResizeObserver(() => {
+      if (timer !== undefined) window.clearTimeout(timer)
+      timer = window.setTimeout(() => {
+        const bounds = panel.getBoundingClientRect()
+        const next = { w: Math.round(bounds.width), h: Math.round(bounds.height) }
+        setSize(current => (Math.abs(current.w - next.w) > 1 || Math.abs(current.h - next.h) > 1 ? next : current))
+        writePanelRect({ ...latestRect.current, ...next })
+      }, 300)
+    })
+    observer.observe(panel)
+    return () => {
+      if (timer !== undefined) window.clearTimeout(timer)
+      observer.disconnect()
+    }
+  }, [docked])
+
   if (typeof document === 'undefined') return null
 
-  const transform = docked ? undefined : `translate(${rect.x}px, ${rect.y}px)`
   const panelStyle = docked
     ? undefined
-    : { transform, ...(rect.w === undefined ? {} : { width: `${rect.w}px` }), ...(rect.h === undefined ? {} : { height: `${rect.h}px` }) }
+    : { transform: `translate(${rect.x}px, ${rect.y}px)`, width: `${size.w}px`, height: `${size.h}px` }
 
   const renderSheet = (): React.ReactNode => {
     if (sheet === undefined || sheetAnchor === undefined) return null
-    const title = sheet === 'inbox'
-      ? t('workspace.inbox')
-      : sheet === 'teams' ? t('office.facility.teams')
-        : sheet === 'board' ? t('workspace.tabBoard')
-          : t('workspace.tabConfig')
+    const title = sheet === 'settings' ? t('office.panelConfig')
+      : sheet === 'inbox' ? t('workspace.inbox')
+        : sheet === 'teams' ? t('office.facility.teams')
+          : sheet === 'board' ? t('workspace.tabBoard')
+            : t('workspace.tabConfig')
     return createPortal((
       <aside
         className={css.sheet}
         data-sheet={sheet}
-        style={{ bottom: sheetAnchor.bottom, right: sheetAnchor.right }}
+        style={{ left: sheetAnchor.left, bottom: sheetAnchor.bottom }}
         role="dialog"
         aria-modal="false"
         aria-label={title}
@@ -175,7 +219,26 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
           <button type="button" className={css.sheetClose} onClick={() => { setSheet(undefined) }} aria-label={t('office.closePanel')}>×</button>
         </header>
         <div className={css.sheetBody}>
-          {sheet === 'inbox' ? (
+          {sheet === 'settings' ? (
+            <div className={css.settings}>
+              <p className={css.settingsHint}>{t('office.panelSizeHint')}</p>
+              <div className={css.sizeRow}>
+                {(Object.keys(PANEL_SIZES) as (keyof typeof PANEL_SIZES)[]).map((id) => {
+                  const preset = PANEL_SIZES[id]
+                  const active = size.w === preset.w && size.h === preset.h
+                  return (
+                    <button key={id} type="button" className={css.sizeChip} data-active={active || undefined} onClick={() => { applySize(preset) }}>
+                      {t(`office.panelSize.${id}`)}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className={css.settingsMeta}>{size.w} × {size.h} px</p>
+              <button type="button" className={css.settingsButton} onClick={() => { setRect({ x: 0, y: 0 }); writePanelRect({ x: 0, y: 0, ...size }) }}>
+                {t('office.resetPosition')}
+              </button>
+            </div>
+          ) : sheet === 'inbox' ? (
             <ul className={css.inboxList}>
               {team.captainInbox.map((message, index) => (
                 <li key={`${index}:${message.from}`} className={css.inboxRow}>
@@ -229,8 +292,8 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
                 <PixelOffice
                   team={team}
                   t={t}
-                  activeAction={sheet ?? null}
-                  onAction={(action) => { setSheet(action) }}
+                  activeAction={sheet === 'settings' ? null : sheet ?? null}
+                  onAction={(action) => { toggleSheet(action) }}
                   onOpenMember={(memberId) => { openMember(sessionId, memberId as SessionId) }}
                   onUnavailable={() => { /* 无会话修士：由场景内提示承担 */ }}
                 />
@@ -247,10 +310,10 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
                   <span className={css.portalGlyph} aria-hidden>✥</span>
                   <span>{docked ? t('office.dockFloating') : t('office.dockSidebar')}</span>
                 </button>
-                <button type="button" className={css.floorButton} data-control="hall-sword" onClick={() => { setSheet('config') }}>
-                  <span aria-hidden>⚔</span>{t('office.swordBox')}
+                <button type="button" className={css.floorButton} data-control="hall-settings" data-active={sheet === 'settings' || undefined} onClick={() => { toggleSheet('settings') }}>
+                  <span aria-hidden>⚙</span>{t('office.panelConfig')}
                 </button>
-                <button type="button" className={css.floorButton} data-control="hall-roster" onClick={() => { setSheet('teams') }}>
+                <button type="button" className={css.floorButton} data-control="hall-roster" data-active={sheet === 'teams' || undefined} onClick={() => { toggleSheet('teams') }}>
                   <span aria-hidden>☰</span>{t('office.roster')}
                 </button>
               </footer>

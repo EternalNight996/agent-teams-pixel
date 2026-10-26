@@ -7,8 +7,11 @@
   z-index: 11000;
   display: flex;
   flex-direction: column;
-  width: min(460px, calc(100vw - 32px));
+  width: min(620px, calc(100vw - 32px));
+  min-width: 380px;
+  min-height: 240px;
   overflow: hidden;
+  resize: both;
   border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 85%, transparent);
   border-radius: 12px;
   background: #151a21;
@@ -29,10 +32,19 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(420px, 46vw);
+  width: min(440px, 46vw);
+  min-width: 0;
+  min-height: 0;
   border-radius: 0;
   border-right: 0;
+  resize: none;
   box-shadow: -18px 0 50px rgb(0 0 0 / 45%);
+}
+
+/* 右下角缩放把手：让「可自由改大小」看得见。 */
+.window::-webkit-resizer {
+  background:
+    linear-gradient(135deg, transparent 0 46%, var(--dsw-alias-label-tertiary) 46% 52%, transparent 52% 62%, var(--dsw-alias-label-tertiary) 62% 68%, transparent 68%);
 }
 
 .head {
@@ -97,8 +109,7 @@
 
 .canvas {
   flex: 1 1 auto;
-  height: 320px;
-  min-height: 0;
+  min-height: 160px;
 }
 
 [data-collapsed='true'] .canvas {
@@ -158,6 +169,71 @@
 
 .portal:active .portalGlyph {
   transform: rotate(180deg) scale(0.9);
+}
+
+.floorButton[data-active='true'] {
+  border-color: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary);
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 12%, transparent);
+}
+
+/* 面板配置气泡。 */
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settingsHint,
+.settingsMeta {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10.5px;
+  line-height: 1.6;
+}
+
+.sizeRow {
+  display: flex;
+  gap: 6px;
+}
+
+.sizeChip {
+  padding: 4px 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.sizeChip:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary);
+}
+
+.sizeChip[data-active='true'] {
+  border-color: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary);
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 14%, transparent);
+}
+
+.settingsButton {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.settingsButton:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary);
 }
 
 /* 内容气泡：贴在面板上方展开。 */

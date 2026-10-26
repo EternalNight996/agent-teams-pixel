@@ -39,8 +39,12 @@
 - The 宗门协作 tab is gone: the hall is the single surface. The floating panel now
   drags by its header, collapses to a compact one-line container, and carries a
   floor bar with a 传送阵 (dock/floating toggle, state shown by colour + glyph
-  rotation), a 剑盒 (opens the 道统 config popover) and a 名册 button. All
-  content panels open **above the panel** as anchored popovers.
+  rotation), a 面板配置 button (size presets: 紧凑/标准/宽大, live size readout,
+  reset position) and a 名册 toggle. Floor buttons toggle their popover on second
+  click.
+- The panel is freely resizable from its bottom-right corner (size persisted in
+  `agent-teams-pixel.hallRect`), starts larger (620×500), and its popovers anchor
+  to the panel's left edge — a wider panel moves the popover further left.
 - The sect hall itself is now a **window-level floating layer**: mounted from the
   shell overlay (so it survives leaving the tab), anchored bottom-right of the
   main content area, collapsible to a one-line bar (state remembered in

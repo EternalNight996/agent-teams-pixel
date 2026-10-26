@@ -251,6 +251,12 @@ export declare const zh: {
     'office.dockFloating': string;
     'office.swordBox': string;
     'office.roster': string;
+    'office.panelConfig': string;
+    'office.panelSizeHint': string;
+    'office.panelSize.compact': string;
+    'office.panelSize.normal': string;
+    'office.panelSize.large': string;
+    'office.resetPosition': string;
     'office.chatter.1': string;
     'office.chatter.2': string;
     'office.chatter.3': string;
@@ -664,6 +670,12 @@ export declare const en: {
     'office.dockFloating': string;
     'office.swordBox': string;
     'office.roster': string;
+    'office.panelConfig': string;
+    'office.panelSizeHint': string;
+    'office.panelSize.compact': string;
+    'office.panelSize.normal': string;
+    'office.panelSize.large': string;
+    'office.resetPosition': string;
     'office.chatter.1': string;
     'office.chatter.2': string;
     'office.chatter.3': string;
