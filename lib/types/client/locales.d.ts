@@ -264,6 +264,7 @@ export declare const zh: {
     'office.floorSettings': string;
     'office.historyTeams': string;
     'office.historyCurrent': string;
+    'office.viewingState': string;
     'office.viewingCaptain': string;
     'office.viewingMember': string;
     'office.viewingHint': string;
@@ -727,6 +728,7 @@ export declare const en: {
     'office.floorSettings': string;
     'office.historyTeams': string;
     'office.historyCurrent': string;
+    'office.viewingState': string;
     'office.viewingCaptain': string;
     'office.viewingMember': string;
     'office.viewingHint': string;

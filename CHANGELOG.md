@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ### Changed
+- The cultivator whose conversation is currently open is now marked in the scene:
+  a breathing teal (member) or gold (captain) foot ring plus corner brackets,
+  and the name plate state reads 对话中 instead of 静修. Clicking another pixel
+  person moves the marker with the conversation.
 - Status labels agree again: when every task is completed, 道统 shows 已完成 and the
   captain in the scene stops showing 修炼中 (both used to follow phase=running).
 - The 宗门进度 sheet header now has a ＋新建任务 button: it returns to the main

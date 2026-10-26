@@ -23,6 +23,8 @@ export interface SceneMember {
     readonly model?: string;
     readonly unread?: number;
     readonly isLeader?: boolean;
+    /** The conversation currently open in the host (painted as active). */
+    readonly viewing?: boolean;
 }
 /** Copy the scene needs but must not translate itself. */
 export interface SceneLabels {
@@ -34,6 +36,8 @@ export interface SceneLabels {
     readonly working?: string;
     readonly idle?: string;
     readonly unknownState?: string;
+    /** 当前打开对话时名牌上的状态词（如：对话中）。 */
+    readonly viewing?: string;
 }
 /** 墙面数据碑：宗门气运的关键数字，标签由调用方本地化。 */
 export interface SceneWall {

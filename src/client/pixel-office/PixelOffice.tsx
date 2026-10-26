@@ -18,6 +18,8 @@ export interface PixelOfficeProps {
   readonly onOpenMember?: (memberId: string) => void
   /** Clicking the captain returns to the main conversation. */
   readonly onOpenCaptain?: () => void
+  /** Session whose conversation is open; its cultivator is painted as active. */
+  readonly viewingSessionId?: string
   /** A member without a conversation was clicked (nothing to open yet). */
   readonly onUnavailable?: (name: string) => void
   /** A wall facility was picked: the parent decides which panel to open. */
@@ -88,7 +90,7 @@ type Hover =
   | { readonly kind: 'settings'; readonly label: string; readonly hint: string; readonly x: number; readonly y: number }
 
 export function PixelOffice({
-  team, t, onOpenMember, onOpenCaptain, onUnavailable, onAction, activeAction, enabledActions,
+  team, t, onOpenMember, onOpenCaptain, viewingSessionId, onUnavailable, onAction, activeAction, enabledActions,
   onDock, onSettings, settingsOpen, teamless,
 }: PixelOfficeProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -122,6 +124,7 @@ export function PixelOffice({
       activity: captainActive ? 'working' : 'idle',
       unread: team.captainInbox.length,
       isLeader: true,
+      viewing: viewingSessionId !== undefined && viewingSessionId === team.captainSessionId,
     }
     const members: SceneMember[] = [captain, ...live.map((member): SceneMember => ({
       id: member.id,
@@ -134,6 +137,7 @@ export function PixelOffice({
       total: member.total,
       model: member.model,
       unread: member.unread,
+      viewing: viewingSessionId !== undefined && viewingSessionId === member.id,
     }))]
     const facilities: SceneFacility[] = onAction === undefined
       ? []
@@ -169,6 +173,7 @@ export function PixelOffice({
         working: t('office.working'),
         idle: t('office.idle'),
         unknownState: t('office.unknown'),
+        viewing: t('office.viewingState'),
       },
       // 墙面功德碑：把「宗门气运」的关键数字搬进洞府，点碑看完整进度。
       wall: {

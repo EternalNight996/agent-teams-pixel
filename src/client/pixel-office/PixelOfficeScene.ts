@@ -24,6 +24,8 @@ export interface SceneMember {
   readonly model?: string
   readonly unread?: number
   readonly isLeader?: boolean
+  /** The conversation currently open in the host (painted as active). */
+  readonly viewing?: boolean
 }
 
 /** Copy the scene needs but must not translate itself. */
@@ -36,6 +38,8 @@ export interface SceneLabels {
   readonly working?: string
   readonly idle?: string
   readonly unknownState?: string
+  /** 当前打开对话时名牌上的状态词（如：对话中）。 */
+  readonly viewing?: string
 }
 
 /** 墙面数据碑：宗门气运的关键数字，标签由调用方本地化。 */
@@ -1305,6 +1309,33 @@ export function createPixelScene(
     }
   }
 
+  /** 当前打开的对话所属修士：呼吸光圈 + 四角标记，切换对话时跟着移动。 */
+  function paintViewing(cx: number, baseY: number, member: SceneMember, time: number): void {
+    const color = member.isLeader === true ? '#f2c14e' : '#6fd6c8'
+    const pulse = 0.5 + 0.5 * Math.sin(time / 680)
+    g.save()
+    g.strokeStyle = color
+    g.globalAlpha = 0.5 + pulse * 0.3
+    g.lineWidth = 1.8
+    g.beginPath(); g.ellipse(cx, baseY - 2, 26, 8, 0, 0, Math.PI * 2); g.stroke()
+    g.globalAlpha = 0.22 + pulse * 0.15
+    g.beginPath(); g.ellipse(cx, baseY - 2, 34, 11, 0, 0, Math.PI * 2); g.stroke()
+    const x = cx - 30
+    const y = baseY - 100
+    const w = 60
+    const h = 78
+    g.globalAlpha = 0.85
+    g.lineWidth = 1.4
+    for (const [px, py, sx, sy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]] as const) {
+      g.beginPath()
+      g.moveTo(px + sx * 7, py)
+      g.lineTo(px, py)
+      g.lineTo(px, py + sy * 7)
+      g.stroke()
+    }
+    g.restore()
+  }
+
   /** Name plate, state dot, progress bar, task bubble and unread badge. */
   function paintOverlay(cx: number, deskY: number, member: SceneMember, time: number): void {
     const seed = hash(member.id || member.name)
@@ -1314,9 +1345,11 @@ export function createPixelScene(
 
     // Name plate under the desk edge: name + persistent state word.
     const labels = model?.labels
-    const stateText = member.activity === 'working'
-      ? labels?.working
-      : member.activity === 'idle' ? labels?.idle : labels?.unknownState
+    const stateText = member.viewing === true
+      ? (labels?.viewing ?? '对话中')
+      : member.activity === 'working'
+        ? labels?.working
+        : member.activity === 'idle' ? labels?.idle : labels?.unknownState
     const label = stateText === undefined || stateText === ''
       ? truncate(member.name, 10)
       : `${truncate(member.name, 8)} · ${stateText}`
@@ -1560,6 +1593,7 @@ export function createPixelScene(
       for (const spot of spots) paintFurniture(spot.deskCx, spot.deskY, spot.member, time)
       for (const spot of spots) paintCharacter(spot.cx, spot.baseY, spot.member, time, spot.walking)
       for (const spot of spots) paintOverlay(spot.cx, spot.baseY, spot.member, time)
+      for (const spot of spots) if (spot.member.viewing === true) paintViewing(spot.cx, spot.baseY, spot.member, time)
       // 鼠标停在修士上：四角描金，明确这是可点的会话入口。
       const hoveredMemberId = hovered?.kind === 'member' ? hovered.id : undefined
       if (hoveredMemberId !== undefined) {

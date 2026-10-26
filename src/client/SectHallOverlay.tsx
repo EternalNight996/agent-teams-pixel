@@ -686,6 +686,7 @@ export function SectHallOverlay({
                   }}
                   onOpenMember={(memberId) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, memberId as SessionId) }}
                   onOpenCaptain={goHome}
+                  viewingSessionId={sessionId}
                   onUnavailable={() => { /* 无会话修士：由场景内提示承担 */ }}
                   onDock={dockToSidebar}
                   onSettings={() => { toggleSheet('settings') }}
