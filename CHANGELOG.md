@@ -17,6 +17,10 @@
   privacy-bounded diagnostics, prefilled GitHub issue, copy-diagnostics and
   copy-AI-prompt actions; it opens on 赞助. Support QRs are served through an
   allowlisted host route; SPONSOR.md and assets/support are packaged.
+- Idle XP now settles for the **whole team** (captain + every member) every
+  10 seconds; the currently open conversation keeps the 1x→3x online streak and
+  everyone else earns base. Offline catch-up (8h) applies to all; time before the
+  fix is not backfilled.
 - Idle cultivation follows a faster retention curve: 10 XP/10s at Lv.1,
   accelerating to ~10s/level at Lv.100 (1→100 in ~23 minutes at 3x), then slowly
   stretching (200≈16s, 500≈31s, 1000≈50s, cap≈4.2min). The online streak reaches
