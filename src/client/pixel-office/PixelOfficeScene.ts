@@ -114,6 +114,8 @@ export interface SceneHandle {
   cycleMount(id: string): void
   /** Force one member's travel form (equipment sheet). */
   setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off'): void
+  /** Equip one member's artifact/skill (equipment sheet). */
+  setEquip(id: string, kind: 'weapon' | 'skill', tier: number): void
   /** Cancel the loop and release the context. */
   dispose(): void
 }
@@ -128,9 +130,9 @@ const TOP_PAD = 104
 const MAX_COLUMNS = 4
 const DESK_W = 92
 /** 中庭两个可点物件：传送阵（归栏）与阵盘（配置）。 */
-const DOCK_AT = { x: 132, y: WALL_HEIGHT + 76 } as const
+const DOCK_AT = { x: 132, y: WALL_HEIGHT + 52 } as const
 // 与左侧归栏火把关于世界中线对称，避免压到最右侧的修士。
-const DIAL_AT = { x: WORLD_W - DOCK_AT.x, y: WALL_HEIGHT + 70 } as const
+const DIAL_AT = { x: WORLD_W - DOCK_AT.x, y: WALL_HEIGHT + 46 } as const
 
 const COLORS = {
   wall: '#2f3b33',
@@ -200,7 +202,7 @@ export function createPixelScene(
 ): SceneHandle {
   const context = canvas.getContext('2d')
   if (context === null) {
-    return { render() {}, resize() {}, dispose() {}, setHover() {}, jump() {}, cycleMount() {}, setMount() {}, hitTest() { return undefined } }
+    return { render() {}, resize() {}, dispose() {}, setHover() {}, jump() {}, cycleMount() {}, setMount() {}, setEquip() {}, hitTest() { return undefined } }
   }
   const g = context
   let model: SceneModel | undefined
@@ -221,6 +223,9 @@ export function createPixelScene(
   const jumps = new Map<string, number>()
   // 双击在 auto → 御剑 → 坐骑 → 步行 之间切换（低境界仍用弹跳反馈）。
   const mountOverride = new Map<string, 'auto' | 'sword' | 'beast' | 'off'>()
+  // 已装备的法器/技能（由「天机阁」物品栏写入），用于即时外观切换。
+  const weaponEquip = new Map<string, number>()
+  const skillEquip = new Map<string, number>()
   // 修为飘字与升级特效。
   type CultFx = { x: number; y: number; groundY: number; text: string; start: number; kind: 'xp' | 'level' }
   let cultivationFx: CultFx[] = []
@@ -558,6 +563,38 @@ export function createPixelScene(
     paintFacilityHover(rect, hovered, active)
   }
 
+  /** 天机阁：法器/坐骑/技能的陈列柜，点开装备页。 */
+  function paintGear(rect: FacilityRect, hovered: boolean, active: boolean): void {
+    g.fillStyle = '#263630'
+    roundRect(g, rect.x, rect.y, rect.w, rect.h, 4)
+    g.fill()
+    g.fillStyle = '#4f5f55'
+    roundRect(g, rect.x + 4, rect.y + 4, rect.w - 8, rect.h - 8, 5)
+    g.fill()
+    g.fillStyle = '#1e2a24'
+    roundRect(g, rect.x + 7, rect.y + 7, rect.w - 14, rect.h - 14, 3)
+    g.fill()
+    g.fillStyle = '#7a6a4a'
+    g.fillRect(rect.x + 10, rect.y + 22, rect.w - 20, 2)
+    g.fillRect(rect.x + 10, rect.y + 38, rect.w - 20, 2)
+    g.fillStyle = '#8fe3ff'
+    g.fillRect(rect.x + 14, rect.y + 14, 5, 7)
+    g.fillRect(rect.x + 24, rect.y + 15, 4, 6)
+    g.fillStyle = '#f2c14e'
+    g.fillRect(rect.x + rect.w - 22, rect.y + 15, 5, 6)
+    const cx = rect.x + rect.w / 2
+    const cy = rect.y + 31
+    const glow = g.createRadialGradient(cx, cy, 1, cx, cy, 13)
+    glow.addColorStop(0, 'rgba(143, 227, 255, 0.9)')
+    glow.addColorStop(0.6, 'rgba(143, 227, 255, 0.25)')
+    glow.addColorStop(1, 'rgba(143, 227, 255, 0)')
+    g.fillStyle = glow
+    g.beginPath(); g.arc(cx, cy, 13, 0, Math.PI * 2); g.fill()
+    g.fillStyle = '#e8fbff'
+    g.beginPath(); g.arc(cx, cy, 4, 0, Math.PI * 2); g.fill()
+    paintFacilityHover(rect, hovered, active)
+  }
+
   /** 传音阁：掌门收件箱，红点表示未读。 */
   function paintPost(rect: FacilityRect, badge: number, hovered: boolean, active: boolean): void {
     g.fillStyle = '#3a2718'
@@ -818,6 +855,7 @@ export function createPixelScene(
     paintLibrary(FACILITIES.config, hoverAction === 'config', active === 'config')
     paintGate(FACILITIES.teams, model?.teamName ?? '', hoverAction === 'teams', active === 'teams', time)
     paintStele(FACILITIES.board, wall, hoverAction === 'board', active === 'board')
+    paintGear(FACILITIES.gear, hoverAction === 'gear', active === 'gear')
     paintPost(FACILITIES.inbox, facilityIndex.get('inbox')?.badge ?? 0, hoverAction === 'inbox', active === 'inbox')
     // 标签后画，压在墙裙上
     for (const action of FACILITY_ORDER) {
@@ -1535,6 +1573,44 @@ export function createPixelScene(
     g.restore()
   }
 
+  /** 已装备外观：法器悬浮在身侧，技能多一层灵环。 */
+  function paintEquipFx(cx: number, baseY: number, member: SceneMember, time: number): void {
+    const key = member.id || member.name
+    const weaponTier = weaponEquip.get(key)
+    const skillTier = skillEquip.get(key)
+    if (weaponTier !== undefined) {
+      const color = weaponTier >= 1000 ? '#c39bff' : weaponTier >= 100 ? '#8fe3ff' : '#f2c14e'
+      const bob = Math.sin(time / 620) * 2
+      g.save()
+      g.translate(cx + 21, baseY - 58 + bob)
+      g.globalAlpha = 0.28
+      g.fillStyle = color
+      g.beginPath(); g.ellipse(0, 0, 12, 14, 0, 0, Math.PI * 2); g.fill()
+      g.globalAlpha = 0.95
+      g.fillStyle = color
+      g.fillRect(-1, -11, 2, 20)
+      g.fillRect(-3, -13, 6, 3)
+      g.fillRect(-2, 9, 4, 2)
+      g.font = 'bold 8px "Segoe UI", sans-serif'
+      g.fillText('✦', 7, -8)
+      g.restore()
+    }
+    if (skillTier !== undefined) {
+      const color = skillTier >= 1000 ? '#c39bff' : skillTier >= 100 ? '#8fe3ff' : '#9be36f'
+      g.save()
+      g.globalAlpha = 0.5 + 0.15 * Math.sin(time / 480)
+      g.strokeStyle = color
+      g.lineWidth = 1.4
+      g.beginPath(); g.ellipse(cx, baseY - 2, 30, 10, 0, 0, Math.PI * 2); g.stroke()
+      for (let i = 0; i < 3; i += 1) {
+        const angle = time / 900 + (i / 3) * Math.PI * 2
+        g.fillStyle = color
+        g.fillRect(cx + Math.cos(angle) * 33 - 1.5, baseY - 2 + Math.sin(angle) * 10 - 1.5, 3, 3)
+      }
+      g.restore()
+    }
+  }
+
   /** Name plate, state dot, progress bar, task bubble and unread badge. */
   function paintOverlay(cx: number, deskY: number, member: SceneMember, time: number): void {
     const seed = hash(member.id || member.name)
@@ -1860,21 +1936,19 @@ export function createPixelScene(
       for (const spot of spots) paintFurniture(spot.deskCx, spot.deskY, spot.member, time)
       for (const spot of spots) if (spot.member.viewing === true) paintViewingAura(spot.cx, spot.baseY, spot.member, time)
       for (const spot of spots) {
-        const wandering = spot.baseY !== spot.deskY
-        const mount = wandering ? chosenMount(spot.member) : undefined
+        const mount = chosenMount(spot.member)
         if (mount !== undefined) paintMount(spot.cx, spot.baseY, mount, time)
       }
       for (const spot of spots) {
-        const wandering = spot.baseY !== spot.deskY
-        const lift = wandering ? liftOf(chosenMount(spot.member)) : 0
+        const lift = liftOf(chosenMount(spot.member))
         const hop = jumpHeight(spot.member.id || spot.member.name, time)
         paintCharacter(spot.cx, spot.baseY - lift - hop, spot.member, time, spot.walking)
         paintCultivationAura(spot.cx, spot.baseY - lift, spot.member, time)
       }
       for (const spot of spots) {
-        const wandering = spot.baseY !== spot.deskY
-        const lift = wandering ? liftOf(chosenMount(spot.member)) : 0
+        const lift = liftOf(chosenMount(spot.member))
         paintOverlay(spot.cx, spot.baseY - lift, spot.member, time)
+        paintEquipFx(spot.cx, spot.baseY - lift, spot.member, time)
       }
       for (const spot of spots) if (spot.member.viewing === true) paintViewingBadge(spot.cx, spot.baseY, spot.member, time)
       drawCultivationFx(time)
@@ -1986,6 +2060,10 @@ export function createPixelScene(
     },
     setMount(id, form) {
       mountOverride.set(id, form)
+    },
+    setEquip(id, kind, tier) {
+      if (kind === 'weapon') weaponEquip.set(id, tier)
+      else skillEquip.set(id, tier)
     },
     dispose() {
       disposed = true

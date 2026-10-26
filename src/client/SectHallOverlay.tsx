@@ -142,9 +142,10 @@ export function SectHallOverlay({
   const [reviewing, setReviewing] = useState(false)
   const [historyTeamId, setHistoryTeamId] = useState<string | undefined>()
   const [characterId, setCharacterId] = useState<string | undefined>()
-  const [equippedId, setEquippedId] = useState<string | undefined>()
+  // 法器 / 坐骑 / 技能各选各的，互不覆盖。
+  const [equipped, setEquipped] = useState<{ weapon?: string; mount?: string; skill?: string }>({})
   useCultivationVersion()
-  useEffect(() => { setEquippedId(undefined) }, [characterId])
+  useEffect(() => { setEquipped({}) }, [characterId])
   const [sheetAnchor, setSheetAnchor] = useState<{ left: number; top: number; width: number; maxHeight: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
   const [token, setToken] = useState<TokenPoint>(() => readTokenPoint())
@@ -199,6 +200,15 @@ export function SectHallOverlay({
     window.setTimeout(() => {
       document.querySelector<HTMLElement>('[data-composer-card] [contenteditable="true"][role="textbox"], [data-composer-card] textarea')?.focus()
     }, 160)
+  }
+  // 天机阁：打开当前角色（或掌门）的装备页。
+  const openGear = (): void => {
+    const id = viewingCaptain ? hall.captainSessionId : viewingMember?.id
+    const target = id !== undefined && id !== '' ? id : hall.captainSessionId
+    if (target !== '') {
+      setCharacterId(target)
+      setSheet('character')
+    }
   }
   const staged = hall.phase === 'staged'
   // 令牌随面板配置缩放：标准 620×500 = 1.0，超大面板最多 1.8 倍。
@@ -572,28 +582,32 @@ export function SectHallOverlay({
                     <div className={css.inventory}>
                       {CULTIVATION_ITEMS.filter(item => item.kind === section.kind).map(item => {
                         const locked = characterCultivation.level < item.level
-                        const equipped = equippedId === item.id
+                        const isEquipped = equipped[item.kind] === item.id
                         return (
                           <button
                             key={item.id}
                             type="button"
                             className={css.item}
                             data-locked={locked || undefined}
-                            data-equipped={equipped || undefined}
+                            data-equipped={isEquipped || undefined}
                             disabled={locked}
                             title={t(item.key as Parameters<typeof t>[0])}
                             onClick={() => {
                               if (locked) return
-                              setEquippedId(item.id)
-                              if (item.form !== undefined) {
+                              setEquipped(current => ({ ...current, [item.kind]: item.id }))
+                              if (item.kind === 'mount' && item.form !== undefined) {
                                 window.dispatchEvent(new CustomEvent('agent-teams:mount', { detail: { id: character.id, form: item.form } }))
+                              } else if (item.kind !== 'mount') {
+                                window.dispatchEvent(new CustomEvent('agent-teams:equip', {
+                                  detail: { id: character.id, kind: item.kind, tier: item.level },
+                                }))
                               }
                             }}
                           >
                             <span className={css.itemIcon}>{item.icon}</span>
                             <span className={css.itemName}>{t(item.key as Parameters<typeof t>[0])}</span>
                             <span className={css.itemLevel}>Lv.{item.level}</span>
-                            {equipped && <span className={css.itemEquipped}>✓</span>}
+                            {isEquipped && <span className={css.itemEquipped}>✓</span>}
                             {locked && <span className={css.itemLock}>🔒</span>}
                           </button>
                         )
@@ -776,10 +790,11 @@ export function SectHallOverlay({
                 <PixelOffice
                   team={hall}
                   t={t}
-                  activeAction={sheet === 'settings' || sheet === 'start' || sheet === 'character' ? null : sheet ?? null}
+                  activeAction={sheet === 'character' ? 'gear' : sheet === 'settings' || sheet === 'start' ? null : sheet ?? null}
                   onAction={(action) => {
                     // 无队伍时山门就是开宗入口（与底部「开宗」双向对应）；有队伍时开名册。
                     if (action === 'teams' && !hasTeam) { startSect(); return }
+                    if (action === 'gear') { openGear(); return }
                     toggleSheet(action)
                   }}
                   onOpenMember={(memberId) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, memberId as SessionId) }}
@@ -826,6 +841,9 @@ export function SectHallOverlay({
                 </button>
                 <button type="button" className={css.floorButton} data-control="hall-inbox" data-active={sheet === 'inbox' || undefined} onClick={() => { toggleSheet('inbox') }}>
                   <span aria-hidden>信</span>{t('office.floorInbox')}
+                </button>
+                <button type="button" className={css.floorButton} data-control="hall-gear" data-active={sheet === 'character' || undefined} onClick={openGear}>
+                  <span aria-hidden>阁</span>{t('office.floorGear')}
                 </button>
                 <button type="button" className={css.floorButton} data-control="hall-settings" data-active={sheet === 'settings' || undefined} onClick={() => { toggleSheet('settings') }}>
                   <span aria-hidden>⚙</span>{t('office.floorSettings')}

@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 ### Changed
+- 法器、坐骑、技能 now equip independently in the inventory (three separate
+  selections instead of one global slot).
+- Added the 天机阁 wall facility (and a bottom-bar entry) that opens the gear
+  sheet; the wall now holds five facilities inside the same 520px world.
+- Selected mounts are always rendered for idle cultivators (even at their desk),
+  and equipped artifacts/skills add visible floating-blade / spirit-ring effects.
+- 归栏 and 配置 objects moved upward on the courtyard so they no longer sit on
+  top of the cultivators.
 - The cultivation ladder now follows the full 凡人流 hierarchy across the 9999
   level cap: 凡人 → 炼气 → 筑基 → 结丹 → 元婴 → 化神 → 炼虚 → 合体 → 大乘 → 渡劫
   → 真仙 → 金仙 → 太乙 → 大罗 → 道祖.

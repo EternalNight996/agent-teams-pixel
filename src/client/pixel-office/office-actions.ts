@@ -8,7 +8,7 @@
  */
 
 /** One panel a wall facility can open. */
-export type SceneAction = 'teams' | 'board' | 'config' | 'inbox'
+export type SceneAction = 'teams' | 'board' | 'config' | 'inbox' | 'gear'
 
 /** Scene-space rectangle (the renderer draws in a 520-wide world). */
 export interface FacilityRect {
@@ -20,17 +20,18 @@ export interface FacilityRect {
 
 /** Fixed wall layout: bookshelf, gate, merit stele and message rack. */
 export const FACILITIES: Readonly<Record<SceneAction, FacilityRect>> = {
-  config: { x: 18, y: 10, w: 92, h: 60 },
-  teams: { x: 148, y: 6, w: 156, h: 66 },
-  board: { x: 332, y: 10, w: 80, h: 60 },
-  inbox: { x: 430, y: 10, w: 80, h: 60 },
+  config: { x: 10, y: 10, w: 84, h: 60 },
+  teams: { x: 102, y: 6, w: 128, h: 66 },
+  board: { x: 238, y: 10, w: 72, h: 60 },
+  gear: { x: 318, y: 10, w: 72, h: 60 },
+  inbox: { x: 398, y: 10, w: 72, h: 60 },
 }
 
 /** The wall band reserved for facilities; desks start below it. */
 export const WALL_HEIGHT = 96
 
 /** Order used by the rail and by tests (left to right on the wall). */
-export const FACILITY_ORDER: readonly SceneAction[] = ['config', 'teams', 'board', 'inbox']
+export const FACILITY_ORDER: readonly SceneAction[] = ['config', 'teams', 'board', 'gear', 'inbox']
 
 /** A scene hit from `hitTest`: a cultivator desk or a wall facility. */
 export type SceneHit =

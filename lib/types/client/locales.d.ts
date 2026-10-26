@@ -262,6 +262,7 @@ export declare const zh: {
     'office.floorProgress': string;
     'office.floorInbox': string;
     'office.floorSettings': string;
+    'office.floorGear': string;
     'office.historyTeams': string;
     'office.historyCurrent': string;
     'office.viewingState': string;
@@ -351,10 +352,12 @@ export declare const zh: {
     'office.facility.teams': string;
     'office.facility.board': string;
     'office.facility.config': string;
+    'office.facility.gear': string;
     'office.facility.inbox': string;
     'office.action.teamsHint': string;
     'office.action.boardHint': string;
     'office.action.configHint': string;
+    'office.action.gearHint': string;
     'office.action.inboxHint': string;
     'app.title': string;
     'quickstart.entry': string;
@@ -786,6 +789,7 @@ export declare const en: {
     'office.floorProgress': string;
     'office.floorInbox': string;
     'office.floorSettings': string;
+    'office.floorGear': string;
     'office.historyTeams': string;
     'office.historyCurrent': string;
     'office.viewingState': string;
@@ -875,10 +879,12 @@ export declare const en: {
     'office.facility.teams': string;
     'office.facility.board': string;
     'office.facility.config': string;
+    'office.facility.gear': string;
     'office.facility.inbox': string;
     'office.action.teamsHint': string;
     'office.action.boardHint': string;
     'office.action.configHint': string;
+    'office.action.gearHint': string;
     'office.action.inboxHint': string;
     'app.title': string;
     'quickstart.entry': string;

@@ -107,6 +107,8 @@ export interface SceneHandle {
     cycleMount(id: string): void;
     /** Force one member's travel form (equipment sheet). */
     setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off'): void;
+    /** Equip one member's artifact/skill (equipment sheet). */
+    setEquip(id: string, kind: 'weapon' | 'skill', tier: number): void;
     /** Cancel the loop and release the context. */
     dispose(): void;
 }

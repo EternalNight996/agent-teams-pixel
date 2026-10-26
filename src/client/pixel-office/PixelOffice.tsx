@@ -45,6 +45,7 @@ const FACILITY_LABEL: Readonly<Record<SceneAction, AgentTeamsLocaleKey>> = {
   teams: 'office.facility.teams',
   board: 'office.facility.board',
   config: 'office.facility.config',
+  gear: 'office.facility.gear',
   inbox: 'office.facility.inbox',
 }
 
@@ -52,6 +53,7 @@ const FACILITY_HINT: Readonly<Record<SceneAction, AgentTeamsLocaleKey>> = {
   teams: 'office.action.teamsHint',
   board: 'office.action.boardHint',
   config: 'office.action.configHint',
+  gear: 'office.action.gearHint',
   inbox: 'office.action.inboxHint',
 }
 
@@ -60,6 +62,7 @@ const FACILITY_GLYPH: Readonly<Record<SceneAction, string>> = {
   teams: '山',
   board: '碑',
   config: '经',
+  gear: '阁',
   inbox: '信',
 }
 
@@ -239,6 +242,17 @@ export function PixelOffice({
     }
     window.addEventListener('agent-teams:mount', onMount)
     return () => { window.removeEventListener('agent-teams:mount', onMount) }
+  }, [])
+
+  useEffect(() => {
+    const onEquip = (event: Event): void => {
+      const detail = (event as CustomEvent<{ id?: string; kind?: 'weapon' | 'skill'; tier?: number }>).detail
+      if (detail?.id !== undefined && detail.kind !== undefined && detail.tier !== undefined) {
+        sceneRef.current?.setEquip(detail.id, detail.kind, detail.tier)
+      }
+    }
+    window.addEventListener('agent-teams:equip', onEquip)
+    return () => { window.removeEventListener('agent-teams:equip', onEquip) }
   }, [])
 
   const sceneMembers = useMemo(() => new Map(model.members.map(member => [member.id, member])), [model])
