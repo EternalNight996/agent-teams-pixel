@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Changed
+- After 开宗立派 succeeds, the hall waits for the new team to land and then opens
+  the 道统配置 (team config) sheet automatically, so the founder can review the
+  roster and doctrine right away instead of the wizard just closing.
 - The 开宗 wizard's 修士 chips now show the embedded pixel portrait for each
   role (preset roster, selected roles, the role picker and the oath summary);
   custom roles fall back to an initial-letter badge.

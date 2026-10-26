@@ -45,10 +45,11 @@ function templateOf(id: string): QuickTemplate {
   return TEMPLATES.find(entry => entry.id === id) ?? TEMPLATES[0] as QuickTemplate
 }
 
-export function QuickStartWizard({ sessionId, t, onDone }: {
+export function QuickStartWizard({ sessionId, t, onDone, onFounded }: {
   readonly sessionId: SessionId
   readonly t: AgentTeamsTranslate
   readonly onDone?: () => void
+  readonly onFounded?: () => void
 }) {
   const [step, setStep] = useState(0)
   const [goal, setGoal] = useState('')
@@ -65,6 +66,11 @@ export function QuickStartWizard({ sessionId, t, onDone }: {
   const [created, setCreated] = useState<string | undefined>()
   const multiRef = useRef<HTMLDivElement | null>(null)
   const goalRef = useRef<HTMLTextAreaElement | null>(null)
+  const foundedTimer = useRef<number | undefined>(undefined)
+
+  useEffect(() => () => {
+    if (foundedTimer.current !== undefined) window.clearTimeout(foundedTimer.current)
+  }, [])
 
   useEffect(() => {
     if (!rolesOpen) return
@@ -163,7 +169,7 @@ export function QuickStartWizard({ sessionId, t, onDone }: {
       }))
       if (body.teamId !== undefined) window.dispatchEvent(new CustomEvent(TEAM_CREATED_EVENT, { detail: { teamId: body.teamId } }))
       setGoal('')
-      window.setTimeout(() => { onDone?.() }, 1800)
+      foundedTimer.current = window.setTimeout(() => { onFounded?.() }, 1400)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {

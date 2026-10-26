@@ -131,6 +131,8 @@ export function SectHallOverlay({
   const [collapsed, setCollapsed] = useState(() => readBool(COLLAPSED_KEY))
   const [docked, setDocked] = useState(() => readBool(DOCKED_KEY))
   const [sheet, setSheet] = useState<SheetKind | undefined>()
+  // 开宗成功后等新队伍落地，再自动打开道统配置让掌门审核。
+  const [pendingReview, setPendingReview] = useState(false)
   const [sheetAnchor, setSheetAnchor] = useState<{ left: number; top: number; width: number; maxHeight: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
   const [token, setToken] = useState<TokenPoint>(() => readTokenPoint())
@@ -148,6 +150,12 @@ export function SectHallOverlay({
 
   // 洞府常驻：即使当前会话还没有队伍，也保留浮层（空洞府里只有掌门）。
   const hasTeam = team !== undefined
+
+  useEffect(() => {
+    if (!pendingReview || !hasTeam) return
+    setPendingReview(false)
+    setSheet('config')
+  }, [pendingReview, hasTeam])
   const hall: ActivityTeam = team ?? {
     workspace: '',
     teamId: '',
@@ -459,7 +467,12 @@ export function SectHallOverlay({
           ) : sheet === 'start' ? (
             sessionId === undefined
               ? <p className={css.settingsHint}>{t('workspace.emptyTitle')}</p>
-              : <QuickStartWizard sessionId={sessionId} t={t} onDone={() => { setSheet(undefined) }} />
+              : <QuickStartWizard
+                  sessionId={sessionId}
+                  t={t}
+                  onDone={() => { setSheet(undefined) }}
+                  onFounded={() => { setPendingReview(true) }}
+                />
           ) : sheet === 'inbox' ? (
             hall.captainInbox.length === 0
               ? <p className={css.settingsHint}>{t('workspace.inboxEmpty')}</p>
