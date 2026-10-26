@@ -10,6 +10,10 @@
   attempts). Frontend reuses existing components, verifier reuses implementation
   evidence rather than rerunning everything, reviewer reviews the diff/evidence.
   Tests cap the five contracts at 5,200 chars and the DAG at depth 5 / width 2.
+- Artifact handoff: every full-stack task now carries an explicit 交付/验收 line
+  (contract file, browser evidence, migration/tests, E2E, risk matrix,
+  findings+verdict), and every role contract ends with a five-bullet Report rule
+  (changed paths, commands/evidence, contract gaps; write files, do not paste).
 - Idle XP attribution now follows a **durable subagent transcript** even when the
   host keeps the parent captain as `current`: if a retained child owns the main
   view, that member is the one who idles. This fixes member conversations awarding

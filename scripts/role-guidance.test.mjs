@@ -18,6 +18,7 @@ test('software roles expose bounded contracts with ownership, rules and done', (
     assert.match(text, /Ownership:/)
     assert.match(text, /Must:/)
     assert.match(text, /Done:/)
+    assert.match(text, /Report:/)
   }
   assert.equal(roleGuidance('captain'), undefined)
   assert.equal(roleGuidance(undefined), undefined)
@@ -59,6 +60,8 @@ test('the fullstack template builds a contract -> parallel layers -> integration
   assert.equal(byId.get('contract')?.assignee, '合契师')
   assert.equal(byId.get('frontend')?.assignee, '灵绘师')
   assert.equal(byId.get('backend')?.assignee, '地脉师')
+  for (const task of plan.tasks) assert.match(task.description, /交付\/验收：/, `${task.id} must carry an expected artifact`)
+  assert.match(byId.get('contract')?.description ?? '', /契约文件/)
   // Lean roster: the integrator owns both the contract and the final glue.
   assert.equal(plan.members.length, 5)
   assert.ok(!roles.includes('architect'))
@@ -88,5 +91,8 @@ test('the full-stack prompt and DAG stay within an efficiency budget', () => {
     .map(role => roleGuidance(role) ?? '')
   const totalChars = contracts.reduce((sum, text) => sum + text.length, 0)
   assert.ok(totalChars <= 5200, `five role contracts total ${totalChars} chars`)
-  for (const text of contracts) assert.match(text, /Working budget:/)
+  for (const text of contracts) {
+    assert.match(text, /Working budget:/)
+    assert.match(text, /Report:/)
+  }
 })

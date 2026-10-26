@@ -17,6 +17,8 @@ export interface QuickStartTemplate {
         readonly subject: string;
         readonly role: string;
         readonly description: string;
+        /** Expected artifact/acceptance, appended to the staged task description. */
+        readonly expected?: string;
         readonly dependencies?: readonly string[];
     }[];
 }

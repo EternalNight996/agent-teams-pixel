@@ -32,6 +32,8 @@ export interface QuickStartTemplate {
     readonly subject: string
     readonly role: string
     readonly description: string
+    /** Expected artifact/acceptance, appended to the staged task description. */
+    readonly expected?: string
     readonly dependencies?: readonly string[]
   }[]
 }
@@ -106,12 +108,12 @@ export const QUICK_START_TEMPLATES: readonly QuickStartTemplate[] = [
     label: '全栈开发',
     roles: ['integrator', 'frontend', 'backend', 'verifier', 'reviewer'],
     tasks: [
-      { id: 'contract', subject: '定契约与边界', role: 'integrator', description: '先定 API/数据结构/UI 契约与非目标，明确前后端各自可写范围。产出契约文档或类型定义，作为前后端共同输入。' },
-      { id: 'frontend', subject: '实现前端', role: 'frontend', description: '按契约实现界面：loading/empty/error、键盘/可访问性、320/768/1280 响应式；附浏览器证据。', dependencies: ['contract'] },
-      { id: 'backend', subject: '实现后端', role: 'backend', description: '按契约实现 API/数据：迁移+回滚、校验、鉴权、幂等、结构化错误与集成测试；发布契约变更。', dependencies: ['contract'] },
-      { id: 'integrate', subject: '联调与契约对齐', role: 'integrator', description: '对齐前后端字段/类型/错误码，跑端到端 smoke，记录契约差异与残余风险。', dependencies: ['frontend', 'backend'] },
-      { id: 'verify', subject: '验证全链路', role: 'verifier', description: '跑测试与浏览器 smoke，按风险矩阵覆盖正常/边界/错误/鉴权/回归，记录命令与证据。', dependencies: ['integrate'] },
-      { id: 'review', subject: '审查交付', role: 'reviewer', description: '对照验收与契约审查正确性、范围、安全、性能与可访问性；证据不足则失败。', dependencies: ['verify'] },
+      { id: 'contract', subject: '定契约与边界', role: 'integrator', description: '先定 API/数据结构/UI 契约与非目标，明确前后端各自可写范围。产出契约文档或类型定义，作为前后端共同输入。', expected: '契约文件（端点/类型/错误码/字段所有权）+ 明确非目标。' },
+      { id: 'frontend', subject: '实现前端', role: 'frontend', description: '按契约实现界面：loading/empty/error、键盘/可访问性、320/768/1280 响应式；附浏览器证据。', expected: '可运行 UI + 截图/控制台证据路径 + 契约缺口。', dependencies: ['contract'] },
+      { id: 'backend', subject: '实现后端', role: 'backend', description: '按契约实现 API/数据：迁移+回滚、校验、鉴权、幂等、结构化错误与集成测试；发布契约变更。', expected: '迁移/回滚 + 集成测试 + 契约变更路径。', dependencies: ['contract'] },
+      { id: 'integrate', subject: '联调与契约对齐', role: 'integrator', description: '对齐前后端字段/类型/错误码，跑端到端 smoke，记录契约差异与残余风险。', expected: '端到端 smoke 命令与结果 + 契约差异清单。', dependencies: ['frontend', 'backend'] },
+      { id: 'verify', subject: '验证全链路', role: 'verifier', description: '跑测试与浏览器 smoke，按风险矩阵覆盖正常/边界/错误/鉴权/回归，记录命令与证据。', expected: '风险矩阵 + 命令/预期/实际。', dependencies: ['integrate'] },
+      { id: 'review', subject: '审查交付', role: 'reviewer', description: '对照验收与契约审查正确性、范围、安全、性能与可访问性；证据不足则失败。', expected: 'findings（文件/行/修复）+ verdict。', dependencies: ['verify'] },
     ],
   },
   {
@@ -159,7 +161,7 @@ export function buildQuickStartPlan(goal: string, templateId: string, requestedR
   const tasks = template.tasks.map((task, index) => ({
     id: task.id,
     subject: `${task.subject}：${shortGoal(goal, 40)}`,
-    description: `${task.description}\n\n目标：${goal}`,
+    description: `${task.description}${task.expected === undefined ? '' : `\n\n交付/验收：${task.expected}`}\n\n目标：${goal}`,
     assignee: ROLE_NAMES[roles.includes(task.role) ? task.role : roles[index % roles.length] as string] ?? (roles.includes(task.role) ? task.role : roles[index % roles.length] as string),
     dependencies: [...(task.dependencies ?? [])],
   }))

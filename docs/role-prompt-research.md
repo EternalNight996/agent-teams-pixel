@@ -58,16 +58,18 @@
 
 | 角色 | chars | ~tokens |
 |---|---:|---:|
-| integrator | 819 | 205 |
-| frontend | 891 | 223 |
-| backend | 797 | 199 |
-| verifier | 744 | 186 |
-| reviewer | 755 | 189 |
-| **合计** | **4,006** | **~1,002** |
+| integrator | 953 | 238 |
+| frontend | 1,025 | 256 |
+| backend | 931 | 233 |
+| verifier | 878 | 220 |
+| reviewer | 889 | 222 |
+| **合计** | **4,676** | **~1,169** |
 
 - 每个成员只看到自己那一段（约 190–225 tokens），不是五段全付；前缀固定，缓存不受影响。
 - 新增 Working budget：只读范围内文件、不复述任务/不粘贴大文件、证据化汇报、同一阻塞两次失败即停下报告；用于压返工与长输出。
+- 新增 Report 约定：只报 changed paths、命令/证据、契约缺口，最多 5 条；产物写文件，不把内容粘进汇报（MetaGPT 文档交接 / CrewAI expected_output 的轻量版）。
 - fullstack 模板：6 个任务、5 名成员、DAG 深度 5、最大并行宽度 2（frontend/backend 并行）；契约与联调同一人，少一次交接。
+- 每个 fullstack 任务在描述里带「交付/验收」：契约文件、截图/控制台证据、迁移/测试、E2E 命令与结果、风险矩阵、findings+verdict，减少“做完但不知道交什么”。
 - 对比上一版 6 人（architect + frontend + backend + integrator + verifier + reviewer）：少一个成员前缀、少一次跨角色交接。真实模型基准里成员 system prompt 约 9.1k chars（~2.3k tokens/请求）；少一个成员在 12–16 个请求量级上可省约 2.8–3.7 万输入 tokens（多数为缓存读），但**这是结构估算，不是 A/B 实测**。
 - 收益应体现在“少返工、少跨层误改、验收证据齐”，而不是单次 token 更少；
 - 需要真实模型 A/B 验证：单 agent vs 团队、前端/后端角色有无专用 contract，比较墙钟、token、一次通过率。
