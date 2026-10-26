@@ -8,6 +8,7 @@ import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import type { SceneAction } from './pixel-office/PixelOffice.tsx'
 import { OPEN_HALL_SHEET_EVENT, SectHallOverlay } from './SectHallOverlay.tsx'
+import { hallHasWork } from './hall-visibility.ts'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { OPEN_PANEL_EVENT } from './AgentTeamsCard.tsx'
 import type { AgentTeamsCardData } from './agent-teams-card-definition.ts'
@@ -82,7 +83,10 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDi
   const local = useSyncExternalStore(state.subscribe, state.getSnapshot)
   const sessionTeams = current === undefined ? [] : snapshots.teams.filter(team => team.captainSessionId === current)
   const wanted = current === undefined ? undefined : local.selected.get(current)
-  const hallTeam = sessionTeams.find(team => team.teamId === wanted) ?? sessionTeams[0]
+  // 浮层是「队伍工作」的窗口：没有任务或任务全部已弃的队伍不占位，
+  // 同一会话里若有另一支还有活的队伍，就显示那一支。
+  const hallTeam = sessionTeams.find(team => team.teamId === wanted && hallHasWork(team.tasks))
+    ?? sessionTeams.find(team => hallHasWork(team.tasks))
   const targets = useSyncExternalStore(subscribeActivityMonitorTargets, getActivityMonitorTargetsSnapshot)
   const currentTargets = useMemo(() => targets.filter(target => target.sessionId === current), [targets, current])
   // One discovery tracker per visit, outside polling effects restarted by card registration.
