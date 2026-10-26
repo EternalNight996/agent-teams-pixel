@@ -55,6 +55,11 @@
   button (left of 归栏) and a 开宗 button inside the teamless sheet hint both open
   the conversation's 开宗立派 dialog through a shared window event
   (`agent-teams:open-quickstart`).
+- The courtyard now carries the panel-level actions as clickable props: a glowing
+  传送阵 (bottom-left) docks the hall into the right sidebar, and a 阵盘
+  (bottom-right) opens panel settings and lights up while that sheet is open.
+  Without a team the wall gate reads 开宗 and opens the founding wizard, matching
+  the floor button.
 - The floor bar mirrors the wall menu: next to 归栏 it now also carries 名册,
   道统, 进度, 收信 and 配置 (config last). A wall fixture and its floor button open
   the same sheet and light each other up; while no team exists, the gate doubles

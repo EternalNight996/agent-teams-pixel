@@ -24,6 +24,14 @@ export interface PixelOfficeProps {
   readonly activeAction?: SceneAction | null
   /** Facilities this surface can actually open (the floater only has the board). */
   readonly enabledActions?: readonly SceneAction[]
+  /** 场景里的传送阵：收起面板并归栏到右侧栏。 */
+  readonly onDock?: () => void
+  /** 场景里的阵盘：打开面板配置。 */
+  readonly onSettings?: () => void
+  /** 面板配置是否打开（阵盘高亮，和底部按钮双向联动）。 */
+  readonly settingsOpen?: boolean
+  /** 还没有队伍：山门在场景里改作「开宗」入口，与底部按钮一致。 */
+  readonly teamless?: boolean
 }
 
 const FACILITY_LABEL: Readonly<Record<SceneAction, AgentTeamsLocaleKey>> = {
@@ -77,12 +85,20 @@ type Hover =
 
 export function PixelOffice({
   team, t, onOpenMember, onUnavailable, onAction, activeAction, enabledActions,
+  onDock, onSettings, settingsOpen, teamless,
 }: PixelOfficeProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const hostRef = useRef<HTMLDivElement | null>(null)
   const sceneRef = useRef<ReturnType<typeof createPixelScene> | null>(null)
   const [hover, setHover] = useState<Hover | undefined>()
   const actions = enabledActions ?? ALL_ACTIONS
+  // 没有队伍时，山门就是开宗入口：墙上的标签/提示与底部「开宗」保持一致。
+  const labelFor = (action: SceneAction): string => (
+    action === 'teams' && teamless === true ? t('quickstart.entry') : t(FACILITY_LABEL[action])
+  )
+  const hintFor = (action: SceneAction): string => (
+    action === 'teams' && teamless === true ? t('quickstart.entryTitle') : t(FACILITY_HINT[action])
+  )
 
   const live = useMemo(() => team.members.filter(member => member.status !== 'removed'), [team.members])
   const done = team.tasks.filter(task => task.status === 'completed').length
@@ -115,7 +131,7 @@ export function PixelOffice({
       ? []
       : actions.map(action => ({
         action,
-        label: t(FACILITY_LABEL[action]),
+        label: labelFor(action),
         badge: action === 'inbox' ? team.captainInbox.length : undefined,
       }))
     return {
@@ -146,7 +162,7 @@ export function PixelOffice({
         failedCount: failed,
       },
     }
-  }, [actions, activeAction, done, failed, live, onAction, running, t, team, waiting])
+  }, [actions, activeAction, done, failed, live, onAction, running, t, team, teamless, waiting])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -196,7 +212,7 @@ export function PixelOffice({
     const x = Math.max(110, Math.min(event.clientX - rect.left, Math.max(110, rect.width - 110)))
     const y = event.clientY - rect.top
     if (hit.kind === 'action') {
-      setHover({ kind: 'action', action: hit.action, label: t(FACILITY_LABEL[hit.action]), hint: t(FACILITY_HINT[hit.action]), x, y })
+      setHover({ kind: 'action', action: hit.action, label: labelFor(hit.action), hint: hintFor(hit.action), x, y })
       return
     }
     const member = sceneMembers.get(hit.id)
@@ -286,14 +302,43 @@ export function PixelOffice({
                 className={css.railButton}
                 data-control={`office-${action}`}
                 aria-pressed={activeAction === action}
-                aria-label={t(FACILITY_LABEL[action])}
-                title={`${t(FACILITY_LABEL[action])} · ${t(FACILITY_HINT[action])}`}
+                aria-label={labelFor(action)}
+                title={`${labelFor(action)} · ${hintFor(action)}`}
                 onClick={() => { onAction(action) }}
               >
                 <span aria-hidden>{FACILITY_GLYPH[action]}</span>
               </button>
             ))}
           </div>
+        )}
+        {onDock !== undefined && (
+          <button
+            type="button"
+            className={css.sceneObject}
+            data-object="dock"
+            data-control="scene-dock"
+            aria-label={t('office.dockSidebar')}
+            title={`${t('office.dockSidebar')} · ${t('office.scene.dockHint')}`}
+            onClick={onDock}
+          >
+            <span className={css.sceneObjectGlyph} aria-hidden>✥</span>
+            <span className={css.sceneObjectLabel}>{t('office.dockSidebar')}</span>
+          </button>
+        )}
+        {onSettings !== undefined && (
+          <button
+            type="button"
+            className={css.sceneObject}
+            data-object="settings"
+            data-control="scene-settings"
+            data-active={settingsOpen || undefined}
+            aria-label={t('office.floorSettings')}
+            title={`${t('office.floorSettings')} · ${t('office.scene.settingsHint')}`}
+            onClick={onSettings}
+          >
+            <span className={css.sceneObjectGlyph} aria-hidden>⚙</span>
+            <span className={css.sceneObjectLabel}>{t('office.floorSettings')}</span>
+          </button>
         )}
       </div>
     </section>

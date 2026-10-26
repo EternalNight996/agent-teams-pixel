@@ -538,6 +538,10 @@ export function SectHallOverlay({
                   }}
                   onOpenMember={(memberId) => { if (sessionId !== undefined) openMember(sessionId, memberId as SessionId) }}
                   onUnavailable={() => { /* 无会话修士：由场景内提示承担 */ }}
+                  onDock={dockToSidebar}
+                  onSettings={() => { toggleSheet('settings') }}
+                  settingsOpen={sheet === 'settings'}
+                  teamless={!hasTeam}
                 />
               </div>
               <footer className={css.floor}>

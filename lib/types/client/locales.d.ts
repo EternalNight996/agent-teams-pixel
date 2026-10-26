@@ -257,6 +257,8 @@ export declare const zh: {
     'office.floorProgress': string;
     'office.floorInbox': string;
     'office.floorSettings': string;
+    'office.scene.dockHint': string;
+    'office.scene.settingsHint': string;
     'office.panelConfig': string;
     'office.panelSizeHint': string;
     'office.panelSize.compact': string;
@@ -702,6 +704,8 @@ export declare const en: {
     'office.floorProgress': string;
     'office.floorInbox': string;
     'office.floorSettings': string;
+    'office.scene.dockHint': string;
+    'office.scene.settingsHint': string;
     'office.panelConfig': string;
     'office.panelSizeHint': string;
     'office.panelSize.compact': string;
