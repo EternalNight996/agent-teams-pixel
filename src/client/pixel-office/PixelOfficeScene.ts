@@ -376,64 +376,73 @@ export function createPixelScene(
     paintFacilityHover(rect, hovered, active)
   }
 
-  /** 开宗入口：传送门（2026-10-26 由「山门木构」改为传送门，更契合“开宗立派”）。 */
+  /** 开宗入口：木构山门（保留原造型），门洞中央加入旋转传输。 */
   function paintGate(rect: FacilityRect, name: string, hovered: boolean, active: boolean, time: number): void {
+    // 檐顶
+    g.fillStyle = '#1f2a25'
+    g.beginPath()
+    g.moveTo(rect.x - 8, rect.y + 11)
+    g.lineTo(rect.x + rect.w / 2, rect.y - 3)
+    g.lineTo(rect.x + rect.w + 8, rect.y + 11)
+    g.closePath()
+    g.fill()
+    g.fillStyle = '#3b2a1e'
+    g.fillRect(rect.x - 3, rect.y + 11, rect.w + 6, 4)
+    // 门洞与灵气
+    g.fillStyle = '#0d1512'
+    g.fillRect(rect.x + 10, rect.y + 16, rect.w - 20, rect.h - 16)
+    const glow = g.createLinearGradient(0, rect.y + rect.h - 8, 0, rect.y + 20)
+    glow.addColorStop(0, 'rgba(103, 217, 165, 0.26)')
+    glow.addColorStop(1, 'rgba(103, 217, 165, 0)')
+    g.fillStyle = glow
+    g.fillRect(rect.x + 10, rect.y + 16, rect.w - 20, rect.h - 20)
+    // 门洞中央：旋转的传输法阵
     const cx = rect.x + rect.w / 2
     const cy = rect.y + rect.h * 0.62
-    const pulse = 0.5 + 0.5 * Math.sin(time / 760)
-    // 石质拱门框
-    g.fillStyle = '#2a3a34'
-    g.beginPath()
-    g.moveTo(rect.x - 2, rect.y + rect.h)
-    g.lineTo(rect.x - 2, rect.y + 26)
-    g.quadraticCurveTo(cx, rect.y + 2, rect.x + rect.w + 2, rect.y + 26)
-    g.lineTo(rect.x + rect.w + 2, rect.y + rect.h)
-    g.closePath(); g.fill()
-    g.fillStyle = '#1b2722'
-    g.beginPath()
-    g.moveTo(rect.x + 8, rect.y + rect.h)
-    g.lineTo(rect.x + 8, rect.y + 30)
-    g.quadraticCurveTo(cx, rect.y + 12, rect.x + rect.w - 8, rect.y + 30)
-    g.lineTo(rect.x + rect.w - 8, rect.y + rect.h)
-    g.closePath(); g.fill()
-    // 门内传送涡流（裁剪在拱形内）
+    const pulse = 0.5 + 0.5 * Math.sin(time / 720)
     g.save()
     g.beginPath()
-    g.moveTo(rect.x + 8, rect.y + rect.h)
-    g.lineTo(rect.x + 8, rect.y + 30)
-    g.quadraticCurveTo(cx, rect.y + 12, rect.x + rect.w - 8, rect.y + 30)
-    g.lineTo(rect.x + rect.w - 8, rect.y + rect.h)
-    g.closePath(); g.clip()
-    const swirl = g.createRadialGradient(cx, cy, 2, cx, cy, rect.w * 0.42)
-    swirl.addColorStop(0, `rgba(214, 255, 244, ${(0.85 + pulse * 0.1).toFixed(3)})`)
-    swirl.addColorStop(0.35, `rgba(103, 217, 165, ${(0.55 + pulse * 0.2).toFixed(3)})`)
-    swirl.addColorStop(0.75, 'rgba(48, 120, 118, 0.55)')
-    swirl.addColorStop(1, 'rgba(16, 40, 44, 0.9)')
-    g.fillStyle = swirl
-    g.fillRect(rect.x, rect.y, rect.w, rect.h)
-    // 旋转灵纹环
+    g.rect(rect.x + 10, rect.y + 16, rect.w - 20, rect.h - 16)
+    g.clip()
+    const halo = g.createRadialGradient(cx, cy, 1, cx, cy, Math.max(18, rect.w * 0.22))
+    halo.addColorStop(0, `rgba(196, 255, 232, ${(0.5 + pulse * 0.25).toFixed(3)})`)
+    halo.addColorStop(0.5, 'rgba(103, 217, 165, 0.25)')
+    halo.addColorStop(1, 'rgba(40, 110, 96, 0)')
+    g.fillStyle = halo
+    g.beginPath(); g.ellipse(cx, cy, rect.w * 0.22, rect.h * 0.3, 0, 0, Math.PI * 2); g.fill()
+    // 两圈反向旋转的灵纹
     for (let ring = 0; ring < 2; ring += 1) {
-      const radius = rect.w * (0.3 - ring * 0.11)
-      g.strokeStyle = `rgba(190, 255, 232, ${(0.35 - ring * 0.12 + pulse * 0.12).toFixed(3)})`
-      g.lineWidth = 1
-      g.beginPath(); g.ellipse(cx, cy, radius, radius * 1.35, 0, 0, Math.PI * 2); g.stroke()
+      const radius = rect.w * (0.1 + ring * 0.055)
+      const spin = (ring === 0 ? 1 : -1) * time / (700 + ring * 420)
+      g.fillStyle = `rgba(214, 255, 244, ${(0.5 - ring * 0.12 + pulse * 0.2).toFixed(3)})`
+      for (let i = 0; i < 8; i += 1) {
+        const angle = spin + (i / 8) * Math.PI * 2
+        g.fillRect(cx + Math.cos(angle) * radius - 1.2, cy + Math.sin(angle) * radius * 1.25 - 1.2, 2.4, 2.4)
+      }
     }
-    g.fillStyle = `rgba(234, 255, 246, ${(0.5 + pulse * 0.35).toFixed(3)})`
-    const spin = time / 1400
-    for (let i = 0; i < 8; i += 1) {
-      const angle = spin + (i / 8) * Math.PI * 2
-      const rx = rect.w * 0.26
-      g.fillRect(cx + Math.cos(angle) * rx - 1.2, cy + Math.sin(angle) * rx * 1.3 - 1.2, 2.4, 2.4)
-    }
+    // 中心旋涡点
+    g.fillStyle = `rgba(234, 255, 246, ${(0.55 + pulse * 0.35).toFixed(3)})`
+    g.fillRect(cx - 2, cy - 2, 4, 4)
     g.restore()
-    // 门楣刻字（宗门名）
+    // 门柱
+    g.fillStyle = '#6b3a2a'
+    g.fillRect(rect.x + 2, rect.y + 15, 9, rect.h - 15)
+    g.fillRect(rect.x + rect.w - 11, rect.y + 15, 9, rect.h - 15)
+    g.fillStyle = '#8a4b34'
+    g.fillRect(rect.x + 2, rect.y + 15, 2, rect.h - 15)
+    g.fillRect(rect.x + rect.w - 11, rect.y + 15, 2, rect.h - 15)
+    // 牌匾
     const pw = Math.min(96, rect.w - 24)
     const px = rect.x + Math.round((rect.w - pw) / 2)
-    const py = rect.y + 8
-    const label = truncate(name, 7)
-    g.fillStyle = 'rgba(12, 26, 24, 0.82)'
-    roundRect(g, px - 3, py - 3, pw + 6, 20, 3); g.fill()
+    const py = rect.y + 19
+    g.fillStyle = '#6b4a2a'
+    roundRect(g, px - 3, py - 3, pw + 6, 22, 3)
+    g.fill()
     g.fillStyle = '#d4af37'
+    roundRect(g, px, py, pw, 16, 2)
+    g.fill()
+    const label = truncate(name, 7)
+    g.fillStyle = '#3a2410'
     g.font = 'bold 9px "Segoe UI", sans-serif'
     g.fillText(label, px + (pw - g.measureText(label).width) / 2, py + 11)
     paintFacilityHover(rect, hovered, active)

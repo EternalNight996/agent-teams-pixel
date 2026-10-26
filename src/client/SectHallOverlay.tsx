@@ -417,7 +417,7 @@ export function SectHallOverlay({
       <aside
         className={css.sheet}
         data-sheet={sheet}
-        style={{ left: sheetAnchor.left, bottom: sheetAnchor.bottom, width: sheetAnchor.width }}
+        style={{ left: sheetAnchor.left, bottom: sheetAnchor.bottom, width: sheetAnchor.width, height: size.h }}
         role="dialog"
         aria-modal="false"
         aria-label={title}

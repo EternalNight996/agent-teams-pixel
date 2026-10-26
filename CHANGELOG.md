@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 ### Changed
+- Hall popovers (面板配置 / 名册 / 道统 / 进度 / 收信) now share one fixed height
+  equal to the current hall panel, and their content is scaled up (zoom 1.18)
+  with a larger sheet title/close control, so the config UI is readable at a
+  glance. Resizing the hall panel resizes the open sheet with it.
+- The 开宗 gate is back to the wooden 山门 silhouette; its doorway now carries a
+  rotating transmission (two counter-rotating rune rings plus a pulsing centre).
 - The 山门洞府 is now the team tab itself: the wall's four facilities (藏经阁 /
   山门 / 功德碑 / 传音阁) open the setup, roster, progress and inbox sheets, so the
   permanent header, board column, member chips and inbox row no longer consume
