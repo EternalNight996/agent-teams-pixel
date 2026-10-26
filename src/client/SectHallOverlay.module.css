@@ -28,17 +28,13 @@
 }
 
 /* 归栏：吸附成右侧整列，不再浮空。 */
+/* 归栏：在右侧栏区域另开一个窗口（保持自身大小，不拉长成整列）。 */
 .window[data-docked='true'] {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(440px, 46vw);
-  min-width: 0;
-  min-height: 0;
-  border-radius: 0;
-  border-right: 0;
-  resize: none;
-  box-shadow: -18px 0 50px rgb(0 0 0 / 45%);
+  top: 16px;
+  right: 16px;
+  bottom: auto;
+  border-color: color-mix(in srgb, var(--dsw-alias-state-success-primary) 45%, var(--dsw-alias-border-l2));
+  box-shadow: 0 22px 60px rgb(0 0 0 / 52%), 0 0 0 1px color-mix(in srgb, var(--dsw-alias-state-success-primary) 22%, transparent);
 }
 
 /* 右下角缩放把手：让「可自由改大小」看得见。 */

@@ -43,8 +43,12 @@
   reset position) and a 名册 toggle. Floor buttons toggle their popover on second
   click.
 - The panel is freely resizable from its bottom-right corner (size persisted in
-  `agent-teams-pixel.hallRect`), starts larger (620×500), and its popovers anchor
-  to the panel's left edge — a wider panel moves the popover further left.
+  `agent-teams-pixel.hallRect`) and starts larger (620×500). Popovers open to the
+  **left of the panel**, treating the panel as reserved right-side space: a wider
+  panel pushes the dialog further left.
+- 归栏 opens a second window in the right-side area at the panel's own size (green
+  accent, not a stretched full-height column); 浮空 returns it to the bottom-right
+  as a floating card.
 - The sect hall itself is now a **window-level floating layer**: mounted from the
   shell overlay (so it survives leaving the tab), anchored bottom-right of the
   main content area, collapsible to a one-line bar (state remembered in

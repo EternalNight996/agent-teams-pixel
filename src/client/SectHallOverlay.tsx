@@ -109,10 +109,10 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
       const panel = panelRef.current
       if (panel === null) return
       const bounds = panel.getBoundingClientRect()
+      // 面板占据右侧空间，对话框贴在面板左侧（面板越大越靠左）。
       const popoverWidth = Math.min(480, window.innerWidth - 32)
-      setSheetAnchor(docked
-        ? { left: Math.max(16, bounds.left - popoverWidth - 16), bottom: 16 }
-        : { left: Math.max(16, bounds.left), bottom: Math.max(16, window.innerHeight - bounds.top + 8) })
+      const left = bounds.left - popoverWidth - 8
+      setSheetAnchor({ left: Math.max(16, Math.min(left, window.innerWidth - popoverWidth - 16)), bottom: 16 })
     }
     measure()
     window.addEventListener('resize', measure)
@@ -194,9 +194,11 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
 
   if (typeof document === 'undefined') return null
 
-  const panelStyle = docked
-    ? undefined
-    : { transform: `translate(${rect.x}px, ${rect.y}px)`, width: `${size.w}px`, height: `${size.h}px` }
+  const panelStyle = {
+    transform: docked ? undefined : `translate(${rect.x}px, ${rect.y}px)`,
+    width: `${size.w}px`,
+    height: `${size.h}px`,
+  }
 
   const renderSheet = (): React.ReactNode => {
     if (sheet === undefined || sheetAnchor === undefined) return null
