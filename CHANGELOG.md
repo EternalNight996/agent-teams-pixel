@@ -61,9 +61,11 @@
 - The floating hall is persistent by design: it keeps existing for any team in
   the session even when the team has no tasks or every task was cancelled (a
   stopped team still shows its hall), and it is there before any team exists —
-  an empty hall with only the captain and a 未开宗 badge. It no longer depends on
-  the right-sidebar service: closing/reclaiming the right column no longer
-  replaces the hall with the legacy panel or drops it.
+  an empty hall with only the captain and a 未开宗 badge. In that teamless hall the
+  four wall fixtures and the 名册 button stay actionable: each opens its sheet
+  with a 尚未开宗 hint (inbox shows its empty copy) instead of silently doing
+  nothing. It no longer depends on the right-sidebar service: closing/reclaiming
+  the right column no longer replaces the hall with the legacy panel or drops it.
 - 归栏 now minimizes the floating hall to the token and opens the hall page in the
   right sidebar (`sidebar.right.pane.tab`, kind `agent-teams`); clicking the token
   brings the floating hall back and closes that sidebar page.

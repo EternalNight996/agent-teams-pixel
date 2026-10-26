@@ -392,8 +392,13 @@ export function SectHallOverlay({
 
   const renderSheet = (): React.ReactNode => {
     if (sheet === undefined || sheetAnchor === undefined) return null
-    // 尚未开宗时只有面板配置可用；队伍内容要等快照到达后再渲染。
-    if (!hasTeam && sheet !== 'settings') return null
+    // 无队伍时墙面设施 / 名册仍然可点：给出「尚未开宗」的提示，而不是静默无响应。
+    const noTeamHint = (
+      <div className={css.settings}>
+        <p className={css.settingsHint}>{t('workspace.emptyTitle')}</p>
+        <p className={css.settingsMeta}>{t('workspace.emptyBody')}</p>
+      </div>
+    )
     const title = sheet === 'settings' ? t('office.panelConfig')
       : sheet === 'inbox' ? t('workspace.inbox')
         : sheet === 'teams' ? t('office.facility.teams')
@@ -433,27 +438,37 @@ export function SectHallOverlay({
               </button>
             </div>
           ) : sheet === 'inbox' ? (
-            <ul className={css.inboxList}>
-              {hall.captainInbox.map((message, index) => (
-                <li key={`${index}:${message.from}`} className={css.inboxRow}>
-                  <span className={css.inboxFrom}>{message.from}</span>
-                  <span className={css.inboxText}>{message.content}</span>
-                </li>
-              ))}
-            </ul>
+            hall.captainInbox.length === 0
+              ? <p className={css.settingsHint}>{t('workspace.inboxEmpty')}</p>
+              : (
+                <ul className={css.inboxList}>
+                  {hall.captainInbox.map((message, index) => (
+                    <li key={`${index}:${message.from}`} className={css.inboxRow}>
+                      <span className={css.inboxFrom}>{message.from}</span>
+                      <span className={css.inboxText}>{message.content}</span>
+                    </li>
+                  ))}
+                </ul>
+              )
           ) : sheet === 'config' ? (
-            staged && sessionId !== undefined
-              ? <StagingPlanEditor team={hall} modelDirectory={modelDirectories.directoryFor(sessionId)} onContinuePlanning={() => { setSheet(undefined) }} onDiscarded={() => { setSheet(undefined) }} t={t} />
-              : <TeamConfigPanel team={hall} t={t} />
+            !hasTeam
+              ? noTeamHint
+              : staged && sessionId !== undefined
+                ? <StagingPlanEditor team={hall} modelDirectory={modelDirectories.directoryFor(sessionId)} onContinuePlanning={() => { setSheet(undefined) }} onDiscarded={() => { setSheet(undefined) }} t={t} />
+                : <TeamConfigPanel team={hall} t={t} />
           ) : (
-            <TeamSection
-              team={hall}
-              t={t}
-              workspace
-              onNavigate={(_parent, child) => { if (sessionId !== undefined) openMember(sessionId, child) }}
-              onContinuePlanning={() => { setSheet(undefined) }}
-              onDiscarded={() => { setSheet(undefined) }}
-            />
+            !hasTeam
+              ? noTeamHint
+              : (
+                <TeamSection
+                  team={hall}
+                  t={t}
+                  workspace
+                  onNavigate={(_parent, child) => { if (sessionId !== undefined) openMember(sessionId, child) }}
+                  onContinuePlanning={() => { setSheet(undefined) }}
+                  onDiscarded={() => { setSheet(undefined) }}
+                />
+              )
           )}
         </div>
       </aside>
@@ -506,7 +521,6 @@ export function SectHallOverlay({
                 <PixelOffice
                   team={hall}
                   t={t}
-                  enabledActions={hasTeam ? undefined : []}
                   activeAction={sheet === 'settings' ? null : sheet ?? null}
                   onAction={(action) => { toggleSheet(action) }}
                   onOpenMember={(memberId) => { if (sessionId !== undefined) openMember(sessionId, memberId as SessionId) }}
@@ -527,11 +541,9 @@ export function SectHallOverlay({
                 <button type="button" className={css.floorButton} data-control="hall-settings" data-active={sheet === 'settings' || undefined} onClick={() => { toggleSheet('settings') }}>
                   <span aria-hidden>⚙</span>{t('office.panelConfig')}
                 </button>
-                {hasTeam && (
-                  <button type="button" className={css.floorButton} data-control="hall-roster" data-active={sheet === 'teams' || undefined} onClick={() => { toggleSheet('teams') }}>
-                    <span aria-hidden>☰</span>{t('office.roster')}
-                  </button>
-                )}
+                <button type="button" className={css.floorButton} data-control="hall-roster" data-active={sheet === 'teams' || undefined} onClick={() => { toggleSheet('teams') }}>
+                  <span aria-hidden>☰</span>{t('office.roster')}
+                </button>
               </footer>
         </section>
       ), document.body)}
