@@ -19,6 +19,8 @@ interface CultivationState {
   idleAt: Record<string, number>
   /** 连续挂机节拍数，用于 1x→3x 的留存加成。 */
   streak: Record<string, number>
+  /** 上一次结算挂机的角色；切换对话时只从切换那一刻开始算。 */
+  lastActive?: string
   tick: number
 }
 
@@ -40,6 +42,7 @@ function load(): CultivationState {
       seen: typeof parsed.seen === 'object' && parsed.seen !== null ? parsed.seen : {},
       idleAt: typeof parsed.idleAt === 'object' && parsed.idleAt !== null ? parsed.idleAt : {},
       streak: typeof parsed.streak === 'object' && parsed.streak !== null ? parsed.streak : {},
+      lastActive: typeof parsed.lastActive === 'string' ? parsed.lastActive : undefined,
       tick: typeof parsed.tick === 'number' ? parsed.tick : Date.now(),
     }
   } catch {
@@ -166,12 +169,29 @@ export function ingestCultivation(teams: readonly ActivityTeam[], currentSession
     }
   }
 
-  // 挂机：只给当前打开对话的角色；切到别人就停止，不结算后台成员。
+  // 挂机：只给当前打开对话的角色。切换对话时从切换那一刻重新起算，
+  // 不把在后台/别的对话停留的时间补记给新角色；同一角色关闭再打开仍可补结。
   const currentKey = currentSessionId === undefined || currentSessionId === ''
     ? undefined
     : resolveCurrentKey(teams, currentSessionId)
   if (currentKey !== undefined) {
+    if (state.lastActive !== currentKey) {
+      state.idleAt[currentKey] = now
+      state.streak[currentKey] = 0
+      state.lastActive = currentKey
+      changed = true
+    }
     changed = settleIdleXp(currentKey, now) || changed
+  } else {
+    if (state.lastActive !== undefined) {
+      state.lastActive = undefined
+      changed = true
+    }
+    // 没有打开的对话时，把所有角色的挂机起点拨到当下，事后切换不补记。
+    for (const team of teams) {
+      state.idleAt[captainKey(team.name)] = now
+      for (const member of team.members) state.idleAt[memberKey(member.name)] = now
+    }
   }
 
   state.tick = now

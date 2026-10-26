@@ -69,3 +69,30 @@ test('idle XP does not accrue when no conversation is open', () => {
     assert.equal(xpOf('captain:solo-c'), 0)
   })
 })
+
+test('switching conversations never backfills time spent in another dialog', () => {
+  withClock(({ advance }) => {
+    const teams = [team('solo-d', 'cap-d', [{ id: 'm-d1', name: 'epsilon' }, { id: 'm-d2', name: 'zeta' }])]
+    ingestCultivation(teams, 'm-d1')
+    advance(10_000)
+    ingestCultivation(teams, 'm-d1')
+    const earned = xpOf('member:epsilon')
+    assert.ok(earned > 0)
+
+    // 在 epsilon 上离开 60 秒，然后切到 zeta：epsilon 不能拿到这 60 秒。
+    advance(60_000)
+    ingestCultivation(teams, 'm-d2')
+    assert.equal(xpOf('member:epsilon'), earned)
+
+    // 再切回 epsilon：从切换那一刻起算，切换本身不补记。
+    advance(10_000)
+    ingestCultivation(teams, 'm-d1')
+    const back = xpOf('member:epsilon')
+    assert.equal(back, earned)
+
+    // 之后再停留 10 秒才正常增长。
+    advance(10_000)
+    ingestCultivation(teams, 'm-d1')
+    assert.ok(xpOf('member:epsilon') > back)
+  })
+})

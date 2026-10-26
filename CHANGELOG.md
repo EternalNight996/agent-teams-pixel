@@ -17,9 +17,11 @@
   privacy-bounded diagnostics, prefilled GitHub issue, copy-diagnostics and
   copy-AI-prompt actions; it opens on 赞助. Support QRs are served through an
   allowlisted host route; SPONSOR.md and assets/support are packaged.
-- Idle XP now settles **only for the character whose conversation is open**;
-  switching away stops accrual and background members/captain do not idle. The
-  open character keeps the 1x→3x online streak and up to 8h offline catch-up.
+- Idle XP now settles **only for the character whose conversation is open** and
+  only while that conversation is the visible panel. Switching away stops
+  accrual and does **not** backfill the time spent elsewhere (background members
+  and the captain do not idle). The open character keeps the 1x→3x online streak
+  and up to 8h offline catch-up for the same session.
 - Level badges in the panel and the hall now use realm-specific colour palettes.
 - Idle cultivation is half the fast curve (IDLE_XP_SCALE=0.5, taper 0.8):
   10 XP/10s at Lv.1, ~20s/level at Lv.100 (1→100 in ~45 minutes at 3x), then

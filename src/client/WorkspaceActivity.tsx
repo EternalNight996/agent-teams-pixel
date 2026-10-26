@@ -76,7 +76,7 @@ export function ActivitySurface({ bridge, state, ...props }: ActivityPanelProps 
   return <WorkspaceMonitor {...props} sidebar={sidebar} state={state} />
 }
 
-function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, openCaptain, modelDirectories }: ActivityPanelProps & {
+function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, openCaptain, modelDirectories, conversationVisible = true }: ActivityPanelProps & {
   /** 右侧栏服务可能被宿主回收（右侧栏关闭、懒加载）；缺失时按「当前会话在前台」处理。 */
   sidebar?: ISidebarRight
   state: WorkspaceActivityState
@@ -88,10 +88,10 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, openCap
   const wanted = current === undefined ? undefined : local.selected.get(current)
   // 修士子会话里没有自己的队伍：按成员会话 id 反查它所属的主队伍，
   // 这样点进子进程也能继续看到主任务的进度，而不是一座空洞府。
-  // 全局修为结算：任务完成 + 当前对话角色挂机，跨宗门持久化。
+  // 全局修为结算：任务完成照常结算；只有当前可见对话的角色才获得挂机修为。
   useEffect(() => {
-    ingestCultivation(snapshots.teams, current)
-  }, [snapshots, current])
+    ingestCultivation(snapshots.teams, conversationVisible ? current : undefined)
+  }, [snapshots, current, conversationVisible])
   const linkedTeam = current === undefined
     ? undefined
     : [...snapshots.teams, ...snapshots.archivedTeams].find(team => team.members.some(member => member.id === current))
