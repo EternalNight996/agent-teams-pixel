@@ -398,6 +398,29 @@
   gap: 12px;
 }
 
+/* 名册页的开宗入口：首次开宗与“再开一宗”共用同一条路径。 */
+.historyStart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, #f2c14e 55%, var(--dsw-alias-border-l2));
+  border-radius: 8px;
+  background: color-mix(in srgb, #f2c14e 10%, transparent);
+  color: #f2c14e;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.historyStart:hover {
+  background: color-mix(in srgb, #f2c14e 18%, transparent);
+  border-color: #f2c14e;
+}
+
 .historyBlock {
   display: flex;
   flex-direction: column;

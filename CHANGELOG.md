@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Changed
+- 山门·名册 keeps an 开宗立派 entry even after the sect has run tasks: opening it
+  stages a new sect, and the wizard's replace flow takes over when a team already
+  exists, so a finished run no longer dead-ends the hall.
 - Every pixel person now shows a small "Lv.N 境界" badge above their head; task
   and chatter bubbles shift up so the badge never covers them.
 - The active-conversation marker is now much louder: a floating 对话中 tag beside

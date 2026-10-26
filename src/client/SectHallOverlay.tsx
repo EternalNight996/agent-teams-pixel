@@ -540,6 +540,10 @@ export function SectHallOverlay({
                 : <TeamConfigPanel team={hall} t={t} />
           ) : sheet === 'teams' ? (
             <div className={css.history}>
+              {/* 已开宗并跑过任务后，山门→名册仍然保留开宗入口；已有宗门时向导会提示替换。 */}
+              <button type="button" className={css.historyStart} onClick={startSect} title={t('quickstart.entryTitle')}>
+                <span aria-hidden>⛩</span>{t('quickstart.entry')}
+              </button>
               {hasTeam && (
                 <div className={css.historyCurrent} data-current="true">
                   <span className={css.historyCurrentDot} aria-hidden />
