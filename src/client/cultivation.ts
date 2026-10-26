@@ -1,7 +1,7 @@
 /**
- * 修炼体系：修为是全局的（按修士身份持久化），任务完成快、挂机慢。
+ * 修炼体系：修为全局持久化，任务完成快、挂机慢；等级上限 9999。
  *
- * 这里只负责“修为 -> 等级/境界/解锁”，修为的累积由 cultivation-store 负责。
+ * 这里负责“修为 -> 等级/境界/装备/技能解锁”，修为累积由 cultivation-store 负责。
  */
 export const CULTIVATION_REALMS = [
   'realm.qi',
@@ -17,22 +17,49 @@ export type CultivationRealmKey = (typeof CULTIVATION_REALMS)[number]
 
 export type CultivationSkillKey =
   | 'skill.aura'
-  | 'skill.weapon'
-  | 'skill.sword'
   | 'skill.shield'
-  | 'skill.beast'
-  | 'skill.treasure'
+  | 'skill.swordArray'
+  | 'skill.gale'
+  | 'skill.law'
 
-/** 等级上限与法器/技能解锁表。 */
-export const LEVEL_CAP = 20
-export const SKILL_UNLOCKS: ReadonlyArray<{ readonly level: number; readonly key: CultivationSkillKey }> = [
-  { level: 2, key: 'skill.aura' },
-  { level: 3, key: 'skill.weapon' },
-  { level: 5, key: 'skill.sword' },
-  { level: 7, key: 'skill.shield' },
-  { level: 8, key: 'skill.beast' },
-  { level: 10, key: 'skill.treasure' },
+export type CultivationItemKind = 'weapon' | 'mount' | 'skill'
+
+export interface CultivationItem {
+  readonly id: string
+  readonly kind: CultivationItemKind
+  readonly level: number
+  readonly key: string
+  readonly icon: string
+  /** 坐骑对应的场景形态。 */
+  readonly form?: 'auto' | 'sword' | 'beast' | 'off'
+}
+
+/** 装备物品栏：等级里程碑解锁。 */
+export const CULTIVATION_ITEMS: readonly CultivationItem[] = [
+  { id: 'weapon-tao', kind: 'weapon', level: 1, key: 'item.weapon.tao', icon: '🗡' },
+  { id: 'weapon-spirit', kind: 'weapon', level: 3, key: 'item.weapon.spirit', icon: '⚔' },
+  { id: 'weapon-treasure', kind: 'weapon', level: 10, key: 'item.weapon.treasure', icon: '🔮' },
+  { id: 'weapon-immortal', kind: 'weapon', level: 50, key: 'item.weapon.immortal', icon: '🪄' },
+  { id: 'weapon-divine', kind: 'weapon', level: 500, key: 'item.weapon.divine', icon: '⚡' },
+  { id: 'mount-auto', kind: 'mount', level: 1, key: 'office.mountAuto', icon: '✦', form: 'auto' },
+  { id: 'mount-walk', kind: 'mount', level: 1, key: 'office.mountWalk', icon: '🚶', form: 'off' },
+  { id: 'mount-sword', kind: 'mount', level: 5, key: 'item.mount.sword', icon: '🗡', form: 'sword' },
+  { id: 'mount-beast', kind: 'mount', level: 8, key: 'item.mount.beast', icon: '🐉', form: 'beast' },
+  { id: 'mount-crane', kind: 'mount', level: 20, key: 'item.mount.crane', icon: '🕊', form: 'beast' },
+  { id: 'mount-qilin', kind: 'mount', level: 50, key: 'item.mount.qilin', icon: '🦄', form: 'beast' },
+  { id: 'mount-dragon', kind: 'mount', level: 100, key: 'item.mount.dragon', icon: '🐲', form: 'beast' },
+  { id: 'skill-aura', kind: 'skill', level: 2, key: 'skill.aura', icon: '✨' },
+  { id: 'skill-shield', kind: 'skill', level: 7, key: 'skill.shield', icon: '🛡' },
+  { id: 'skill-swordarray', kind: 'skill', level: 15, key: 'skill.swordArray', icon: '🌀' },
+  { id: 'skill-gale', kind: 'skill', level: 30, key: 'skill.gale', icon: '🌪' },
+  { id: 'skill-law', kind: 'skill', level: 100, key: 'skill.law', icon: '🪷' },
 ]
+
+/** 等级上限：9999。 */
+export const LEVEL_CAP = 9999
+
+/** 境界带宽：炼气/筑基/…一路扩到 9999。 */
+const REALM_BANDS = [9, 49, 99, 299, 999, 4999, 9999]
 
 /** 升到下一级还需要的修为（随等级线性增长）。 */
 export function xpNeed(level: number): number {
@@ -52,7 +79,6 @@ export interface Cultivation {
   readonly xp: number
   readonly floor: number
   readonly next: number
-  /** 当前等级内的进度（0..1）。 */
   readonly ratio: number
   readonly rankKey: CultivationRealmKey
   readonly skills: readonly CultivationSkillKey[]
@@ -68,18 +94,26 @@ export function cultivationFromXp(xp: number): Cultivation {
     level += 1
     need = xpNeed(level)
   }
-  const rankIndex = Math.min(CULTIVATION_REALMS.length - 1, Math.floor((level - 1) / 3))
+  let realmIndex = REALM_BANDS.findIndex(band => level <= band)
+  if (realmIndex < 0) realmIndex = REALM_BANDS.length - 1
   const ratio = level >= LEVEL_CAP ? 1 : Math.min(1, Math.max(0, (safe - floor) / need))
-  const skills = SKILL_UNLOCKS.filter(unlock => level >= unlock.level).map(unlock => unlock.key)
+  const skills = CULTIVATION_ITEMS
+    .filter(item => item.kind === 'skill' && level >= item.level)
+    .map(item => item.key as CultivationSkillKey)
   return {
     level,
     xp: safe,
     floor,
     next: floor + need,
     ratio,
-    rankKey: CULTIVATION_REALMS[rankIndex] as CultivationRealmKey,
+    rankKey: CULTIVATION_REALMS[realmIndex] as CultivationRealmKey,
     skills,
   }
+}
+
+/** 当前等级下已解锁的全部装备/技能（用于物品栏与 tooltip）。 */
+export function unlockedItems(level: number): readonly CultivationItem[] {
+  return CULTIVATION_ITEMS.filter(item => level >= item.level)
 }
 
 /** 挂机修为：每分钟只涨一点点，主要靠任务。 */
@@ -89,12 +123,10 @@ export const TASK_XP = 60
 /** 掌门因宗门任务完成获得的带队修为。 */
 export const CAPTAIN_TASK_XP = 40
 
-/** 修士身份：按名字跨宗门共享等级。 */
 export function memberKey(name: string): string {
   return `member:${name.trim()}`
 }
 
-/** 掌门身份：按宗门区分不同门派的掌门。 */
 export function captainKey(teamName: string): string {
   return `captain:${teamName.trim()}`
 }

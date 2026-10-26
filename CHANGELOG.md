@@ -4,9 +4,14 @@
 
 ### Changed
 - Clicking a cultivator's overhead level badge (or the hall's identity chip) opens
-  an equipment sheet: current Lv/境界/XP, level-test presets (Lv.1/3/5/8/10/15/20)
-  that write the global XP directly, unlocked skills, and travel-form buttons
-  (自动 / 御剑 / 神兽 / 步行) gated by their unlock levels.
+  an equipment sheet with a game-style inventory grid: 法器 / 坐骑 / 技能 slots
+  show their unlock level, a 🔒 when locked and a golden ✓ when equipped.
+- Selecting an unlocked 坐骑 immediately switches the scene form; 法器/技能 are
+  passive but show as equipped in the grid.
+- The level cap is now 9999 with wider realm bands; level-test presets cover
+  Lv.1/3/5/8/10/15/20/50/100/500/9999.
+- Items unlock throughout the progression: 桃木剑/灵剑/灵宝/仙器/神器, 飞剑/灵兽/
+  仙鹤/麒麟/神龙, and skills 灵光/灵盾/剑阵/御风/法相.
 - Creating a sect while another exists no longer auto-deletes the current team:
   the wizard asks to replace, and replacement is refused while any task is
   pending/running, so a live run (and its trail) can no longer be wiped by a

@@ -17,7 +17,7 @@ import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
 import { QuickStartWizard } from './QuickStartDialog.tsx'
-import { captainKey, cultivationFromXp, memberKey, xpForLevel } from './cultivation.ts'
+import { CULTIVATION_ITEMS, captainKey, cultivationFromXp, memberKey, xpForLevel } from './cultivation.ts'
 import { setCultivationXp, useCultivationVersion, xpOf } from './cultivation-store.ts'
 import { OPEN_HALL_SHEET_EVENT, type HallSheetAction } from './hall-events.ts'
 import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
@@ -142,7 +142,9 @@ export function SectHallOverlay({
   const [reviewing, setReviewing] = useState(false)
   const [historyTeamId, setHistoryTeamId] = useState<string | undefined>()
   const [characterId, setCharacterId] = useState<string | undefined>()
+  const [equippedId, setEquippedId] = useState<string | undefined>()
   useCultivationVersion()
+  useEffect(() => { setEquippedId(undefined) }, [characterId])
   const [sheetAnchor, setSheetAnchor] = useState<{ left: number; top: number; width: number; maxHeight: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
   const [token, setToken] = useState<TokenPoint>(() => readTokenPoint())
@@ -548,7 +550,7 @@ export function SectHallOverlay({
                 <p className={css.settingsMeta}>{characterCultivation.xp} / {characterCultivation.next} XP</p>
                 <span className={css.historyTitle}>{t('office.levelTest')}</span>
                 <div className={css.sizeRow}>
-                  {[1, 3, 5, 8, 10, 15, 20].map(level => (
+                  {[1, 3, 5, 8, 10, 15, 20, 50, 100, 500, 9999].map(level => (
                     <button
                       key={level}
                       type="button"
@@ -560,34 +562,45 @@ export function SectHallOverlay({
                     </button>
                   ))}
                 </div>
-                <span className={css.historyTitle}>{t('office.equipment')}</span>
-                <div className={css.sizeRow}>
-                  {(['auto', 'sword', 'beast', 'off'] as const).map((form) => {
-                    const disabled = (form === 'sword' && characterCultivation.level < 5)
-                      || (form === 'beast' && characterCultivation.level < 8)
-                    const label = form === 'auto'
-                      ? t('office.mountAuto')
-                      : form === 'sword'
-                        ? t('office.mountSword')
-                        : form === 'beast' ? t('office.mountBeast') : t('office.mountWalk')
-                    return (
-                      <button
-                        key={form}
-                        type="button"
-                        className={css.sizeChip}
-                        disabled={disabled}
-                        onClick={() => { window.dispatchEvent(new CustomEvent('agent-teams:mount', { detail: { id: character.id, form } })) }}
-                      >
-                        {label}
-                      </button>
-                    )
-                  })}
-                </div>
-                <p className={css.settingsMeta}>
-                  {t('office.skills')}: {characterCultivation.skills.length === 0
-                    ? t('skill.none')
-                    : characterCultivation.skills.map(skill => t(skill)).join(' / ')}
-                </p>
+                {([
+                  { kind: 'weapon', title: t('office.weapon') },
+                  { kind: 'mount', title: t('office.mounts') },
+                  { kind: 'skill', title: t('office.skills') },
+                ] as const).map(section => (
+                  <div key={section.kind} className={css.inventorySection}>
+                    <span className={css.historyTitle}>{section.title}</span>
+                    <div className={css.inventory}>
+                      {CULTIVATION_ITEMS.filter(item => item.kind === section.kind).map(item => {
+                        const locked = characterCultivation.level < item.level
+                        const equipped = equippedId === item.id
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            className={css.item}
+                            data-locked={locked || undefined}
+                            data-equipped={equipped || undefined}
+                            disabled={locked}
+                            title={t(item.key as Parameters<typeof t>[0])}
+                            onClick={() => {
+                              if (locked) return
+                              setEquippedId(item.id)
+                              if (item.form !== undefined) {
+                                window.dispatchEvent(new CustomEvent('agent-teams:mount', { detail: { id: character.id, form: item.form } }))
+                              }
+                            }}
+                          >
+                            <span className={css.itemIcon}>{item.icon}</span>
+                            <span className={css.itemName}>{t(item.key as Parameters<typeof t>[0])}</span>
+                            <span className={css.itemLevel}>Lv.{item.level}</span>
+                            {equipped && <span className={css.itemEquipped}>✓</span>}
+                            {locked && <span className={css.itemLock}>🔒</span>}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )
           ) : sheet === 'inbox' ? (
