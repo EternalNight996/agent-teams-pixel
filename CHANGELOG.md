@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ### Changed
+- Release readiness: added a package-smoke test (npm pack dry-run) that asserts
+  the tarball ships the built plugin, support QRs, SPONSOR.md and only the three
+  intended runtime scripts, while excluding src/docs/tests; published
+  docs/release-checklist.md with automated and manual gates.
 - Team efficiency / prompt score pass: the full-stack template is now a 5-person
   team (integrator owns both the contract and final integration; no separate
   architect), and every software role contract carries a Working budget (in-scope
