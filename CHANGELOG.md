@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 ### Changed
+- Status labels agree again: when every task is completed, 道统 shows 已完成 and the
+  captain in the scene stops showing 修炼中 (both used to follow phase=running).
+- The 宗门进度 sheet header now has a ＋新建任务 button: it returns to the main
+  conversation and focuses the composer, where telling the captain the task is
+  the supported way to add one.
+- The hall header shows whose conversation is open: a gold 掌门·主对话 chip or a
+  teal {name}·修士对话 chip.
 - 山门·名册 marks the live sect with a green 当前 banner and tags archived runs
   as 历史; selecting a past run shows its historic roster/state.
 - Clicking the 掌门 in the hall scene (or the 掌门 card in 宗门进度) now returns to

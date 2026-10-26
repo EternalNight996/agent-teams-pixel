@@ -158,11 +158,6 @@ export function SectHallOverlay({
   const hasTeam = team !== undefined
   // 在修士子会话里洞府展示的是主队伍，成员跳转必须用主会话 id 作为 parent。
   const ownerSessionId = (team?.captainSessionId ?? sessionId) as SessionId | undefined
-  // 点击掌门：回到他所在的主对话（而不是打开一个“成员子会话”）。
-  const goHome = (): void => {
-    if (openCaptain !== undefined && hall.captainSessionId !== '') openCaptain(hall.captainSessionId as SessionId)
-  }
-
   useEffect(() => {
     if (!pendingReview || !hasTeam) return
     setPendingReview(false)
@@ -182,6 +177,23 @@ export function SectHallOverlay({
   }
   const done = hall.tasks.filter(task => task.status === 'completed').length
   const total = hall.tasks.length
+  // 点击掌门：回到他所在的主对话（而不是打开一个“成员子会话”）。
+  const goHome = (): void => {
+    if (openCaptain !== undefined && hall.captainSessionId !== '') openCaptain(hall.captainSessionId as SessionId)
+  }
+  // 当前对话框属于谁：掌门主对话还是某位修士的子对话。
+  const viewingCaptain = sessionId !== undefined && sessionId === hall.captainSessionId
+  const viewingMember = sessionId === undefined
+    ? undefined
+    : hall.members.find(member => member.id === sessionId)
+  // 新建任务由掌门（主对话）执行：回到主对话并聚焦输入框，用户直接说要建什么。
+  const startNewTask = (): void => {
+    setSheet(undefined)
+    goHome()
+    window.setTimeout(() => {
+      document.querySelector<HTMLElement>('[data-composer-card] [contenteditable="true"][role="textbox"], [data-composer-card] textarea')?.focus()
+    }, 160)
+  }
   const staged = hall.phase === 'staged'
   // 令牌随面板配置缩放：标准 620×500 = 1.0，超大面板最多 1.8 倍。
   const tokenScale = Math.min(1.8, Math.max(0.8, size.h / PANEL_SIZES.normal.h))
@@ -471,6 +483,11 @@ export function SectHallOverlay({
       >
         <header className={css.sheetHead}>
           <span className={css.sheetTitle}>{title}</span>
+          {sheet === 'board' && hasTeam && (
+            <button type="button" className={css.sheetAction} onClick={startNewTask} title={t('office.newTaskHint')}>
+              ＋ {t('office.newTask')}
+            </button>
+          )}
           <button type="button" className={css.sheetClose} onClick={finishSheet} aria-label={t('office.closePanel')}>×</button>
         </header>
         <div className={css.sheetBody}>
@@ -646,6 +663,13 @@ export function SectHallOverlay({
             <span className={css.caret} aria-hidden>▾</span>
             <span className={css.title}>⛩ {hall.name}</span>
             <span className={css.meta}>{hasTeam ? `${done}/${total}` : t('office.hallNoTeam')}</span>
+            {hasTeam && (viewingCaptain || viewingMember !== undefined) && (
+              <span className={css.viewer} data-kind={viewingCaptain ? 'captain' : 'member'} title={t('office.viewingHint')}>
+                {viewingCaptain
+                  ? `👑 ${t('office.viewingCaptain')}`
+                  : `◈ ${t('office.viewingMember', { name: viewingMember?.name ?? '' })}`}
+              </span>
+            )}
             <button type="button" className={css.headButton} data-control="hall-collapse" aria-expanded onClick={toggleCollapsed}>
               {t('office.collapse')}
             </button>

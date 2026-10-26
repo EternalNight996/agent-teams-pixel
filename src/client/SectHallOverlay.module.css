@@ -219,6 +219,29 @@
   font-size: 11px;
 }
 
+/* 当前对话身份：掌门主对话 / 某位修士子对话。 */
+.viewer {
+  flex: none;
+  padding: 1px 7px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  font-size: 10.5px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.viewer[data-kind='captain'] {
+  border-color: color-mix(in srgb, #f2c14e 55%, var(--dsw-alias-border-l2));
+  background: color-mix(in srgb, #f2c14e 12%, transparent);
+  color: #f2c14e;
+}
+
+.viewer[data-kind='member'] {
+  border-color: color-mix(in srgb, var(--dsw-alias-state-business-primary) 55%, var(--dsw-alias-border-l2));
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 10%, transparent);
+  color: var(--dsw-alias-state-business-primary);
+}
+
 .headButton {
   flex: none;
   padding: 3px 10px;
@@ -516,6 +539,23 @@
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.sheetAction {
+  flex: none;
+  margin-left: auto;
+  padding: 3px 9px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-state-business-primary) 45%, var(--dsw-alias-border-l2));
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-state-business-primary);
+  font: inherit;
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.sheetAction:hover {
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 10%, transparent);
 }
 
 .sheetClose {

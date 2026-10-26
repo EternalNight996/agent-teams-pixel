@@ -43,9 +43,13 @@ function kindLabel(kind: string | undefined, t: AgentTeamsTranslate): string {
 
 export function TeamConfigPanel({ team, t }: { team: ActivityTeam; t: AgentTeamsTranslate }) {
   const completed = team.tasks.filter(task => task.status === 'completed').length
+  // 进度页已显示“已完成”时，道统页的阶段也必须一致，不能还写“进行中”。
+  const allCompleted = team.tasks.length > 0 && completed === team.tasks.length
   const facts = [
     { label: t('config.team'), value: team.name, sub: team.teamId },
-    { label: t('config.phase'), value: team.halted === true ? t('config.halted') : t(team.phase === 'staged' ? 'config.phaseStaged' : 'config.phaseRunning') },
+    { label: t('config.phase'), value: team.halted === true
+      ? t('config.halted')
+      : t(team.phase === 'staged' ? 'config.phaseStaged' : allCompleted ? 'config.phaseCompleted' : 'config.phaseRunning') },
     { label: t('config.members'), value: String(team.members.length) },
     { label: t('config.tasks'), value: `${completed}/${team.tasks.length}` },
   ]

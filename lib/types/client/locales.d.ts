@@ -264,6 +264,11 @@ export declare const zh: {
     'office.floorSettings': string;
     'office.historyTeams': string;
     'office.historyCurrent': string;
+    'office.viewingCaptain': string;
+    'office.viewingMember': string;
+    'office.viewingHint': string;
+    'office.newTask': string;
+    'office.newTaskHint': string;
     'office.historyPast': string;
     'office.taskHistory': string;
     'office.historyEmpty': string;
@@ -432,6 +437,7 @@ export declare const zh: {
     'office.realm': string;
     'config.phaseStaged': string;
     'config.phaseRunning': string;
+    'config.phaseCompleted': string;
     'config.kind.work': string;
     'config.kind.requirements': string;
     'config.kind.implementation': string;
@@ -721,6 +727,11 @@ export declare const en: {
     'office.floorSettings': string;
     'office.historyTeams': string;
     'office.historyCurrent': string;
+    'office.viewingCaptain': string;
+    'office.viewingMember': string;
+    'office.viewingHint': string;
+    'office.newTask': string;
+    'office.newTaskHint': string;
     'office.historyPast': string;
     'office.taskHistory': string;
     'office.historyEmpty': string;
@@ -889,6 +900,7 @@ export declare const en: {
     'office.realm': string;
     'config.phaseStaged': string;
     'config.phaseRunning': string;
+    'config.phaseCompleted': string;
     'config.kind.work': string;
     'config.kind.requirements': string;
     'config.kind.implementation': string;

@@ -111,11 +111,15 @@ export function PixelOffice({
   const failed = team.tasks.filter(task => task.status === 'failed').length
 
   const model = useMemo<SceneModel>(() => {
+    // 全部任务了结后掌门不再显示“修炼中”，与进度页的“已完成”保持一致。
+    const allCompleted = team.tasks.length > 0 && team.tasks.every(task => task.status === 'completed')
+    const captainActive = team.phase === 'running' && team.halted !== true && !allCompleted
+      && team.tasks.some(task => task.status === 'pending' || task.status === 'claimed' || task.status === 'in_progress')
     const captain: SceneMember = {
       id: team.captainSessionId,
       name: t('office.captain'),
       role: 'captain',
-      activity: team.phase === 'running' ? 'working' : 'idle',
+      activity: captainActive ? 'working' : 'idle',
       unread: team.captainInbox.length,
       isLeader: true,
     }
