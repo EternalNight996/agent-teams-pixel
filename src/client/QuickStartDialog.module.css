@@ -98,6 +98,46 @@
   gap: 8px;
 }
 
+/* 开宗向导内联在内容气泡里：表单 + 贴底操作条（不弹独立窗口）。 */
+.wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wizardActions {
+  position: sticky;
+  bottom: -2px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 0 2px;
+  background: linear-gradient(180deg, transparent, #151a21 32%);
+}
+
+.wizardActions > button {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.wizardActions > button[data-primary] {
+  border-color: #f2c14e;
+  background: linear-gradient(118deg, #f8e6b0, #f2c14e);
+  color: #16241b;
+  font-weight: 700;
+}
+
+.wizardActions > button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .form {
   display: flex;
   flex-direction: column;

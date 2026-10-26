@@ -1,4 +1,10 @@
-import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
-/** 打开「开宗立派」弹窗的窗口事件：对话头部按钮与洞府里的开宗入口共用。 */
-export declare const OPEN_QUICKSTART_EVENT = "agent-teams:open-quickstart";
-export declare function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.session.header.actions'> & PropsLocale<'agentTeams'>): import("react").JSX.Element;
+import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots';
+import type { SessionId } from '@deepseek-ai/dsh-session/types';
+import type { AgentTeamsTranslate } from './locales.ts';
+export declare function QuickStartWizard({ sessionId, t, onDone }: {
+    readonly sessionId: SessionId;
+    readonly t: AgentTeamsTranslate;
+    readonly onDone?: () => void;
+}): import("react").JSX.Element;
+/** 对话头部的开宗入口：统一打开洞府里的内容气泡，不再弹独立窗口。 */
+export declare function TeamQuickStart({ t }: PropsLocale<'agentTeams'>): import("react").JSX.Element;

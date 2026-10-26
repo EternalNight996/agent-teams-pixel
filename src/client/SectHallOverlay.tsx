@@ -16,7 +16,8 @@ import { TeamSection } from './ActivityPanel.tsx'
 import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
-import { OPEN_QUICKSTART_EVENT } from './QuickStartDialog.tsx'
+import { QuickStartWizard } from './QuickStartDialog.tsx'
+import { OPEN_HALL_SHEET_EVENT, type HallSheetAction } from './hall-events.ts'
 import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
 import css from './SectHallOverlay.module.css'
 
@@ -102,10 +103,7 @@ function writePanelRect(rect: PanelRect): void {
   try { window.localStorage.setItem(PANEL_RECT_KEY, JSON.stringify(rect)) } catch { /* private mode */ }
 }
 
-/** 常驻洞府浮层里的墙面设施被点击时广播的事件（供监视器等复用）。 */
-export const OPEN_HALL_SHEET_EVENT = 'agent-teams:open-sheet'
-
-type SheetKind = SceneAction | 'settings'
+type SheetKind = HallSheetAction
 
 /** 面板预设尺寸：初始给大一些。 */
 const PANEL_SIZES = {
@@ -175,7 +173,7 @@ export function SectHallOverlay({
   // 墙面设施/剑盒/名册 → 面板上方的内容气泡。
   useEffect(() => {
     const open = (event: Event): void => {
-      const action = (event as CustomEvent<{ action?: SceneAction }>).detail?.action
+      const action = (event as CustomEvent<{ action?: HallSheetAction }>).detail?.action
       if (action !== undefined) setSheet(action)
     }
     window.addEventListener(OPEN_HALL_SHEET_EVENT, open)
@@ -391,9 +389,9 @@ export function SectHallOverlay({
     height: `${size.h}px`,
   }
 
-  // 开宗：拉起对话头部同一个「开宗立派」弹窗（洞府无队伍时的入口）。
+  // 开宗：和功德碑/进度一样在面板左侧的内容气泡里展示，不弹独立窗口。
   const startSect = (): void => {
-    window.dispatchEvent(new CustomEvent(OPEN_QUICKSTART_EVENT))
+    setSheet(current => current === 'start' ? undefined : 'start')
   }
 
   const renderSheet = (): React.ReactNode => {
@@ -409,10 +407,11 @@ export function SectHallOverlay({
       </div>
     )
     const title = sheet === 'settings' ? t('office.panelConfig')
-      : sheet === 'inbox' ? t('workspace.inbox')
-        : sheet === 'teams' ? t('office.facility.teams')
-          : sheet === 'board' ? t('workspace.tabBoard')
-            : t('workspace.tabConfig')
+      : sheet === 'start' ? t('quickstart.title')
+        : sheet === 'inbox' ? t('workspace.inbox')
+          : sheet === 'teams' ? t('office.facility.teams')
+            : sheet === 'board' ? t('workspace.tabBoard')
+              : t('workspace.tabConfig')
     return createPortal((
       <aside
         className={css.sheet}
@@ -446,6 +445,10 @@ export function SectHallOverlay({
                 {t('office.resetPosition')}
               </button>
             </div>
+          ) : sheet === 'start' ? (
+            sessionId === undefined
+              ? <p className={css.settingsHint}>{t('workspace.emptyTitle')}</p>
+              : <QuickStartWizard sessionId={sessionId} t={t} onDone={() => { setSheet(undefined) }} />
           ) : sheet === 'inbox' ? (
             hall.captainInbox.length === 0
               ? <p className={css.settingsHint}>{t('workspace.inboxEmpty')}</p>
@@ -530,7 +533,7 @@ export function SectHallOverlay({
                 <PixelOffice
                   team={hall}
                   t={t}
-                  activeAction={sheet === 'settings' ? null : sheet ?? null}
+                  activeAction={sheet === 'settings' || sheet === 'start' ? null : sheet ?? null}
                   onAction={(action) => {
                     // 无队伍时山门就是开宗入口（与底部「开宗」双向对应）；有队伍时开名册。
                     if (action === 'teams' && !hasTeam) { startSect(); return }

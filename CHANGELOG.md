@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 ### Changed
+- 开宗立派 now renders inline in the hall's left-hand content sheet, exactly like
+  功德碑/进度 — the header 开宗 button opens that sheet too, and there is no
+  standalone quick-start modal any more.
+- The 开宗 doorway transmission gained layered counter-rotating arcs, spiralling
+  pixel motes, a soft membrane and a bright core, so it reads as a portal with
+  depth instead of a flat spinner.
 - Hall popovers (面板配置 / 名册 / 道统 / 进度 / 收信) now share one fixed height
   equal to the current hall panel, and their content is scaled up (zoom 1.18)
   with a larger sheet title/close control, so the config UI is readable at a

@@ -1,14 +1,13 @@
 /** Click-to-dispatch entry: a header button that stages a plan from a small wizard. */
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import css from './QuickStartDialog.module.css'
+import { OPEN_HALL_SHEET_EVENT } from './hall-events.ts'
+import type { AgentTeamsTranslate } from './locales.ts'
 import { TEAM_CREATED_EVENT } from './team-reveal.ts'
 import { ROLE_META } from './role-labels.ts'
 import { SECT_PRESETS, randomSect, sectPreset } from './sects.ts'
-
-/** 打开「开宗立派」弹窗的窗口事件：对话头部按钮与洞府里的开宗入口共用。 */
-export const OPEN_QUICKSTART_EVENT = 'agent-teams:open-quickstart'
 
 type TplKey = 'quickstart.tplFix' | 'quickstart.tplFeat' | 'quickstart.tplResearch' | 'quickstart.tplAudit'
   | 'quickstart.tplBuild' | 'quickstart.tplArray' | 'quickstart.tplDocs' | 'quickstart.tplDebate'
@@ -45,8 +44,11 @@ function templateOf(id: string): QuickTemplate {
   return TEMPLATES.find(entry => entry.id === id) ?? TEMPLATES[0] as QuickTemplate
 }
 
-export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.session.header.actions'> & PropsLocale<'agentTeams'>) {
-  const [open, setOpen] = useState(false)
+export function QuickStartWizard({ sessionId, t, onDone }: {
+  readonly sessionId: SessionId
+  readonly t: AgentTeamsTranslate
+  readonly onDone?: () => void
+}) {
   const [step, setStep] = useState(0)
   const [goal, setGoal] = useState('')
   const [template, setTemplate] = useState<string>(TEMPLATES[0]?.id ?? 'fix')
@@ -73,27 +75,9 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
     return () => { document.removeEventListener('pointerdown', onPointerDown) }
   }, [rolesOpen])
 
-  // 洞府里的「开宗」入口：没有队伍时也能从浮层直接拉起同一个弹窗。
-  useEffect(() => {
-    const openDialog = (): void => {
-      setOpen(true)
-      setStep(0)
-      setError('')
-      setBlocked(false)
-      setCreated(undefined)
-    }
-    window.addEventListener(OPEN_QUICKSTART_EVENT, openDialog)
-    return () => { window.removeEventListener(OPEN_QUICKSTART_EVENT, openDialog) }
-  }, [])
-
-  const reset = (): void => {
-    setGoal('')
-    setError('')
-    setBlocked(false)
-    setCreated(undefined)
-    setBusy(false)
-    setRolesOpen(false)
-    setStep(0)
+  const close = (): void => {
+    if (busy) return
+    onDone?.()
   }
   const activeSect = sectMode === 'custom' ? undefined : sectPreset(sectMode === 'random' ? rolledSect : sectMode)
   const sectRoles = activeSect?.roles ?? roles
@@ -165,7 +149,7 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
       }))
       if (body.teamId !== undefined) window.dispatchEvent(new CustomEvent(TEAM_CREATED_EVENT, { detail: { teamId: body.teamId } }))
       setGoal('')
-      window.setTimeout(() => { setOpen(false); reset() }, 1800)
+      window.setTimeout(() => { onDone?.() }, 1800)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
@@ -188,34 +172,8 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
   const roster = sectMode === 'custom' ? roles : [...sectRoles]
 
   return (
-    <>
-      <button type="button" className={css.entry} data-quick-start-entry title={t('quickstart.entryTitle')} onClick={() => { setOpen(true); setStep(0); setError(''); setBlocked(false); setCreated(undefined) }}>
-        <span aria-hidden>⛩</span>{t('quickstart.entry')}
-      </button>
-      <Modal
-        open={open}
-        onClose={() => { if (!busy) { setOpen(false); reset() } }}
-        title={t('quickstart.title')}
-        closeLabel={t('quickstart.cancel')}
-        footer={(
-          <span className={css.actions}>
-            <button type="button" disabled={busy} onClick={() => { setOpen(false); reset() }}>{t('quickstart.cancel')}</button>
-            {step > 0 && (
-              <button type="button" data-control="quickstart-back" disabled={busy} onClick={() => { goTo(step - 1) }}>{t('quickstart.back')}</button>
-            )}
-            {step < STEPS.length - 1 ? (
-              <button type="button" data-primary data-control="quickstart-next" disabled={!canAdvance} onClick={next}>
-                {t('quickstart.next')}
-              </button>
-            ) : (
-              <button type="button" data-primary data-control="quickstart-submit" disabled={busy || !canAdvance} onClick={() => { void submit(false) }}>
-                {busy ? t('quickstart.busy') : t('quickstart.found')}
-              </button>
-            )}
-          </span>
-        )}
-      >
-        <div className={css.form}>
+    <div className={css.wizard}>
+      <div className={css.form}>
           <ol className={css.steps} aria-label={t('quickstart.title')}>
             {STEPS.map((entry, index) => {
               const state = index === step ? 'current' : index < step ? 'done' : 'todo'
@@ -394,8 +352,37 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
             </p>
           )}
           {created !== undefined && <p className={css.success} role="status">{created}</p>}
-        </div>
-      </Modal>
-    </>
+      </div>
+      <div className={css.wizardActions}>
+        <button type="button" disabled={busy} onClick={close}>{t('quickstart.cancel')}</button>
+        {step > 0 && (
+          <button type="button" data-control="quickstart-back" disabled={busy} onClick={() => { goTo(step - 1) }}>{t('quickstart.back')}</button>
+        )}
+        {step < STEPS.length - 1 ? (
+          <button type="button" data-primary data-control="quickstart-next" disabled={!canAdvance} onClick={next}>
+            {t('quickstart.next')}
+          </button>
+        ) : (
+          <button type="button" data-primary data-control="quickstart-submit" disabled={busy || !canAdvance} onClick={() => { void submit(false) }}>
+            {busy ? t('quickstart.busy') : t('quickstart.found')}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/** 对话头部的开宗入口：统一打开洞府里的内容气泡，不再弹独立窗口。 */
+export function TeamQuickStart({ t }: PropsLocale<'agentTeams'>) {
+  return (
+    <button
+      type="button"
+      className={css.entry}
+      data-quick-start-entry
+      title={t('quickstart.entryTitle')}
+      onClick={() => { window.dispatchEvent(new CustomEvent(OPEN_HALL_SHEET_EVENT, { detail: { action: 'start' } })) }}
+    >
+      <span aria-hidden>⛩</span>{t('quickstart.entry')}
+    </button>
   )
 }
