@@ -28,7 +28,13 @@ export declare function xpNeed(level: number): number;
 export declare function taskXpFor(level: number): number;
 /** 掌门带队完成任务获得的修为。 */
 export declare function captainTaskXpFor(level: number): number;
-/** 每 10 秒挂机修为：等级越高越多，挂机也有明显成长感。 */
+/**
+ * 每 10 秒挂机修为。
+ *
+ * 目标曲线：1 级正好 10 点；前 100 级满连击每级约 20 秒，100 级即可出师；
+ * 之后每级耗时按 (lv/100)^1.1 缓慢拉长（1000 级 ~4 分钟、封顶 ~50 分钟）。
+ * 也就是「挂机经验约随等级^1.2，但涨得比升级所需慢」，早期快、后期自然变慢。
+ */
 export declare function idleXpPer10s(level: number): number;
 /** 连续挂机加成：每 2 分钟 +0.5 倍，最高 3 倍（离线补结按基础值）。 */
 export declare function idleStreakMultiplier(streakTicks: number): number;

@@ -10,9 +10,11 @@
   prefilled GitHub issue, copy-diagnostics and copy-AI-prompt actions. Support
   QRs are served through an allowlisted host route; SPONSOR.md and
   assets/support are packaged.
-- Idle cultivation is much more generous: 2 + level/2 XP every 10 seconds, with a
-  continuous-online streak up to 3x (each 2 minutes +0.5x) and up to 8 hours of
-  offline catch-up. The character sheet shows the current idle rate.
+- Idle cultivation follows a retention curve: 10 XP/10s at Lv.1, about 20 seconds
+  per level through Lv.100 at max streak, then a slow (lv/100)^1.1 lengthening to
+  roughly 53 minutes per level at the cap; the online streak reaches 3x (every 2
+  minutes +0.5x) with up to 8 hours of offline catch-up. The character sheet shows
+  the current idle rate.
 - The 封神榜 also exists as a fifth wall facility (golden board with names and a
   vermilion seal); clicking it opens the ranks sheet, and opening ranks highlights
   the wall board.
