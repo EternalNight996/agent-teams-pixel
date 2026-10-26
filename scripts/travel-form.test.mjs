@@ -7,7 +7,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
-  BEAST_LEVEL, CHARACTER_HEIGHT, SHOE_HEIGHT, SWORD_LEVEL, TRAVEL_LIFT, characterRig, nextTravelForm, travelFormFor,
+  BEAST_LEVEL, CHARACTER_DISPLAY_HEIGHT, CHARACTER_HEIGHT, CHARACTER_SCALE, SHOE_HEIGHT, SWORD_LEVEL, TRAVEL_LIFT,
+  characterRig, nextTravelForm, travelFormFor,
 } from '../lib/client/pixel-office/travel.js'
 
 test('no level ever auto-flies: default, auto and off all walk', () => {
@@ -46,10 +47,10 @@ test('lift matches the mount art: walk stays on the ground, beasts higher than s
   assert.ok(TRAVEL_LIFT.beast > TRAVEL_LIFT.sword)
 })
 
-test('mounted cultivators hover clear of the low desk (21px tall)', () => {
-  // 矮案案面在 baseY−21；离地高度必须更大，否则剑/兽会压在案面上。
-  assert.ok(TRAVEL_LIFT.sword > 21)
-  assert.ok(TRAVEL_LIFT.beast > 21)
+test('mounted cultivators hover clear of the low desk (17px tall)', () => {
+  // 矮案案面在 baseY−17；离地高度必须更大，否则剑/兽会压在案面上。
+  assert.ok(TRAVEL_LIFT.sword > 17)
+  assert.ok(TRAVEL_LIFT.beast > 17)
 })
 
 test('the painted figure stands on the ground instead of floating above its shadow', () => {
@@ -58,7 +59,16 @@ test('the painted figure stands on the ground instead of floating above its shad
     assert.equal(rig.headY, baseY - CHARACTER_HEIGHT)
     // 鞋底正好落在 baseY：脚踩地面，而不是悬在落影上方。
     assert.equal(rig.shoeY + SHOE_HEIGHT, baseY)
+    // 缩放后脚底仍在 baseY（以脚底为锚点缩放，不会把人抬起来）。
+    assert.equal(Math.round(baseY + (rig.shoeY + SHOE_HEIGHT - baseY) * CHARACTER_SCALE), baseY)
     assert.ok(rig.headY < rig.bodyY && rig.bodyY < rig.waistY
       && rig.waistY < rig.hemY && rig.hemY < rig.shoeY, 'rig lines stay ordered top-down')
   }
+})
+
+test('the cultivator is a mini figure: art is drawn large, then scaled down', () => {
+  assert.ok(CHARACTER_SCALE > 0.5 && CHARACTER_SCALE < 0.7, 'scale keeps the pixel figure hand-sized')
+  assert.ok(CHARACTER_DISPLAY_HEIGHT >= 48 && CHARACTER_DISPLAY_HEIGHT <= 60, 'the visible figure is about 56px tall')
+  // 缩放后头顶高度 = 显示高度，名牌/等级框/热区都按这个值对齐。
+  assert.equal(Math.round(CHARACTER_HEIGHT * CHARACTER_SCALE), CHARACTER_DISPLAY_HEIGHT)
 })

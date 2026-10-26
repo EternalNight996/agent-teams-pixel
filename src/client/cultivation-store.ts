@@ -83,13 +83,6 @@ export function xpOf(key: string): number {
   return Math.round(state.xp[key] ?? 0)
 }
 
-/** 直接设置某个角色修为（调试/提级用）；会立即持久化并通知界面。 */
-export function setCultivationXp(key: string, xp: number): void {
-  state.xp[key] = Math.max(0, Math.round(xp))
-  persist()
-  notify()
-}
-
 export function useCultivationVersion(): number {
   return useSyncExternalStore(subscribeCultivation, cultivationVersion, cultivationVersion)
 }

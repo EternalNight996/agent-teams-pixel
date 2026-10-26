@@ -93,7 +93,7 @@ export const CULTIVATION_ITEMS: readonly CultivationItem[] = [
 export const LEVEL_CAP = 9999
 
 /** 境界带宽：炼气/筑基/…一路扩到 9999。 */
-const REALM_BANDS = [4, 49, 149, 349, 699, 1199, 1899, 2799, 3899, 5199, 6699, 7999, 8999, 9799, 9999]
+export const REALM_BANDS = [4, 49, 149, 349, 699, 1199, 1899, 2799, 3899, 5199, 6699, 7999, 8999, 9799, 9999] as const
 
 /** 升到下一级还需要的修为（随等级线性增长）。 */
 export function xpNeed(level: number): number {
@@ -113,14 +113,6 @@ export function captainTaskXpFor(level: number): number {
 /** 每 10 秒挂机修为：等级越高越多。 */
 export function idleXpPer10s(level: number): number {
   return 1 + Math.floor(Math.max(1, level) / 10)
-}
-
-/** 指定等级所需的累计修为（用于调试/直接提级）。 */
-export function xpForLevel(level: number): number {
-  const target = Math.min(LEVEL_CAP, Math.max(1, Math.floor(level)))
-  let xp = 0
-  for (let current = 1; current < target; current += 1) xp += xpNeed(current)
-  return xp
 }
 
 export interface Cultivation {

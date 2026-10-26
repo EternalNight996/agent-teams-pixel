@@ -28,8 +28,6 @@ export declare function taskXpFor(level: number): number;
 export declare function captainTaskXpFor(level: number): number;
 /** 每 10 秒挂机修为：等级越高越多。 */
 export declare function idleXpPer10s(level: number): number;
-/** 指定等级所需的累计修为（用于调试/直接提级）。 */
-export declare function xpForLevel(level: number): number;
 export interface Cultivation {
     readonly level: number;
     readonly xp: number;

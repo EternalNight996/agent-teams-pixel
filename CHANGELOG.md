@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 ### Changed
+- Cultivators, desks, focus artifacts, name plates, level badges, hit areas and
+  floating effects were miniaturized (~56px figures, 72×17 desks) while keeping
+  the hanfu details; non-crowned cultivators now default to long hair.
+- Removed the 天机阁 level-test jump buttons (and the xpForLevel/setCultivationXp
+  backdoor); progression comes only from tasks and idle cultivation.
+- Fixed desk-front leg clipping, the floating incense burner, oversized props
+  after scaling, and flying label/badge/hit-area alignment.
 - Mounted cultivators keep their legs still (walking gait only plays on foot);
   every mount family now has its own model: spirit beast, crane, qilin, jiao,
   dragon, phoenix and dao beast, selected from the 天机阁 item.

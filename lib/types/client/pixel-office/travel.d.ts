@@ -16,7 +16,7 @@ export declare const BEAST_LEVEL = 8;
 /**
  * 离地高度（世界像素）：骑手脚尖正好落在剑脊 / 兽鞍上。
  *
- * 数值要高于矮案案面（baseY−21）：御剑/骑兽是“飞起来”，不是站在案上的剑上。
+ * 数值要高于矮案案面（baseY−17）：御剑/骑兽是“飞起来”，不是站在案上的剑上。
  */
 export declare const TRAVEL_LIFT: Readonly<Record<TravelForm, number>>;
 /**
@@ -26,10 +26,17 @@ export declare const TRAVEL_LIFT: Readonly<Record<TravelForm, number>>;
  * 够格才离地。等级不够时退回步行，不偷偷飞起来。
  */
 export declare function travelFormFor(level: number, override?: TravelOverride): TravelForm;
-/** 身形高度：头顶在 baseY − 92，鞋底正好落在 baseY。 */
+/** 美术画布高度：头顶在 baseY − 92，鞋底正好落在 baseY。 */
 export declare const CHARACTER_HEIGHT = 92;
 /** 鞋高：脚不是悬空的，鞋底贴着地面。 */
 export declare const SHOE_HEIGHT = 7;
+/**
+ * mini 缩放：像素人定位是可爱小手办，美术按 92px 画完整体缩到约 56px，
+ * 汉服细节不丢，人也不会显得又高又怪。
+ */
+export declare const CHARACTER_SCALE = 0.61;
+/** 场景里实际看到的身形高度（名牌、等级框、热区都按这个对齐）。 */
+export declare const CHARACTER_DISPLAY_HEIGHT: number;
 /** 一具落地身形的关键横线：头、肩、腰、袍角、鞋面。 */
 export interface CharacterRig {
     readonly headY: number;

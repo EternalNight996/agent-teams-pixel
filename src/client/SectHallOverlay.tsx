@@ -15,8 +15,8 @@ import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
 import { QuickStartWizard } from './QuickStartDialog.tsx'
-import { CULTIVATION_ITEMS, captainKey, cultivationFromXp, memberKey, xpForLevel } from './cultivation.ts'
-import { setCultivationXp, useCultivationVersion, xpOf } from './cultivation-store.ts'
+import { CULTIVATION_ITEMS, captainKey, cultivationFromXp, memberKey } from './cultivation.ts'
+import { useCultivationVersion, xpOf } from './cultivation-store.ts'
 import { OPEN_HALL_SHEET_EVENT, type HallSheetAction } from './hall-events.ts'
 import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
 import css from './SectHallOverlay.module.css'
@@ -541,20 +541,7 @@ export function SectHallOverlay({
                 </div>
                 <div className={css.xpTrack}><span style={{ width: `${Math.round(characterCultivation.ratio * 100)}%` }} /></div>
                 <p className={css.settingsMeta}>{characterCultivation.xp} / {characterCultivation.next} XP</p>
-                <span className={css.historyTitle}>{t('office.levelTest')}</span>
-                <div className={css.sizeRow}>
-                  {[1, 5, 20, 50, 150, 350, 700, 1200, 2800, 5200, 9000, 9800, 9999].map(level => (
-                    <button
-                      key={level}
-                      type="button"
-                      className={css.sizeChip}
-                      data-active={characterCultivation.level === level || undefined}
-                      onClick={() => { setCultivationXp(character.key, xpForLevel(level)) }}
-                    >
-                      Lv.{level}
-                    </button>
-                  ))}
-                </div>
+                <p className={css.settingsMeta}>{t('office.levelEarnHint')}</p>
                 {([
                   { kind: 'weapon', title: t('office.weapon'), hint: undefined },
                   { kind: 'mount', title: t('office.mounts'), hint: t('office.mountHint') },
