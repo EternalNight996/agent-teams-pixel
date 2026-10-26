@@ -10,6 +10,10 @@
   attempts). Frontend reuses existing components, verifier reuses implementation
   evidence rather than rerunning everything, reviewer reviews the diff/evidence.
   Tests cap the five contracts at 5,200 chars and the DAG at depth 5 / width 2.
+- Added an optional security-hardening role/template (adapting the
+  security-auditor pattern): read-only audit → minimal fix → exploit/regression
+  verification → security review. The security contract requires repro before
+  fix, minimal diff, a regression test and an explicit residual-risk list.
 - Artifact handoff: every full-stack task now carries an explicit 交付/验收 line
   (contract file, browser evidence, migration/tests, E2E, risk matrix,
   findings+verdict), and every role contract ends with a five-bullet Report rule

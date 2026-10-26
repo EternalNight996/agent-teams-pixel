@@ -26,6 +26,7 @@ export const ROLE_VISUALS: Readonly<Record<string, RoleVisual>> = {
   frontend: { weapon: 'brush', robe: '#3f7a6a', robeDark: '#2a5a4e', robeLight: '#5f9a88', trim: '#c8f2e8', accent: '#8fe3d0', hair: '#2a2230', skin: '#f2cfae', hairStyle: 'long', },
   backend: { weapon: 'compass', robe: '#4a5a7a', robeDark: '#323d57', robeLight: '#66789a', trim: '#cfe0ff', accent: '#8fb8ff', hair: '#241f2c', skin: '#f2cfae', },
   integrator: { weapon: 'array', robe: '#7a5a3a', robeDark: '#543d28', robeLight: '#a07a50', trim: '#f2d9a8', accent: '#f2c14e', hair: '#2a2230', skin: '#f2cfae', hairStyle: 'topknot', },
+  security: { weapon: 'talisman', robe: '#4a2a3a', robeDark: '#321c28', robeLight: '#6a3f52', trim: '#f2c14e', accent: '#ff9aa8', hair: '#1c1a22', skin: '#f2cfae', beard: true, },
   verifier: { weapon: 'pill', robe: '#7a5c9e', robeDark: '#55416f', robeLight: '#9b7fc0', trim: '#e6d9ff', accent: '#e6d9ff', hair: '#2a2230', skin: '#f2cfae', },
   reviewer: { weapon: 'scroll', robe: '#4a4a58', robeDark: '#32323d', robeLight: '#666675', trim: '#d4af37', accent: '#ffe9a8', hair: '#1c1a22', skin: '#f2cfae', beard: true, },
   researcher: { weapon: 'gourd', robe: '#4f7d5a', robeDark: '#365740', robeLight: '#6c9f78', trim: '#d9f2df', accent: '#d9f2df', hair: '#2a2230', skin: '#f2cfae', hairStyle: 'long', },

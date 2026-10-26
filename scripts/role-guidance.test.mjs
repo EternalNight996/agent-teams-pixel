@@ -10,7 +10,7 @@ import { buildQuickStartPlan } from '../lib/quick-start.js'
 import { memberPersona } from '../lib/members.js'
 
 test('software roles expose bounded contracts with ownership, rules and done', () => {
-  for (const role of ['frontend', 'backend', 'integrator', 'verifier', 'reviewer']) {
+  for (const role of ['frontend', 'backend', 'integrator', 'verifier', 'reviewer', 'security']) {
     assert.ok(ROLE_CONTRACT_IDS.includes(role), `missing role ${role}`)
     const text = roleGuidance(role)
     assert.equal(typeof text, 'string')
@@ -45,6 +45,22 @@ test('member persona appends the contract only for recognized software roles', (
   assert.match(frontend, /loading \/ empty \/ error/)
   const generic = memberPersona(team, { name: 'm', role: 'researcher' }, '/tmp')
   assert.doesNotMatch(generic, /Role contract:/)
+})
+
+test('the hardening template audits, fixes minimally, verifies and reviews', () => {
+  const plan = buildQuickStartPlan('harden the login flow', 'hardening')
+  const roles = plan.members.map(member => member.role)
+  assert.deepEqual(roles, ['auditor', 'security', 'verifier', 'reviewer'])
+  const byId = new Map(plan.tasks.map(task => [task.id, task]))
+  assert.deepEqual(byId.get('fix')?.dependencies, ['audit'])
+  assert.deepEqual(byId.get('verify')?.dependencies, ['fix'])
+  assert.deepEqual(byId.get('review')?.dependencies, ['verify'])
+  assert.equal(byId.get('audit')?.assignee, '巡查使')
+  assert.equal(byId.get('fix')?.assignee, '镇魔师')
+  for (const task of plan.tasks) assert.match(task.description, /交付\/验收：/)
+  const security = roleGuidance('security') ?? ''
+  assert.match(security, /reproduce/i)
+  assert.match(security, /residual risk/i)
 })
 
 test('the fullstack template builds a contract -> parallel layers -> integration DAG', () => {

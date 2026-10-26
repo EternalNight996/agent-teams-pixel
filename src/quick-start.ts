@@ -10,14 +10,14 @@
 export const SECT_NAMES: Record<string, string> = {
   fix: '斗法宗', feat: '开山宗', research: '寻仙宗', audit: '巡查宗',
   build: '炼器宗', array: '布阵宗', docs: '传道宗', debate: '论道宗',
-  fullstack: '合道宗',
+  fullstack: '合道宗', hardening: '镇魔宗',
 }
 
 export const ROLE_NAMES: Record<string, string> = {
   planner: '军师', implementer: '剑修', verifier: '丹修', reviewer: '执法长老',
   researcher: '散修', analyst: '推演师', writer: '书记', auditor: '巡查使',
   architect: '阵修', tester: '体修', documenter: '传道长老', operator: '炼器师',
-  frontend: '灵绘师', backend: '地脉师', integrator: '合契师',
+  frontend: '灵绘师', backend: '地脉师', integrator: '合契师', security: '镇魔师',
   // 门派预设新增的 8 个道途：缺了它们，成员名会退化成裸角色 id（demon/poisoner）。
   talisman: '符修', healer: '医修', beastmaster: '驭兽师', puppeteer: '傀儡师',
   musician: '音修', poisoner: '毒修', monk: '佛修', demon: '魔修',
@@ -114,6 +114,17 @@ export const QUICK_START_TEMPLATES: readonly QuickStartTemplate[] = [
       { id: 'integrate', subject: '联调与契约对齐', role: 'integrator', description: '对齐前后端字段/类型/错误码，跑端到端 smoke，记录契约差异与残余风险。', expected: '端到端 smoke 命令与结果 + 契约差异清单。', dependencies: ['frontend', 'backend'] },
       { id: 'verify', subject: '验证全链路', role: 'verifier', description: '跑测试与浏览器 smoke，按风险矩阵覆盖正常/边界/错误/鉴权/回归，记录命令与证据。', expected: '风险矩阵 + 命令/预期/实际。', dependencies: ['integrate'] },
       { id: 'review', subject: '审查交付', role: 'reviewer', description: '对照验收与契约审查正确性、范围、安全、性能与可访问性；证据不足则失败。', expected: 'findings（文件/行/修复）+ verdict。', dependencies: ['verify'] },
+    ],
+  },
+  {
+    id: 'hardening',
+    label: '安全加固',
+    roles: ['auditor', 'security', 'verifier', 'reviewer'],
+    tasks: [
+      { id: 'audit', subject: '威胁建模与只读审计', role: 'auditor', description: '只读检查鉴权、输入、密钥、依赖与注入/XSS/CSRF 面，给出按严重度排序的发现。', expected: '威胁模型 + findings（复现步骤/影响/建议）。' },
+      { id: 'fix', subject: '最小修复', role: 'security', description: '先复现确认问题，再做最小修复并补回归测试；不扩大功能范围。', expected: '每项修复的复现/修复/测试证据 + 残余风险。', dependencies: ['audit'] },
+      { id: 'verify', subject: '验证修复', role: 'verifier', description: '复跑利用路径与回归，确认问题消失且无新增失败。', expected: '修复前后命令/结果对比 + 回归矩阵。', dependencies: ['fix'] },
+      { id: 'review', subject: '安全审查', role: 'reviewer', description: '审查修复正确性、残余风险与是否引入新攻击面；证据不足则失败。', expected: 'findings + verdict + 残余风险。', dependencies: ['verify'] },
     ],
   },
   {

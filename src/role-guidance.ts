@@ -68,6 +68,20 @@ const CONTRACTS: Readonly<Record<string, RoleContract>> = {
     mustNot: ['edit implementation code to make tests pass', 'approve on “looks fine” without evidence'],
     done: 'verdict backed by commands/evidence; failures have reproducible steps.',
   },
+  security: {
+    ownership: 'security hardening of the existing feature: threat model and minimal fixes, not new product scope.',
+    must: [
+      'name the trust boundaries and check authz, input validation, secrets, dependency risk and injection/XSS/CSRF surfaces',
+      'reproduce each confirmed issue before fixing, keep the fix minimal and add a regression test',
+      'record residual risk and any accepted risk explicitly; never weaken auth or hide findings',
+    ],
+    mustNot: [
+      'do broad refactors or unrelated feature work',
+      'claim a security fix without a before/after reproduction',
+      'edit UI/server layers outside the confirmed issue without the owner’s agreement',
+    ],
+    done: 'threat model + reproduced findings + minimal fixes + regression tests + residual-risk list.',
+  },
   reviewer: {
     ownership: 'independent review against the acceptance contract and delivery risk.',
     must: [

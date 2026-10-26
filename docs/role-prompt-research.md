@@ -52,6 +52,13 @@
 五人是刻意压过的编制：architect 不再单列，契约与最终联调都由 integrator 拥有，
 少一个成员前缀和一次跨角色交接。
 
+另有一个可选的「安全加固」四角色模板（吸收 wshobson/agents 的 security-auditor 模式）：
+
+    audit (auditor, read-only) → fix (security, minimal)
+      → verify (exploit repro + regression) → review (reviewer)
+
+它不默认进入 fullstack，避免普通功能任务为安全角色多付前缀；需要时单独选。
+
 ## 4. 成本与收益（当前实测）
 
 角色 contract 实测（字符 / 约 tokens）：
@@ -63,7 +70,8 @@
 | backend | 931 | 233 |
 | verifier | 878 | 220 |
 | reviewer | 889 | 222 |
-| **合计** | **4,676** | **~1,169** |
+| **fullstack 合计** | **4,676** | **~1,169** |
+| security（可选） | 1,032 | 258 |
 
 - 每个成员只看到自己那一段（约 190–225 tokens），不是五段全付；前缀固定，缓存不受影响。
 - 新增 Working budget：只读范围内文件、不复述任务/不粘贴大文件、证据化汇报、同一阻塞两次失败即停下报告；用于压返工与长输出。

@@ -412,6 +412,7 @@ export declare const zh: {
     'quickstart.tplResearch': string;
     'quickstart.tplAudit': string;
     'quickstart.tplFullstack': string;
+    'quickstart.tplHardening': string;
     'role.planner.name': string;
     'role.planner.ability': string;
     'role.implementer.name': string;
@@ -422,6 +423,8 @@ export declare const zh: {
     'role.backend.ability': string;
     'role.integrator.name': string;
     'role.integrator.ability': string;
+    'role.security.name': string;
+    'role.security.ability': string;
     'role.verifier.name': string;
     'role.verifier.ability': string;
     'role.reviewer.name': string;
@@ -489,6 +492,7 @@ export declare const zh: {
     'quickstart.desc.research': string;
     'quickstart.desc.audit': string;
     'quickstart.desc.fullstack': string;
+    'quickstart.desc.hardening': string;
     'quickstart.desc.build': string;
     'quickstart.desc.array': string;
     'quickstart.desc.docs': string;
@@ -1023,6 +1027,7 @@ export declare const en: {
     'quickstart.tplResearch': string;
     'quickstart.tplAudit': string;
     'quickstart.tplFullstack': string;
+    'quickstart.tplHardening': string;
     'role.planner.name': string;
     'role.planner.ability': string;
     'role.implementer.name': string;
@@ -1033,6 +1038,8 @@ export declare const en: {
     'role.backend.ability': string;
     'role.integrator.name': string;
     'role.integrator.ability': string;
+    'role.security.name': string;
+    'role.security.ability': string;
     'role.verifier.name': string;
     'role.verifier.ability': string;
     'role.reviewer.name': string;
@@ -1100,6 +1107,7 @@ export declare const en: {
     'quickstart.desc.research': string;
     'quickstart.desc.audit': string;
     'quickstart.desc.fullstack': string;
+    'quickstart.desc.hardening': string;
     'quickstart.desc.build': string;
     'quickstart.desc.array': string;
     'quickstart.desc.docs': string;
