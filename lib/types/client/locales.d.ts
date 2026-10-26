@@ -253,6 +253,10 @@ export declare const zh: {
     'office.dockFloating': string;
     'office.swordBox': string;
     'office.roster': string;
+    'office.floorDoctrine': string;
+    'office.floorProgress': string;
+    'office.floorInbox': string;
+    'office.floorSettings': string;
     'office.panelConfig': string;
     'office.panelSizeHint': string;
     'office.panelSize.compact': string;
@@ -694,6 +698,10 @@ export declare const en: {
     'office.dockFloating': string;
     'office.swordBox': string;
     'office.roster': string;
+    'office.floorDoctrine': string;
+    'office.floorProgress': string;
+    'office.floorInbox': string;
+    'office.floorSettings': string;
     'office.panelConfig': string;
     'office.panelSizeHint': string;
     'office.panelSize.compact': string;

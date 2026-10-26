@@ -55,9 +55,12 @@
   button (left of 归栏) and a 开宗 button inside the teamless sheet hint both open
   the conversation's 开宗立派 dialog through a shared window event
   (`agent-teams:open-quickstart`).
-- The hall chrome reads larger: floor buttons (归栏 / 面板配置 / 名册) use 12.5px
-  text with 6px × 14px padding and 14px glyphs, and the header title/meta/collapse
-  control grew with them.
+- The floor bar mirrors the wall menu: next to 归栏 it now also carries 名册,
+  道统, 进度, 收信 and 配置 (config last). A wall fixture and its floor button open
+  the same sheet and light each other up; while no team exists, the gate doubles
+  as the 开宗 entry. The bar wraps when the panel is narrow.
+- The hall chrome reads larger: floor buttons use 14px text with 6px × 12px
+  padding and 15–16px glyphs; the header title/meta/collapse control grew too.
 - 收起 now shrinks the whole hall into a jade-and-gold 宗门令牌 (gate glyph,
   engraved frame, red tassel). The token scales with the panel preset/resized
   panel: a 460×380 compact panel gives a smaller token, a 1040×760 超大 panel a

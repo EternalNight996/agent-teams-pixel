@@ -531,7 +531,11 @@ export function SectHallOverlay({
                   team={hall}
                   t={t}
                   activeAction={sheet === 'settings' ? null : sheet ?? null}
-                  onAction={(action) => { toggleSheet(action) }}
+                  onAction={(action) => {
+                    // 无队伍时山门就是开宗入口（与底部「开宗」双向对应）；有队伍时开名册。
+                    if (action === 'teams' && !hasTeam) { startSect(); return }
+                    toggleSheet(action)
+                  }}
                   onOpenMember={(memberId) => { if (sessionId !== undefined) openMember(sessionId, memberId as SessionId) }}
                   onUnavailable={() => { /* 无会话修士：由场景内提示承担 */ }}
                 />
@@ -558,11 +562,20 @@ export function SectHallOverlay({
                   <span className={css.portalGlyph} aria-hidden>✥</span>
                   <span>{t('office.dockSidebar')}</span>
                 </button>
-                <button type="button" className={css.floorButton} data-control="hall-settings" data-active={sheet === 'settings' || undefined} onClick={() => { toggleSheet('settings') }}>
-                  <span aria-hidden>⚙</span>{t('office.panelConfig')}
-                </button>
                 <button type="button" className={css.floorButton} data-control="hall-roster" data-active={sheet === 'teams' || undefined} onClick={() => { toggleSheet('teams') }}>
-                  <span aria-hidden>☰</span>{t('office.roster')}
+                  <span aria-hidden>山</span>{t('office.roster')}
+                </button>
+                <button type="button" className={css.floorButton} data-control="hall-doctrine" data-active={sheet === 'config' || undefined} onClick={() => { toggleSheet('config') }}>
+                  <span aria-hidden>经</span>{t('office.floorDoctrine')}
+                </button>
+                <button type="button" className={css.floorButton} data-control="hall-progress" data-active={sheet === 'board' || undefined} onClick={() => { toggleSheet('board') }}>
+                  <span aria-hidden>碑</span>{t('office.floorProgress')}
+                </button>
+                <button type="button" className={css.floorButton} data-control="hall-inbox" data-active={sheet === 'inbox' || undefined} onClick={() => { toggleSheet('inbox') }}>
+                  <span aria-hidden>信</span>{t('office.floorInbox')}
+                </button>
+                <button type="button" className={css.floorButton} data-control="hall-settings" data-active={sheet === 'settings' || undefined} onClick={() => { toggleSheet('settings') }}>
+                  <span aria-hidden>⚙</span>{t('office.floorSettings')}
                 </button>
               </footer>
         </section>

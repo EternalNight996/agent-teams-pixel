@@ -245,8 +245,9 @@
 .floor {
   display: flex;
   flex: none;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 8px 10px;
   border-top: 1px solid var(--dsw-alias-border-l2);
   background: color-mix(in srgb, var(--dsw-alias-bg-module-platform) 55%, #151a21);
@@ -257,14 +258,14 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 6px 12px;
   border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 999px;
   background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 70%, transparent);
   color: var(--dsw-alias-label-secondary);
   font: inherit;
-  font-size: 12.5px;
-  line-height: 17px;
+  font-size: 14px;
+  line-height: 19px;
   cursor: pointer;
   transition: border-color 140ms ease, color 140ms ease, background-color 140ms ease;
 }
@@ -276,13 +277,13 @@
 }
 
 .portalGlyph {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
   transition: transform 240ms ease;
 }
 
 .floorButton span[aria-hidden='true'] {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1;
 }
 
