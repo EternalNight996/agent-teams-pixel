@@ -117,6 +117,7 @@ export function PixelOffice({
   const model = useMemo<SceneModel>(() => {
     // 全部任务了结后掌门不再显示“修炼中”，与进度页的“已完成”保持一致。
     const allCompleted = team.tasks.length > 0 && team.tasks.every(task => task.status === 'completed')
+    const captainCultivation = cultivationOf(team.tasks.filter(task => task.status === 'completed').length, team.tasks.length, team.createdAt)
     const captainActive = team.phase === 'running' && team.halted !== true && !allCompleted
       && team.tasks.some(task => task.status === 'pending' || task.status === 'claimed' || task.status === 'in_progress')
     const captain: SceneMember = {
@@ -127,22 +128,27 @@ export function PixelOffice({
       unread: team.captainInbox.length,
       isLeader: true,
       viewing: viewingSessionId !== undefined && viewingSessionId === team.captainSessionId,
-      level: cultivationOf(team.tasks.filter(task => task.status === 'completed').length, team.tasks.length, team.createdAt).level,
+      level: captainCultivation.level,
+      realm: t(captainCultivation.rankKey),
     }
-    const members: SceneMember[] = [captain, ...live.map((member): SceneMember => ({
-      id: member.id,
-      name: member.name,
-      role: member.role,
-      activity: member.activity,
-      currentTask: member.currentTask,
-      progress: member.progress,
-      done: member.done,
-      total: member.total,
-      model: member.model,
-      unread: member.unread,
-      viewing: viewingSessionId !== undefined && viewingSessionId === member.id,
-      level: cultivationOf(member.done, member.total, team.createdAt).level,
-    }))]
+    const members: SceneMember[] = [captain, ...live.map((member): SceneMember => {
+      const cultivation = cultivationOf(member.done, member.total, team.createdAt)
+      return {
+        id: member.id,
+        name: member.name,
+        role: member.role,
+        activity: member.activity,
+        currentTask: member.currentTask,
+        progress: member.progress,
+        done: member.done,
+        total: member.total,
+        model: member.model,
+        unread: member.unread,
+        viewing: viewingSessionId !== undefined && viewingSessionId === member.id,
+        level: cultivation.level,
+        realm: t(cultivation.rankKey),
+      }
+    })]
     const facilities: SceneFacility[] = onAction === undefined
       ? []
       : actions.map(action => ({

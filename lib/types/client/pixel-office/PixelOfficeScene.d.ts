@@ -27,6 +27,8 @@ export interface SceneMember {
     readonly viewing?: boolean;
     /** Cultivation level; higher levels ride a flying sword or a divine beast. */
     readonly level?: number;
+    /** Localized realm name shown with the level above the head. */
+    readonly realm?: string;
 }
 /** Copy the scene needs but must not translate itself. */
 export interface SceneLabels {

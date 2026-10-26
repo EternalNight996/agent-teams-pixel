@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Changed
+- Every pixel person now shows a small "Lv.N 境界" badge above their head; task
+  and chatter bubbles shift up so the badge never covers them.
 - The active-conversation marker is now much louder: a floating 对话中 tag beside
   the character, a stronger teal/gold aura and a glowing name plate.
 - Double-clicking a pixel person makes them hop in place (single-click still

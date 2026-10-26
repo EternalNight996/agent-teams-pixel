@@ -28,6 +28,8 @@ export interface SceneMember {
   readonly viewing?: boolean
   /** Cultivation level; higher levels ride a flying sword or a divine beast. */
   readonly level?: number
+  /** Localized realm name shown with the level above the head. */
+  readonly realm?: string
 }
 
 /** Copy the scene needs but must not translate itself. */
@@ -1462,6 +1464,26 @@ export function createPixelScene(
       : stateTone(member.activity)
     g.beginPath(); g.arc(cx - textW / 2 - 10, deskY + 10, 2.6, 0, Math.PI * 2); g.fill()
 
+    // 头顶等级 + 境界：Lv.N 炼气/筑基/…
+    const levelText = member.level === undefined || member.level <= 0
+      ? undefined
+      : `Lv.${member.level}${member.realm === undefined || member.realm === '' ? '' : ` ${member.realm}`}`
+    if (levelText !== undefined) {
+      g.font = 'bold 7px "Segoe UI", monospace'
+      const lw = g.measureText(levelText).width + 10
+      const lx = Math.max(2, Math.min(WORLD_W - lw - 2, cx - lw / 2))
+      const ly = headY - 22
+      g.fillStyle = 'rgba(12, 18, 22, 0.82)'
+      roundRect(g, lx, ly, lw, 12, 3)
+      g.fill()
+      g.strokeStyle = 'rgba(242, 193, 78, 0.7)'
+      g.lineWidth = 1
+      roundRect(g, lx, ly, lw, 12, 3)
+      g.stroke()
+      g.fillStyle = '#f2c14e'
+      g.fillText(levelText, lx + 5, ly + 8.5)
+    }
+
     // Per-member progress bar.
     if (member.total !== undefined && member.total > 0) {
       const ratio = Math.min(1, Math.max(0, (member.done ?? 0) / member.total))
@@ -1477,7 +1499,7 @@ export function createPixelScene(
       g.font = '8px "Segoe UI", monospace'
       const bw = g.measureText(text).width + 12
       const bx = Math.max(2, Math.min(WORLD_W - bw - 2, cx - bw / 2))
-      const by = Math.max(4, headY - 26)
+      const by = Math.max(4, headY - 26 - (member.level === undefined ? 0 : 17))
       g.fillStyle = COLORS.bubble
       roundRect(g, bx, by, bw, 15, 4)
       g.fill()
@@ -1503,7 +1525,7 @@ export function createPixelScene(
         const text = truncate(line, 18)
         const bw = g.measureText(text).width + 12
         const bx = Math.max(2, Math.min(WORLD_W - bw - 2, cx - bw / 2))
-        const by = Math.max(4, headY - 26)
+        const by = Math.max(4, headY - 26 - (member.level === undefined ? 0 : 17))
         g.fillStyle = 'rgba(28, 36, 48, 0.94)'
         roundRect(g, bx, by, bw, 15, 4)
         g.fill()
