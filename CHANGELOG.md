@@ -46,6 +46,9 @@
   the **left of the panel** with their right edge exactly 8px from the panel's left
   edge (clamped inside the viewport), treating the panel as reserved right-side
   space: a wider panel pushes the dialog further left.
+- The hall chrome reads larger: floor buttons (归栏 / 面板配置 / 名册) use 12.5px
+  text with 6px × 14px padding and 14px glyphs, and the header title/meta/collapse
+  control grew with them.
 - 收起 now shrinks the whole hall into a jade-and-gold 宗门令牌 (gate glyph,
   engraved frame, red tassel). The token scales with the panel preset/resized
   panel: a 460×380 compact panel gives a smaller token, a 1040×760 超大 panel a

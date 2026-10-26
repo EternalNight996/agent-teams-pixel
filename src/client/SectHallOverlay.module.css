@@ -185,7 +185,7 @@
   flex: none;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px 6px 10px;
+  padding: 8px 10px 8px 12px;
   border-bottom: 1px solid var(--dsw-alias-border-l2);
   cursor: grab;
   touch-action: none;
@@ -199,15 +199,15 @@
 .caret {
   flex: none;
   color: var(--dsw-alias-label-tertiary);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .title {
   overflow: hidden;
   color: var(--dsw-alias-label-primary);
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 650;
-  line-height: 16px;
+  line-height: 18px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -216,18 +216,18 @@
   flex: none;
   margin-left: auto;
   color: var(--dsw-alias-label-secondary);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .headButton {
   flex: none;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 6px;
   background: transparent;
   color: var(--dsw-alias-label-secondary);
   font: inherit;
-  font-size: 10px;
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -246,8 +246,8 @@
   display: flex;
   flex: none;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: 8px;
+  padding: 8px 10px;
   border-top: 1px solid var(--dsw-alias-border-l2);
   background: color-mix(in srgb, var(--dsw-alias-bg-module-platform) 55%, #151a21);
 }
@@ -256,15 +256,15 @@
 .floorButton {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 9px;
+  gap: 6px;
+  padding: 6px 14px;
   border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 999px;
   background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 70%, transparent);
   color: var(--dsw-alias-label-secondary);
   font: inherit;
-  font-size: 10.5px;
-  line-height: 14px;
+  font-size: 12.5px;
+  line-height: 17px;
   cursor: pointer;
   transition: border-color 140ms ease, color 140ms ease, background-color 140ms ease;
 }
@@ -276,9 +276,14 @@
 }
 
 .portalGlyph {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
   transition: transform 240ms ease;
+}
+
+.floorButton span[aria-hidden='true'] {
+  font-size: 14px;
+  line-height: 1;
 }
 
 .portal:active .portalGlyph {
