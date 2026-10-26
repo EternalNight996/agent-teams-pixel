@@ -6,7 +6,8 @@ import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/cli
 import { ActivityPanel, TeamSection, historicCardTeam, type ActivityPanelProps } from './ActivityPanel.tsx'
 import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
-import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
+import type { SceneAction } from './pixel-office/PixelOffice.tsx'
+import { OPEN_HALL_SHEET_EVENT, SectHallOverlay } from './SectHallOverlay.tsx'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { OPEN_PANEL_EVENT } from './AgentTeamsCard.tsx'
 import type { AgentTeamsCardData } from './agent-teams-card-definition.ts'
@@ -22,8 +23,6 @@ export const TEAM_TAB_ID = 'agent-teams-pixel/activity'
 
 /** Persisted history-page preference: progress board vs setup page. */
 const WORKSPACE_VIEW_KEY = 'agent-teams-pixel.workspaceView'
-/** One-time coach line pointing at the wall menu (dismissed once, then never again). */
-const HALL_GUIDE_KEY = 'agent-teams-pixel.hallGuide'
 /** Floating panel geometry remembered across opens: offset + user-resized size. */
 const SHEET_RECT_KEY = 'agent-teams-pixel.sheetRect'
 
@@ -74,11 +73,16 @@ export function ActivitySurface({ bridge, state, ...props }: ActivityPanelProps 
   return sidebar === undefined ? <ActivityPanel {...props} /> : <WorkspaceMonitor {...props} sidebar={sidebar} state={state} />
 }
 
-function WorkspaceMonitor({ sessionsList, sidebar, state }: ActivityPanelProps & {
+function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember }: ActivityPanelProps & {
   sidebar: ISidebarRight
   state: WorkspaceActivityState
 }) {
   const current = currentSessionId(useSyncExternalStore(sessionsList.subscribe, sessionsList.getSnapshot))
+  const snapshots = useSyncExternalStore(subscribeActivitySnapshots, getActivitySnapshotsSnapshot)
+  const local = useSyncExternalStore(state.subscribe, state.getSnapshot)
+  const sessionTeams = current === undefined ? [] : snapshots.teams.filter(team => team.captainSessionId === current)
+  const wanted = current === undefined ? undefined : local.selected.get(current)
+  const hallTeam = sessionTeams.find(team => team.teamId === wanted) ?? sessionTeams[0]
   const targets = useSyncExternalStore(subscribeActivityMonitorTargets, getActivityMonitorTargetsSnapshot)
   const currentTargets = useMemo(() => targets.filter(target => target.sessionId === current), [targets, current])
   // One discovery tracker per visit, outside polling effects restarted by card registration.
@@ -144,7 +148,18 @@ function WorkspaceMonitor({ sessionsList, sidebar, state }: ActivityPanelProps &
     window.addEventListener(TEAM_CREATED_EVENT, reveal)
     return () => { window.removeEventListener(TEAM_CREATED_EVENT, reveal) }
   }, [current, sidebar, state])
-  return null
+  // 洞府作为窗口级浮层常驻：切到对话/别的页面也在，可收起成一条。
+  return hallTeam === undefined ? null : (
+    <SectHallOverlay
+      team={hallTeam}
+      t={t}
+      onOpenMember={(memberId) => { openMember(hallTeam.captainSessionId as SessionId, memberId as SessionId) }}
+      onAction={(action) => {
+        window.dispatchEvent(new CustomEvent(OPEN_HALL_SHEET_EVENT, { detail: { action } }))
+        sidebar.openTab(TEAM_TAB_KIND)
+      }}
+    />
+  )
 }
 
 export type WorkspaceActivityProps = PropsRuntime<'sidebar.right.pane.tab'> & PropsLocale<'agentTeams'> & {
@@ -172,14 +187,14 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
   const [sheet, setSheet] = useState<SceneAction | undefined>()
   const sheetRef = useRef<HTMLElement | null>(null)
   // 悬浮面板：可拖动（拖标题栏）、可拖右下角改大小，位置/大小记在 localStorage。
-  const stageRef = useRef<HTMLElement | null>(null)
+  const rootRef = useRef<HTMLDivElement | null>(null)
   // 悬浮窗贴住「主内容区」右下角：右侧栏（本插件所在栏）不参与，避免看起来像栏内面板。
   const [sheetRight, setSheetRight] = useState(16)
   useEffect(() => {
     if (sheet === undefined) return
     const measure = (): void => {
-      const stage = stageRef.current
-      const paneLeft = stage === null ? window.innerWidth : stage.getBoundingClientRect().left
+      const root = rootRef.current
+      const paneLeft = root === null ? window.innerWidth : root.getBoundingClientRect().left
       setSheetRight(Math.max(16, Math.round(window.innerWidth - paneLeft + 16)))
     }
     measure()
@@ -300,19 +315,6 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     }
   }, [sheet])
   // First visit: one floating line explains what on the wall is clickable.
-  const [guide, setGuide] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false
-    try { return window.localStorage.getItem(HALL_GUIDE_KEY) !== '1' } catch { return false }
-  })
-  const dismissGuide = (): void => {
-    setGuide(false)
-    try { window.localStorage.setItem(HALL_GUIDE_KEY, '1') } catch { /* private mode */ }
-  }
-  useEffect(() => {
-    if (!guide) return
-    const timer = window.setTimeout(dismissGuide, 12000)
-    return () => { window.clearTimeout(timer) }
-  }, [guide])
   useEffect(() => {
     if (sheet === undefined) return
     // Focus the dialog itself (not the ×) so mouse users do not get a heavy
@@ -320,17 +322,6 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     const frame = window.requestAnimationFrame(() => { sheetRef.current?.focus() })
     return () => { window.cancelAnimationFrame(frame) }
   }, [sheet])
-  // 点击没有会话的修士时给一条短暂提示，而不是跳转到空对话。
-  const [officeHint, setOfficeHint] = useState('')
-  const officeHintTimer = useRef<number | undefined>(undefined)
-  const showOfficeHint = (name: string): void => {
-    setOfficeHint(name)
-    if (officeHintTimer.current !== undefined) window.clearTimeout(officeHintTimer.current)
-    officeHintTimer.current = window.setTimeout(() => { setOfficeHint('') }, 2600)
-  }
-  useEffect(() => () => {
-    if (officeHintTimer.current !== undefined) window.clearTimeout(officeHintTimer.current)
-  }, [])
   useEffect(() => {
     if (sheet === undefined) return
     const close = (event: KeyboardEvent): void => {
@@ -339,6 +330,15 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     window.addEventListener('keydown', close)
     return () => { window.removeEventListener('keydown', close) }
   }, [sheet])
+  // 常驻洞府浮层里的墙面设施被点击：在这里打开对应的内容浮窗。
+  useEffect(() => {
+    const open = (event: Event): void => {
+      const action = (event as CustomEvent<{ action?: SceneAction }>).detail?.action
+      if (action !== undefined) setSheet(action)
+    }
+    window.addEventListener(OPEN_HALL_SHEET_EVENT, open)
+    return () => { window.removeEventListener(OPEN_HALL_SHEET_EVENT, open) }
+  }, [])
   const live = snapshots.teams.filter(team => team.captainSessionId === sessionId)
   const archived = snapshots.archivedTeams.filter(team => team.captainSessionId === sessionId && !live.some(item => item.teamId === team.teamId))
   const historic = [...local.history.values()].filter(team => team.captainSessionId === sessionId
@@ -480,7 +480,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
     )
   }
   return (
-    <div className={css.root} data-agent-teams-workspace data-session-id={sessionId}>
+    <div ref={rootRef} className={css.root} data-agent-teams-workspace data-session-id={sessionId}>
       {selected !== undefined && liveSelected && status === 'error' && (
         <div className={css.stageError} role="alert">
           <span>{t('workspace.error')}</span>
@@ -500,65 +500,16 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
           </div>
         )
       ) : liveSelected ? (
-        <section ref={stageRef} className={css.stage} data-office-stage>
-          <PixelOffice
+        <div className={css.content} data-workspace-board>
+          <TeamSection
             team={selected}
             t={t}
-            activeAction={sheet ?? null}
-            onAction={(action) => { setSheet(action) }}
-            onOpenMember={(memberId) => { openMember(selected.captainSessionId as SessionId, memberId as SessionId) }}
-            onUnavailable={showOfficeHint}
+            workspace
+            onNavigate={(_parent, child) => { openMember(selected.captainSessionId as SessionId, child) }}
+            onContinuePlanning={backToChat}
+            onDiscarded={backToChat}
           />
-          <p className={css.hallHint} data-hall-hint>{t('office.hintShort')}</p>
-          {guide && sheet === undefined && (
-            <div className={css.hallGuide} role="note" data-hall-guide>
-              <span>{t('office.guide')}</span>
-              <button type="button" onClick={dismissGuide}>{t('office.guideDismiss')}</button>
-            </div>
-          )}
-          {selected.phase === 'staged' && sheet !== 'config' && (
-            <div className={css.stagedRibbon} data-staged-ribbon>
-              <span>{t('office.awaiting')}</span>
-              <button type="button" onClick={() => { setSheet('config') }}>{t('office.stagedReview')}</button>
-            </div>
-          )}
-          {sheet !== undefined && typeof document !== 'undefined' && createPortal((
-              <aside
-                ref={sheetRef}
-                className={css.sheet}
-                data-sheet={sheet}
-                role="dialog"
-                aria-modal="false"
-                aria-label={sheetTitle(sheet)}
-                tabIndex={-1}
-                style={{
-                  '--sheet-dx': `${sheetOffset.x}px`,
-                  '--sheet-dy': `${sheetOffset.y}px`,
-                  right: `${sheetRight}px`,
-                  ...(sheetSize.w === undefined ? {} : { width: `${sheetSize.w}px` }),
-                  ...(sheetSize.h === undefined ? {} : { height: `${sheetSize.h}px` }),
-                } as CSSProperties}
-              >
-                <header className={css.sheetHead} onPointerDown={beginSheetDrag}>
-                  <span className={css.sheetGrip} aria-hidden>⠿</span>
-                  <span className={css.sheetTitle}>{sheetTitle(sheet)}</span>
-                  <span className={css.sheetMeta}>{selected.name} · {t('team.stats.completed', { completed: completedCount, total: selected.tasks.length })}</span>
-                  <button
-                    type="button"
-                    className={css.sheetClose}
-                    data-control="sheet-close"
-                    aria-label={t('office.closePanel')}
-                    title={t('office.closePanel')}
-                    onClick={() => { setSheet(undefined) }}
-                  >×</button>
-                </header>
-                <div className={css.sheetBody}>{sheetBody(sheet, selected)}</div>
-              </aside>
-          ), document.body)}
-          {officeHint !== '' && (
-            <div className={css.officeHint} role="status">{t('office.noConversation', { name: officeHint })}</div>
-          )}
-        </section>
+        </div>
       ) : (
         <div className={css.content}>
           <header className={css.heading}>
@@ -604,6 +555,40 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
                 onContinuePlanning={backToChat} onDiscarded={backToChat} onNavigate={openMember} t={t} />)}
         </div>
       )}
+      {/* 内容浮窗：由常驻洞府浮层里的墙面设施触发（事件），贴主内容区右下角。 */}
+      {selected !== undefined && sheet !== undefined && typeof document !== 'undefined' && createPortal((
+        <aside
+          ref={sheetRef}
+          className={css.sheet}
+          data-sheet={sheet}
+          role="dialog"
+          aria-modal="false"
+          aria-label={sheetTitle(sheet)}
+          tabIndex={-1}
+          style={{
+            '--sheet-dx': `${sheetOffset.x}px`,
+            '--sheet-dy': `${sheetOffset.y}px`,
+            right: `${sheetRight}px`,
+            ...(sheetSize.w === undefined ? {} : { width: `${sheetSize.w}px` }),
+            ...(sheetSize.h === undefined ? {} : { height: `${sheetSize.h}px` }),
+          } as CSSProperties}
+        >
+          <header className={css.sheetHead} onPointerDown={beginSheetDrag}>
+            <span className={css.sheetGrip} aria-hidden>⠿</span>
+            <span className={css.sheetTitle}>{sheetTitle(sheet)}</span>
+            <span className={css.sheetMeta}>{selected.name} · {t('team.stats.completed', { completed: completedCount, total: selected.tasks.length })}</span>
+            <button
+              type="button"
+              className={css.sheetClose}
+              data-control="sheet-close"
+              aria-label={t('office.closePanel')}
+              title={t('office.closePanel')}
+              onClick={() => { setSheet(undefined) }}
+            >×</button>
+          </header>
+          <div className={css.sheetBody}>{sheetBody(sheet, selected)}</div>
+        </aside>
+      ), document.body)}
     </div>
   )
 }

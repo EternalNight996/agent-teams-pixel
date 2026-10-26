@@ -1,0 +1,76 @@
+/* 常驻洞府浮层：窗口级浮窗，可收起成一条。 */
+
+.window {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 11000;
+  display: flex;
+  flex-direction: column;
+  width: min(460px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 85%, transparent);
+  border-radius: 12px;
+  background: #151a21;
+  box-shadow: 0 22px 60px rgb(0 0 0 / 52%), inset 0 2px rgb(255 255 255 / 4%);
+}
+
+.window[data-collapsed='true'] {
+  width: min(320px, calc(100vw - 32px));
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+
+.window[data-collapsed='true'] .head {
+  border-bottom: 0;
+}
+
+.headButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.headButton:hover {
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 8%, transparent);
+}
+
+.caret {
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+}
+
+.title {
+  overflow: hidden;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  flex: none;
+  margin-left: auto;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.canvas {
+  height: 320px;
+  min-height: 0;
+}

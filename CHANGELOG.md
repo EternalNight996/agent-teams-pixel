@@ -36,6 +36,13 @@
   blank column.
 
 ### Added
+- The sect hall itself is now a **window-level floating layer**: mounted from the
+  shell overlay (so it survives leaving the tab), anchored bottom-right of the
+  main content area, collapsible to a one-line bar (state remembered in
+  `agent-teams-pixel.hallCollapsed`), with the team name and completion count in
+  its header. The 宗门协作 tab now hosts the board (captain / member tree /
+  dependency map); wall facilities in the floating hall open the matching
+  content dialog at the main area's bottom-right.
 - Idle cultivators leave their desks: they stroll the courtyard on a reproducible
   per-seed loop (62% walking, the rest pausing) and return to the desk the moment
   a task starts; desks, incense burners and 本命法器 stay behind.
