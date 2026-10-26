@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### Changed
+- Added the 封神榜 board (bottom bar 榜): sect roll by cultivation, the 15-realm
+  ladder with per-realm level ranges and descriptions, the current speaker's
+  cultivation card, leveling tips (task/captain/idle formulas, first-seen
+  back-pay, mount cadence) and the three-part sect story. Realm ranges and copy
+  are derived from shared cultivation/data modules, with 1..9999 coverage tests.
 - Cultivators, desks, focus artifacts, name plates, level badges, hit areas and
   floating effects were miniaturized (~56px figures, 72×17 desks) while keeping
   the hanfu details; non-crowned cultivators now default to long hair.

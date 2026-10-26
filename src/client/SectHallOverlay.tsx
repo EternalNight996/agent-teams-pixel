@@ -18,6 +18,7 @@ import { QuickStartWizard } from './QuickStartDialog.tsx'
 import { CULTIVATION_ITEMS, captainKey, cultivationFromXp, memberKey } from './cultivation.ts'
 import { useCultivationVersion, xpOf } from './cultivation-store.ts'
 import { OPEN_HALL_SHEET_EVENT, type HallSheetAction } from './hall-events.ts'
+import { ASCENSION_RANKS, ASCENSION_STORY, ASCENSION_TIPS, rankAtLevel } from './immortals.ts'
 import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
 import css from './SectHallOverlay.module.css'
 
@@ -468,13 +469,33 @@ export function SectHallOverlay({
               : { id: member.id || member.name, name: member.name, key: memberKey(member.name), isCaptain: false }
           })()
     const characterCultivation = character === undefined ? undefined : cultivationFromXp(xpOf(character.key))
+    // 封神榜跟着「当前打开的对话」走：掌门看掌门，修士看修士。
+    const viewerKey = viewingCaptain
+      ? captainKey(hall.name)
+      : viewingMember === undefined ? undefined : memberKey(viewingMember.name)
+    const viewerCultivation = viewerKey === undefined ? undefined : cultivationFromXp(xpOf(viewerKey))
+    const viewerName = viewingCaptain ? t('office.captain') : viewingMember?.name
+    const viewerRank = viewerCultivation === undefined ? undefined : rankAtLevel(viewerCultivation.level)
+    // 封神榜先看「本宗谁在榜上」：按修为从高到低排。
+    const roster = !hasTeam
+      ? []
+      : [
+          { key: captainKey(hall.name), name: t('office.captain'), cultivation: cultivationFromXp(xpOf(captainKey(hall.name))) },
+          ...hall.members.map(member => ({
+            key: memberKey(member.name),
+            name: member.name,
+            cultivation: cultivationFromXp(xpOf(memberKey(member.name))),
+          })),
+        ].sort((left, right) => right.cultivation.level - left.cultivation.level
+          || right.cultivation.xp - left.cultivation.xp)
     const title = sheet === 'settings' ? t('office.panelConfig')
       : sheet === 'start' ? t('quickstart.title')
         : sheet === 'character' ? t('office.equipment')
-          : sheet === 'inbox' ? t('workspace.inbox')
-            : sheet === 'teams' ? t('office.facility.teams')
-              : sheet === 'board' ? t('workspace.tabBoard')
-                : t('workspace.tabConfig')
+          : sheet === 'ranks' ? t('office.ascension')
+            : sheet === 'inbox' ? t('workspace.inbox')
+              : sheet === 'teams' ? t('office.facility.teams')
+                : sheet === 'board' ? t('workspace.tabBoard')
+                  : t('workspace.tabConfig')
     return createPortal((
       <aside
         className={css.sheet}
@@ -502,7 +523,56 @@ export function SectHallOverlay({
           <button type="button" className={css.sheetClose} onClick={finishSheet} aria-label={t('office.closePanel')}>×</button>
         </header>
         <div className={css.sheetBody}>
-          {sheet === 'settings' ? (
+          {sheet === 'ranks' ? (
+            <div className={css.ranks}>
+              <p className={css.settingsHint}>{t('office.ascensionIntro')}</p>
+              {viewerCultivation !== undefined && viewerName !== undefined && (
+                <div className={css.rankHero}>
+                  <span className={css.rankHeroName}>{viewerName} · Lv.{viewerCultivation.level} {t(viewerCultivation.rankKey)}</span>
+                  <div className={css.xpTrack}><span style={{ width: `${Math.round(viewerCultivation.ratio * 100)}%` }} /></div>
+                  <span className={css.settingsMeta}>{viewerCultivation.xp} / {viewerCultivation.next} XP · {t('office.ascensionCurrent')}</span>
+                </div>
+              )}
+              {roster.length > 0 && (
+                <>
+                  <span className={css.historyTitle}>{t('office.ascensionSect')}</span>
+                  <ol className={css.rosterList}>
+                    {roster.map((entry, index) => (
+                      <li key={entry.key} className={css.rosterRow}>
+                        <span className={css.rosterIndex}>{index + 1}</span>
+                        <span className={css.rosterName}>{entry.name}</span>
+                        <span className={css.rosterLevel}>Lv.{entry.cultivation.level} · {t(entry.cultivation.rankKey)}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </>
+              )}
+              <span className={css.historyTitle}>{t('office.ascensionRealmList')}</span>
+              <ol className={css.rankList}>
+                {ASCENSION_RANKS.map(rank => {
+                  const current = viewerRank?.realm === rank.realm
+                  return (
+                    <li key={rank.realm} className={css.rankRow} data-current={current || undefined}>
+                      <div className={css.rankTop}>
+                        <span className={css.rankName}>{t(rank.realm)}</span>
+                        <span className={css.rankRange}>Lv.{rank.levelMin}–{rank.levelMax}</span>
+                        {current && <span className={css.rankCurrent}>{t('office.ascensionYouAre')}</span>}
+                      </div>
+                      <p className={css.rankDesc}>{t(rank.descKey)}</p>
+                    </li>
+                  )
+                })}
+              </ol>
+              <span className={css.historyTitle}>{t('office.ascensionFast')}</span>
+              <ul className={css.tips}>
+                {ASCENSION_TIPS.map(key => <li key={key} className={css.tip}>{t(key)}</li>)}
+              </ul>
+              <span className={css.historyTitle}>{t('office.ascensionStory')}</span>
+              <div className={css.story}>
+                {ASCENSION_STORY.map(key => <p key={key}>{t(key)}</p>)}
+              </div>
+            </div>
+          ) : sheet === 'settings' ? (
             <div className={css.settings}>
               <p className={css.settingsHint}>{t('office.panelSizeHint')}</p>
               <div className={css.sizeRow}>
@@ -791,7 +861,11 @@ export function SectHallOverlay({
                 <PixelOffice
                   team={hall}
                   t={t}
-                  activeAction={sheet === 'character' ? 'gear' : sheet === 'settings' || sheet === 'start' ? null : sheet ?? null}
+                  activeAction={
+                    sheet === 'character' ? 'gear'
+                      : sheet === 'settings' || sheet === 'start' || sheet === 'ranks' ? null
+                        : sheet ?? null
+                  }
                   onAction={(action) => {
                     // 无队伍时山门就是开宗入口（与底部「开宗」双向对应）；有队伍时开名册。
                     if (action === 'teams' && !hasTeam) { startSect(); return }
@@ -828,6 +902,9 @@ export function SectHallOverlay({
                 </button>
                 <button type="button" className={css.floorButton} data-control="hall-progress" data-active={sheet === 'board' || undefined} onClick={() => { toggleSheet('board') }}>
                   <span aria-hidden>碑</span>{t('office.floorProgress')}
+                </button>
+                <button type="button" className={css.floorButton} data-control="hall-ranks" data-active={sheet === 'ranks' || undefined} onClick={() => { toggleSheet('ranks') }}>
+                  <span aria-hidden>榜</span>{t('office.floorRanks')}
                 </button>
                 <button type="button" className={css.floorButton} data-control="hall-gear" data-active={sheet === 'character' || undefined} onClick={openGear}>
                   <span aria-hidden>阁</span>{t('office.floorGear')}

@@ -20,6 +20,8 @@ export interface CultivationItem {
 export declare const CULTIVATION_ITEMS: readonly CultivationItem[];
 /** 等级上限：9999。 */
 export declare const LEVEL_CAP = 9999;
+/** 境界带宽：炼气/筑基/…一路扩到 9999。 */
+export declare const REALM_BANDS: readonly [4, 49, 149, 349, 699, 1199, 1899, 2799, 3899, 5199, 6699, 7999, 8999, 9799, 9999];
 /** 升到下一级还需要的修为（随等级线性增长）。 */
 export declare function xpNeed(level: number): number;
 /** 完成任务获得的修为：等级越高收益越高。 */
