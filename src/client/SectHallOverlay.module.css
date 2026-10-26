@@ -368,6 +368,120 @@
   color: var(--dsw-alias-label-primary);
 }
 
+/* 名册 = 历史：已归档宗门 + 本门已了结任务，不再重复进度页的实时成员卡。 */
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historyBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.historyTitle {
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.historyItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.historyItem:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+.historyItem[data-active='true'] {
+  border-color: var(--dsw-alias-state-business-primary);
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 10%, transparent);
+}
+
+.historyName {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.historyMeta {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10.5px;
+}
+
+.historyDetail {
+  padding-top: 8px;
+  border-top: 1px dashed var(--dsw-alias-border-l2);
+}
+
+.historyTasks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.historyTask {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto auto;
+  gap: 6px;
+  align-items: center;
+  padding: 5px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 6px;
+  font-size: 10.5px;
+}
+
+.historyTaskId {
+  color: var(--dsw-alias-label-tertiary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.historyTaskSubject {
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.historyTaskWho {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.historyTaskState {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+}
+
+.historyTaskState[data-state='completed'] {
+  color: var(--dsw-alias-state-success-primary);
+}
+
+.historyTaskState[data-state='failed'] {
+  color: var(--dsw-alias-state-error-primary);
+}
+
 /* 内容气泡：贴在面板左侧（右缘 = 面板左缘 − 8px），宽度由 hall-geometry 计算后内联。 */
 .sheet {
   position: fixed;

@@ -84,6 +84,7 @@ export function AgentTeamsSummary({ data, openMember, sessionId, t }: AgentTeams
     teamName: snapshot?.name ?? data.teamName,
     members: snapshot?.members.map((member) => ({ id: member.id, name: member.name, role: member.role })) ?? data.members,
   }), [data, owner, snapshot])
+  const messages = (snapshot?.messages ?? []).slice(-8)
   return (
     <section className={css.root} data-agent-teams-card data-team-id={resolved.teamId}>
       <header className={css.head}>
@@ -100,6 +101,27 @@ export function AgentTeamsSummary({ data, openMember, sessionId, t }: AgentTeams
           {t('workspace.focus')}
         </button>
       </header>
+      {messages.length > 0 && (
+        <div className={css.comms} data-team-comms>
+          <span className={css.commsTitle}>{t('card.comms')}</span>
+          <ul className={css.commsList}>
+            {messages.map((message) => {
+              const fromCaptain = message.from === 'captain' || message.from === ''
+              const role = fromCaptain ? '' : snapshot?.members.find((member) => member.name === message.from)?.role ?? ''
+              const art = fromCaptain ? LEAD_ART : memberArtUrl(message.from, role)
+              return (
+                <li key={message.id ?? `${message.ts ?? 0}:${message.from}`} className={css.commsRow} data-from={fromCaptain ? 'captain' : 'member'}>
+                  <img className={css.commsAvatar} src={art ?? ''} alt="" aria-hidden />
+                  <span className={css.commsText}>
+                    <span className={css.commsMeta}>{message.from} → {message.to ?? 'captain'}</span>
+                    <span className={css.commsBody} title={message.content}>{message.content}</span>
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )}
       {resolved.members.length > 0 && (
         <div className={css.members}>
           {resolved.members.map((member) => (

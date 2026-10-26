@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 ### Changed
+- 山门·名册 no longer duplicates the live 宗门进度 member cards: it is now a
+  history sheet listing archived sect runs (with their historic roster) plus the
+  current sect's finished tasks.
+- The team card in the main conversation now streams recent captain↔member
+  mailbox messages (latest 12, refreshed by the one-second activity snapshot), so
+  the interaction between the captain and the cultivators shows up live in the
+  chat instead of only inside the hall.
 - 宗门进度 no longer draws the separate task-dependency graph: each member card
   now carries its own progress bar and a "交给 {name} · {task}" handoff line, so
   the panel content itself shows who works on what, how far along it is and who

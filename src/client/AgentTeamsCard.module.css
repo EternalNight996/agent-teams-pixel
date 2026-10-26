@@ -145,4 +145,73 @@
 .chatEntry:hover { background: var(--dsw-alias-bg-module-platform); }
 .chatEntry:focus-visible { outline: 2px solid var(--dsw-alias-state-business-primary); outline-offset: 2px; }
 .turnCards { display: grid; gap: 8px; margin-block: 10px; }
+
+/* 主对话框卡片里的实时交互流：掌门与修士的往返消息。 */
+.comms {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+}
+
+.commsTitle {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 14px;
+}
+
+.commsList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 132px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.commsRow {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.commsAvatar {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  object-fit: contain;
+  background: transparent;
+}
+
+.commsText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+
+.commsMeta {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9.5px;
+  line-height: 12px;
+}
+
+.commsBody {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10.5px;
+  line-height: 1.45;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 @media (max-width: 600px) { .head { flex-wrap: wrap; } }

@@ -93,6 +93,11 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDi
   // 洞府常驻：只要会话里还有队伍，浮层就保持存在——即使队伍 0 任务、
   // 或任务全部已弃（已停止），也不自动收起（用户明确要求）。
   const hallTeam = sessionTeams.find(team => team.teamId === wanted) ?? sessionTeams[0] ?? linkedTeam
+  // 名册页看历史：同一掌门会话下已经归档的宗门。
+  const ownerCaptain = hallTeam?.captainSessionId ?? current
+  const historyTeams = ownerCaptain === undefined
+    ? []
+    : snapshots.archivedTeams.filter(team => team.captainSessionId === ownerCaptain)
   const targets = useSyncExternalStore(subscribeActivityMonitorTargets, getActivityMonitorTargetsSnapshot)
   const currentTargets = useMemo(() => targets.filter(target => target.sessionId === current), [targets, current])
   // One discovery tracker per visit, outside polling effects restarted by card registration.
@@ -163,6 +168,7 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, modelDi
   return (
     <SectHallOverlay
       team={hallTeam}
+      history={historyTeams}
       t={t}
       sessionId={current}
       modelDirectories={modelDirectories}

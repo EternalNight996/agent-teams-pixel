@@ -15,7 +15,7 @@ import { memberActivity } from './members.ts'
 import { canDeclareDelivery, describeQualityLoop, verdictAuditNotes } from './quality-gates.ts'
 import { auditTeamWorkspace } from './workspace-audit.ts'
 import {
-  CAPTAIN_KEY, listArchivedTeamIds, readArchivedTeam, readUnreadMailbox, readTeam,
+  CAPTAIN_KEY, listArchivedTeamIds, readArchivedTeam, readMailbox, readUnreadMailbox, readTeam,
   taskDepthsById, taskVisualState,
 } from './state.ts'
 import type { MemberStatus, TeamState, TeamTask } from './types.ts'
@@ -70,6 +70,16 @@ export interface TeamActivityMessage {
   readonly content: string
 }
 
+/** One live captain↔member message in the conversation card feed. */
+export interface TeamActivityChatMessage {
+  readonly id: string
+  readonly from: string
+  readonly to: string
+  readonly content: string
+  readonly ts: number
+  readonly taskId?: string
+}
+
 /** The full panel payload for one team. */
 export interface TeamActivitySnapshot {
   readonly workspace: string
@@ -84,6 +94,8 @@ export interface TeamActivitySnapshot {
   readonly tasks: readonly TeamActivityTask[]
   readonly messageCount: number
   readonly captainInbox: readonly TeamActivityMessage[]
+  /** Recent captain↔member messages, oldest first (newest last). */
+  readonly messages: readonly TeamActivityChatMessage[]
   /** Present when the snapshot could audit the workspace bytes. */
   readonly loopState?: string
   readonly deliverable?: boolean
@@ -182,6 +194,33 @@ export async function assembleTeamSnapshot(
     }
   })
   const captainInbox = await readUnreadMailbox(stateRoot, state.id, CAPTAIN_KEY)
+  // 主对话卡片要实时同步掌门与修士的往返消息：把双方邮箱合并成一条时间线
+  // （只保留未作废的最新一小段，避免每次轮询塞入整本历史）。
+  let messages: TeamActivityChatMessage[] = []
+  try {
+    const threads = await Promise.all([
+      readMailbox(stateRoot, state.id, CAPTAIN_KEY),
+      ...roster.map((member) => readMailbox(stateRoot, state.id, member.name)),
+    ])
+    const seen = new Set<string>()
+    const merged: TeamActivityChatMessage[] = []
+    for (const message of threads.flat()) {
+      if (message.discardedAt !== undefined || seen.has(message.id)) continue
+      seen.add(message.id)
+      merged.push({
+        id: message.id,
+        from: message.from,
+        to: message.to,
+        content: message.content,
+        ts: message.ts,
+        ...message.taskId === undefined ? {} : { taskId: message.taskId },
+      })
+    }
+    merged.sort((left, right) => left.ts - right.ts)
+    messages = merged.slice(-12)
+  } catch (error: unknown) {
+    ctx.logger.warn(`agent-teams: message log read failed for ${state.name}: ${String(error)}`)
+  }
   // The panel must reach the same delivery conclusion as the status tool, so
   // it reads the same current bytes instead of trusting task records alone.
   const audit = options.workspacePath === undefined ? undefined : auditTeamWorkspace(options.workspacePath, state)
@@ -232,6 +271,7 @@ export async function assembleTeamSnapshot(
       from: message.from,
       content: message.content,
     })),
+    messages,
   }
 }
 

@@ -55,6 +55,15 @@ export interface TeamActivityMessage {
     readonly from: string;
     readonly content: string;
 }
+/** One live captain↔member message in the conversation card feed. */
+export interface TeamActivityChatMessage {
+    readonly id: string;
+    readonly from: string;
+    readonly to: string;
+    readonly content: string;
+    readonly ts: number;
+    readonly taskId?: string;
+}
 /** The full panel payload for one team. */
 export interface TeamActivitySnapshot {
     readonly workspace: string;
@@ -69,6 +78,8 @@ export interface TeamActivitySnapshot {
     readonly tasks: readonly TeamActivityTask[];
     readonly messageCount: number;
     readonly captainInbox: readonly TeamActivityMessage[];
+    /** Recent captain↔member messages, oldest first (newest last). */
+    readonly messages: readonly TeamActivityChatMessage[];
     /** Present when the snapshot could audit the workspace bytes. */
     readonly loopState?: string;
     readonly deliverable?: boolean;

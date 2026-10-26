@@ -39,10 +39,14 @@ export interface ActivityTask {
     /** Durable last-write stamp; drives the finished-member ordering (issue #192). */
     readonly updatedAt?: number;
 }
-/** One captain-inbox preview row. */
+/** One captain-inbox preview row, also used for the live chat timeline. */
 export interface ActivityMessage {
+    readonly id?: string;
     readonly from: string;
+    readonly to?: string;
     readonly content: string;
+    readonly ts?: number;
+    readonly taskId?: string;
 }
 /** One team snapshot (mirrors the host TeamActivitySnapshot). */
 export interface ActivityTeam {
@@ -58,6 +62,8 @@ export interface ActivityTeam {
     readonly tasks: readonly ActivityTask[];
     readonly messageCount: number;
     readonly captainInbox: readonly ActivityMessage[];
+    /** Recent captain↔member messages, oldest first. */
+    readonly messages?: readonly ActivityMessage[];
 }
 /** A successfully-created conversation card that currently needs updates. */
 export interface ActivityMonitorTarget {

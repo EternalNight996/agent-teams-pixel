@@ -114,10 +114,12 @@ const PANEL_SIZES = {
 } as const
 
 export function SectHallOverlay({
-  team, t, sessionId, modelDirectories, openMember, sidebar, tabKind,
+  team, history = [], t, sessionId, modelDirectories, openMember, sidebar, tabKind,
 }: {
   /** 无队伍时缺省：浮层仍常驻，渲染一座只有掌门的空洞府。 */
   readonly team?: ActivityTeam
+  /** 本掌门会话下已归档的历史宗门（名册页展示）。 */
+  readonly history?: readonly ActivityTeam[]
   readonly t: AgentTeamsTranslate
   /** 当前会话；应用级浮层在个别宿主上可能拿不到，此时只能渲染空洞府。 */
   readonly sessionId?: SessionId
@@ -134,6 +136,7 @@ export function SectHallOverlay({
   // 开宗成功后等新队伍落地，再自动打开道统配置让掌门审核；审核完跳到宗门进度。
   const [pendingReview, setPendingReview] = useState(false)
   const [reviewing, setReviewing] = useState(false)
+  const [historyTeamId, setHistoryTeamId] = useState<string | undefined>()
   const [sheetAnchor, setSheetAnchor] = useState<{ left: number; top: number; width: number; maxHeight: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
   const [token, setToken] = useState<TokenPoint>(() => readTokenPoint())
@@ -432,6 +435,11 @@ export function SectHallOverlay({
         </button>
       </div>
     )
+    const selectedHistory = history.find(team => team.teamId === historyTeamId) ?? history[0]
+    const historyTasks = hall.tasks.filter(task => task.status === 'completed' || task.status === 'failed' || task.status === 'cancelled')
+    const taskStatusLabel = (status: string): string => status === 'completed'
+      ? t('task.status.completed')
+      : status === 'failed' ? t('task.status.failed') : t('task.status.cancelled')
     const title = sheet === 'settings' ? t('office.panelConfig')
       : sheet === 'start' ? t('quickstart.title')
         : sheet === 'inbox' ? t('workspace.inbox')
@@ -507,6 +515,60 @@ export function SectHallOverlay({
               : staged && sessionId !== undefined
                 ? <StagingPlanEditor team={hall} modelDirectory={modelDirectories.directoryFor(sessionId)} onContinuePlanning={() => { setSheet(undefined) }} onDiscarded={() => { setSheet(undefined) }} t={t} />
                 : <TeamConfigPanel team={hall} t={t} />
+          ) : sheet === 'teams' ? (
+            <div className={css.history}>
+              {history.length === 0 && historyTasks.length === 0 && (
+                <p className={css.settingsHint}>{t('office.historyEmpty')}</p>
+              )}
+              {history.length > 0 && (
+                <div className={css.historyBlock}>
+                  <span className={css.historyTitle}>{t('office.historyTeams')}</span>
+                  <div className={css.historyList}>
+                    {history.map(team => {
+                      const done = team.tasks.filter(task => task.status === 'completed').length
+                      return (
+                        <button
+                          key={team.teamId}
+                          type="button"
+                          className={css.historyItem}
+                          data-active={selectedHistory?.teamId === team.teamId || undefined}
+                          onClick={() => { setHistoryTeamId(team.teamId) }}
+                        >
+                          <span className={css.historyName}>{team.name}</span>
+                          <span className={css.historyMeta}>{done}/{team.tasks.length} · {t('team.stats.members', { count: team.members.length })}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {selectedHistory !== undefined && (
+                    <div className={css.historyDetail}>
+                      <TeamSection
+                        team={selectedHistory}
+                        t={t}
+                        historic
+                        workspace
+                        onNavigate={(_parent, child) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, child) }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+              {historyTasks.length > 0 && (
+                <div className={css.historyBlock}>
+                  <span className={css.historyTitle}>{t('office.taskHistory')}</span>
+                  <ul className={css.historyTasks}>
+                    {historyTasks.map(task => (
+                      <li key={task.id} className={css.historyTask}>
+                        <span className={css.historyTaskId}>{task.id}</span>
+                        <span className={css.historyTaskSubject} title={task.subject}>{task.subject}</span>
+                        <span className={css.historyTaskWho}>{task.assignee || '—'}</span>
+                        <span className={css.historyTaskState} data-state={task.state}>{taskStatusLabel(task.status)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           ) : (
             !hasTeam
               ? noTeamHint
