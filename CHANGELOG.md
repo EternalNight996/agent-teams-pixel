@@ -9,10 +9,10 @@
 - The 开宗 doorway transmission gained layered counter-rotating arcs, spiralling
   pixel motes, a soft membrane and a bright core, so it reads as a portal with
   depth instead of a flat spinner.
-- Hall popovers (面板配置 / 名册 / 道统 / 进度 / 收信) now share one fixed height
-  equal to the current hall panel, and their content is scaled up (zoom 1.18)
-  with a larger sheet title/close control, so the config UI is readable at a
-  glance. Resizing the hall panel resizes the open sheet with it.
+- Hall popovers (面板配置 / 名册 / 道统 / 进度 / 收信 / 开宗) now cap their height
+  at the current hall panel instead of forcing it: short content shrinks to fit,
+  tall content scrolls, so no sheet leaves an empty band at the bottom. Their
+  content is scaled up (zoom 1.18) with a larger sheet title/close control.
 - The 开宗 gate is back to the wooden 山门 silhouette; its doorway now carries a
   rotating transmission (two counter-rotating rune rings plus a pulsing centre).
 - The 山门洞府 is now the team tab itself: the wall's four facilities (藏经阁 /

@@ -376,8 +376,8 @@
   flex-direction: column;
   box-sizing: border-box;
   width: min(480px, calc(100vw - 32px));
-  /* 固定高度由内联样式给出（= 当前洞府高度），这里只兜住窗口上限。 */
-  max-height: calc(100vh - 32px);
+  /* 高度随内容收缩；上限 = 当前洞府高度（再由视口兜底）。 */
+  max-height: min(calc(100vh - 32px), var(--hall-sheet-max, calc(100vh - 32px)));
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 85%, transparent);
   border-radius: 12px;

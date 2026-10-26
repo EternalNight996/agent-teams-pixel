@@ -416,7 +416,13 @@ export function SectHallOverlay({
       <aside
         className={css.sheet}
         data-sheet={sheet}
-        style={{ left: sheetAnchor.left, bottom: sheetAnchor.bottom, width: sheetAnchor.width, height: size.h }}
+        style={{
+          left: sheetAnchor.left,
+          bottom: sheetAnchor.bottom,
+          width: sheetAnchor.width,
+          // 高度随内容收缩，最多到当前洞府高度（用 CSS 变量同时兜住视口上限）。
+          ['--hall-sheet-max' as string]: `${size.h}px`,
+        } as React.CSSProperties}
         role="dialog"
         aria-modal="false"
         aria-label={title}
