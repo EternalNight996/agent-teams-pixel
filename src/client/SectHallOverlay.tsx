@@ -1091,9 +1091,6 @@ export function SectHallOverlay({
                     <span aria-hidden>⛩</span>{t('quickstart.entry')}
                   </button>
                 )}
-                <button type="button" className={css.floorButton} data-control="hall-roster" data-active={sheet === 'teams' || undefined} onClick={() => { toggleSheet('teams') }}>
-                  <span aria-hidden>山</span>{t('office.roster')}
-                </button>
                 <button type="button" className={css.floorButton} data-control="hall-doctrine" data-active={sheet === 'config' || undefined} onClick={() => { toggleSheet('config') }}>
                   <span aria-hidden>经</span>{t('office.floorDoctrine')}
                 </button>
@@ -1102,6 +1099,9 @@ export function SectHallOverlay({
                 </button>
                 <button type="button" className={css.floorButton} data-control="hall-ranks" data-active={sheet === 'ranks' || undefined} onClick={() => { toggleSheet('ranks') }}>
                   <span aria-hidden>榜</span>{t('office.floorRanks')}
+                </button>
+                <button type="button" className={css.floorButton} data-control="hall-roster" data-active={sheet === 'teams' || undefined} onClick={() => { toggleSheet('teams') }}>
+                  <span aria-hidden>山</span>{t('office.roster')}
                 </button>
                 <button type="button" className={css.floorButton} data-control="hall-about" data-active={sheet === 'about' || undefined} onClick={() => { toggleSheet('about') }}>
                   <span aria-hidden>志</span>{t('office.floorAbout')}

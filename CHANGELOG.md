@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ### Changed
+- 名册 is now the central action: the wall gate sits on the 520px world's midpoint
+  (藏经阁/功德碑 left; 封神榜/天机阁/宗门志 right) and the bottom-bar 名册 is the
+  4th of seven buttons, following the "home action at the pointer/visual centre"
+  rule while keeping every other facility adjacent.
 - 天机阁 equipment changes are now visible in the hall: each artifact id has its
   own weapon silhouette and tier colour, mounts switch model families, and
   selecting any weapon/mount/skill makes the cultivator hop with a floating
