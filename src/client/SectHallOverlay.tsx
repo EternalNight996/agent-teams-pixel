@@ -16,7 +16,7 @@ import { TeamSection } from './ActivityPanel.tsx'
 import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
-import { hallSheetPlacement } from './hall-geometry.ts'
+import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
 import css from './SectHallOverlay.module.css'
 
 const COLLAPSED_KEY = 'agent-teams-pixel.hallCollapsed'
@@ -337,8 +337,8 @@ export function SectHallOverlay({
         return
       }
       const vw = window.innerWidth
-      const width = Math.min(size.w, Math.max(0, vw - 32))
-      const shift = Math.max(0, Math.min(width + 32, vw - 360))
+      // 让位宽度 = 洞府宽度的一半；窄窗口至少给对话留 360px。
+      const shift = hallYieldWidth(size.w, vw)
       root.setAttribute(HALL_OPEN_ATTRIBUTE, '')
       root.style.setProperty(HALL_SHIFT_PROPERTY, `${shift}px`)
     }

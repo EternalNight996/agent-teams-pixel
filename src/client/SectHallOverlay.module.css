@@ -31,6 +31,17 @@
   transition: padding-right 180ms ease;
 }
 
+/* 右侧栏也打开时，让位改到整个 frame 的最右边：侧栏整体左移，最右侧留出洞府的位置。 */
+:global(html[data-agent-teams-hall-open]:has([data-sidebar-right-open])) :global([data-phase='active']) {
+  padding-right: 0;
+}
+
+:global(html[data-agent-teams-hall-open]:has([data-sidebar-right-open])) :global(:has(> [data-shell-overlay])) {
+  box-sizing: border-box;
+  padding-right: var(--agent-teams-hall-shift);
+  transition: padding-right 180ms ease;
+}
+
 /* 收起：整座洞府缩成一枚可拖动的令牌，点一下展开。 */
 .token {
   position: fixed;

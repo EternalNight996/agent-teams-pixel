@@ -20,6 +20,12 @@ export function hallSheetWidth(viewportWidth: number): number {
   return Math.max(0, Math.min(HALL_SHEET_MAX_WIDTH, viewportWidth - HALL_WINDOW_INSET * 2))
 }
 
+/** 面板给对话让出的宽度：面板宽度的一半，且至少给对话留 360px。 */
+export function hallYieldWidth(panelWidth: number, viewportWidth: number): number {
+  const width = Math.min(panelWidth, Math.max(0, viewportWidth - HALL_WINDOW_INSET * 2))
+  return Math.max(0, Math.min(Math.round(width / 2), viewportWidth - 360))
+}
+
 /** 气泡的落点：左缘 + 宽度。右缘严格等于面板左缘 − 8px，除非被窗口夹取。 */
 export function hallSheetPlacement(panelLeft: number, viewportWidth: number): { left: number; width: number } {
   const width = hallSheetWidth(viewportWidth)

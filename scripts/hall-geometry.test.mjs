@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import {HALL_SHEET_GAP,hallSheetPlacement,hallSheetWidth} from '../lib/client/hall-geometry.js'
+import {HALL_SHEET_GAP,hallSheetPlacement,hallSheetWidth,hallYieldWidth} from '../lib/client/hall-geometry.js'
 
 test('sheet right edge stops 8px before the panel left edge', () => {
   const viewport = 1920
@@ -26,6 +26,19 @@ test('sheet is clamped inside the viewport instead of leaving the screen', () =>
   const farLeft = hallSheetPlacement(200, viewport)
   assert.equal(farLeft.left, 16)
   assert.ok(farLeft.left + farLeft.width <= viewport)
+})
+
+test('the hall yields half of its width to the conversation', () => {
+  assert.equal(hallYieldWidth(620, 1920), 310)
+  assert.equal(hallYieldWidth(1040, 1920), 520)
+  // a panel wider than the viewport is capped to viewport − 32 before halving
+  assert.equal(hallYieldWidth(2400, 1200), 584)
+})
+
+test('the yield always leaves 360px for the conversation', () => {
+  assert.equal(hallYieldWidth(620, 700), 310)
+  // half of the capped width (284) would exceed viewport − 360 (240)
+  assert.equal(hallYieldWidth(2400, 600), 240)
 })
 
 test('sheet shrinks with a viewport narrower than 512px', () => {
