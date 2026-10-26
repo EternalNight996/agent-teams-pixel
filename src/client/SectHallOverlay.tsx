@@ -850,9 +850,6 @@ export function SectHallOverlay({
                 <button type="button" className={css.floorButton} data-control="hall-progress" data-active={sheet === 'board' || undefined} onClick={() => { toggleSheet('board') }}>
                   <span aria-hidden>碑</span>{t('office.floorProgress')}
                 </button>
-                <button type="button" className={css.floorButton} data-control="hall-inbox" data-active={sheet === 'inbox' || undefined} onClick={() => { toggleSheet('inbox') }}>
-                  <span aria-hidden>信</span>{t('office.floorInbox')}
-                </button>
                 <button type="button" className={css.floorButton} data-control="hall-gear" data-active={sheet === 'character' || undefined} onClick={openGear}>
                   <span aria-hidden>阁</span>{t('office.floorGear')}
                 </button>

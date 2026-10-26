@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Changed
+- 传音阁 is removed from the wall menu and the bottom bar (four facilities now:
+  藏经阁 / 山门 / 功德碑 / 天机阁). Captain↔member messages still appear live in the
+  conversation team card.
 - XP is shown as integers only (no decimal tail), and idle cultivation now settles
   once every 10 seconds (+1 XP) instead of ticking continuously; each settlement
   pops the green +1 above the open character. Offline idle is capped at 1 hour.

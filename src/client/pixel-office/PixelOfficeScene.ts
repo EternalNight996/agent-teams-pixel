@@ -856,7 +856,6 @@ export function createPixelScene(
     paintGate(FACILITIES.teams, model?.teamName ?? '', hoverAction === 'teams', active === 'teams', time)
     paintStele(FACILITIES.board, wall, hoverAction === 'board', active === 'board')
     paintGear(FACILITIES.gear, hoverAction === 'gear', active === 'gear')
-    paintPost(FACILITIES.inbox, facilityIndex.get('inbox')?.badge ?? 0, hoverAction === 'inbox', active === 'inbox')
     // 标签后画，压在墙裙上
     for (const action of FACILITY_ORDER) {
       const facility = facilityIndex.get(action)
