@@ -8,18 +8,20 @@
  */
 import { useSyncExternalStore } from 'react'
 import type { ActivityTeam } from './activity-monitor.ts'
-import { CAPTAIN_TASK_XP, IDLE_XP_PER_MINUTE, TASK_XP, captainKey, memberKey } from './cultivation.ts'
+import { CAPTAIN_TASK_XP, IDLE_XP_PER_10S, TASK_XP, captainKey, memberKey } from './cultivation.ts'
 
 interface CultivationState {
   xp: Record<string, number>
   seen: Record<string, number>
+  /** 每个角色上一次挂机结算的时间戳（每 10 秒结算 1 点）。 */
+  idleAt: Record<string, number>
   tick: number
 }
 
 const STORAGE_KEY = 'agent-teams-pixel.cultivation.v1'
 
 function emptyState(): CultivationState {
-  return { xp: {}, seen: {}, tick: Date.now() }
+  return { xp: {}, seen: {}, idleAt: {}, tick: Date.now() }
 }
 
 function load(): CultivationState {
@@ -32,6 +34,7 @@ function load(): CultivationState {
     return {
       xp: typeof parsed.xp === 'object' && parsed.xp !== null ? parsed.xp : {},
       seen: typeof parsed.seen === 'object' && parsed.seen !== null ? parsed.seen : {},
+      idleAt: typeof parsed.idleAt === 'object' && parsed.idleAt !== null ? parsed.idleAt : {},
       tick: typeof parsed.tick === 'number' ? parsed.tick : Date.now(),
     }
   } catch {
@@ -74,12 +77,13 @@ export function cultivationVersion(): number {
 
 /** 全局修为查询；组件通过 useCultivationVersion 订阅后调用。 */
 export function xpOf(key: string): number {
-  return state.xp[key] ?? 0
+  // 修为只显示整数，避免挂机出现小数点。
+  return Math.round(state.xp[key] ?? 0)
 }
 
 /** 直接设置某个角色修为（调试/提级用）；会立即持久化并通知界面。 */
 export function setCultivationXp(key: string, xp: number): void {
-  state.xp[key] = Math.max(0, xp)
+  state.xp[key] = Math.max(0, Math.round(xp))
   persist()
   notify()
 }
@@ -137,8 +141,15 @@ export function ingestCultivation(teams: readonly ActivityTeam[], currentSession
       const member = team.members.find(item => item.id === currentSessionId)
       const key = isCaptain ? captainKey(team.name) : member === undefined ? undefined : memberKey(member.name)
       if (key !== undefined) {
-        const elapsedMinutes = Math.min(2, Math.max(0, (now - state.tick) / 60_000))
-        if (elapsedMinutes > 0) changed = addXp(key, elapsedMinutes * IDLE_XP_PER_MINUTE) || changed
+        // 每满 10 秒结算 1 点挂机修为；离开很久回来最多补 1 小时。
+        const last = state.idleAt[key] ?? now
+        const intervals = Math.min(360, Math.floor((now - last) / 10_000))
+        if (intervals > 0) {
+          changed = addXp(key, intervals * IDLE_XP_PER_10S) || changed
+          state.idleAt[key] = last + intervals * 10_000
+        } else if (state.idleAt[key] === undefined) {
+          state.idleAt[key] = now
+        }
       }
     }
   }

@@ -36,8 +36,8 @@ export interface Cultivation {
 export declare function cultivationFromXp(xp: number): Cultivation;
 /** 当前等级下已解锁的全部装备/技能（用于物品栏与 tooltip）。 */
 export declare function unlockedItems(level: number): readonly CultivationItem[];
-/** 挂机修为：每分钟只涨一点点，主要靠任务。 */
-export declare const IDLE_XP_PER_MINUTE = 0.25;
+/** 挂机修为：每 10 秒结算 1 点，主要靠任务。 */
+export declare const IDLE_XP_PER_10S = 1;
 /** 完成一个任务获得的修为。 */
 export declare const TASK_XP = 60;
 /** 掌门因宗门任务完成获得的带队修为。 */

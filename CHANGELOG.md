@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Changed
+- XP is shown as integers only (no decimal tail), and idle cultivation now settles
+  once every 10 seconds (+1 XP) instead of ticking continuously; each settlement
+  pops the green +1 above the open character. Offline idle is capped at 1 hour.
 - 名册的历史宗门列表 now includes a green 当前 entry for the live sect (selectable,
   marked 当前); historical runs remain selectable for their historic roster, while
   the live detail stays in 宗门进度 to avoid duplicating it again.

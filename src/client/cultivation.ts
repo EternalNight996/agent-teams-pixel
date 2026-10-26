@@ -151,8 +151,8 @@ export function unlockedItems(level: number): readonly CultivationItem[] {
   return CULTIVATION_ITEMS.filter(item => level >= item.level)
 }
 
-/** 挂机修为：每分钟只涨一点点，主要靠任务。 */
-export const IDLE_XP_PER_MINUTE = 0.25
+/** 挂机修为：每 10 秒结算 1 点，主要靠任务。 */
+export const IDLE_XP_PER_10S = 1
 /** 完成一个任务获得的修为。 */
 export const TASK_XP = 60
 /** 掌门因宗门任务完成获得的带队修为。 */
