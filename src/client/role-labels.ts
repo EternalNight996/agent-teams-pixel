@@ -20,6 +20,9 @@ export interface RoleLabelMeta {
 export const ROLE_META: readonly RoleLabelMeta[] = [
   { id: 'planner', nameKey: 'role.planner.name', abilityKey: 'role.planner.ability' },
   { id: 'implementer', nameKey: 'role.implementer.name', abilityKey: 'role.implementer.ability' },
+  { id: 'frontend', nameKey: 'role.frontend.name', abilityKey: 'role.frontend.ability' },
+  { id: 'backend', nameKey: 'role.backend.name', abilityKey: 'role.backend.ability' },
+  { id: 'integrator', nameKey: 'role.integrator.name', abilityKey: 'role.integrator.ability' },
   { id: 'verifier', nameKey: 'role.verifier.name', abilityKey: 'role.verifier.ability' },
   { id: 'reviewer', nameKey: 'role.reviewer.name', abilityKey: 'role.reviewer.ability' },
   { id: 'researcher', nameKey: 'role.researcher.name', abilityKey: 'role.researcher.ability' },

@@ -23,6 +23,7 @@ import { agentTeamsSource, observedSessionFormatVersion, type SessionFormatBeare
 import { markMailboxDelivered, appendMailbox, CAPTAIN_KEY, createMessage, readRetiredMemberIds, readTeamSync, readTeam, releaseMailboxDelivery, withTeamLock, writeTeam } from './state.ts'
 import { mailboxPrompt } from './mailbox.ts'
 import { nearestLiveLead } from './lineage.ts'
+import { roleGuidance } from './role-guidance.ts'
 import { appendTeamEvent, captainSessionOf } from './events.ts'
 import type { MemberToolFilter } from './tool-policies.ts'
 import { TERMINAL_TASK_STATUSES, type TeamMember, type TeamState, type TeamTask } from './types.ts'
@@ -830,6 +831,7 @@ function assignedNonTerminalCount(team: TeamState, memberName: string): number {
 export function memberPersona(team: TeamState, member: TeamMember, stateDir: string, executionPrompt?: string): string {
   const goal = team.description?.trim() || '(not provided)'
   const injectedPrompt = member.executionPrompt?.trim() || executionPrompt?.trim()
+  const guidance = roleGuidance(member.role)
   const protocol = truncatedPersonaProtocol(team.profile?.protocol)
   return `You are ${member.name}, a member of the multi-agent team "${team.name}" running inside DeepSeek Harness AgentTeams. The captain leads the team; you are a worker member${member.role ? ` with the role: ${member.role}` : ''}.
 
@@ -840,6 +842,8 @@ Team context:
 - Profile protocol: ${protocol}
 ${injectedPrompt === undefined || injectedPrompt === '' ? '' : `- Execution guidance:
 ${injectedPrompt}
+`}${guidance === undefined ? '' : `- Role contract:
+${guidance}
 `}- The team state lives under ${stateDir}/${team.id}/ (team.json and inbox/*.jsonl). You may inspect these files read-only for diagnostics, but never edit them directly; use the agent_teams_* tools so JSON escaping and concurrent updates stay safe.
 - The captain and your teammates reach you through messages. Coordination arrives at your nearest model step. Apply it to your current attempt; a task assignment starts a separate turn.
 When you receive a task, treat the assignment prompt's dependency results as source material. Do not ignore them.

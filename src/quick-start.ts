@@ -10,12 +10,14 @@
 export const SECT_NAMES: Record<string, string> = {
   fix: '斗法宗', feat: '开山宗', research: '寻仙宗', audit: '巡查宗',
   build: '炼器宗', array: '布阵宗', docs: '传道宗', debate: '论道宗',
+  fullstack: '合道宗',
 }
 
 export const ROLE_NAMES: Record<string, string> = {
   planner: '军师', implementer: '剑修', verifier: '丹修', reviewer: '执法长老',
   researcher: '散修', analyst: '推演师', writer: '书记', auditor: '巡查使',
   architect: '阵修', tester: '体修', documenter: '传道长老', operator: '炼器师',
+  frontend: '灵绘师', backend: '地脉师', integrator: '合契师',
   // 门派预设新增的 8 个道途：缺了它们，成员名会退化成裸角色 id（demon/poisoner）。
   talisman: '符修', healer: '医修', beastmaster: '驭兽师', puppeteer: '傀儡师',
   musician: '音修', poisoner: '毒修', monk: '佛修', demon: '魔修',
@@ -97,6 +99,19 @@ export const QUICK_START_TEMPLATES: readonly QuickStartTemplate[] = [
       { id: 'outline', subject: '列纲', role: 'writer', description: '确定读者、目标与章节结构。' },
       { id: 'draft', subject: '成文', role: 'documenter', description: '按纲撰写，附示例与可运行命令。', dependencies: ['outline'] },
       { id: 'review', subject: '审阅', role: 'reviewer', description: '核对事实、命令可跑与表述一致。', dependencies: ['draft'] },
+    ],
+  },
+  {
+    id: 'fullstack',
+    label: '全栈开发',
+    roles: ['architect', 'frontend', 'backend', 'integrator', 'verifier', 'reviewer'],
+    tasks: [
+      { id: 'contract', subject: '定契约与边界', role: 'architect', description: '先定 API/数据结构/UI 契约与非目标，明确前后端各自可写范围。产出契约文档或类型定义。' },
+      { id: 'frontend', subject: '实现前端', role: 'frontend', description: '按契约实现界面：loading/empty/error、键盘/可访问性、320/768/1280 响应式；附浏览器证据。', dependencies: ['contract'] },
+      { id: 'backend', subject: '实现后端', role: 'backend', description: '按契约实现 API/数据：迁移+回滚、校验、鉴权、幂等、结构化错误与集成测试；发布契约变更。', dependencies: ['contract'] },
+      { id: 'integrate', subject: '联调与契约对齐', role: 'integrator', description: '对齐前后端字段/类型/错误码，跑端到端 smoke，记录契约差异与残余风险。', dependencies: ['frontend', 'backend'] },
+      { id: 'verify', subject: '验证全链路', role: 'verifier', description: '跑测试与浏览器 smoke，按风险矩阵覆盖正常/边界/错误/鉴权/回归，记录命令与证据。', dependencies: ['integrate'] },
+      { id: 'review', subject: '审查交付', role: 'reviewer', description: '对照验收与契约审查正确性、范围、安全、性能与可访问性；证据不足则失败。', dependencies: ['verify'] },
     ],
   },
   {

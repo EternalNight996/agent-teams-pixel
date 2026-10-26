@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 ### Changed
+- Software-delivery roles now carry concise contracts appended to the member
+  persona: frontend (UI states/a11y/browser evidence, no server edits), backend
+  (contract/migration/authz/tests, no UI edits), integrator (contract drift/E2E),
+  plus bounded verifier/reviewer rules. A new full-stack quick-start template
+  runs contract → parallel frontend/backend → integrate → verify → review.
+- Added docs/role-prompt-research.md comparing MetaGPT, ChatDev, LangGPT, CrewAI,
+  Claude-subagent collections and cursor-rule collections, and what was adapted.
 - 名册 is now the central action: the wall gate sits on the 520px world's midpoint
   (藏经阁/功德碑 left; 封神榜/天机阁/宗门志 right) and the bottom-bar 名册 is the
   4th of seven buttons, following the "home action at the pointer/visual centre"
