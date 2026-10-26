@@ -1,6 +1,7 @@
 /** Pixel-office view of one AgentTeams snapshot, driven by the shared activity model. */
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { ActivityTeam } from '../activity-monitor.ts'
+import { cultivationOf } from '../cultivation.ts'
 import type { AgentTeamsLocaleKey, AgentTeamsTranslate } from '../locales.ts'
 import { realmKey } from '../realm.ts'
 import { roleLabel } from '../role-labels.ts'
@@ -96,6 +97,7 @@ export function PixelOffice({
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const hostRef = useRef<HTMLDivElement | null>(null)
   const sceneRef = useRef<ReturnType<typeof createPixelScene> | null>(null)
+  const clickTimer = useRef<number | undefined>(undefined)
   const [hover, setHover] = useState<Hover | undefined>()
   const actions = enabledActions ?? ALL_ACTIONS
   // 没有队伍时，山门就是开宗入口：墙上的标签/提示与底部「开宗」保持一致。
@@ -125,6 +127,7 @@ export function PixelOffice({
       unread: team.captainInbox.length,
       isLeader: true,
       viewing: viewingSessionId !== undefined && viewingSessionId === team.captainSessionId,
+      level: cultivationOf(team.tasks.filter(task => task.status === 'completed').length, team.tasks.length, team.createdAt).level,
     }
     const members: SceneMember[] = [captain, ...live.map((member): SceneMember => ({
       id: member.id,
@@ -138,6 +141,7 @@ export function PixelOffice({
       model: member.model,
       unread: member.unread,
       viewing: viewingSessionId !== undefined && viewingSessionId === member.id,
+      level: cultivationOf(member.done, member.total, team.createdAt).level,
     }))]
     const facilities: SceneFacility[] = onAction === undefined
       ? []
@@ -206,6 +210,7 @@ export function PixelOffice({
       window.removeEventListener('resize', measure)
       scene.dispose()
       sceneRef.current = null
+      if (clickTimer.current !== undefined) window.clearTimeout(clickTimer.current)
     }
   }, [])
 
@@ -281,11 +286,21 @@ export function PixelOffice({
     }
     const member = sceneMembers.get(hit.id)
     if (member === undefined) return
-    // 掌门没有成员子会话：点他回到主对话。
-    if (member.isLeader) { onOpenCaptain?.(); return }
-    // 还没有对话（未创建会话的修士）不跳转，只提示。
-    if (member.id === '') { onUnavailable?.(member.name); return }
-    onOpenMember?.(member.id)
+    // 双击：原地跳一下，不切换对话。
+    if (event.detail >= 2) {
+      if (clickTimer.current !== undefined) { window.clearTimeout(clickTimer.current); clickTimer.current = undefined }
+      sceneRef.current?.jump(member.id || member.name)
+      return
+    }
+    if (clickTimer.current !== undefined) window.clearTimeout(clickTimer.current)
+    clickTimer.current = window.setTimeout(() => {
+      clickTimer.current = undefined
+      // 掌门没有成员子会话：点他回到主对话。
+      if (member.isLeader) { onOpenCaptain?.(); return }
+      // 还没有对话（未创建会话的修士）不跳转，只提示。
+      if (member.id === '') { onUnavailable?.(member.name); return }
+      onOpenMember?.(member.id)
+    }, 240)
   }
   const statusLine = team.halted === true
     ? t('office.stalled')

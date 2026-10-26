@@ -25,6 +25,8 @@ export interface SceneMember {
     readonly isLeader?: boolean;
     /** The conversation currently open in the host (painted as active). */
     readonly viewing?: boolean;
+    /** Cultivation level; higher levels ride a flying sword or a divine beast. */
+    readonly level?: number;
 }
 /** Copy the scene needs but must not translate itself. */
 export interface SceneLabels {
@@ -91,6 +93,8 @@ export interface SceneHandle {
     hitTest(x: number, y: number): SceneHit | undefined;
     /** Mark the element under the pointer so the scene can highlight it. */
     setHover(hit: SceneHit | undefined): void;
+    /** Make one member hop (double-click feedback). */
+    jump(id: string): void;
     /** Cancel the loop and release the context. */
     dispose(): void;
 }

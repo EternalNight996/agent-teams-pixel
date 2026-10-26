@@ -26,6 +26,8 @@ export interface SceneMember {
   readonly isLeader?: boolean
   /** The conversation currently open in the host (painted as active). */
   readonly viewing?: boolean
+  /** Cultivation level; higher levels ride a flying sword or a divine beast. */
+  readonly level?: number
 }
 
 /** Copy the scene needs but must not translate itself. */
@@ -98,6 +100,8 @@ export interface SceneHandle {
   hitTest(x: number, y: number): SceneHit | undefined
   /** Mark the element under the pointer so the scene can highlight it. */
   setHover(hit: SceneHit | undefined): void
+  /** Make one member hop (double-click feedback). */
+  jump(id: string): void
   /** Cancel the loop and release the context. */
   dispose(): void
 }
@@ -184,7 +188,7 @@ export function createPixelScene(
 ): SceneHandle {
   const context = canvas.getContext('2d')
   if (context === null) {
-    return { render() {}, resize() {}, dispose() {}, setHover() {}, hitTest() { return undefined } }
+    return { render() {}, resize() {}, dispose() {}, setHover() {}, jump() {}, hitTest() { return undefined } }
   }
   const g = context
   let model: SceneModel | undefined
@@ -201,6 +205,8 @@ export function createPixelScene(
   let hitAreas: HitArea[] = []
   let hovered: SceneHit | undefined
   const zoom = options.zoom ?? 1
+  // 双击弹跳：按成员 id 记录起跳帧时间（-1 表示刚请求）。
+  const jumps = new Map<string, number>()
 
   function fit(): void {
     const ratio = Math.min(width / WORLD_W, height / worldH)
@@ -1315,14 +1321,98 @@ export function createPixelScene(
     const pulse = 0.5 + 0.5 * Math.sin(time / 900)
     g.save()
     const glow = g.createRadialGradient(cx, baseY - 46, 2, cx, baseY - 46, 52)
-    glow.addColorStop(0, `rgba(${rgb}, ${(0.16 + pulse * 0.06).toFixed(3)})`)
-    glow.addColorStop(0.55, `rgba(${rgb}, ${(0.06 + pulse * 0.03).toFixed(3)})`)
+    glow.addColorStop(0, `rgba(${rgb}, ${(0.26 + pulse * 0.08).toFixed(3)})`)
+    glow.addColorStop(0.55, `rgba(${rgb}, ${(0.10 + pulse * 0.05).toFixed(3)})`)
     glow.addColorStop(1, 'rgba(0, 0, 0, 0)')
     g.fillStyle = glow
     g.beginPath(); g.ellipse(cx, baseY - 46, 44, 58, 0, 0, Math.PI * 2); g.fill()
     g.strokeStyle = `rgba(${rgb}, ${(0.18 + pulse * 0.1).toFixed(3)})`
     g.lineWidth = 1.2
     g.beginPath(); g.ellipse(cx, baseY - 2, 30, 9, 0, 0, Math.PI * 2); g.stroke()
+    g.restore()
+  }
+
+  /** 双击弹跳高度（抛物线，520ms）。 */
+  function jumpHeight(id: string, time: number): number {
+    const start = jumps.get(id)
+    if (start === undefined) return 0
+    if (start < 0) { jumps.set(id, time); return 0 }
+    const progress = (time - start) / 520
+    if (progress >= 1) { jumps.delete(id); return 0 }
+    return Math.sin(progress * Math.PI) * 20
+  }
+
+  /** 高境界的修士闲逛时御剑或乘神兽。 */
+  function mountKindOf(member: SceneMember): 'sword' | 'beast' | undefined {
+    if (member.activity === 'working') return undefined
+    const level = member.level ?? 0
+    if (level >= 8) return 'beast'
+    if (level >= 5) return 'sword'
+    return undefined
+  }
+
+  function mountLift(member: SceneMember): number {
+    const kind = mountKindOf(member)
+    return kind === 'sword' ? 14 : kind === 'beast' ? 9 : 0
+  }
+
+  function paintMount(cx: number, y: number, kind: 'sword' | 'beast', time: number): void {
+    const bob = Math.sin(time / 380) * 1.2
+    g.save()
+    g.translate(cx, y + bob)
+    if (kind === 'sword') {
+      const glow = g.createRadialGradient(0, -4, 2, 0, -4, 40)
+      glow.addColorStop(0, 'rgba(120, 220, 255, 0.34)')
+      glow.addColorStop(1, 'rgba(120, 220, 255, 0)')
+      g.fillStyle = glow
+      g.beginPath(); g.ellipse(0, -4, 38, 14, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#e8fbff'
+      g.fillRect(-24, -6, 46, 3)
+      g.fillStyle = '#8fe3ff'
+      g.fillRect(14, -7, 12, 5)
+      g.fillStyle = '#f2c14e'
+      g.fillRect(-10, -8, 6, 2)
+      g.fillStyle = 'rgba(180, 240, 255, 0.75)'
+      g.fillRect(-28, -5, 3, 1)
+      g.fillRect(-34, -4, 3, 1)
+    } else {
+      g.fillStyle = 'rgba(120, 220, 200, 0.16)'
+      g.beginPath(); g.ellipse(0, 0, 26, 9, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#3d5c52'
+      g.beginPath(); g.ellipse(0, -8, 18, 7, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#4d7266'
+      g.beginPath(); g.ellipse(14, -13, 7, 6, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#f2c14e'
+      g.fillRect(11, -20, 2, 5)
+      g.fillRect(17, -20, 2, 5)
+      g.fillStyle = '#2e4740'
+      g.fillRect(-13, -4, 3, 6)
+      g.fillRect(7, -4, 3, 6)
+      g.fillRect(-22, -11, 8, 3)
+      g.fillStyle = '#ffe9a8'
+      g.fillRect(16, -14, 2, 2)
+    }
+    g.restore()
+  }
+
+  /** 当前对话者头顶的悬浮标签，比只有光圈更容易一眼看到。 */
+  function paintViewingBadge(cx: number, baseY: number, member: SceneMember, time: number): void {
+    const text = model?.labels?.viewing ?? '对话中'
+    const color = member.isLeader === true ? '#f2c14e' : '#6fd6c8'
+    const bob = Math.sin(time / 520) * 2
+    g.save()
+    g.font = 'bold 8px "Segoe UI", sans-serif'
+    const w = g.measureText(text).width + 12
+    const x = cx + 22
+    const y = baseY - 104 + bob
+    g.fillStyle = 'rgba(12, 18, 22, 0.88)'
+    roundRect(g, x, y, w, 15, 4); g.fill()
+    g.strokeStyle = color
+    g.lineWidth = 1
+    roundRect(g, x, y, w, 15, 4); g.stroke()
+    g.fillStyle = color
+    g.fillText(text, x + 6, y + 10.5)
+    g.beginPath(); g.moveTo(x + 1, y + 6); g.lineTo(x - 5, y + 10); g.lineTo(x + 1, y + 12); g.closePath(); g.fill()
     g.restore()
   }
 
@@ -1599,8 +1689,23 @@ export function createPixelScene(
     } else {
       for (const spot of spots) paintFurniture(spot.deskCx, spot.deskY, spot.member, time)
       for (const spot of spots) if (spot.member.viewing === true) paintViewingAura(spot.cx, spot.baseY, spot.member, time)
-      for (const spot of spots) paintCharacter(spot.cx, spot.baseY, spot.member, time, spot.walking)
-      for (const spot of spots) paintOverlay(spot.cx, spot.baseY, spot.member, time)
+      for (const spot of spots) {
+        const wandering = spot.baseY !== spot.deskY
+        const mount = wandering ? mountKindOf(spot.member) : undefined
+        if (mount !== undefined) paintMount(spot.cx, spot.baseY, mount, time)
+      }
+      for (const spot of spots) {
+        const wandering = spot.baseY !== spot.deskY
+        const lift = wandering ? mountLift(spot.member) : 0
+        const hop = jumpHeight(spot.member.id || spot.member.name, time)
+        paintCharacter(spot.cx, spot.baseY - lift - hop, spot.member, time, spot.walking)
+      }
+      for (const spot of spots) {
+        const wandering = spot.baseY !== spot.deskY
+        const lift = wandering ? mountLift(spot.member) : 0
+        paintOverlay(spot.cx, spot.baseY - lift, spot.member, time)
+      }
+      for (const spot of spots) if (spot.member.viewing === true) paintViewingBadge(spot.cx, spot.baseY, spot.member, time)
       // 鼠标停在修士上：四角描金，明确这是可点的会话入口。
       const hoveredMemberId = hovered?.kind === 'member' ? hovered.id : undefined
       if (hoveredMemberId !== undefined) {
@@ -1689,6 +1794,9 @@ export function createPixelScene(
     },
     setHover(hit) {
       hovered = hit
+    },
+    jump(id) {
+      jumps.set(id, -1)
     },
     dispose() {
       disposed = true

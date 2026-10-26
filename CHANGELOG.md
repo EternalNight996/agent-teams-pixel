@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 ### Changed
+- The active-conversation marker is now much louder: a floating 对话中 tag beside
+  the character, a stronger teal/gold aura and a glowing name plate.
+- Double-clicking a pixel person makes them hop in place (single-click still
+  opens their conversation).
+- Idle cultivators wander the courtyard; from Lv.5 they ride a flying sword and
+  from Lv.8 a divine beast, driven by the same cultivation levels.
 - Removed the redundant 查看宗门 entries (header button and conversation-card
   button); 开宗立派 stays as the only header action.
 - The active cultivator is now marked with a soft teal (member) / gold (captain)
