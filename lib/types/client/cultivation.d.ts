@@ -3,9 +3,9 @@
  *
  * 这里负责“修为 -> 等级/境界/装备/技能解锁”，修为累积由 cultivation-store 负责。
  */
-export declare const CULTIVATION_REALMS: readonly ["realm.qi", "realm.foundation", "realm.golden", "realm.nascent", "realm.spirit", "realm.void", "realm.mahayana"];
+export declare const CULTIVATION_REALMS: readonly ["realm.mortal", "realm.qi", "realm.foundation", "realm.golden", "realm.nascent", "realm.spirit", "realm.void", "realm.integration", "realm.mahayana", "realm.tribulation", "realm.trueImmortal", "realm.goldenImmortal", "realm.taiyi", "realm.daluo", "realm.dao"];
 export type CultivationRealmKey = (typeof CULTIVATION_REALMS)[number];
-export type CultivationSkillKey = 'skill.aura' | 'skill.shield' | 'skill.swordArray' | 'skill.gale' | 'skill.law';
+export type CultivationSkillKey = 'skill.aura' | 'skill.shield' | 'skill.swordArray' | 'skill.gale' | 'skill.law' | 'skill.swordQi' | 'skill.pillFire' | 'skill.infantFire' | 'skill.divinePower' | 'skill.domain' | 'skill.dharma' | 'skill.immortalArt' | 'skill.daoArt';
 export type CultivationItemKind = 'weapon' | 'mount' | 'skill';
 export interface CultivationItem {
     readonly id: string;

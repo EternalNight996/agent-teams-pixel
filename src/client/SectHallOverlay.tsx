@@ -550,7 +550,7 @@ export function SectHallOverlay({
                 <p className={css.settingsMeta}>{characterCultivation.xp} / {characterCultivation.next} XP</p>
                 <span className={css.historyTitle}>{t('office.levelTest')}</span>
                 <div className={css.sizeRow}>
-                  {[1, 3, 5, 8, 10, 15, 20, 50, 100, 500, 9999].map(level => (
+                  {[1, 5, 20, 50, 150, 350, 700, 1200, 2800, 5200, 9000, 9800, 9999].map(level => (
                     <button
                       key={level}
                       type="button"

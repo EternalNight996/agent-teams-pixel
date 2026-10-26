@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 ### Changed
+- The cultivation ladder now follows the full 凡人流 hierarchy across the 9999
+  level cap: 凡人 → 炼气 → 筑基 → 结丹 → 元婴 → 化神 → 炼虚 → 合体 → 大乘 → 渡劫
+  → 真仙 → 金仙 → 太乙 → 大罗 → 道祖.
+- Inventory unlocks extend through every realm: 法宝/灵宝/仙器/真仙器/道器,
+  蛟龙/仙鹤/麒麟/真龙/凤凰/道兽, and skills 剑气/丹火/婴火/神通/领域/法相/仙术/
+  道法. Level-test presets now jump to the realm boundaries.
 - Clicking a cultivator's overhead level badge (or the hall's identity chip) opens
   an equipment sheet with a game-style inventory grid: 法器 / 坐骑 / 技能 slots
   show their unlock level, a 🔒 when locked and a golden ✓ when equipped.
