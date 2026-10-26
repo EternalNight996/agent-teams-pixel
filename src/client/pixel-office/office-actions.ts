@@ -38,7 +38,6 @@ export const FACILITY_ORDER: readonly SceneAction[] = ['config', 'teams', 'board
 export type SceneHit =
   | { readonly kind: 'member'; readonly id: string }
   | { readonly kind: 'action'; readonly action: SceneAction }
-  | { readonly kind: 'dock' }
   | { readonly kind: 'settings' }
   /** Clicking a cultivator's overhead level badge opens their equipment sheet. */
   | { readonly kind: 'level'; readonly id: string }

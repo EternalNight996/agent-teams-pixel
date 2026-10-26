@@ -79,15 +79,13 @@ export interface SceneModel {
     readonly activeAction?: SceneAction;
     /** 闲置修士随机说的一句话（由调用方本地化），空数组则不显示闲聊。 */
     readonly chatter?: readonly string[];
-    /** 中庭可点物件：归栏传送阵 / 面板配置阵盘。 */
+    /** 中庭可点物件：面板配置阵盘。 */
     readonly sceneObjects?: {
-        readonly dock?: boolean;
         readonly settings?: boolean;
         readonly settingsActive?: boolean;
     };
-    /** 两个物件的标签（调用方本地化）。 */
+    /** 物件的标签（调用方本地化）。 */
     readonly sceneLabels?: {
-        readonly dock?: string;
         readonly settings?: string;
     };
 }

@@ -22,8 +22,6 @@ export interface PixelOfficeProps {
     readonly activeAction?: SceneAction | null;
     /** Facilities this surface can actually open (the floater only has the board). */
     readonly enabledActions?: readonly SceneAction[];
-    /** 场景里的传送阵：收起面板并归栏到右侧栏。 */
-    readonly onDock?: () => void;
     /** 场景里的阵盘：打开面板配置。 */
     readonly onSettings?: () => void;
     /** 面板配置是否打开（阵盘高亮，和底部按钮双向联动）。 */
@@ -31,4 +29,4 @@ export interface PixelOfficeProps {
     /** 还没有队伍：山门在场景里改作「开宗」入口，与底部按钮一致。 */
     readonly teamless?: boolean;
 }
-export declare function PixelOffice({ team, t, onOpenMember, onOpenCaptain, onOpenCharacter, viewingSessionId, onUnavailable, onAction, activeAction, enabledActions, onDock, onSettings, settingsOpen, teamless, }: PixelOfficeProps): import("react").JSX.Element;
+export declare function PixelOffice({ team, t, onOpenMember, onOpenCaptain, onOpenCharacter, viewingSessionId, onUnavailable, onAction, activeAction, enabledActions, onSettings, settingsOpen, teamless, }: PixelOfficeProps): import("react").JSX.Element;

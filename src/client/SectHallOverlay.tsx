@@ -1,14 +1,12 @@
 /**
- * 宗门洞府浮层：整块洞府场景浮在 DSH 窗口上，可拖动、可收起、可传送回右侧栏。
+ * 宗门洞府浮层：整块洞府场景浮在 DSH 窗口上，可拖动、可收起。
  *
  * 由 shell.overlay 的常驻监视器渲染；墙面设施、剑盒、名册等在浮层内部展开
- * （内容气泡贴在面板左侧）。展开时像右侧栏一样给对话让位；收起成一枚可拖动的
- * 令牌；「归栏」收起浮层并在右侧栏打开洞府页面。
+ * （内容气泡贴在面板左侧）。展开时给对话让位，收起成一枚可拖动的令牌。
  */
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { ModelDirectoryResolver } from '@deepseek-ai/dsh-client-ui-model-selection/client'
-import type { ISidebarRight, TabId } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { ActivityTeam } from './activity-monitor.ts'
 import type { AgentTeamsTranslate } from './locales.ts'
@@ -24,7 +22,6 @@ import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
 import css from './SectHallOverlay.module.css'
 
 const COLLAPSED_KEY = 'agent-teams-pixel.hallCollapsed'
-const DOCKED_KEY = 'agent-teams-pixel.hallDocked'
 const PANEL_RECT_KEY = 'agent-teams-pixel.hallRect'
 const TOKEN_KEY = 'agent-teams-pixel.hallToken'
 /** 名册历史列表里的“当前宗门”哨兵。 */
@@ -126,7 +123,7 @@ const PANEL_SIZES = {
 } as const
 
 export function SectHallOverlay({
-  team, history = [], t, sessionId, modelDirectories, openMember, openCaptain, sidebar, tabKind,
+  team, history = [], t, sessionId, modelDirectories, openMember, openCaptain,
 }: {
   /** 无队伍时缺省：浮层仍常驻，渲染一座只有掌门的空洞府。 */
   readonly team?: ActivityTeam
@@ -139,19 +136,15 @@ export function SectHallOverlay({
   readonly openMember: (parentId: SessionId, childId: SessionId) => void
   /** 回到掌门所在的主对话（点击场景里的掌门）。 */
   readonly openCaptain?: (captainSessionId: SessionId) => void
-  /** 右侧栏服务：归栏时在这里打开洞府页面；缺失时只收成令牌。 */
-  readonly sidebar?: ISidebarRight
-  /** 洞府页面在右侧栏的 kind。 */
-  readonly tabKind?: string
 }) {
   const [collapsed, setCollapsed] = useState(() => readBool(COLLAPSED_KEY))
-  const [docked, setDocked] = useState(() => readBool(DOCKED_KEY))
   const [sheet, setSheet] = useState<SheetKind | undefined>()
   // 开宗成功后等新队伍落地，再自动打开道统配置让掌门审核；审核完跳到宗门进度。
   const [pendingReview, setPendingReview] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   const [historyTeamId, setHistoryTeamId] = useState<string | undefined>()
   const [characterId, setCharacterId] = useState<string | undefined>()
+  const previousSessionRef = useRef(sessionId)
   // 法器 / 坐骑 / 技能各选各的，互不覆盖；按角色分开记，来回切换不会丢装备。
   type EquippedSlots = { weapon?: string; mount?: string; skill?: string }
   const [equippedByCharacter, setEquippedByCharacter] = useState<Record<string, EquippedSlots>>({})
@@ -195,6 +188,19 @@ export function SectHallOverlay({
   }
   const done = hall.tasks.filter(task => task.status === 'completed').length
   const total = hall.tasks.length
+  // 天机阁打开时，切换修士对话后装备页实时跟随当前角色；仅会话变化时触发。
+  useEffect(() => {
+    if (sheet !== 'character') { previousSessionRef.current = sessionId; return }
+    if (previousSessionRef.current === sessionId) return
+    previousSessionRef.current = sessionId
+    if (sessionId === undefined) return
+    if (sessionId === hall.captainSessionId) {
+      setCharacterId(hall.captainSessionId)
+      return
+    }
+    const member = hall.members.find(item => item.id === sessionId)
+    if (member !== undefined) setCharacterId(member.id || member.name)
+  }, [sheet, sessionId, hall.captainSessionId, hall.members])
   // 点击掌门：回到他所在的主对话（而不是打开一个“成员子会话”）。
   const goHome = (): void => {
     if (openCaptain !== undefined && hall.captainSessionId !== '') openCaptain(hall.captainSessionId as SessionId)
@@ -214,8 +220,8 @@ export function SectHallOverlay({
   }
   // 天机阁：打开当前角色（或掌门）的装备页。
   const openGear = (): void => {
-    const id = viewingCaptain ? hall.captainSessionId : viewingMember?.id
-    const target = id !== undefined && id !== '' ? id : hall.captainSessionId
+    const memberRef = viewingMember === undefined ? undefined : (viewingMember.id || viewingMember.name)
+    const target = viewingCaptain ? hall.captainSessionId : memberRef ?? hall.captainSessionId
     if (target !== '') {
       setCharacterId(target)
       setSheet('character')
@@ -255,7 +261,7 @@ export function SectHallOverlay({
     measure()
     window.addEventListener('resize', measure)
     return () => { window.removeEventListener('resize', measure) }
-  }, [sheet, docked, collapsed, rect, size])
+  }, [sheet, collapsed, rect, size])
 
   const beginDrag = (event: React.PointerEvent<HTMLElement>): void => {
     if ((event.target as HTMLElement).closest('button') !== null) return
@@ -286,24 +292,6 @@ export function SectHallOverlay({
     window.addEventListener('pointerup', up)
   }
 
-  // 右侧栏里洞府页面的开关（宿主没有注册页面类型时安静降级）。
-  const openSidebarPage = (): void => {
-    if (sidebar === undefined || tabKind === undefined) return
-    try {
-      sidebar.openTab(tabKind)
-    } catch { /* 页面类型未注册：只保留令牌 */ }
-  }
-
-  const closeSidebarPage = (): void => {
-    if (sidebar === undefined || tabKind === undefined || sessionId === undefined) return
-    const withTabs = sidebar as ISidebarRight & {
-      tabsIn?: (id: SessionId) => readonly { id: string; kind?: string }[]
-    }
-    const page = (withTabs.tabsIn?.(sessionId) ?? []).find((tab) => tab.kind === tabKind)
-    if (page === undefined) return
-    try { sidebar.close(page.id as TabId) } catch { /* 已经关掉 */ }
-  }
-
   const toggleCollapsed = (): void => {
     const next = !collapsed
     setCollapsed(next)
@@ -311,13 +299,6 @@ export function SectHallOverlay({
     if (next) {
       // 收起成一枚令牌时，内容气泡也一并收起，避免令牌旁边挂着一块面板。
       setSheet(undefined)
-      return
-    }
-    // 展开即回到浮空：退出归栏，并关掉右侧栏里的洞府页面。
-    if (docked) {
-      setDocked(false)
-      writeBool(DOCKED_KEY, false)
-      closeSidebarPage()
     }
   }
 
@@ -379,16 +360,6 @@ export function SectHallOverlay({
     })
   }, [tokenSize.w, tokenSize.h])
 
-  // 归栏：收起成令牌 + 在右侧栏打开洞府页面。
-  const dockToSidebar = (): void => {
-    setDocked(true)
-    writeBool(DOCKED_KEY, true)
-    setCollapsed(true)
-    writeBool(COLLAPSED_KEY, true)
-    setSheet(undefined)
-    openSidebarPage()
-  }
-
   // 展开的洞府像右侧栏一样让对话内容向左收，避免被面板盖住。
   useEffect(() => {
     const root = document.documentElement
@@ -433,7 +404,7 @@ export function SectHallOverlay({
     setSheet(kind)
   }
 
-  // 自由缩放：浮空与归栏窗口都能拖右下角改大小，尺寸记在 localStorage。
+  // 自由缩放：拖右下角改大小，尺寸记在 localStorage。
   useEffect(() => {
     if (collapsed) return
     const panel = panelRef.current
@@ -491,10 +462,10 @@ export function SectHallOverlay({
       : characterId === hall.captainSessionId
         ? { id: hall.captainSessionId, name: t('office.captain'), key: captainKey(hall.name), isCaptain: true }
         : (() => {
-            const member = hall.members.find(item => item.id === characterId)
+            const member = hall.members.find(item => item.id === characterId || item.name === characterId)
             return member === undefined
               ? undefined
-              : { id: member.id, name: member.name, key: memberKey(member.name), isCaptain: false }
+              : { id: member.id || member.name, name: member.name, key: memberKey(member.name), isCaptain: false }
           })()
     const characterCultivation = character === undefined ? undefined : cultivationFromXp(xpOf(character.key))
     const title = sheet === 'settings' ? t('office.panelConfig')
@@ -816,7 +787,7 @@ export function SectHallOverlay({
                 data-kind={viewingCaptain ? 'captain' : 'member'}
                 title={t('office.equipment')}
                 onClick={() => {
-                  const id = viewingCaptain ? hall.captainSessionId : viewingMember?.id
+                  const id = viewingCaptain ? hall.captainSessionId : (viewingMember?.id || viewingMember?.name)
                   if (id !== undefined && id !== '') { setCharacterId(id); setSheet('character') }
                 }}
               >
@@ -845,7 +816,6 @@ export function SectHallOverlay({
                   onOpenCharacter={(memberId) => { setCharacterId(memberId); setSheet('character') }}
                   viewingSessionId={sessionId}
                   onUnavailable={() => { /* 无会话修士：由场景内提示承担 */ }}
-                  onDock={dockToSidebar}
                   onSettings={() => { toggleSheet('settings') }}
                   settingsOpen={sheet === 'settings'}
                   teamless={!hasTeam}
@@ -863,16 +833,6 @@ export function SectHallOverlay({
                     <span aria-hidden>⛩</span>{t('quickstart.entry')}
                   </button>
                 )}
-                <button
-                  type="button"
-                  className={css.portal}
-                  data-control="hall-dock"
-                  onClick={dockToSidebar}
-                  title={t('office.dockSidebar')}
-                >
-                  <span className={css.portalGlyph} aria-hidden>✥</span>
-                  <span>{t('office.dockSidebar')}</span>
-                </button>
                 <button type="button" className={css.floorButton} data-control="hall-roster" data-active={sheet === 'teams' || undefined} onClick={() => { toggleSheet('teams') }}>
                   <span aria-hidden>山</span>{t('office.roster')}
                 </button>

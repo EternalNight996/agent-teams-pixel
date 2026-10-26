@@ -29,8 +29,6 @@ export type SceneHit = {
     readonly kind: 'action';
     readonly action: SceneAction;
 } | {
-    readonly kind: 'dock';
-} | {
     readonly kind: 'settings';
 }
 /** Clicking a cultivator's overhead level badge opens their equipment sheet. */

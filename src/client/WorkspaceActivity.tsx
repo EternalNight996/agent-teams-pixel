@@ -179,8 +179,6 @@ function WorkspaceMonitor({ sessionsList, sidebar, state, t, openMember, openCap
       modelDirectories={modelDirectories}
       openMember={openMember}
       openCaptain={openCaptain}
-      sidebar={sidebar}
-      tabKind={TEAM_TAB_KIND}
     />
   )
 }

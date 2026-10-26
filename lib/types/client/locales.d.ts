@@ -254,8 +254,6 @@ export declare const zh: {
     'office.resize': string;
     'office.hint': string;
     'office.hintShort': string;
-    'office.dockSidebar': string;
-    'office.dockFloating': string;
     'office.swordBox': string;
     'office.roster': string;
     'office.floorDoctrine': string;
@@ -326,7 +324,6 @@ export declare const zh: {
     'office.historyPast': string;
     'office.taskHistory': string;
     'office.historyEmpty': string;
-    'office.scene.dockHint': string;
     'office.scene.settingsHint': string;
     'office.panelConfig': string;
     'office.panelSizeHint': string;
@@ -783,8 +780,6 @@ export declare const en: {
     'office.resize': string;
     'office.hint': string;
     'office.hintShort': string;
-    'office.dockSidebar': string;
-    'office.dockFloating': string;
     'office.swordBox': string;
     'office.roster': string;
     'office.floorDoctrine': string;
@@ -855,7 +850,6 @@ export declare const en: {
     'office.historyPast': string;
     'office.taskHistory': string;
     'office.historyEmpty': string;
-    'office.scene.dockHint': string;
     'office.scene.settingsHint': string;
     'office.panelConfig': string;
     'office.panelSizeHint': string;

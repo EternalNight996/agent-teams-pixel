@@ -219,8 +219,7 @@ check(
     && clientIndexSource.includes('ctx.uiConversation.events.register(agentTeamsCardDefinition)')
     && clientIndexSource.includes('ctx.locale.register(AGENT_TEAMS_LOCALE_NAMESPACE, { zh, en })')
     // Every locale-bound slot registration: create entry, chat entry, turn
-    // tail, shell overlay, keyed chat node, and the right-pane hall page that
-    // 归栏 opens.
+    // tail, shell overlay, keyed chat node, and the right-pane team page.
     && clientIndexSource.match(/locale:\s*AGENT_TEAMS_LOCALE_NAMESPACE/gu)?.length === 5,
 )
 check(

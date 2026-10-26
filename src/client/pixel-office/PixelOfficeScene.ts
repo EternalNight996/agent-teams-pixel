@@ -1985,13 +1985,13 @@ export function createPixelScene(
 
     // 头顶等级框也可点：打开该修士的装备页。
     for (const spot of spots) {
-      if ((spot.member.level ?? 0) <= 0 || spot.member.id === '') continue
+      if ((spot.member.level ?? 0) <= 0) continue
       hitAreas.push({
         x: Math.max(2, Math.min(WORLD_W - 62, spot.cx - 31)),
         y: spot.baseY - 122,
         w: 62,
         h: 18,
-        hit: { kind: 'level', id: spot.member.id },
+        hit: { kind: 'level', id: spot.member.id || spot.member.name },
       })
     }
 

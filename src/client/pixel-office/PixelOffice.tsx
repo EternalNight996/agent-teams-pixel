@@ -331,8 +331,12 @@ export function PixelOffice({
       clickTimer.current = undefined
       // 掌门没有成员子会话：点他回到主对话。
       if (member.isLeader) { onOpenCaptain?.(); return }
-      // 还没有对话（未创建会话的修士）不跳转，只提示。
-      if (member.id === '') { onUnavailable?.(member.name); return }
+      // 未派工/未建会话的修士：点开装备页，给明确反馈。
+      if (member.id === '') {
+        if (onOpenCharacter !== undefined) onOpenCharacter(member.name)
+        else onUnavailable?.(member.name)
+        return
+      }
       onOpenMember?.(member.id)
     }, 240)
   }
