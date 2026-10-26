@@ -355,6 +355,7 @@ export declare const zh: {
     'office.facility.config': string;
     'office.facility.gear': string;
     'office.facility.ranks': string;
+    'office.facility.about': string;
     'office.facility.inbox': string;
     'office.floorRanks': string;
     'office.ascension': string;
@@ -375,6 +376,7 @@ export declare const zh: {
     'office.action.boardHint': string;
     'office.action.configHint': string;
     'office.action.gearHint': string;
+    'office.action.aboutHint': string;
     'office.action.ranksHint': string;
     'office.action.inboxHint': string;
     'app.title': string;
@@ -956,6 +958,7 @@ export declare const en: {
     'office.facility.config': string;
     'office.facility.gear': string;
     'office.facility.ranks': string;
+    'office.facility.about': string;
     'office.facility.inbox': string;
     'office.floorRanks': string;
     'office.ascension': string;
@@ -976,6 +979,7 @@ export declare const en: {
     'office.action.boardHint': string;
     'office.action.configHint': string;
     'office.action.gearHint': string;
+    'office.action.aboutHint': string;
     'office.action.ranksHint': string;
     'office.action.inboxHint': string;
     'app.title': string;

@@ -1061,7 +1061,7 @@ export function SectHallOverlay({
                   t={t}
                   activeAction={
                     sheet === 'character' ? 'gear'
-                      : sheet === 'settings' || sheet === 'start' || sheet === 'about' ? null
+                      : sheet === 'settings' || sheet === 'start' ? null
                         : sheet ?? null
                   }
                   onAction={(action) => {

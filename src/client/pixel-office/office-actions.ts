@@ -8,7 +8,7 @@
  */
 
 /** One panel a wall facility can open. */
-export type SceneAction = 'teams' | 'board' | 'config' | 'inbox' | 'gear' | 'ranks'
+export type SceneAction = 'teams' | 'board' | 'config' | 'inbox' | 'gear' | 'ranks' | 'about'
 
 /** Scene-space rectangle (the renderer draws in a 520-wide world). */
 export interface FacilityRect {
@@ -25,6 +25,8 @@ export const FACILITIES: Readonly<Record<SceneAction, FacilityRect>> = {
   board: { x: 228, y: 10, w: 70, h: 60 },
   ranks: { x: 306, y: 10, w: 70, h: 60 },
   gear: { x: 384, y: 10, w: 74, h: 60 },
+  // 宗门志：墙最右侧的一方石志，点开关于/赞助/交流群/反馈。
+  about: { x: 460, y: 10, w: 54, h: 60 },
   // 传音阁入口已移除；保留矩形仅为类型兼容，不在 FACILITY_ORDER 中绘制/命中。
   inbox: { x: 466, y: 10, w: 60, h: 60 },
 }
@@ -33,7 +35,7 @@ export const FACILITIES: Readonly<Record<SceneAction, FacilityRect>> = {
 export const WALL_HEIGHT = 96
 
 /** Order used by the rail and by tests (left to right on the wall). */
-export const FACILITY_ORDER: readonly SceneAction[] = ['config', 'teams', 'board', 'ranks', 'gear']
+export const FACILITY_ORDER: readonly SceneAction[] = ['config', 'teams', 'board', 'ranks', 'gear', 'about']
 
 /** A scene hit from `hitTest`: a cultivator desk or a wall facility. */
 export type SceneHit =

@@ -8,6 +8,9 @@
   selecting any weapon/mount/skill makes the cultivator hop with a floating
   item name and a 1.4s colour ring. The character sheet explains the immediate
   preview.
+- The 宗门志 is also a sixth wall facility at the far right (stone tablet/scroll);
+  clicking it opens the same sheet and it highlights while open. The bottom-bar 志
+  entry remains.
 - Added the 宗门志 (志) bottom-bar entry with four tabs in this order: voluntary
   sponsorship (WeChat QRs + MIT note), the author's QQ group QR, an About tab
   (version/author/other projects/old dsh-desktop notice) and a feedback tab with

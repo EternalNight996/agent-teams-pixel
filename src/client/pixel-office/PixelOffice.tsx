@@ -45,6 +45,7 @@ const FACILITY_LABEL: Readonly<Record<SceneAction, AgentTeamsLocaleKey>> = {
   ranks: 'office.facility.ranks',
   config: 'office.facility.config',
   gear: 'office.facility.gear',
+  about: 'office.facility.about',
   inbox: 'office.facility.inbox',
 }
 
@@ -54,6 +55,7 @@ const FACILITY_HINT: Readonly<Record<SceneAction, AgentTeamsLocaleKey>> = {
   ranks: 'office.action.ranksHint',
   config: 'office.action.configHint',
   gear: 'office.action.gearHint',
+  about: 'office.action.aboutHint',
   inbox: 'office.action.inboxHint',
 }
 
@@ -64,6 +66,7 @@ const FACILITY_GLYPH: Readonly<Record<SceneAction, string>> = {
   ranks: '榜',
   config: '经',
   gear: '阁',
+  about: '志',
   inbox: '信',
 }
 
