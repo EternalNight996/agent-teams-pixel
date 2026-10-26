@@ -1,7 +1,7 @@
 {
-  "name": "agent-teams-pixel",
-  "version": "0.3.0-rc.1",
-  "description": "AgentTeams × 像素办公室：508 张角色卡驱动的多智能体团队协作与交付流水线（DeepSeek Harness 插件）。基于 NanmiCoder/dsh-agent-teams 0.1.26（MIT）派生。",
+  "name": "dsh-pixel-team",
+  "version": "0.3.0-rc.2",
+  "description": "DSH Pixel Team：DeepSeek Harness 的像素洞府多智能体团队协作与交付流水线（AgentTeams 衍生，MIT）。",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
@@ -32,20 +32,21 @@
     "scripts/doctor.mjs",
     "scripts/compatibility.mjs",
     "pnpm-workspace.yaml",
-    "scripts/legacy-session-source-repair.mjs"
+    "scripts/legacy-session-source-repair.mjs",
+    "dsh-plugin.naming.json"
   ],
   "license": "MIT",
   "author": {
     "name": "EternalNight996",
     "url": "https://github.com/EternalNight996"
   },
-  "homepage": "https://github.com/EternalNight996/agent-teams-pixel#readme",
+  "homepage": "https://github.com/EternalNight996/dsh-pixel-team#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EternalNight996/agent-teams-pixel.git"
+    "url": "git+https://github.com/EternalNight996/dsh-pixel-team.git"
   },
   "bugs": {
-    "url": "https://github.com/EternalNight996/agent-teams-pixel/issues"
+    "url": "https://github.com/EternalNight996/dsh-pixel-team/issues"
   },
   "keywords": [
     "dsh",
@@ -253,7 +254,7 @@
     "typescript": "^5.9.3"
   },
   "bin": {
-    "agent-teams-pixel-doctor": "scripts/doctor.mjs"
+    "dsh-pixel-team-doctor": "scripts/doctor.mjs"
   },
   "contributors": [
     {

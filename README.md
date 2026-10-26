@@ -1,22 +1,22 @@
-> **Derivative notice**：本项目是 [dsh-agent-teams](https://github.com/NanmiCoder/dsh-agent-teams)（MIT，NanmiCoder）的衍生版，包名与插件 id 为 `agent-teams-pixel`。上游版权见 [NOTICE.md](./NOTICE.md) 与 [LICENSE](./LICENSE)；本版差异与路线见 [docs/OUR-DIFFERENCES.md](./docs/OUR-DIFFERENCES.md)。
+> **Derivative notice**：本项目是 [dsh-agent-teams](https://github.com/NanmiCoder/dsh-agent-teams)（MIT，NanmiCoder）的衍生版，包名与插件 id 为 `dsh-pixel-team`。上游版权见 [NOTICE.md](./NOTICE.md) 与 [LICENSE](./LICENSE)；本版差异与路线见 [docs/OUR-DIFFERENCES.md](./docs/OUR-DIFFERENCES.md)。
 
 <p align="right">
   <strong>English</strong> · <a href="./README_ZH.md">简体中文</a>
 </p>
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="agent-teams-pixel turns one DeepSeek Harness session into a coordinated multi-agent team">
+  <img src="./assets/readme/hero.svg" width="100%" alt="dsh-pixel-team turns one DeepSeek Harness session into a coordinated multi-agent team">
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/agent-teams-pixel"><img src="https://img.shields.io/npm/v/agent-teams-pixel?style=flat-square&amp;color=5B4CF0" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/dsh-pixel-team"><img src="https://img.shields.io/npm/v/dsh-pixel-team?style=flat-square&amp;color=5B4CF0" alt="npm version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-0B7285?style=flat-square" alt="MIT license"></a>
   <a href="./cordis.patch.yml"><img src="https://img.shields.io/badge/DSH-Web%20%2B%20Headless-5B4CF0?style=flat-square" alt="DSH Web and Headless"></a>
 </p>
 
 ## One prompt. A working team.
 
-`agent-teams-pixel` turns the current DeepSeek Harness session into a captain that can assemble durable sub-agents, split a goal into dependency-aware tasks, and coordinate work through direct messages.
+`dsh-pixel-team` turns the current DeepSeek Harness session into a captain that can assemble durable sub-agents, split a goal into dependency-aware tasks, and coordinate work through direct messages.
 
 Ask in natural language. The plugin provides the team protocol, 14 coordination tools, persistent state, an automatic shared-task scheduler, and a live Web UI—without requiring a separate workflow engine.
 
@@ -26,7 +26,7 @@ Ask in natural language. The plugin provides the team protocol, 14 coordination 
 
 ## Releases
 
-[v0.3.0-rc.1](./release-notes/v0.3.0-rc.1.md) refreshes the team workspace with completion and inbox cards, preserves the distinct claimed state, and fixes optional tool inputs and live host session-format detection. This stable plugin release uses npm `latest`; the recommended Harness host remains `0.2.1-rc.2`. See the exact [support matrix](./compatibility.json) and [verification scope](./docs/maintenance-workflow.md).
+[v0.3.0-rc.2](./release-notes/v0.3.0-rc.2.md) refreshes the team workspace with completion and inbox cards, preserves the distinct claimed state, and fixes optional tool inputs and live host session-format detection. This stable plugin release uses npm `latest`; the recommended Harness host remains `0.2.1-rc.2`. See the exact [support matrix](./compatibility.json) and [verification scope](./docs/maintenance-workflow.md).
 
 ## Why AgentTeams?
 
@@ -45,26 +45,26 @@ The conversation card and activity panel use Harness's official locale service. 
 
 ## Install and choose versions
 
-**Recommended pair: DeepSeek Harness `0.2.1-rc.3` + AgentTeams `0.3.0-rc.1`. The host remains an RC.**
+**Recommended pair: DeepSeek Harness `0.2.1-rc.3` + AgentTeams `0.3.0-rc.2`. The host remains an RC.**
 
 | Use case | DeepSeek Harness | AgentTeams plugin |
 | --- | --- | --- |
-| **Recommended** | **`0.2.1-rc.3`** | **`0.3.0-rc.1`** |
-| Previous recommended RC | `0.2.1-rc.1`, `0.2.0-rc.2`, `0.1.7-rc.2` | `0.3.0-rc.1` |
-| Legacy RC | `0.1.5-rc.1`, `0.1.5-rc.2`, `0.1.5-rc.3` | `0.3.0-rc.1` |
-| Retaining an older RC | `0.1.2-rc.1` | `0.3.0-rc.1` |
-| Developer Alpha testing | `0.1.2-alpha.5` | `0.3.0-rc.1` |
-| Retaining an older Alpha | `0.1.2-alpha.2` | `0.3.0-rc.1` |
+| **Recommended** | **`0.2.1-rc.3`** | **`0.3.0-rc.2`** |
+| Previous recommended RC | `0.2.1-rc.1`, `0.2.0-rc.2`, `0.1.7-rc.2` | `0.3.0-rc.2` |
+| Legacy RC | `0.1.5-rc.1`, `0.1.5-rc.2`, `0.1.5-rc.3` | `0.3.0-rc.2` |
+| Retaining an older RC | `0.1.2-rc.1` | `0.3.0-rc.2` |
+| Developer Alpha testing | `0.1.2-alpha.5` | `0.3.0-rc.2` |
+| Retaining an older Alpha | `0.1.2-alpha.2` | `0.3.0-rc.2` |
 
 ### Desktop app
 
 In the app sidebar, open **Plugins → Add plugin** and enter the npm package spec:
 
 ```text
-agent-teams-pixel
+dsh-pixel-team
 ```
 
-The package name resolves npm `latest`. To pin a version, append `@0.3.0-rc.1`. Install it, then choose **Enable now**. If the host asks for a restart, restart the desktop app. Use the package spec above for the published build; an npm or GitHub webpage URL is not the same install source. For Git installation, use a commit containing the verified build outputs described below.
+The package name resolves npm `latest`. To pin a version, append `@0.3.0-rc.2`. Install it, then choose **Enable now**. If the host asks for a restart, restart the desktop app. Use the package spec above for the published build; an npm or GitHub webpage URL is not the same install source. For Git installation, use a commit containing the verified build outputs described below.
 
 The desktop app supplies its own Harness core and package manager. Upgrading the global CLI does not upgrade that core, and an ordinary standalone CLI cannot manage its desktop profile. The CLI carrier installed by the desktop app can manage that profile in `0.2.1-rc.2`. Check the embedded core against the compatibility list. Harness `0.2.1-rc.3` is now the exact published target; its RC status is unchanged. The earlier source-only `0.2.0` prediction is no longer a support declaration. See the [release migration evidence](./docs/harness-0.2.1-rc.2/README.md).
 
@@ -79,10 +79,10 @@ Skip this if you already run this version. Alpha is opt-in: select an exact Alph
 
 ### CLI / Web: 2. Install the AgentTeams plugin
 
-Install or upgrade from npm using the package name (resolves npm `latest`, currently `0.3.0-rc.1`):
+Install or upgrade from npm using the package name (resolves npm `latest`, currently `0.3.0-rc.2`):
 
 ```sh
-dsh plugin --profile web add --save-exact agent-teams-pixel
+dsh plugin --profile web add --save-exact dsh-pixel-team
 ```
 
 For a CLI-managed installation, replace `web` with your active CLI profile. **Stop and restart that profile's Harness process, then refresh the browser.** Installing the plugin does not upgrade Harness; the host and plugin have independent `latest` channels.

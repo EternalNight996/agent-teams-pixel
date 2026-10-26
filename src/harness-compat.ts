@@ -122,7 +122,7 @@ declare module '@deepseek-ai/dsh-llm' {
 }
 
 /** Package identity a released plugin-wrapper source names on older hosts. */
-export const AGENT_TEAMS_PLUGIN_NAME = 'agent-teams-pixel'
+export const AGENT_TEAMS_PLUGIN_NAME = 'dsh-pixel-team'
 
 /**
  * First stored format generation whose migration edges admit producer-owned

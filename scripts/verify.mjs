@@ -365,7 +365,7 @@ check(
   'the client renders portraits from embedded data instead of the host asset route',
   artworkSource.includes("from './art-data.ts'")
     && artworkSource.includes('data:image/png;base64,')
-    && !artworkSource.includes('/plugins/dsh-agent-teams/assets/'),
+    && !artworkSource.includes('/plugins/dsh-pixel-team/assets/'),
   'portrait URLs must not depend on the host allowlist that requires an app restart',
 )
 check(
@@ -1100,9 +1100,9 @@ discoveryPoller.stop()
 check(
   'a cardless cold session restores live and archive once, then probes at the discovery cadence',
   discoveryUrls.length === 3
-    && discoveryUrls[0] === '/plugins/dsh-agent-teams/state'
+    && discoveryUrls[0] === '/plugins/dsh-pixel-team/state'
     && discoveryUrls[1]?.endsWith('?archived=1')
-    && discoveryUrls[2] === '/plugins/dsh-agent-teams/state'
+    && discoveryUrls[2] === '/plugins/dsh-pixel-team/state'
     && discoveryIntervals.length === 1
     && discoveryIntervals[0] === ACTIVITY_PROBE_MS,
 )
@@ -1121,7 +1121,7 @@ const latePoller = startActivityPolling([], {
   discoverySessionId: 'cold-captain',
   fetchState: async (url) => {
     lateUrls.push(url)
-    if (url === '/plugins/dsh-agent-teams/state') {
+    if (url === '/plugins/dsh-pixel-team/state') {
       return { ok: true, json: async () => ({ teams: lateLiveTeams }) }
     }
     return { ok: true, json: async () => ({ teams: [] }) }

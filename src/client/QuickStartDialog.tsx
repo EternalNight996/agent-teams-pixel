@@ -153,7 +153,7 @@ export function QuickStartWizard({ sessionId, t, onDone, onFounded }: {
     setBusy(true)
     setError('')
     try {
-      const response = await fetch('/plugins/dsh-agent-teams/quick-start', {
+      const response = await fetch('/plugins/dsh-pixel-team/quick-start', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ sessionId, goal: goalTrimmed, template, roles: sectMode === 'custom' ? roles : [...(activeSect?.roles ?? roles)], replace }),

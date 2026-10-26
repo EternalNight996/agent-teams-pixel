@@ -17,7 +17,7 @@ import assert from 'node:assert/strict'
 import { agentTeamsSource, hostSessionFormatVersion, observedSessionFormatVersion } from '../lib/harness-compat.js'
 import { steerCaptainReport } from '../lib/members.js'
 
-const releasedWrapper = { kind: 'plugin', plugin: 'agent-teams-pixel' }
+const releasedWrapper = { kind: 'plugin', plugin: 'dsh-pixel-team' }
 const modern = { kind: 'agent-teams' }
 const command = { kind: 'agent-teams-command', goal: 'report on the plugin' }
 const captain = version => ({ session: { header: { version } }, steer() {} })

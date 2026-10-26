@@ -12,4 +12,4 @@ licensed under the MIT License.
 
 The upstream project name, package name and repository remain the property of
 their author. This derivative uses its own package identity
-(`agent-teams-pixel`) and must not be presented as the upstream project.
+(`dsh-pixel-team`) and must not be presented as the upstream project.

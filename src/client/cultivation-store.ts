@@ -24,7 +24,7 @@ interface CultivationState {
   tick: number
 }
 
-const STORAGE_KEY = 'agent-teams-pixel.cultivation.v1'
+const STORAGE_KEY = 'dsh-pixel-team.cultivation.v1'
 
 function emptyState(): CultivationState {
   return { xp: {}, seen: {}, idleAt: {}, streak: {}, tick: Date.now() }

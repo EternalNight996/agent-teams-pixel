@@ -1,4 +1,4 @@
-# Release checklist (agent-teams-pixel)
+# Release checklist (dsh-pixel-team)
 
 Date: 2026-10-27. Automated gates are reproducible; manual gates are still required
 before a public release.
@@ -26,7 +26,7 @@ pnpm verify:release now runs npm pack --dry-run and asserts:
   (compatibility, doctor, legacy-session-source-repair) are included;
 - tarball is non-trivial and under the 8 MB budget.
 
-Current artifact (dry-run): agent-teams-pixel-0.3.0-rc.1.tgz, ~1.8 MB packed,
+Current artifact (dry-run): dsh-pixel-team-0.3.0-rc.1.tgz, ~1.8 MB packed,
 ~4.1 MB unpacked.
 
 ## Manual gates (not yet run for this build)
@@ -34,7 +34,7 @@ Current artifact (dry-run): agent-teams-pixel-0.3.0-rc.1.tgz, ~1.8 MB packed,
 1. Real browser smoke: 6 wall facilities + 7 bottom-bar entries, 宗门志 scroll and
    QR loading, equipment switch feedback, feedback copy/prefilled issue.
 2. Packaged artifact into an isolated profile: cold start + real host support
-   route /plugins/dsh-agent-teams/support/*.
+   route /plugins/dsh-pixel-team/support/*.
 3. Real-model minimal business: create → dispatch → execute → verify → review.
 4. A/B: single agent vs 5-person fullstack, compare wall clock, tokens, first-pass
    pass rate (suggest wall clock -25%, tokens <=1.3x, pass rate not lower).
@@ -42,6 +42,6 @@ Current artifact (dry-run): agent-teams-pixel-0.3.0-rc.1.tgz, ~1.8 MB packed,
 ## Deploy note
 
 The desktop profile currently points at an older tarball
-(agent-teams-pixel-0.3.0-rc.1.tgz). Updating node_modules works for a restart, but
+(dsh-pixel-team-0.3.0-rc.1.tgz). Updating node_modules works for a restart, but
 a plugin-manager reinstall would restore the old package until the tarball and
 lockfile are regenerated.

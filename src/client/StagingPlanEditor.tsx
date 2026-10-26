@@ -14,7 +14,7 @@ import type { AgentTeamsTranslate } from './locales.ts'
 import { roleLabel } from './role-labels.ts'
 import css from './ActivityPanel.module.css'
 
-const PLAN_URL = '/plugins/dsh-agent-teams/plan'
+const PLAN_URL = '/plugins/dsh-pixel-team/plan'
 
 type PlanFeedback = {
   readonly tone: 'success' | 'error'

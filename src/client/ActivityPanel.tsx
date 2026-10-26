@@ -6,7 +6,7 @@
  * dragged into a floating window, resized, and folded into an activity badge.
  * On wide viewports the docked panel makes the conversation column yield
  * space; narrow viewports keep a simple inset overlay. It
- * polls the host `/plugins/dsh-agent-teams/state` route for
+ * polls the host `/plugins/dsh-pixel-team/state` route for
  * server-side snapshots (durable files + live subagent activity), with a
  * collapsed badge that auto-expands once when activity appears. Archived
  * teams stay available for the owning conversation after live work ends.
@@ -124,9 +124,9 @@ type PanelGesture = {
 }
 
 /** Persisted floater preference: board view vs pixel-office view. */
-const OFFICE_VIEW_KEY = 'agent-teams-pixel.officeView'
+const OFFICE_VIEW_KEY = 'dsh-pixel-team.officeView'
 /** Persisted dependency rendering: the original DAT map or the vertical flow. */
-const DEPENDENCY_VIEW_KEY = 'agent-teams-pixel.dependencyView'
+const DEPENDENCY_VIEW_KEY = 'dsh-pixel-team.dependencyView'
 
 function initialPanelLayout(): PanelLayout {
   if (typeof window === 'undefined') return DEFAULT_PANEL_LAYOUT

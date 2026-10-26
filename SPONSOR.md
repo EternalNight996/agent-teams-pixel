@@ -1,6 +1,6 @@
 # 赞助与交流
 
-AgentTeams Pixel（agent-teams-pixel）是 MIT 协议的开源插件，始终免费。  
+AgentTeams Pixel（dsh-pixel-team）是 MIT 协议的开源插件，始终免费。  
 如果它帮你省了时间、或者你在像素洞府里玩得开心，可以自愿请作者喝杯咖啡。
 
 > 打赏完全自愿，不影响任何功能、不解除任何限制。
@@ -21,8 +21,8 @@ AgentTeams Pixel（agent-teams-pixel）是 MIT 协议的开源插件，始终免
 
 请优先通过 GitHub Issues 反馈，并附上插件里「宗门志 → 反馈异常」生成的诊断信息：
 
-- 仓库：https://github.com/EternalNight996/agent-teams-pixel
-- 新建 issue：https://github.com/EternalNight996/agent-teams-pixel/issues/new
+- 仓库：https://github.com/EternalNight996/dsh-pixel-team
+- 新建 issue：https://github.com/EternalNight996/dsh-pixel-team/issues/new
 
 ## 作者的其他项目
 

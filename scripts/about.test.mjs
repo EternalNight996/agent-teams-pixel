@@ -17,7 +17,7 @@ test('client version constant tracks package.json', () => {
 
 test('issue title takes the first line and caps its length', () => {
   assert.equal(buildIssueTitle('归栏后界面空白\n复现步骤…'), '归栏后界面空白')
-  assert.equal(buildIssueTitle('   '), 'agent-teams-pixel 异常反馈')
+  assert.equal(buildIssueTitle('   '), 'dsh-pixel-team 异常反馈')
   const long = buildIssueTitle('x'.repeat(80))
   assert.equal(long.length, 60)
   assert.ok(long.endsWith('…'))
@@ -33,7 +33,7 @@ test('issue body carries the report and the diagnostics block', () => {
 test('issue url is fully encoded and points at the repository', () => {
   const url = buildIssueUrl({
     description: '点封神榜 没反应 / 空白',
-    diagnostics: 'plugin: agent-teams-pixel@0.3.0',
+    diagnostics: 'plugin: dsh-pixel-team@0.3.0',
     version: '0.3.0',
   })
   assert.ok(url.startsWith(PLUGIN_REPO + '/issues/new?title='))
@@ -46,7 +46,7 @@ test('the AI prompt carries both report and diagnostics', () => {
   const prompt = buildAgentPrompt({ description: '反馈内容', diagnostics: 'diag line' })
   assert.ok(prompt.includes('反馈内容'))
   assert.ok(prompt.includes('diag line'))
-  assert.ok(prompt.includes('agent-teams-pixel'))
+  assert.ok(prompt.includes('dsh-pixel-team'))
   const english = buildAgentPrompt({ description: 'report', diagnostics: 'diag', locale: 'en' })
   assert.ok(english.includes('You are debugging'))
 })
@@ -56,7 +56,7 @@ test('diagnostics include version, environment and team summary', () => {
     version: '9.9.9',
     team: { name: '斗法宗', phase: 'running', members: 3, tasks: { total: 5, done: 2, failed: 1, running: 1 } },
   })
-  assert.ok(text.includes('agent-teams-pixel@9.9.9'))
+  assert.ok(text.includes('dsh-pixel-team@9.9.9'))
   assert.ok(text.includes('team: 斗法宗 [running] members=3 tasks=2/5 running=1 failed=1'))
   assert.ok(text.includes('user agent:'))
   assert.ok(text.includes('viewport:'))

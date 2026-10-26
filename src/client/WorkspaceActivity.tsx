@@ -21,12 +21,12 @@ import { LEAD_ART } from './artwork.ts'
 import css from './WorkspaceActivity.module.css'
 
 export const TEAM_TAB_KIND = 'agent-teams'
-export const TEAM_TAB_ID = 'agent-teams-pixel/activity'
+export const TEAM_TAB_ID = 'dsh-pixel-team/activity'
 
 /** Persisted history-page preference: progress board vs setup page. */
-const WORKSPACE_VIEW_KEY = 'agent-teams-pixel.workspaceView'
+const WORKSPACE_VIEW_KEY = 'dsh-pixel-team.workspaceView'
 /** Floating panel geometry remembered across opens: offset + user-resized size. */
-const SHEET_RECT_KEY = 'agent-teams-pixel.sheetRect'
+const SHEET_RECT_KEY = 'dsh-pixel-team.sheetRect'
 
 interface SheetRect {
   readonly x: number

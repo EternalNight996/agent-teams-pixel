@@ -16,8 +16,8 @@ for (const scenario of selectedScenarios) {
     mkdirSync(workspace, { recursive: true });
     mkdirSync(join(profile, 'node_modules/@nanmicoder'), { recursive: true });
     if (linkWorkspacePackages) symlinkSync(join(runtime, 'node_modules/@deepseek-ai'), join(profile, 'node_modules/@deepseek-ai'), 'dir');
-    symlinkSync(join(runtime, 'node_modules/agent-teams-pixel'), join(profile, 'node_modules/agent-teams-pixel'), 'dir');
-    json(join(profile, 'package.json'), { name: 'runtime-test-profile', version: '0.0.0', private: true, type: 'module', dsh: { profile: { bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-headless', 'agent-teams-pixel'], patchReload: 'startup' } } });
+    symlinkSync(join(runtime, 'node_modules/dsh-pixel-team'), join(profile, 'node_modules/dsh-pixel-team'), 'dir');
+    json(join(profile, 'package.json'), { name: 'runtime-test-profile', version: '0.0.0', private: true, type: 'module', dsh: { profile: { bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-headless', 'dsh-pixel-team'], patchReload: 'startup' } } });
     copyFileSync(join(dirname(fileURLToPath(import.meta.url)), 'fixtures/harness-runtime-llm.mjs'), join(profile, 'fixture-llm.mjs'));
     writeFileSync(join(profile, 'cordis.patch.yml'), `- id: llm-deepseek\n  disabled: true\n- id: llm-pi-ai\n  disabled: true\n- id: agent-default-model\n  config:\n    provider: runtime-lab\n    model: fixture-model\n- insert:\n    - id: runtime-lab-fixture\n      name: './fixture-llm.mjs'\n`);
     if (scenario === 'lifecycle')

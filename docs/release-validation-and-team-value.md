@@ -1,7 +1,7 @@
 # 发布前验证与 AgentTeams 实用价值评估
 
 日期：2026-10-27  
-范围：agent-teams-pixel（AgentTeams × 像素洞府）发布前门禁、交互闭环、以及 AgentTeams 在效率 / token / 交付上的底层分析与实测证据。
+范围：dsh-pixel-team（AgentTeams × 像素洞府）发布前门禁、交互闭环、以及 AgentTeams 在效率 / token / 交付上的底层分析与实测证据。
 
 ## 1. 发布门禁结果（本次实测）
 
@@ -51,7 +51,7 @@
 
 1. 真实浏览器：点墙面/底栏 6+7 入口、滚动宗门志、加载二维码、点反馈复制与弹窗。
 2. 真实 DPI/窗口尺寸下的面板与气泡不裁切、不横向滚动。
-3. 打包产物安装到隔离 profile 后冷启动一次，确认真实宿主路由能取到 `/plugins/dsh-agent-teams/support/*`。
+3. 打包产物安装到隔离 profile 后冷启动一次，确认真实宿主路由能取到 `/plugins/dsh-pixel-team/support/*`。
 4. 真实模型跑一遍「创建 → 派发 → 成员执行 → 审查 → 汇总」的最小业务。
 
 ## 3. AgentTeams 到底带来什么：从底层结构看

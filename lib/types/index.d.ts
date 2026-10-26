@@ -11,7 +11,7 @@
  * dependencies, wakes members with messages, relays reports, and collects
  * results.
  *
- * Installation (bundle): `dsh plugin --profile <name> add agent-teams-pixel`
+ * Installation (bundle): `dsh plugin --profile <name> add dsh-pixel-team`
  * (or a local path). The bundle patch mounts this plugin row into the host
  * composition; the tools register into the shared `tools` registry and the
  * usage section into the global system prompt, so the plugin needs no realm.
