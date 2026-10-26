@@ -448,6 +448,21 @@ export function apply(ctx: Context, config: Config): void {
         try {
           if (replace) {
             // Explicit user choice: end the current sect so a new one can be founded.
+            // Refuse while any task is still pending/running: archiving then would
+            // throw away live work and its conversation trail.
+            let hasLiveWork = false
+            try {
+              const status = tools?.get?.('agent_teams_status')
+              const raw = await status?.execute?.({}, run)
+              const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
+              const tasks = Array.isArray((parsed as { tasks?: unknown }).tasks)
+                ? (parsed as { tasks: Array<{ status?: string }> }).tasks : []
+              hasLiveWork = tasks.some(task => task.status === 'pending' || task.status === 'claimed'
+                || task.status === 'in_progress' || task.status === 'running')
+            } catch {
+              hasLiveWork = false
+            }
+            if (hasLiveWork) throw new Error('当前宗门还有未完成或执行中的任务，请先结束任务再替换宗门')
             const remove = tools?.get?.('agent_teams_delete')
             try {
               await remove?.execute?.({}, run)
@@ -464,24 +479,10 @@ export function apply(ctx: Context, config: Config): void {
           res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
           res.end(JSON.stringify({ ok: true, teamId: value.team_id, teamName: value.team_name, phase: value.phase, template: plan.template, tasks: plan.tasks.length }))
         } catch (error: unknown) {
-          let message = error instanceof Error ? error.message : String(error)
-          if (/already lead team/i.test(message)) {
-            const remove = tools?.get?.('agent_teams_delete')
-            try {
-              await remove?.execute?.({}, run)
-              const retried = await definition.execute({
-                name: plan.teamName,
-                description: goal,
-                approval: 'required',
-                plan: { members: plan.members, tasks: plan.tasks },
-              }, run) as { team_id?: string; phase?: string; team_name?: string }
-              res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
-              res.end(JSON.stringify({ ok: true, teamId: retried.team_id, teamName: retried.team_name, phase: retried.phase, template: plan.template, tasks: plan.tasks.length }))
-              return
-            } catch (retryError: unknown) {
-              message = retryError instanceof Error ? retryError.message : String(retryError)
-            }
-          }
+          const message = error instanceof Error ? error.message : String(error)
+          // Never auto-delete an existing team here: the client asks the user to
+          // confirm replace, so a plain "found a new sect" cannot wipe the current
+          // run (and its conversation trail) by surprise.
           ctx.logger.warn(`agent-teams: quick-start failed for ${sessionId}: ${message}`)
           res.writeHead(422, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
           res.end(JSON.stringify({ error: message }))

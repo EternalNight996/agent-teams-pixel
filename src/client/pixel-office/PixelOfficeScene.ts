@@ -1769,6 +1769,15 @@ export function createPixelScene(
         spot.baseY = from.y + (to.y - from.y) * eased
         spot.walking = phase < 0.62
       }
+    } else {
+      // 面板不够高、没有中庭时，也别把闲置修士钉在座位上：让他们在案几旁踱步。
+      for (const spot of spots) {
+        if (spot.member.activity !== 'idle') continue
+        const seed = hash(spot.member.id || spot.member.name)
+        const sway = Math.sin(time / (2400 + (seed % 1200)) + (seed % 7))
+        spot.cx = Math.max(36, Math.min(WORLD_W - 36, spot.deskCx + sway * 24))
+        spot.walking = Math.abs(sway) > 0.25
+      }
     }
     for (const spot of spots) trackCultivationFx(spot, time)
     paintRoom(time, model?.wall, hovered, lastDeskY)

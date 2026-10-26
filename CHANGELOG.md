@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 ### Changed
+- Creating a sect while another exists no longer auto-deletes the current team:
+  the wizard asks to replace, and replacement is refused while any task is
+  pending/running, so a live run (and its trail) can no longer be wiped by a
+  surprise archive.
+- Idle/completed cultivators keep moving even in short panels: without a
+  courtyard they pace beside their desks instead of standing still.
 - Cultivation is now global and persistent: XP is stored per member name and per
   sect captain in localStorage, so 魔修's level follows them across sects/sessions
   while different sect captains keep separate levels.
