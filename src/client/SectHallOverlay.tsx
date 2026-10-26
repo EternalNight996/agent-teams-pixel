@@ -165,6 +165,8 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
     const next = !collapsed
     setCollapsed(next)
     writeBool(COLLAPSED_KEY, next)
+    // 收起成一枚水晶球时，内容气泡也一并收起，避免球旁边挂着一块面板。
+    if (next) setSheet(undefined)
   }
 
   const toggleDocked = (): void => {
@@ -283,29 +285,48 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
     ), document.body)
   }
 
+  const orbTitle = hasTeam
+    ? `${hall.name} · ${done}/${total}`
+    : `${hall.name} · ${t('office.hallNoTeam')}`
+
   return (
     <>
-      {createPortal((
+      {collapsed ? createPortal((
+        // 收起：整座洞府缩成一枚水晶球，点一下展开。
+        <button
+          type="button"
+          className={css.orb}
+          data-hall-orb
+          data-docked={docked || undefined}
+          style={{ transform: docked ? undefined : `translate(${rect.x}px, ${rect.y}px)` }}
+          onClick={toggleCollapsed}
+          aria-label={t('office.expand')}
+          aria-expanded={false}
+          title={`${t('office.expand')} · ${orbTitle}`}
+        >
+          <span className={css.orbGlass} aria-hidden>
+            <span className={css.orbGlyph} aria-hidden>⛩</span>
+          </span>
+          <span className={css.orbStand} aria-hidden />
+        </button>
+      ), document.body) : createPortal((
         <section
           ref={panelRef}
           className={css.window}
           data-hall-window
-          data-collapsed={collapsed || undefined}
           data-docked={docked || undefined}
           style={panelStyle}
           aria-label={t('office.sceneAria', { name: hall.name })}
         >
           <header className={css.head} onPointerDown={beginDrag}>
-            <span className={css.caret} aria-hidden>{collapsed ? '▸' : '▾'}</span>
+            <span className={css.caret} aria-hidden>▾</span>
             <span className={css.title}>⛩ {hall.name}</span>
             <span className={css.meta}>{hasTeam ? `${done}/${total}` : t('office.hallNoTeam')}</span>
-            <button type="button" className={css.headButton} data-control="hall-collapse" aria-expanded={!collapsed} onClick={toggleCollapsed}>
-              {collapsed ? t('office.expand') : t('office.collapse')}
+            <button type="button" className={css.headButton} data-control="hall-collapse" aria-expanded onClick={toggleCollapsed}>
+              {t('office.collapse')}
             </button>
           </header>
-          {!collapsed && (
-            <>
-              <div className={css.canvas}>
+          <div className={css.canvas}>
                 <PixelOffice
                   team={hall}
                   t={t}
@@ -337,8 +358,6 @@ export function SectHallOverlay({ team, t, sessionId, modelDirectories, openMemb
                   </button>
                 )}
               </footer>
-            </>
-          )}
         </section>
       ), document.body)}
       {renderSheet()}

@@ -20,15 +20,6 @@
   box-shadow: 0 22px 60px rgb(0 0 0 / 52%), inset 0 2px rgb(255 255 255 / 4%);
 }
 
-/* 收起：只剩一条紧凑容器。 */
-.window[data-collapsed='true'] {
-  width: min(300px, calc(100vw - 32px));
-}
-
-.window[data-collapsed='true'] .head {
-  border-bottom: 0;
-}
-
 /* 归栏：在右侧栏区域另开一个窗口（保持自身大小，不拉长成整列）。 */
 .window[data-docked='true'] {
   top: 16px;
@@ -36,6 +27,117 @@
   bottom: auto;
   border-color: color-mix(in srgb, var(--dsw-alias-state-success-primary) 45%, var(--dsw-alias-border-l2));
   box-shadow: 0 22px 60px rgb(0 0 0 / 52%), 0 0 0 1px color-mix(in srgb, var(--dsw-alias-state-success-primary) 22%, transparent);
+}
+
+/* 收起：整座洞府缩成一枚水晶球，点一下展开。 */
+.orb {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 11000;
+  width: 58px;
+  height: 58px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: filter 160ms ease;
+  animation: hall-orb-fade 160ms ease-out;
+}
+
+.orb[data-docked='true'] {
+  top: 16px;
+  bottom: auto;
+}
+
+.orb:hover {
+  filter: brightness(1.14);
+}
+
+.orb:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 3px;
+}
+
+.orbGlass {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 26%, rgb(255 255 255 / 96%) 0 7%, rgb(214 241 255 / 92%) 12%, rgb(126 200 255 / 88%) 32%, rgb(45 110 194 / 92%) 58%, rgb(14 30 56 / 96%) 88%);
+  box-shadow:
+    inset 0 -7px 12px rgb(3 10 24 / 55%),
+    inset 0 5px 9px rgb(255 255 255 / 45%),
+    0 0 0 1px rgb(180 220 255 / 35%),
+    0 8px 20px rgb(20 80 160 / 35%),
+    0 0 26px rgb(90 170 255 / 28%);
+  animation: hall-orb-pop 200ms ease-out;
+}
+
+.orbGlass::before {
+  content: '';
+  position: absolute;
+  left: 15%;
+  top: 11%;
+  width: 36%;
+  height: 24%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgb(255 255 255 / 92%), transparent 70%);
+  filter: blur(0.5px);
+}
+
+.orbGlass::after {
+  content: '';
+  position: absolute;
+  inset: 24%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 68%, rgb(150 230 255 / 45%), transparent 62%);
+  animation: hall-orb-swirl 7s linear infinite;
+}
+
+.orbGlyph {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgb(235 248 255 / 82%);
+  font-size: 18px;
+  line-height: 1;
+  text-shadow: 0 0 8px rgb(170 225 255 / 85%);
+}
+
+.orbStand {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 32px;
+  height: 7px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgb(255 214 140 / 45%), rgb(120 84 30 / 25%) 55%, transparent 72%);
+  box-shadow: 0 0 10px rgb(255 206 120 / 22%);
+}
+
+@keyframes hall-orb-fade {
+  from { opacity: 0; }
+}
+
+@keyframes hall-orb-pop {
+  from { opacity: 0; transform: scale(0.55); }
+}
+
+@keyframes hall-orb-swirl {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb,
+  .orbGlass,
+  .orbGlass::after {
+    animation: none;
+  }
 }
 
 /* 右下角缩放把手：让「可自由改大小」看得见。 */
@@ -107,10 +209,6 @@
 .canvas {
   flex: 1 1 auto;
   min-height: 160px;
-}
-
-[data-collapsed='true'] .canvas {
-  display: none;
 }
 
 /* 地板操作条：传送阵 / 剑盒 / 名册。 */
