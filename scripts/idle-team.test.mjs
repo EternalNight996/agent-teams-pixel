@@ -1,6 +1,6 @@
 /**
- * 挂机归属回归：只有当前打开对话的角色会累积挂机修为。
- * 其他成员/掌门在后台不涨，没有打开对话时任何人都不涨。
+ * 挂机归属回归：当前对话面板所属宗门的掌门 + 全部修士一起累积；
+ * 其他宗门不涨；正在对话的角色额外吃连击；换面板不补记。
  */
 import assert from 'node:assert/strict'
 import test from 'node:test'
@@ -30,69 +30,76 @@ function withClock(run) {
   }
 }
 
-test('only the open member earns idle XP; teammates and captain do not', () => {
+test('every cultivator in the current panel earns idle XP; another sect does not', () => {
   withClock(({ advance }) => {
-    const teams = [team('solo-a', 'cap-a', [{ id: 'm-a1', name: 'alpha' }, { id: 'm-a2', name: 'beta' }])]
-    ingestCultivation(teams, 'm-a1')
+    const teams = [
+      team('panel-a', 'cap-a', [{ id: 'a1', name: 'alpha' }, { id: 'a2', name: 'beta' }]),
+      team('panel-b', 'cap-b', [{ id: 'b1', name: 'gamma' }]),
+    ]
+    ingestCultivation(teams, 'cap-a')
     const before = {
+      captain: xpOf('captain:panel-a'),
       alpha: xpOf('member:alpha'),
       beta: xpOf('member:beta'),
-      captain: xpOf('captain:solo-a'),
+      gamma: xpOf('member:gamma'),
     }
     advance(10_000)
-    ingestCultivation(teams, 'm-a1')
-    assert.ok(xpOf('member:alpha') > before.alpha, 'the open member must gain')
-    assert.equal(xpOf('member:beta'), before.beta, 'a background member must not gain')
-    assert.equal(xpOf('captain:solo-a'), before.captain, 'the captain must not gain while a member is open')
+    ingestCultivation(teams, 'cap-a')
+    assert.ok(xpOf('captain:panel-a') > before.captain, 'the panel captain must gain')
+    assert.ok(xpOf('member:alpha') > before.alpha, 'panel member alpha must gain')
+    assert.ok(xpOf('member:beta') > before.beta, 'panel member beta must gain')
+    assert.equal(xpOf('member:gamma'), before.gamma, 'another sect must not gain')
   })
 })
 
-test('the open captain earns idle XP; members do not', () => {
+test('the active member gets the streak bonus over the rest of the panel', () => {
   withClock(({ advance }) => {
-    const teams = [team('solo-b', 'cap-b', [{ id: 'm-b1', name: 'gamma' }])]
-    ingestCultivation(teams, 'cap-b')
-    const memberBefore = xpOf('member:gamma')
-    advance(20_000)
-    ingestCultivation(teams, 'cap-b')
-    assert.ok(xpOf('captain:solo-b') > 0, 'the open captain must gain')
-    assert.equal(xpOf('member:gamma'), memberBefore, 'a member must not gain while the captain is open')
+    const teams = [team('panel-c', 'cap-c', [{ id: 'c1', name: 'delta' }, { id: 'c2', name: 'epsilon' }])]
+    ingestCultivation(teams, 'c1')
+    for (let tick = 0; tick < 12; tick += 1) {
+      advance(10_000)
+      ingestCultivation(teams, 'c1')
+    }
+    assert.ok(xpOf('member:delta') > 0)
+    assert.ok(xpOf('member:delta') > xpOf('member:epsilon'), 'the speaker must out-earn a background member')
+    assert.ok(xpOf('member:epsilon') > 0, 'background member still earns base idle')
   })
 })
 
-test('idle XP does not accrue when no conversation is open', () => {
+test('no open conversation means nobody earns idle XP', () => {
   withClock(({ advance }) => {
-    const teams = [team('solo-c', 'cap-c', [{ id: 'm-c1', name: 'delta' }])]
+    const teams = [team('panel-d', 'cap-d', [{ id: 'd1', name: 'zeta' }])]
     ingestCultivation(teams, undefined)
     advance(20_000)
     ingestCultivation(teams, undefined)
-    assert.equal(xpOf('member:delta'), 0)
-    assert.equal(xpOf('captain:solo-c'), 0)
+    assert.equal(xpOf('member:zeta'), 0)
+    assert.equal(xpOf('captain:panel-d'), 0)
   })
 })
 
-test('switching conversations never backfills time spent in another dialog', () => {
+test('switching panels does not backfill the incoming sect', () => {
   withClock(({ advance }) => {
-    const teams = [team('solo-d', 'cap-d', [{ id: 'm-d1', name: 'epsilon' }, { id: 'm-d2', name: 'zeta' }])]
-    ingestCultivation(teams, 'm-d1')
+    const teams = [
+      team('panel-e', 'cap-e', [{ id: 'e1', name: 'eta' }]),
+      team('panel-f', 'cap-f', [{ id: 'f1', name: 'theta' }]),
+    ]
+    ingestCultivation(teams, 'cap-e')
     advance(10_000)
-    ingestCultivation(teams, 'm-d1')
-    const earned = xpOf('member:epsilon')
-    assert.ok(earned > 0)
+    ingestCultivation(teams, 'cap-e')
+    const eta = xpOf('member:eta')
+    assert.ok(eta > 0)
 
-    // 在 epsilon 上离开 60 秒，然后切到 zeta：epsilon 不能拿到这 60 秒。
     advance(60_000)
-    ingestCultivation(teams, 'm-d2')
-    assert.equal(xpOf('member:epsilon'), earned)
+    ingestCultivation(teams, 'cap-f')
+    assert.equal(xpOf('member:eta'), eta, 'the old panel stops earning when switched away')
 
-    // 再切回 epsilon：从切换那一刻起算，切换本身不补记。
     advance(10_000)
-    ingestCultivation(teams, 'm-d1')
-    const back = xpOf('member:epsilon')
-    assert.equal(back, earned)
+    ingestCultivation(teams, 'cap-e')
+    const back = xpOf('member:eta')
+    assert.equal(back, eta, 'switching back must not backfill the away time')
 
-    // 之后再停留 10 秒才正常增长。
     advance(10_000)
-    ingestCultivation(teams, 'm-d1')
-    assert.ok(xpOf('member:epsilon') > back)
+    ingestCultivation(teams, 'cap-e')
+    assert.ok(xpOf('member:eta') > back, 'the panel earns again after the switch')
   })
 })

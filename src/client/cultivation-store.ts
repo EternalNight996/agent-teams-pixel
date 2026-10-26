@@ -3,7 +3,7 @@
  *
  * - 任务完成：给对应修士加较多修为（历史已完成任务在首次见到时结算一次）；
  * - 掌门：按宗门已完成任务获得带队修为；
- * - 挂机：只结算当前打开对话的角色，连续在线享受连击倍率；
+ * - 挂机：当前对话面板所属宗门的所有修士一起结算；正在对话的角色额外享受连击；
  * - 数据落在 localStorage，跨宗门、跨会话共享。
  */
 import { useSyncExternalStore } from 'react'
@@ -19,8 +19,8 @@ interface CultivationState {
   idleAt: Record<string, number>
   /** 连续挂机节拍数，用于 1x→3x 的留存加成。 */
   streak: Record<string, number>
-  /** 上一次结算挂机的角色；切换对话时只从切换那一刻开始算。 */
-  lastActive?: string
+  /** 上一次挂机结算的宗门；切换宗门时从切换那一刻开始算。 */
+  lastTeam?: string
   tick: number
 }
 
@@ -42,7 +42,7 @@ function load(): CultivationState {
       seen: typeof parsed.seen === 'object' && parsed.seen !== null ? parsed.seen : {},
       idleAt: typeof parsed.idleAt === 'object' && parsed.idleAt !== null ? parsed.idleAt : {},
       streak: typeof parsed.streak === 'object' && parsed.streak !== null ? parsed.streak : {},
-      lastActive: typeof parsed.lastActive === 'string' ? parsed.lastActive : undefined,
+      lastTeam: typeof parsed.lastTeam === 'string' ? parsed.lastTeam : undefined,
       tick: typeof parsed.tick === 'number' ? parsed.tick : Date.now(),
     }
   } catch {
@@ -105,10 +105,10 @@ function resolveCurrentKey(teams: readonly ActivityTeam[], sessionId: string): s
 
 /**
  * 结算一个角色的挂机修为：每满 10 秒一笔。
- * 只有当前打开对话的角色会调用；连续在线每 1 分钟 +0.5 倍（最高 3 倍）。
+ * 当前对话面板内的角色都会调用；只有正在对话的那位吃连续在线倍率。
  * 离线批量补结按基础值，最多补 8 小时。
  */
-function settleIdleXp(key: string, now: number): boolean {
+function settleIdleXp(key: string, now: number, active: boolean): boolean {
   const last = state.idleAt[key] ?? now
   const gap = now - last
   const intervals = Math.min(2880, Math.floor(gap / 10_000))
@@ -121,18 +121,18 @@ function settleIdleXp(key: string, now: number): boolean {
   }
   const online = gap <= 30_000
   const prior = online ? (state.streak[key] ?? 0) : 0
-  const multiplier = online && intervals === 1 ? idleStreakMultiplier(prior) : 1
+  const multiplier = active && online && intervals === 1 ? idleStreakMultiplier(prior) : 1
   const level = cultivationFromXp(xpOf(key)).level
   const gained = addXp(key, Math.round(intervals * idleXpPer10s(level) * multiplier))
   state.idleAt[key] = last + intervals * 10_000
-  state.streak[key] = prior + intervals
+  if (active) state.streak[key] = prior + intervals
   return gained
 }
 
 /**
- * 消费一次队伍快照：结算新完成的任务、掌门带队修为，以及当前对话角色的挂机修为。
+ * 消费一次队伍快照：结算新完成的任务、掌门带队修为，以及当前对话面板内全队的挂机修为。
  * @param teams - 所有实时队伍（同一份 activity 快照）。
- * @param currentSessionId - 当前前台会话；只有它的角色会获得挂机修为。
+ * @param currentSessionId - 当前前台会话；只有它所属宗门的面板会获得挂机修为。
  */
 export function ingestCultivation(teams: readonly ActivityTeam[], currentSessionId?: string): void {
   const now = Date.now()
@@ -169,29 +169,33 @@ export function ingestCultivation(teams: readonly ActivityTeam[], currentSession
     }
   }
 
-  // 挂机：只给当前打开对话的角色。切换对话时从切换那一刻重新起算，
-  // 不把在后台/别的对话停留的时间补记给新角色；同一角色关闭再打开仍可补结。
-  const currentKey = currentSessionId === undefined || currentSessionId === ''
+  // 挂机：当前对话面板所属宗门内的所有修士一起结算；当前正在对话的角色额外吃连击。
+  // 切换宗门面板时从切换那一刻重新起算，不把别的面板停留时间补记进来。
+  const currentTeam = currentSessionId === undefined || currentSessionId === ''
     ? undefined
-    : resolveCurrentKey(teams, currentSessionId)
-  if (currentKey !== undefined) {
-    if (state.lastActive !== currentKey) {
-      state.idleAt[currentKey] = now
-      state.streak[currentKey] = 0
-      state.lastActive = currentKey
+    : teams.find(team => team.captainSessionId === currentSessionId
+      || team.members.some(member => member.id === currentSessionId))
+  const currentKey = currentTeam === undefined
+    ? undefined
+    : (currentTeam.captainSessionId === currentSessionId
+        ? captainKey(currentTeam.name)
+        : memberKey(currentTeam.members.find(member => member.id === currentSessionId)?.name ?? ''))
+  if (currentTeam !== undefined) {
+    const keys = [captainKey(currentTeam.name), ...currentTeam.members.map(member => memberKey(member.name))]
+    if (state.lastTeam !== currentTeam.teamId) {
+      for (const key of keys) {
+        state.idleAt[key] = now
+        state.streak[key] = 0
+      }
+      state.lastTeam = currentTeam.teamId
       changed = true
     }
-    changed = settleIdleXp(currentKey, now) || changed
-  } else {
-    if (state.lastActive !== undefined) {
-      state.lastActive = undefined
-      changed = true
+    for (const key of keys) {
+      changed = settleIdleXp(key, now, key === currentKey) || changed
     }
-    // 没有打开的对话时，把所有角色的挂机起点拨到当下，事后切换不补记。
-    for (const team of teams) {
-      state.idleAt[captainKey(team.name)] = now
-      for (const member of team.members) state.idleAt[memberKey(member.name)] = now
-    }
+  } else if (state.lastTeam !== undefined) {
+    state.lastTeam = undefined
+    changed = true
   }
 
   state.tick = now
