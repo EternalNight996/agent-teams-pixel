@@ -296,6 +296,18 @@
   background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 12%, transparent);
 }
 
+/* 无队伍时的「开宗」主按钮：比普通地板按钮更醒目。 */
+.startButton {
+  border-color: color-mix(in srgb, var(--dsw-alias-state-business-primary) 55%, var(--dsw-alias-border-l2));
+  color: var(--dsw-alias-label-primary);
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 14%, transparent);
+}
+
+.startButton:hover {
+  border-color: var(--dsw-alias-state-business-primary);
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 22%, transparent);
+}
+
 /* 面板配置气泡。 */
 .settings {
   display: flex;

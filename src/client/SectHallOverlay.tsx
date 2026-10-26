@@ -16,6 +16,7 @@ import { TeamSection } from './ActivityPanel.tsx'
 import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import { TeamConfigPanel } from './TeamConfigPanel.tsx'
 import { PixelOffice, type SceneAction } from './pixel-office/PixelOffice.tsx'
+import { OPEN_QUICKSTART_EVENT } from './QuickStartDialog.tsx'
 import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
 import css from './SectHallOverlay.module.css'
 
@@ -390,13 +391,21 @@ export function SectHallOverlay({
     height: `${size.h}px`,
   }
 
+  // 开宗：拉起对话头部同一个「开宗立派」弹窗（洞府无队伍时的入口）。
+  const startSect = (): void => {
+    window.dispatchEvent(new CustomEvent(OPEN_QUICKSTART_EVENT))
+  }
+
   const renderSheet = (): React.ReactNode => {
     if (sheet === undefined || sheetAnchor === undefined) return null
-    // 无队伍时墙面设施 / 名册仍然可点：给出「尚未开宗」的提示，而不是静默无响应。
+    // 无队伍时墙面设施 / 名册仍然可点：给出「尚未开宗」的提示与开宗入口。
     const noTeamHint = (
       <div className={css.settings}>
         <p className={css.settingsHint}>{t('workspace.emptyTitle')}</p>
         <p className={css.settingsMeta}>{t('workspace.emptyBody')}</p>
+        <button type="button" className={css.settingsButton} data-control="hall-start" onClick={startSect}>
+          <span aria-hidden>⛩</span> {t('quickstart.entry')}
+        </button>
       </div>
     )
     const title = sheet === 'settings' ? t('office.panelConfig')
@@ -528,6 +537,17 @@ export function SectHallOverlay({
                 />
               </div>
               <footer className={css.floor}>
+                {!hasTeam && (
+                  <button
+                    type="button"
+                    className={`${css.floorButton} ${css.startButton}`}
+                    data-control="hall-start"
+                    onClick={startSect}
+                    title={t('quickstart.entryTitle')}
+                  >
+                    <span aria-hidden>⛩</span>{t('quickstart.entry')}
+                  </button>
+                )}
                 <button
                   type="button"
                   className={css.portal}

@@ -7,6 +7,9 @@ import { TEAM_CREATED_EVENT } from './team-reveal.ts'
 import { ROLE_META } from './role-labels.ts'
 import { SECT_PRESETS, randomSect, sectPreset } from './sects.ts'
 
+/** 打开「开宗立派」弹窗的窗口事件：对话头部按钮与洞府里的开宗入口共用。 */
+export const OPEN_QUICKSTART_EVENT = 'agent-teams:open-quickstart'
+
 type TplKey = 'quickstart.tplFix' | 'quickstart.tplFeat' | 'quickstart.tplResearch' | 'quickstart.tplAudit'
   | 'quickstart.tplBuild' | 'quickstart.tplArray' | 'quickstart.tplDocs' | 'quickstart.tplDebate'
 
@@ -57,6 +60,18 @@ export function TeamQuickStart({ sessionId, t }: PropsRuntime<'conversation.sess
     document.addEventListener('pointerdown', onPointerDown)
     return () => { document.removeEventListener('pointerdown', onPointerDown) }
   }, [rolesOpen])
+
+  // 洞府里的「开宗」入口：没有队伍时也能从浮层直接拉起同一个弹窗。
+  useEffect(() => {
+    const openDialog = (): void => {
+      setOpen(true)
+      setError('')
+      setBlocked(false)
+      setCreated(undefined)
+    }
+    window.addEventListener(OPEN_QUICKSTART_EVENT, openDialog)
+    return () => { window.removeEventListener(OPEN_QUICKSTART_EVENT, openDialog) }
+  }, [])
 
   const reset = (): void => {
     setGoal('')
