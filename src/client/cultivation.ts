@@ -97,7 +97,22 @@ const REALM_BANDS = [4, 49, 149, 349, 699, 1199, 1899, 2799, 3899, 5199, 6699, 7
 
 /** 升到下一级还需要的修为（随等级线性增长）。 */
 export function xpNeed(level: number): number {
-  return 60 + (level - 1) * 45
+  return Math.round(60 * Math.pow(Math.max(1, level), 1.2))
+}
+
+/** 完成任务获得的修为：等级越高收益越高。 */
+export function taskXpFor(level: number): number {
+  return 60 + Math.max(1, Math.floor(level)) * 15
+}
+
+/** 掌门带队完成任务获得的修为。 */
+export function captainTaskXpFor(level: number): number {
+  return 40 + Math.max(1, Math.floor(level)) * 8
+}
+
+/** 每 10 秒挂机修为：等级越高越多。 */
+export function idleXpPer10s(level: number): number {
+  return 1 + Math.floor(Math.max(1, level) / 10)
 }
 
 /** 指定等级所需的累计修为（用于调试/直接提级）。 */
@@ -150,12 +165,6 @@ export function unlockedItems(level: number): readonly CultivationItem[] {
   return CULTIVATION_ITEMS.filter(item => level >= item.level)
 }
 
-/** 挂机修为：每 10 秒结算 1 点，主要靠任务。 */
-export const IDLE_XP_PER_10S = 1
-/** 完成一个任务获得的修为。 */
-export const TASK_XP = 60
-/** 掌门因宗门任务完成获得的带队修为。 */
-export const CAPTAIN_TASK_XP = 40
 
 export function memberKey(name: string): string {
   return `member:${name.trim()}`

@@ -104,7 +104,7 @@ export interface SceneHandle {
     /** Cycle one member's travel form: walking → flying sword → divine beast → walking. */
     cycleMount(id: string): void;
     /** Force one member's travel form (equipment sheet); auto/off mean walking. */
-    setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off'): void;
+    setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off', variant?: string): void;
     /** Equip one member's artifact/skill (equipment sheet). */
     setEquip(id: string, kind: 'weapon' | 'skill', tier: number): void;
     /** Cancel the loop and release the context. */

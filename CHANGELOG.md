@@ -3,6 +3,15 @@
 ## [Unreleased]
 
 ### Changed
+- Mounted cultivators keep their legs still (walking gait only plays on foot);
+  every mount family now has its own model: spirit beast, crane, qilin, jiao,
+  dragon, phoenix and dao beast, selected from the 天机阁 item.
+- Cultivator clothing was reworked toward Chinese hanfu: cross-collar 交领右衽,
+  wide sleeves with contrast cuffs, sash with ribbons and jade pendant, cloth
+  boots with pale soles, and a gold hair crown/hairpin.
+- Progression is level-scaled and avoids both runaway and stalled leveling:
+  xpNeed = round(60 × level^1.2), task xp = 60 + 15×level, idle xp per 10s =
+  1 + floor(level/10), with captain task xp scaled similarly.
 - 传音阁 is removed from the wall menu and the bottom bar (four facilities now:
   藏经阁 / 山门 / 功德碑 / 天机阁). Captain↔member messages still appear live in the
   conversation team card.

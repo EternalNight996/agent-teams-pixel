@@ -232,8 +232,8 @@ export function PixelOffice({
 
   useEffect(() => {
     const onMount = (event: Event): void => {
-      const detail = (event as CustomEvent<{ id?: string; form?: 'auto' | 'sword' | 'beast' | 'off' }>).detail
-      if (detail?.id !== undefined && detail.form !== undefined) sceneRef.current?.setMount(detail.id, detail.form)
+      const detail = (event as CustomEvent<{ id?: string; form?: 'auto' | 'sword' | 'beast' | 'off'; mountId?: string }>).detail
+      if (detail?.id !== undefined && detail.form !== undefined) sceneRef.current?.setMount(detail.id, detail.form, detail.mountId)
     }
     window.addEventListener('agent-teams:mount', onMount)
     return () => { window.removeEventListener('agent-teams:mount', onMount) }

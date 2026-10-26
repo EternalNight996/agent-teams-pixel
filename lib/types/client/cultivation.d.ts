@@ -22,6 +22,12 @@ export declare const CULTIVATION_ITEMS: readonly CultivationItem[];
 export declare const LEVEL_CAP = 9999;
 /** 升到下一级还需要的修为（随等级线性增长）。 */
 export declare function xpNeed(level: number): number;
+/** 完成任务获得的修为：等级越高收益越高。 */
+export declare function taskXpFor(level: number): number;
+/** 掌门带队完成任务获得的修为。 */
+export declare function captainTaskXpFor(level: number): number;
+/** 每 10 秒挂机修为：等级越高越多。 */
+export declare function idleXpPer10s(level: number): number;
 /** 指定等级所需的累计修为（用于调试/直接提级）。 */
 export declare function xpForLevel(level: number): number;
 export interface Cultivation {
@@ -36,11 +42,5 @@ export interface Cultivation {
 export declare function cultivationFromXp(xp: number): Cultivation;
 /** 当前等级下已解锁的全部装备/技能（用于物品栏与 tooltip）。 */
 export declare function unlockedItems(level: number): readonly CultivationItem[];
-/** 挂机修为：每 10 秒结算 1 点，主要靠任务。 */
-export declare const IDLE_XP_PER_10S = 1;
-/** 完成一个任务获得的修为。 */
-export declare const TASK_XP = 60;
-/** 掌门因宗门任务完成获得的带队修为。 */
-export declare const CAPTAIN_TASK_XP = 40;
 export declare function memberKey(name: string): string;
 export declare function captainKey(teamName: string): string;

@@ -111,7 +111,7 @@ export interface SceneHandle {
   /** Cycle one member's travel form: walking → flying sword → divine beast → walking. */
   cycleMount(id: string): void
   /** Force one member's travel form (equipment sheet); auto/off mean walking. */
-  setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off'): void
+  setMount(id: string, form: 'auto' | 'sword' | 'beast' | 'off', variant?: string): void
   /** Equip one member's artifact/skill (equipment sheet). */
   setEquip(id: string, kind: 'weapon' | 'skill', tier: number): void
   /** Cancel the loop and release the context. */
@@ -221,6 +221,8 @@ export function createPixelScene(
   const jumps = new Map<string, number>()
   // 出行形态（天机阁装备 / 双击切换）：默认步行，只有 sword/beast 才离地。
   const mountOverride = new Map<string, 'auto' | 'sword' | 'beast' | 'off'>()
+  // 具体坐骑 id（灵兽/仙鹤/麒麟/龙/凤凰/道兽…），决定画哪套模型。
+  const mountVariant = new Map<string, string>()
   // 已装备的法器/技能（由「天机阁」物品栏写入），用于即时外观切换。
   const weaponEquip = new Map<string, number>()
   const skillEquip = new Map<string, number>()
@@ -1213,12 +1215,14 @@ export function createPixelScene(
       { x: cx + 2 - stride, lift: legLift },
     ]
     for (const leg of legs) {
-      g.fillStyle = '#2b3240'
+      // 内袍与皂靴：靴底浅色、靴头上翘，遮住“西式长靴”的感觉。
+      g.fillStyle = visual?.robeDark ?? '#3a3128'
       g.fillRect(leg.x, hemY - 2, 6, shoeY - (hemY - 2) - leg.lift)
-      g.fillStyle = '#1b1510'
+      g.fillStyle = '#241a12'
       g.fillRect(leg.x - 1, shoeY - leg.lift, 8, SHOE_HEIGHT)
-      g.fillStyle = 'rgba(255, 255, 255, 0.16)'
-      g.fillRect(leg.x - 1, shoeY - leg.lift, 8, 1)
+      g.fillStyle = '#d8cfc0'
+      g.fillRect(leg.x - 1, shoeY - leg.lift + SHOE_HEIGHT - 1, 8, 1)
+      g.fillRect(leg.x + (leg.x < cx ? -2 : 7), shoeY - 2 - leg.lift, 2, 2)
     }
 
     // 下摆：遮住裤腿上半段，走路时轻轻摆动。
@@ -1235,6 +1239,13 @@ export function createPixelScene(
     g.fillRect(cx - 11, hemY - 3, 22, 2)
     g.fillStyle = 'rgba(0, 0, 0, 0.3)'
     g.fillRect(cx - 1 + Math.round(hemSway / 2), waistY + 4, 2, hemY - waistY - 8)
+    // 两侧开衩与下摆云纹。
+    g.fillStyle = '#1b1510'
+    g.fillRect(cx - 13, hemY - 6, 2, 6)
+    g.fillRect(cx + 11, hemY - 6, 2, 6)
+    g.fillStyle = trim
+    g.fillRect(cx - 8, hemY - 8, 4, 1)
+    g.fillRect(cx + 5, hemY - 6, 3, 1)
 
     // 躯干：暗描边 + 亮/中/暗三档道袍。
     g.fillStyle = '#1b1510'
@@ -1245,27 +1256,43 @@ export function createPixelScene(
     g.fillRect(cx - 9, bodyY, 3, waistY - bodyY)
     g.fillStyle = visual?.robeDark ?? 'rgba(0, 0, 0, 0.22)'
     g.fillRect(cx + 5, bodyY, 4, waistY - bodyY)
-    // 交领与腰带。
+    // 交领右衽：内衬 + 两条斜襟；腰带、绦带与玉佩。
+    const innerCollar = visual?.robeLight ?? '#e8eef8'
+    g.fillStyle = innerCollar
+    g.beginPath(); g.moveTo(cx - 7, bodyY); g.lineTo(cx + 7, bodyY); g.lineTo(cx + 2, bodyY + 9); g.lineTo(cx - 2, bodyY + 9); g.closePath(); g.fill()
     g.fillStyle = trim
-    g.fillRect(cx - 9, bodyY + 1, 18, 2)
-    g.fillStyle = 'rgba(0, 0, 0, 0.35)'
-    g.fillRect(cx - 1, bodyY + 3, 2, waistY - bodyY - 6)
-    g.fillStyle = '#3a2c1e'
-    g.fillRect(cx - 10, waistY - 3, 20, 4)
+    g.beginPath(); g.moveTo(cx - 9, bodyY); g.lineTo(cx - 1, bodyY + 10); g.lineTo(cx - 4, bodyY + 11); g.lineTo(cx - 11, bodyY + 2); g.closePath(); g.fill()
+    g.beginPath(); g.moveTo(cx + 9, bodyY); g.lineTo(cx + 1, bodyY + 10); g.lineTo(cx + 4, bodyY + 11); g.lineTo(cx + 11, bodyY + 2); g.closePath(); g.fill()
+    g.fillStyle = 'rgba(0, 0, 0, 0.28)'
+    g.fillRect(cx - 1, bodyY + 10, 2, waistY - bodyY - 12)
+    g.fillStyle = '#6e2a24'
+    g.fillRect(cx - 11, waistY - 4, 22, 5)
+    g.fillStyle = trim
+    g.fillRect(cx - 11, waistY - 4, 22, 1)
     g.fillStyle = '#f2c14e'
-    g.fillRect(cx - 2, waistY - 3, 4, 4)
+    g.fillRect(cx - 3, waistY - 4, 6, 4)
+    g.fillStyle = '#a8433a'
+    g.fillRect(cx + 2, waistY + 1, 2, 12)
+    g.fillRect(cx + 6, waistY + 1, 2, 9)
+    g.fillStyle = '#7fd6c0'
+    g.fillRect(cx - 7, waistY + 2, 3, 3)
+    g.fillStyle = '#f2c14e'
+    g.fillRect(cx - 7, waistY + 1, 3, 1)
 
     // 手臂：袖口 + 手，走路时与腿反向摆动。
     const armSwing = walking ? -stride : 0
     for (const side of [-1, 1] as const) {
-      const x = side < 0 ? cx - 14 : cx + 9
+      const x = side < 0 ? cx - 16 : cx + 9
       const y = bodyY + 3 + (side < 0 ? armSwing : -armSwing)
+      // 宽袖：袖身加宽，袖口一圈浅色镶边。
       g.fillStyle = robe
-      g.fillRect(x, y, 5, 16)
+      g.fillRect(x, y, 7, 17)
       g.fillStyle = visual?.robeDark ?? 'rgba(0, 0, 0, 0.22)'
-      g.fillRect(x + (side < 0 ? 0 : 3), y + 10, 2, 6)
+      g.fillRect(x + (side < 0 ? 0 : 5), y + 10, 2, 7)
+      g.fillStyle = trim
+      g.fillRect(x - 1, y + 14, 9, 2)
       g.fillStyle = skin
-      g.fillRect(x, y + 16, 5, 4)
+      g.fillRect(x + 1, y + 17, 5, 4)
     }
 
     // 头部与发式。
@@ -1287,6 +1314,14 @@ export function createPixelScene(
       g.fillStyle = '#d8d2c8'
       g.fillRect(cx - 3, headY + 12, 6, 4)
     }
+    // 发冠/发簪：把“欧洲中世纪”感压下去。
+    g.fillStyle = '#f2c14e'
+    g.fillRect(cx - 5, headY - 2, 10, 2)
+    g.fillStyle = trim
+    g.fillRect(cx - 1, headY - 7, 2, 5)
+    g.fillStyle = '#f2c14e'
+    g.fillRect(cx + 3, headY - 8, 6, 1)
+    g.fillRect(cx + 8, headY - 8, 1, 2)
     // 眼。
     g.fillStyle = '#24303f'
     g.fillRect(cx - 4, headY + 8, 2, 2)
@@ -1479,7 +1514,16 @@ export function createPixelScene(
   }
 
   /** 神兽：鞍座托着骑手、四足悬空，整只兽浮在案面上方。 */
-  function paintBeastMount(cx: number, feetY: number, time: number): void {
+  function paintBeastMount(cx: number, feetY: number, time: number, variant?: string): void {
+    const kind = variant === undefined ? 'beast'
+      : variant.includes('crane') ? 'crane'
+        : variant.includes('qilin') || variant.includes('kirin') ? 'qilin'
+          : variant.includes('phoenix') ? 'phoenix'
+            : variant.includes('dao') ? 'dao'
+              : variant.includes('jiao') ? 'jiao'
+                : variant.includes('dragon') ? 'dragon'
+                  : 'beast'
+    if (kind !== 'beast') { paintSpecialMount(cx, feetY, time, kind); return }
     const bob = Math.sin(time / 460) * 1.1
     const body = '#3d5c52'
     const bodyLit = '#4d7266'
@@ -1541,10 +1585,138 @@ export function createPixelScene(
     g.restore()
   }
 
+  /** 仙鹤/麒麟/凤凰/蛟龙/真龙/道兽：每种坐骑一套独立模型。 */
+  function paintSpecialMount(cx: number, feetY: number, time: number, kind: 'crane' | 'qilin' | 'phoenix' | 'dao' | 'jiao' | 'dragon'): void {
+    const bob = Math.sin(time / 430) * 1.2
+    g.save()
+    g.translate(cx, feetY + bob)
+    if (kind === 'crane') {
+      g.fillStyle = 'rgba(160, 220, 220, 0.18)'
+      g.beginPath(); g.ellipse(0, 8, 24, 8, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#f2f5f0'
+      g.beginPath(); g.ellipse(0, 9, 15, 7, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#dbe7e5'
+      g.beginPath(); g.ellipse(-7, 8, 9, 5, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#f2f5f0'
+      g.fillRect(9, -7, 3, 16)
+      g.beginPath(); g.ellipse(12, -9, 5, 4, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#f2c14e'
+      g.fillRect(16, -9, 5, 2)
+      g.fillStyle = '#d43a3a'
+      g.fillRect(10, -13, 3, 3)
+      g.fillStyle = '#2e4740'
+      g.fillRect(-9, 15, 2, 8)
+      g.fillRect(-4, 16, 2, 7)
+      g.fillStyle = '#7a3f52'
+      g.fillRect(-5, 1, 10, 4)
+      g.fillStyle = '#f2c14e'
+      g.fillRect(-5, 1, 10, 1)
+    } else if (kind === 'qilin') {
+      g.fillStyle = 'rgba(255, 160, 80, 0.16)'
+      g.beginPath(); g.ellipse(0, 10, 24, 8, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#c9a24a'
+      g.beginPath(); g.ellipse(0, 9, 17, 8, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#e8c46a'
+      g.beginPath(); g.ellipse(-2, 6, 12, 4, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#2e4740'
+      g.fillRect(-11, 15, 3, 8)
+      g.fillRect(-4, 16, 3, 7)
+      g.fillRect(5, 15, 3, 8)
+      g.fillRect(12, 16, 3, 7)
+      g.fillStyle = '#c9a24a'
+      g.fillRect(12, -3, 7, 13)
+      g.beginPath(); g.ellipse(19, -6, 7, 5, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#f2c14e'
+      g.fillRect(17, -14, 2, 7)
+      g.fillRect(21, -12, 2, 5)
+      g.fillStyle = '#d43a3a'
+      for (let i = 0; i < 5; i += 1) g.fillRect(9 + i, -9 + i * 2, 2, 2)
+      g.fillStyle = '#ffe9a8'
+      g.fillRect(21, -7, 2, 2)
+      g.fillStyle = '#d43a3a'
+      g.beginPath(); g.moveTo(-16, 4); g.quadraticCurveTo(-26, 2, -25, 12); g.quadraticCurveTo(-20, 8, -17, 8); g.closePath(); g.fill()
+      g.fillStyle = '#7a3f52'
+      g.fillRect(-5, 1, 10, 4)
+      g.fillStyle = '#f2c14e'
+      g.fillRect(-5, 1, 10, 1)
+    } else if (kind === 'phoenix') {
+      g.fillStyle = 'rgba(255, 120, 50, 0.2)'
+      g.beginPath(); g.ellipse(0, 8, 28, 10, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#e06a2a'
+      g.beginPath(); g.ellipse(0, 8, 15, 7, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#f2a23a'
+      g.beginPath(); g.ellipse(-3, 5, 11, 4, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#d43a3a'
+      g.beginPath(); g.moveTo(-6, 6); g.quadraticCurveTo(-26, -8, -30, 2); g.quadraticCurveTo(-20, 8, -8, 10); g.closePath(); g.fill()
+      g.beginPath(); g.moveTo(6, 6); g.quadraticCurveTo(24, -6, 28, 2); g.quadraticCurveTo(18, 8, 8, 10); g.closePath(); g.fill()
+      g.fillStyle = '#f2c14e'
+      for (let i = 0; i < 3; i += 1) {
+        const sway = Math.sin(time / 240 + i) * 2
+        g.fillRect(-22 + i * 3 + sway, 12, 2, 10)
+      }
+      g.fillStyle = '#e06a2a'
+      g.fillRect(11, -4, 6, 12)
+      g.beginPath(); g.ellipse(17, -7, 5, 4, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#f2c14e'
+      g.fillRect(20, -8, 5, 2)
+      g.fillRect(13, -12, 2, 4)
+      g.fillRect(17, -11, 2, 3)
+      g.fillStyle = '#7a3f52'
+      g.fillRect(-5, 1, 10, 4)
+      g.fillStyle = '#f2c14e'
+      g.fillRect(-5, 1, 10, 1)
+    } else if (kind === 'dao') {
+      const glow = g.createRadialGradient(0, 8, 3, 0, 8, 30)
+      glow.addColorStop(0, 'rgba(180, 160, 255, 0.35)')
+      glow.addColorStop(1, 'rgba(180, 160, 255, 0)')
+      g.fillStyle = glow
+      g.beginPath(); g.ellipse(0, 8, 30, 12, 0, 0, Math.PI * 2); g.fill()
+      g.fillStyle = '#cfc6ff'
+      g.beginPath(); g.ellipse(0, 9, 19, 7, 0, 0, Math.PI * 2); g.fill()
+      g.strokeStyle = '#f2c14e'
+      g.lineWidth = 1
+      g.beginPath(); g.ellipse(0, 9, 13, 4.5, 0, 0, Math.PI * 2); g.stroke()
+      g.fillStyle = '#9a8cff'
+      for (let i = 0; i < 4; i += 1) {
+        const angle = time / 900 + (i / 4) * Math.PI * 2
+        g.fillRect(Math.cos(angle) * 16 - 1, 9 + Math.sin(angle) * 6 - 1, 2, 2)
+      }
+      g.fillStyle = '#f2c14e'
+      g.beginPath(); g.ellipse(0, 2, 6, 3, 0, 0, Math.PI * 2); g.fill()
+    } else {
+      const dragon = kind === 'dragon'
+      const body = dragon ? '#8a6a2a' : '#2f6a6a'
+      const lit = dragon ? '#c9a24a' : '#4d9a8a'
+      g.strokeStyle = body
+      g.lineWidth = 6
+      g.beginPath(); g.moveTo(-22, 12); g.quadraticCurveTo(-10, -2, 0, 10); g.quadraticCurveTo(10, 18, 20, 4); g.stroke()
+      g.strokeStyle = lit
+      g.lineWidth = 2
+      g.beginPath(); g.moveTo(-20, 11); g.quadraticCurveTo(-10, 0, 0, 10); g.quadraticCurveTo(10, 17, 19, 4); g.stroke()
+      g.fillStyle = body
+      g.beginPath(); g.ellipse(21, 0, 8, 6, -0.2, 0, Math.PI * 2); g.fill()
+      g.fillStyle = lit
+      g.fillRect(25, 2, 6, 3)
+      g.fillStyle = '#f2c14e'
+      g.fillRect(18, -6, 2, 6)
+      g.fillRect(23, -5, 2, 4)
+      g.beginPath(); g.moveTo(26, 1); g.lineTo(34, -2); g.lineTo(30, 4); g.closePath(); g.fill()
+      g.fillStyle = '#ffe9a8'
+      g.fillRect(24, -1, 2, 2)
+      g.fillStyle = body
+      g.beginPath(); g.moveTo(-22, 12); g.quadraticCurveTo(-30, 18, -34, 14); g.quadraticCurveTo(-28, 22, -20, 16); g.closePath(); g.fill()
+      g.fillStyle = '#7a3f52'
+      g.fillRect(-5, 1, 10, 4)
+      g.fillStyle = '#f2c14e'
+      g.fillRect(-5, 1, 10, 1)
+    }
+    g.restore()
+  }
+
   /** 坐骑按形态挂在骑手脚底：剑脊/鞍面就是脚线，人踩着飞。 */
-  function paintMount(cx: number, feetY: number, form: TravelForm, time: number): void {
+  function paintMount(cx: number, feetY: number, form: TravelForm, time: number, variant?: string): void {
     if (form === 'sword') paintSwordMount(cx, feetY, time)
-    else if (form === 'beast') paintBeastMount(cx, feetY, time)
+    else if (form === 'beast') paintBeastMount(cx, feetY, time, variant)
   }
 
   /** 当前对话者头顶的悬浮标签，比只有光圈更容易一眼看到。 */
@@ -2020,9 +2192,10 @@ export function createPixelScene(
       for (const spot of spots) {
         const form = travelForm(spot.member)
         const lift = TRAVEL_LIFT[form]
-        if (form !== 'walk') paintMount(spot.cx, spot.baseY - lift, form, time)
+        if (form !== 'walk') paintMount(spot.cx, spot.baseY - lift, form, time, mountVariant.get(spot.member.id || spot.member.name))
         const hop = jumpHeight(spot.member.id || spot.member.name, time)
-        paintCharacter(spot.cx, spot.baseY - lift - hop, spot.member, time, spot.walking)
+        // 御剑/骑兽时双腿保持不动，只有步行才播步态。
+        paintCharacter(spot.cx, spot.baseY - lift - hop, spot.member, time, spot.walking && form === 'walk')
         paintCultivationAura(spot.cx, spot.baseY - lift, spot.member, time)
       }
       // 伏案修士的下半身压在矮案之后：不再悬在案面上方。
@@ -2132,8 +2305,9 @@ export function createPixelScene(
       const next = nextTravelForm(member.level ?? 0, travelForm(member))
       mountOverride.set(key, next === 'walk' ? 'off' : next)
     },
-    setMount(id, form) {
+    setMount(id, form, variant) {
       mountOverride.set(id, form)
+      if (variant !== undefined) mountVariant.set(id, variant)
     },
     setEquip(id, kind, tier) {
       if (kind === 'weapon') weaponEquip.set(id, tier)

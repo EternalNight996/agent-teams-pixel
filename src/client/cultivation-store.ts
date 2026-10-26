@@ -8,7 +8,9 @@
  */
 import { useSyncExternalStore } from 'react'
 import type { ActivityTeam } from './activity-monitor.ts'
-import { CAPTAIN_TASK_XP, IDLE_XP_PER_10S, TASK_XP, captainKey, memberKey } from './cultivation.ts'
+import {
+  captainKey, captainTaskXpFor, cultivationFromXp, idleXpPer10s, memberKey, taskXpFor,
+} from './cultivation.ts'
 
 interface CultivationState {
   xp: Record<string, number>
@@ -109,9 +111,9 @@ export function ingestCultivation(teams: readonly ActivityTeam[], currentSession
       if (previous === undefined) {
         // 首次见到这个修士：把历史已完成任务一次性结修为，让“用得多”立刻体现在等级上。
         state.seen[seenKey] = member.done
-        if (member.done > 0) changed = addXp(key, member.done * TASK_XP) || changed
+        if (member.done > 0) changed = addXp(key, member.done * taskXpFor(cultivationFromXp(xpOf(key)).level)) || changed
       } else if (member.done > previous) {
-        changed = addXp(key, (member.done - previous) * TASK_XP) || changed
+        changed = addXp(key, (member.done - previous) * taskXpFor(cultivationFromXp(xpOf(key)).level)) || changed
         state.seen[seenKey] = member.done
       } else if (member.done < previous) {
         state.seen[seenKey] = member.done
@@ -123,9 +125,9 @@ export function ingestCultivation(teams: readonly ActivityTeam[], currentSession
     const captainPrevious = state.seen[captainSeenKey]
     if (captainPrevious === undefined) {
       state.seen[captainSeenKey] = teamDone
-      if (teamDone > 0) changed = addXp(captainKey(team.name), teamDone * CAPTAIN_TASK_XP) || changed
+      if (teamDone > 0) changed = addXp(captainKey(team.name), teamDone * captainTaskXpFor(cultivationFromXp(xpOf(captainKey(team.name))).level)) || changed
     } else if (teamDone > captainPrevious) {
-      changed = addXp(captainKey(team.name), (teamDone - captainPrevious) * CAPTAIN_TASK_XP) || changed
+      changed = addXp(captainKey(team.name), (teamDone - captainPrevious) * captainTaskXpFor(cultivationFromXp(xpOf(captainKey(team.name))).level)) || changed
       state.seen[captainSeenKey] = teamDone
     } else if (teamDone < captainPrevious) {
       state.seen[captainSeenKey] = teamDone
@@ -145,7 +147,7 @@ export function ingestCultivation(teams: readonly ActivityTeam[], currentSession
         const last = state.idleAt[key] ?? now
         const intervals = Math.min(360, Math.floor((now - last) / 10_000))
         if (intervals > 0) {
-          changed = addXp(key, intervals * IDLE_XP_PER_10S) || changed
+          changed = addXp(key, intervals * idleXpPer10s(cultivationFromXp(xpOf(key)).level)) || changed
           state.idleAt[key] = last + intervals * 10_000
         } else if (state.idleAt[key] === undefined) {
           state.idleAt[key] = now

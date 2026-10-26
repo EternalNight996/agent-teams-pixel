@@ -597,7 +597,7 @@ export function SectHallOverlay({
                                 }))
                                 if (item.kind === 'mount') {
                                   window.dispatchEvent(new CustomEvent('agent-teams:mount', {
-                                    detail: { id: character.id, form: item.form ?? 'off' },
+                                    detail: { id: character.id, form: item.form ?? 'off', mountId: item.id },
                                   }))
                                 } else {
                                   window.dispatchEvent(new CustomEvent('agent-teams:equip', {
