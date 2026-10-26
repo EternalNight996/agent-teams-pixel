@@ -47,9 +47,9 @@
   the **left of the panel** with their right edge exactly 8px from the panel's left
   edge (clamped inside the viewport), treating the panel as reserved right-side
   space: a wider panel pushes the dialog further left.
-- The floating hall only exists while its team still owns work: a team with no
-  tasks, or whose tasks were all cancelled, no longer floats a panel over the
-  conversation.
+- The floating hall is persistent by design: it keeps existing for any team in
+  the session even when the team has no tasks or every task was cancelled (a
+  stopped team still shows its hall).
 - 归栏 opens a second window at the top-right of the right-side area (16px inset)
   at the panel's own size, still resizable from its bottom-right corner (green
   accent, not a stretched full-height column); 浮空 returns it to the floating card.
