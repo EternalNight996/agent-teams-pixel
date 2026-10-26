@@ -439,6 +439,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
           key={`${sessionId}:${team.teamId}`}
           team={team}
           workspace
+          viewingSessionId={sessionId}
           historic={!live.includes(team)}
           modelDirectory={team.phase === 'staged' ? modelDirectories.directoryFor(sessionId) : undefined}
           onContinuePlanning={backToChat}
@@ -529,6 +530,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
             team={selected}
             t={t}
             workspace
+            viewingSessionId={sessionId}
             onNavigate={(_parent, child) => { openMember(selected.captainSessionId as SessionId, child) }}
             onContinuePlanning={backToChat}
             onDiscarded={backToChat}
@@ -575,7 +577,7 @@ export function WorkspaceActivity({ sessionId, useTabInfo, t, state, modelDirect
                 <p>{t('config.stagedBody')}</p>
                 <button type="button" onClick={() => { setWorkspaceView('config') }}>{t('config.openConfig')}</button>
               </section>
-              : <TeamSection key={`${sessionId}:${selected.teamId}`} team={selected} historic={history}
+              : <TeamSection key={`${sessionId}:${selected.teamId}`} team={selected} historic={history} viewingSessionId={sessionId}
                 onContinuePlanning={backToChat} onDiscarded={backToChat} onNavigate={openMember} t={t} />)}
         </div>
       )}

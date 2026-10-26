@@ -96,15 +96,7 @@ export function AgentTeamsSummary({ data, openMember, sessionId, t }: AgentTeams
         <img className={css.leadAvatar} src={LEAD_ART} alt="" aria-hidden />
         <span className={css.teamName} title={resolved.teamName}>{resolved.teamName}</span>
         <span className={css.memberCount}>{t('card.memberCount', { count: resolved.members.length })}</span>
-        <button
-          type="button"
-          className={css.panelButton}
-          onClick={() => { openActivityPanel(resolved) }}
-          aria-label={t('workspace.focus')}
-          title={t('workspace.focus')}
-        >
-          {t('workspace.focus')}
-        </button>
+
       </header>
       {(messages.length > 0 || taskEvents.length > 0) && (
         <div className={css.comms} data-team-comms>

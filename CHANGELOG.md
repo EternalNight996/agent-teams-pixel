@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 ### Changed
+- Removed the redundant 查看宗门 entries (header button and conversation-card
+  button); 开宗立派 stays as the only header action.
+- The active cultivator is now marked with a soft teal (member) / gold (captain)
+  aura and a glowing name plate instead of the previous brackets/rings, and the
+  宗门进度 member/captain cards show 对话中 for the open conversation.
+- Added a cultivation system: completed tasks and days in the sect accumulate
+  XP; each member (and the captain) shows Lv.N + 境界 on their card, with
+  XP/next-level in the tooltip.
 - The cultivator whose conversation is currently open is now marked in the scene:
   a breathing teal (member) or gold (captain) foot ring plus corner brackets,
   and the name plate state reads 对话中 instead of 静修. Clicking another pixel

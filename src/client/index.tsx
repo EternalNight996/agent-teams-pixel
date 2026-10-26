@@ -20,7 +20,7 @@ import type { UsePanelInfo } from '@deepseek-ai/dsh-client-ui-layout/client'
 import type {} from '@deepseek-ai/dsh-client-ui-model-selection/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 import { ActivitySurface, TEAM_TAB_ID, TEAM_TAB_KIND, WorkspaceActivity, createWorkspaceBridge } from './WorkspaceActivity.tsx'
-import { TeamChatEntry, TeamTurnCard } from './TeamChatEntry.tsx'
+import { TeamTurnCard } from './TeamChatEntry.tsx'
 import { TeamQuickStart } from './QuickStartDialog.tsx'
 import { createWorkspaceState } from './workspace-state.ts'
 import { AgentTeamsCard, type AgentTeamsCardInjected } from './AgentTeamsCard.tsx'
@@ -105,10 +105,7 @@ export function apply(ctx: ClientContext): void {
       name: 'conversation.session.header.actions', id: 'agent-teams-create', order: 49,
       locale: AGENT_TEAMS_LOCALE_NAMESPACE,
     }, TeamQuickStart))
-    native.slots.inject('conversation.session.header.actions', () => native.slots.register({
-      name: 'conversation.session.header.actions', id: 'agent-teams-entry', order: 50,
-      locale: AGENT_TEAMS_LOCALE_NAMESPACE,
-    }, TeamChatEntry))
+
     native.slots.inject('conversation.chat.turnTail', () => native.slots.register({
       name: 'conversation.chat.turnTail', id: 'agent-teams-summary', order: 50,
       locale: AGENT_TEAMS_LOCALE_NAMESPACE,

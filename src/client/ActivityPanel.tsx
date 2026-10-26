@@ -62,6 +62,7 @@ import {
   type ActivityTeam,
 } from './activity-monitor.ts'
 import { ACTION_ART, LEAD_ART, memberArtUrl } from './artwork.ts'
+import { cultivationOf } from './cultivation.ts'
 import { OPEN_PANEL_EVENT } from './AgentTeamsCard.tsx'
 import { StagingPlanEditor } from './StagingPlanEditor.tsx'
 import type { AgentTeamsCardData } from './agent-teams-card-definition.ts'
@@ -529,13 +530,15 @@ function DependencyMap({ tasks, members, t, discarded = false, workspace = false
   )
 }
 
-export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscarded, onNavigate, onOpenCaptain, t, historic = false, workspace = false }: {
+export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscarded, onNavigate, onOpenCaptain, viewingSessionId, t, historic = false, workspace = false }: {
   readonly team: ActivityTeam
   readonly modelDirectory?: ModelDirectory
   readonly onContinuePlanning?: () => void
   readonly onDiscarded?: () => void
   /** Clicking the captain card returns to the main conversation. */
   readonly onOpenCaptain?: () => void
+  /** Session whose conversation is open; the member card shows 对话中. */
+  readonly viewingSessionId?: string
   /** Navigate to a member transcript (floater hides immediately). */
   readonly onNavigate: (parentId: SessionId, childId: SessionId) => void
   readonly t: AgentTeamsTranslate
@@ -553,6 +556,8 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
   const discarded = historic && team.phase === 'staged'
   const stopped = !historic && team.halted === true
   const busyCount = team.members.filter((member) => member.activity === 'working').length
+  const captainViewing = viewingSessionId !== undefined && viewingSessionId === team.captainSessionId
+  const captainCultivation = cultivationOf(team.tasks.filter(task => task.status === 'completed').length, team.tasks.length, team.createdAt)
   const assignedCount = team.tasks.filter((task) => task.assignee !== '' && task.assignee !== CAPTAIN_ASSIGNEE).length
   const captainOwned = team.tasks.filter((task) => task.assignee === CAPTAIN_ASSIGNEE
     && task.status !== 'completed' && task.status !== 'failed' && task.status !== 'cancelled')
@@ -679,6 +684,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
         <div
           className={css.captainNode}
           data-clickable={onOpenCaptain === undefined ? undefined : 'true'}
+          data-viewing={captainViewing || undefined}
           role={onOpenCaptain === undefined ? undefined : 'button'}
           tabIndex={onOpenCaptain === undefined ? undefined : 0}
           onClick={onOpenCaptain}
@@ -693,6 +699,10 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
             <span className={css.captainLine}>
               <span className={css.captainName}>{t('captain.name')}</span>
               <span className={css.captainRole}>{t('captain.role')}</span>
+              <span className={css.memberLevel} title={`${captainCultivation.xp} / ${captainCultivation.next} XP`}>
+                Lv.{captainCultivation.level} {t(captainCultivation.rankKey)}
+              </span>
+              {captainViewing && <span className={css.viewingBadge}>{t('office.viewingState')}</span>}
             </span>
             <span className={css.captainSummary}>{discarded
               ? t('captain.summary.discarded', { tasks: team.tasks.length, members: team.members.length })
@@ -758,6 +768,8 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                   const progressPct = progressTotal > 0
                     ? Math.round((progressDone / progressTotal) * 100)
                     : Math.max(0, Math.min(100, member.progress ?? 0))
+                  const viewing = viewingSessionId !== undefined && member.id === viewingSessionId
+                  const cultivation = cultivationOf(member.done, member.total, team.createdAt)
                   const progressState = progressTotal > 0 && progressDone >= progressTotal
                     ? 'completed'
                     : owned.some((task) => task.state === 'failed') ? 'failed' : undefined
@@ -767,7 +779,7 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                     && task.dependencies.some((id) => owned.some((own) => own.id === id && own.status === 'completed'))
                   ))
                   return (
-              <div key={member.id || member.name} className={css.memberBlock} data-activity={member.activity} data-realm={(member.progress ?? 0) >= 40 ? 'high' : undefined} data-selected-member={workspace && selectedAssignee === member.name || undefined}>
+              <div key={member.id || member.name} className={css.memberBlock} data-activity={member.activity} data-realm={(member.progress ?? 0) >= 40 ? 'high' : undefined} data-viewing={viewing || undefined} data-selected-member={workspace && selectedAssignee === member.name || undefined}>
                 <span className={css.memberBranch} aria-hidden><span /></span>
                 <button
                   type="button"
@@ -791,6 +803,9 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                     <span className={css.memberLine}>
                       <span className={css.memberName}>{member.name}</span>
                       {member.role !== '' && <span className={css.memberRole}>{roleLabel(member.role, member.name, t)}</span>}
+                      <span className={css.memberLevel} title={`${cultivation.xp} / ${cultivation.next} XP`}>
+                        Lv.{cultivation.level} {t(cultivation.rankKey)}
+                      </span>
                       {/* Inline member model badge: compact visible label, full route in
                           title/aria-label (accessible tooltip) and the data-member-model
                           DOM probe; noninteractive span, no tab stop. */}
@@ -799,15 +814,17 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
                           {compactModelLabel(memberModel)}
                         </span>
                       )}
-                      <span className={css.memberState} data-activity={member.activity}>
+                      <span className={css.memberState} data-activity={member.activity} data-viewing={viewing || undefined}>
                         <WorkGlyph active={member.activity === 'working'} />
-                        {discarded
-                          ? t('member.state.notCreated')
-                          : stopped
-                            ? t('member.state.stopped')
-                            : team.phase === 'staged'
-                              ? t('member.state.staged')
-                              : memberStateLabel(member, team.tasks, historic, t)}
+                        {viewing
+                          ? t('office.viewingState')
+                          : discarded
+                            ? t('member.state.notCreated')
+                            : stopped
+                              ? t('member.state.stopped')
+                              : team.phase === 'staged'
+                                ? t('member.state.staged')
+                                : memberStateLabel(member, team.tasks, historic, t)}
                       </span>
                     </span>
                     <span className={css.memberStatusLine}>{discarded

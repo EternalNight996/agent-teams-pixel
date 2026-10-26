@@ -614,6 +614,7 @@ export function SectHallOverlay({
                   t={t}
                   workspace
                   onOpenCaptain={goHome}
+                  viewingSessionId={sessionId}
                   onNavigate={(_parent, child) => { if (ownerSessionId !== undefined) openMember(ownerSessionId, child) }}
                   onContinuePlanning={() => { setSheet(undefined) }}
                   onDiscarded={() => { setSheet(undefined) }}

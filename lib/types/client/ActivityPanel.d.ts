@@ -24,13 +24,15 @@ import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/c
 import { type ActivityTeam } from './activity-monitor.ts';
 import type { AgentTeamsCardData } from './agent-teams-card-definition.ts';
 import type { AgentTeamsTranslate } from './locales.ts';
-export declare function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscarded, onNavigate, onOpenCaptain, t, historic, workspace }: {
+export declare function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscarded, onNavigate, onOpenCaptain, viewingSessionId, t, historic, workspace }: {
     readonly team: ActivityTeam;
     readonly modelDirectory?: ModelDirectory;
     readonly onContinuePlanning?: () => void;
     readonly onDiscarded?: () => void;
     /** Clicking the captain card returns to the main conversation. */
     readonly onOpenCaptain?: () => void;
+    /** Session whose conversation is open; the member card shows 对话中. */
+    readonly viewingSessionId?: string;
     /** Navigate to a member transcript (floater hides immediately). */
     readonly onNavigate: (parentId: SessionId, childId: SessionId) => void;
     readonly t: AgentTeamsTranslate;

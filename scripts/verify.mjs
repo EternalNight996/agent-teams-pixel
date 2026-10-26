@@ -221,7 +221,7 @@ check(
     // Every locale-bound slot registration: create entry, chat entry, turn
     // tail, shell overlay, keyed chat node, and the right-pane hall page that
     // 归栏 opens.
-    && clientIndexSource.match(/locale:\s*AGENT_TEAMS_LOCALE_NAMESPACE/gu)?.length === 6,
+    && clientIndexSource.match(/locale:\s*AGENT_TEAMS_LOCALE_NAMESPACE/gu)?.length === 5,
 )
 check(
   'slash command transcript hides the duplicate pre-message result row',

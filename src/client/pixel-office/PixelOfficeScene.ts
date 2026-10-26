@@ -1309,30 +1309,20 @@ export function createPixelScene(
     }
   }
 
-  /** 当前打开的对话所属修士：呼吸光圈 + 四角标记，切换对话时跟着移动。 */
-  function paintViewing(cx: number, baseY: number, member: SceneMember, time: number): void {
-    const color = member.isLeader === true ? '#f2c14e' : '#6fd6c8'
-    const pulse = 0.5 + 0.5 * Math.sin(time / 680)
+  /** 当前打开的对话所属修士：身后柔光 + 地面光晕（比四角框更耐看）。 */
+  function paintViewingAura(cx: number, baseY: number, member: SceneMember, time: number): void {
+    const rgb = member.isLeader === true ? '242, 193, 78' : '111, 214, 200'
+    const pulse = 0.5 + 0.5 * Math.sin(time / 900)
     g.save()
-    g.strokeStyle = color
-    g.globalAlpha = 0.5 + pulse * 0.3
-    g.lineWidth = 1.8
-    g.beginPath(); g.ellipse(cx, baseY - 2, 26, 8, 0, 0, Math.PI * 2); g.stroke()
-    g.globalAlpha = 0.22 + pulse * 0.15
-    g.beginPath(); g.ellipse(cx, baseY - 2, 34, 11, 0, 0, Math.PI * 2); g.stroke()
-    const x = cx - 30
-    const y = baseY - 100
-    const w = 60
-    const h = 78
-    g.globalAlpha = 0.85
-    g.lineWidth = 1.4
-    for (const [px, py, sx, sy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]] as const) {
-      g.beginPath()
-      g.moveTo(px + sx * 7, py)
-      g.lineTo(px, py)
-      g.lineTo(px, py + sy * 7)
-      g.stroke()
-    }
+    const glow = g.createRadialGradient(cx, baseY - 46, 2, cx, baseY - 46, 52)
+    glow.addColorStop(0, `rgba(${rgb}, ${(0.16 + pulse * 0.06).toFixed(3)})`)
+    glow.addColorStop(0.55, `rgba(${rgb}, ${(0.06 + pulse * 0.03).toFixed(3)})`)
+    glow.addColorStop(1, 'rgba(0, 0, 0, 0)')
+    g.fillStyle = glow
+    g.beginPath(); g.ellipse(cx, baseY - 46, 44, 58, 0, 0, Math.PI * 2); g.fill()
+    g.strokeStyle = `rgba(${rgb}, ${(0.18 + pulse * 0.1).toFixed(3)})`
+    g.lineWidth = 1.2
+    g.beginPath(); g.ellipse(cx, baseY - 2, 30, 9, 0, 0, Math.PI * 2); g.stroke()
     g.restore()
   }
 
@@ -1361,8 +1351,25 @@ export function createPixelScene(
     g.fillStyle = member.isLeader ? COLORS.captain : COLORS.label
     g.fillText(label, cx - textW / 2, deskY + 13)
 
+    // 当前对话：名牌描边 + 外圈呼吸光，比额外图形更克制。
+    if (member.viewing === true) {
+      const accent = member.isLeader === true ? '#f2c14e' : '#6fd6c8'
+      g.save()
+      g.strokeStyle = accent
+      g.lineWidth = 1
+      g.globalAlpha = 0.9
+      roundRect(g, cx - textW / 2 - 6, deskY + 3, textW + 12, 14, 3)
+      g.stroke()
+      g.globalAlpha = 0.28 + 0.14 * Math.sin(time / 700)
+      roundRect(g, cx - textW / 2 - 9, deskY + 1, textW + 18, 18, 4)
+      g.stroke()
+      g.restore()
+    }
+
     // State dot.
-    g.fillStyle = stateTone(member.activity)
+    g.fillStyle = member.viewing === true
+      ? (member.isLeader === true ? '#f2c14e' : '#6fd6c8')
+      : stateTone(member.activity)
     g.beginPath(); g.arc(cx - textW / 2 - 10, deskY + 10, 2.6, 0, Math.PI * 2); g.fill()
 
     // Per-member progress bar.
@@ -1591,9 +1598,9 @@ export function createPixelScene(
       g.fillText(text, 24, 150)
     } else {
       for (const spot of spots) paintFurniture(spot.deskCx, spot.deskY, spot.member, time)
+      for (const spot of spots) if (spot.member.viewing === true) paintViewingAura(spot.cx, spot.baseY, spot.member, time)
       for (const spot of spots) paintCharacter(spot.cx, spot.baseY, spot.member, time, spot.walking)
       for (const spot of spots) paintOverlay(spot.cx, spot.baseY, spot.member, time)
-      for (const spot of spots) if (spot.member.viewing === true) paintViewing(spot.cx, spot.baseY, spot.member, time)
       // 鼠标停在修士上：四角描金，明确这是可点的会话入口。
       const hoveredMemberId = hovered?.kind === 'member' ? hovered.id : undefined
       if (hoveredMemberId !== undefined) {

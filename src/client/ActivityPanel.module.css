@@ -767,6 +767,18 @@
 }
 
 .captainRole,
+.memberLevel {
+  flex: none;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, #d4af37 12%, transparent);
+  color: #d4af37;
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 15px;
+  white-space: nowrap;
+}
+
 .memberRole {
   overflow: hidden;
   color: var(--dsw-alias-label-tertiary);
@@ -777,6 +789,37 @@
 }
 
 .captainSummary,
+.memberBlock[data-viewing='true'] {
+  border-radius: 8px;
+  background: color-mix(in srgb, #6fd6c8 5%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, #6fd6c8 55%, transparent),
+    0 0 14px color-mix(in srgb, #6fd6c8 16%, transparent);
+}
+
+.memberState[data-viewing='true'] {
+  color: #6fd6c8;
+}
+
+.captainNode[data-viewing='true'] {
+  border-color: color-mix(in srgb, #f2c14e 62%, var(--dsw-alias-border-l2));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, #f2c14e 50%, transparent),
+    0 0 16px color-mix(in srgb, #f2c14e 14%, transparent);
+}
+
+.viewingBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #f2c14e 16%, transparent);
+  color: #f2c14e;
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
 .memberStatusLine {
   overflow: hidden;
   color: var(--dsw-alias-label-secondary);

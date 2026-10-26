@@ -71,6 +71,8 @@ export interface TeamActivitySnapshot {
     readonly name: string;
     readonly description?: string;
     readonly captainSessionId: string;
+    /** Team creation time; the client uses it for tenure-based cultivation. */
+    readonly createdAt: number;
     readonly phase: 'staged' | 'running';
     readonly planReviewState?: 'awaiting_review' | 'awaiting_feedback';
     readonly halted?: boolean;
