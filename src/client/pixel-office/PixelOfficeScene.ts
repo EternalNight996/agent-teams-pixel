@@ -70,6 +70,17 @@ export interface SceneModel {
   readonly activeAction?: SceneAction
   /** 闲置修士随机说的一句话（由调用方本地化），空数组则不显示闲聊。 */
   readonly chatter?: readonly string[]
+  /** 中庭可点物件：归栏传送阵 / 面板配置阵盘。 */
+  readonly sceneObjects?: {
+    readonly dock?: boolean
+    readonly settings?: boolean
+    readonly settingsActive?: boolean
+  }
+  /** 两个物件的标签（调用方本地化）。 */
+  readonly sceneLabels?: {
+    readonly dock?: string
+    readonly settings?: string
+  }
 }
 
 export type { SceneAction } from './office-actions.ts'
@@ -96,6 +107,9 @@ const CELL_H = 150
 const TOP_PAD = 104
 const MAX_COLUMNS = 4
 const DESK_W = 92
+/** 中庭两个可点物件：传送阵（归栏）与阵盘（配置）。 */
+const DOCK_AT = { x: 132, y: WALL_HEIGHT + 76 } as const
+const DIAL_AT = { x: WORLD_W - 64, y: WALL_HEIGHT + 70 } as const
 
 const COLORS = {
   wall: '#2f3b33',
@@ -218,6 +232,79 @@ export function createPixelScene(
     g.fillStyle = active ? '#241a08' : hovered ? '#ffe9a8' : '#e2ce92'
     g.fillText(text, x + 5, y + 10)
   }
+
+  /** 中庭传送阵：归栏入口，金色阵纹缓慢旋转。 */
+  function paintDockArray(cx: number, cy: number, time: number, hovered: boolean, label: string): void {
+    const pulse = 0.5 + 0.5 * Math.sin(time / 820)
+    g.save()
+    g.translate(cx, cy)
+    g.scale(1, 0.5)
+    const glow = g.createRadialGradient(0, 0, 3, 0, 0, 44)
+    glow.addColorStop(0, `rgba(255, 214, 140, ${(0.26 + pulse * 0.12).toFixed(3)})`)
+    glow.addColorStop(0.55, 'rgba(255, 186, 80, 0.12)')
+    glow.addColorStop(1, 'rgba(255, 186, 80, 0)')
+    g.fillStyle = glow
+    g.beginPath(); g.arc(0, 0, 44, 0, Math.PI * 2); g.fill()
+    g.lineWidth = hovered ? 2.6 : 1.8
+    g.strokeStyle = `rgba(255, 224, 156, ${(0.5 + pulse * 0.25).toFixed(3)})`
+    g.beginPath(); g.arc(0, 0, 30, 0, Math.PI * 2); g.stroke()
+    g.lineWidth = 1
+    g.strokeStyle = 'rgba(255, 200, 110, 0.32)'
+    g.beginPath(); g.arc(0, 0, 19, 0, Math.PI * 2); g.stroke()
+    const spin = time / 2100
+    g.fillStyle = `rgba(255, 238, 184, ${(0.55 + pulse * 0.25).toFixed(3)})`
+    for (let i = 0; i < 8; i += 1) {
+      const angle = spin + (i / 8) * Math.PI * 2
+      g.fillRect(Math.cos(angle) * 37 - 1.5, Math.sin(angle) * 37 - 1.5, 3, 3)
+    }
+    g.fillStyle = 'rgba(255, 246, 208, 0.92)'
+    g.fillRect(-2, -9, 4, 18)
+    g.fillRect(-9, -2, 18, 4)
+    g.restore()
+    paintFloorObjectLabel(cx, cy + 26, label, hovered)
+  }
+
+  /** 阵盘：面板配置入口，配置面板打开时发光。 */
+  function paintHallDial(cx: number, cy: number, time: number, hovered: boolean, active: boolean, label: string): void {
+    const bob = Math.sin(time / 1400) * 1.5
+    g.save()
+    g.translate(cx, cy + bob)
+    g.fillStyle = '#6a6350'
+    g.beginPath(); g.ellipse(0, 15, 22, 8, 0, 0, Math.PI * 2); g.fill()
+    g.fillStyle = '#2a4552'
+    g.beginPath(); g.arc(0, 0, 19, 0, Math.PI * 2); g.fill()
+    g.strokeStyle = active ? '#ffe9a8' : hovered ? '#cfeaff' : '#6fb6d8'
+    g.lineWidth = hovered || active ? 2 : 1.4
+    g.beginPath(); g.arc(0, 0, 19, 0, Math.PI * 2); g.stroke()
+    g.strokeStyle = 'rgba(150, 215, 255, 0.45)'
+    g.lineWidth = 1
+    g.beginPath(); g.arc(0, 0, 12, 0, Math.PI * 2); g.stroke()
+    const spin = -time / 1800
+    g.fillStyle = active ? '#ffe9a8' : hovered ? '#cfeaff' : 'rgba(140, 205, 255, 0.7)'
+    for (let i = 0; i < 6; i += 1) {
+      const angle = spin + (i / 6) * Math.PI * 2
+      g.fillRect(Math.cos(angle) * 15 - 1.5, Math.sin(angle) * 15 - 1.5, 3, 3)
+    }
+    g.fillStyle = active ? '#fff3c4' : '#cfeaff'
+    g.fillRect(-3, -3, 6, 6)
+    g.restore()
+    paintFloorObjectLabel(cx, cy + 24, label, hovered || active)
+  }
+
+  /** 中庭物件的小标签，和墙面设施标签同一风格。 */
+  function paintFloorObjectLabel(cx: number, y: number, label: string, highlighted: boolean): void {
+    if (label === '') return
+    const text = `${truncate(label, 11)} ›`
+    g.font = highlighted ? 'bold 9px "Segoe UI", sans-serif' : '9px "Segoe UI", sans-serif'
+    const width = Math.ceil(g.measureText(text).width) + 10
+    const x = Math.round(cx - width / 2)
+    g.fillStyle = highlighted ? 'rgba(42, 52, 44, 0.96)' : 'rgba(12, 16, 20, 0.62)'
+    roundRect(g, x, Math.round(y), width, 13, 3)
+    g.fill()
+    g.fillStyle = highlighted ? '#ffe9a8' : '#e2ce92'
+    g.fillText(text, x + 5, Math.round(y) + 10)
+  }
+
 
   /** 藏经阁：道统、成员与计划。 */
   function paintLibrary(rect: FacilityRect, hovered: boolean, active: boolean): void {
@@ -1338,6 +1425,26 @@ export function createPixelScene(
       }
     }
 
+    // 中庭物件最后入表：它们排在点击命中的最前面，不被案几热区吞掉。
+    if (model?.sceneObjects?.dock === true) {
+      hitAreas.push({
+        x: DOCK_AT.x - 40,
+        y: DOCK_AT.y - 30,
+        w: 80,
+        h: 60,
+        hit: { kind: 'dock' },
+      })
+    }
+    if (model?.sceneObjects?.settings === true) {
+      hitAreas.push({
+        x: DIAL_AT.x - 28,
+        y: DIAL_AT.y - 32,
+        w: 56,
+        h: 66,
+        hit: { kind: 'settings' },
+      })
+    }
+
     if (layout.length === 0) {
       g.fillStyle = COLORS.label
       g.font = '12px "Segoe UI", sans-serif'
@@ -1353,6 +1460,14 @@ export function createPixelScene(
         const target = spots.find(spot => spot.member.id === hoveredMemberId)
         if (target !== undefined) paintDeskHover(target.cx, target.baseY, time)
       }
+    }
+
+    // 中庭物件：挡在人物之后画，保证最上层可点。
+    if (model?.sceneObjects?.dock === true) {
+      paintDockArray(DOCK_AT.x, DOCK_AT.y, time, hovered?.kind === 'dock', model?.sceneLabels?.dock ?? '')
+    }
+    if (model?.sceneObjects?.settings === true) {
+      paintHallDial(DIAL_AT.x, DIAL_AT.y, time, hovered?.kind === 'settings', model.sceneObjects.settingsActive === true, model?.sceneLabels?.settings ?? '')
     }
 
     if (model?.phase === 'staged') {

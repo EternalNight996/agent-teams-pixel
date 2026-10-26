@@ -28,6 +28,10 @@ export type SceneHit = {
 } | {
     readonly kind: 'action';
     readonly action: SceneAction;
+} | {
+    readonly kind: 'dock';
+} | {
+    readonly kind: 'settings';
 };
 /** Resolve a scene-space point to a facility. */
 export declare function facilityAt(x: number, y: number): SceneAction | undefined;

@@ -82,6 +82,8 @@ type Hover =
     readonly y: number
   }
   | { readonly kind: 'action'; readonly action: SceneAction; readonly label: string; readonly hint: string; readonly x: number; readonly y: number }
+  | { readonly kind: 'dock'; readonly label: string; readonly hint: string; readonly x: number; readonly y: number }
+  | { readonly kind: 'settings'; readonly label: string; readonly hint: string; readonly x: number; readonly y: number }
 
 export function PixelOffice({
   team, t, onOpenMember, onUnavailable, onAction, activeAction, enabledActions,
@@ -141,6 +143,16 @@ export function PixelOffice({
       members,
       activeAction: activeAction ?? undefined,
       facilities,
+      // 中庭里的两个可点物件：归栏传送阵 / 配置阵盘。
+      sceneObjects: {
+        dock: onDock !== undefined,
+        settings: onSettings !== undefined,
+        settingsActive: settingsOpen === true,
+      },
+      sceneLabels: {
+        dock: t('office.dockSidebar'),
+        settings: t('office.floorSettings'),
+      },
       // 闲置闲聊：设定好的短句，由场景按 seed 随机挑一句冒泡。
       chatter: CHATTER_KEYS.map(key => t(key)),
       labels: {
@@ -162,7 +174,7 @@ export function PixelOffice({
         failedCount: failed,
       },
     }
-  }, [actions, activeAction, done, failed, live, onAction, running, t, team, teamless, waiting])
+  }, [actions, activeAction, done, failed, live, onAction, onDock, onSettings, running, settingsOpen, t, team, teamless, waiting])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -215,6 +227,14 @@ export function PixelOffice({
       setHover({ kind: 'action', action: hit.action, label: labelFor(hit.action), hint: hintFor(hit.action), x, y })
       return
     }
+    if (hit.kind === 'dock') {
+      setHover({ kind: 'dock', label: t('office.dockSidebar'), hint: t('office.scene.dockHint'), x, y })
+      return
+    }
+    if (hit.kind === 'settings') {
+      setHover({ kind: 'settings', label: t('office.floorSettings'), hint: t('office.scene.settingsHint'), x, y })
+      return
+    }
     const member = sceneMembers.get(hit.id)
     if (member === undefined) return
     setHover({
@@ -238,6 +258,14 @@ export function PixelOffice({
     if (hit === undefined) return
     if (hit.kind === 'action') {
       onAction?.(hit.action)
+      return
+    }
+    if (hit.kind === 'dock') {
+      onDock?.()
+      return
+    }
+    if (hit.kind === 'settings') {
+      onSettings?.()
       return
     }
     const member = sceneMembers.get(hit.id)
@@ -275,7 +303,7 @@ export function PixelOffice({
         {hover !== undefined && (
           <div
             className={css.tooltip}
-            data-placement={hover.kind === 'action' ? 'below' : 'above'}
+            data-placement={hover.kind === 'member' ? 'above' : 'below'}
             style={{ left: hover.x, top: hover.y }}
             role="tooltip"
           >
@@ -310,35 +338,6 @@ export function PixelOffice({
               </button>
             ))}
           </div>
-        )}
-        {onDock !== undefined && (
-          <button
-            type="button"
-            className={css.sceneObject}
-            data-object="dock"
-            data-control="scene-dock"
-            aria-label={t('office.dockSidebar')}
-            title={`${t('office.dockSidebar')} · ${t('office.scene.dockHint')}`}
-            onClick={onDock}
-          >
-            <span className={css.sceneObjectGlyph} aria-hidden>✥</span>
-            <span className={css.sceneObjectLabel}>{t('office.dockSidebar')}</span>
-          </button>
-        )}
-        {onSettings !== undefined && (
-          <button
-            type="button"
-            className={css.sceneObject}
-            data-object="settings"
-            data-control="scene-settings"
-            data-active={settingsOpen || undefined}
-            aria-label={t('office.floorSettings')}
-            title={`${t('office.floorSettings')} · ${t('office.scene.settingsHint')}`}
-            onClick={onSettings}
-          >
-            <span className={css.sceneObjectGlyph} aria-hidden>⚙</span>
-            <span className={css.sceneObjectLabel}>{t('office.floorSettings')}</span>
-          </button>
         )}
       </div>
     </section>

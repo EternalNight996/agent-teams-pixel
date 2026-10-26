@@ -36,6 +36,8 @@ export const FACILITY_ORDER: readonly SceneAction[] = ['config', 'teams', 'board
 export type SceneHit =
   | { readonly kind: 'member'; readonly id: string }
   | { readonly kind: 'action'; readonly action: SceneAction }
+  | { readonly kind: 'dock' }
+  | { readonly kind: 'settings' }
 
 /** Resolve a scene-space point to a facility. */
 export function facilityAt(x: number, y: number): SceneAction | undefined {
