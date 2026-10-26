@@ -337,7 +337,7 @@ export function SectHallOverlay({
         return
       }
       const vw = window.innerWidth
-      // 让位宽度 = 洞府宽度的一半；窄窗口至少给对话留 360px。
+      // 让位宽度 = 洞府宽度的 2/3；窄窗口至少给对话留 360px。
       const shift = hallYieldWidth(size.w, vw)
       root.setAttribute(HALL_OPEN_ATTRIBUTE, '')
       root.style.setProperty(HALL_SHIFT_PROPERTY, `${shift}px`)

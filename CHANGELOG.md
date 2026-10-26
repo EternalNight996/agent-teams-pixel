@@ -52,8 +52,8 @@
   token almost twice the standard one. It can be dragged anywhere in the window —
   its position is remembered separately (`agent-teams-pixel.hallToken`) — and a
   click (not a drag) expands the hall again. Collapsing closes any open popover.
-- An expanded hall reserves **half its width** in the conversation column, like
-  the right sidebar does: `html[data-agent-teams-hall-open]` plus
+- An expanded hall reserves **two thirds of its width** in the conversation
+  column, like the right sidebar does: `html[data-agent-teams-hall-open]` plus
   `--agent-teams-hall-shift` pads `[data-phase='active']`, so changing the panel
   size reflows the chat content instead of covering it. When the right sidebar is
   open, the yield moves to the whole shell frame instead, so the gap sits at the

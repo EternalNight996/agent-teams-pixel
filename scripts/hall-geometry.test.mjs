@@ -28,16 +28,17 @@ test('sheet is clamped inside the viewport instead of leaving the screen', () =>
   assert.ok(farLeft.left + farLeft.width <= viewport)
 })
 
-test('the hall yields half of its width to the conversation', () => {
-  assert.equal(hallYieldWidth(620, 1920), 310)
-  assert.equal(hallYieldWidth(1040, 1920), 520)
-  // a panel wider than the viewport is capped to viewport − 32 before halving
-  assert.equal(hallYieldWidth(2400, 1200), 584)
+test('the hall yields two thirds of its width to the conversation', () => {
+  assert.equal(hallYieldWidth(620, 1920), 413)
+  assert.equal(hallYieldWidth(1040, 1920), 693)
+  // a panel wider than the viewport is capped to viewport − 32 before the ratio
+  assert.equal(hallYieldWidth(2400, 1200), 779)
 })
 
 test('the yield always leaves 360px for the conversation', () => {
-  assert.equal(hallYieldWidth(620, 700), 310)
-  // half of the capped width (284) would exceed viewport − 360 (240)
+  // 620 × 2/3 = 413, capped by viewport − 360
+  assert.equal(hallYieldWidth(620, 700), 340)
+  // 568 × 2/3 = 379, capped by viewport − 360
   assert.equal(hallYieldWidth(2400, 600), 240)
 })
 
