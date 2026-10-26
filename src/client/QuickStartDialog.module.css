@@ -108,6 +108,20 @@
 
 .wizard .form {
   flex: 1 1 auto;
+  min-height: 0;
+}
+
+.wizard .stepPane {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.wizard .templates {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  align-content: stretch;
+  grid-auto-rows: minmax(52px, 1fr);
 }
 
 .wizardActions {
@@ -427,7 +441,6 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
-  max-height: 200px;
   overflow: auto;
   padding: 2px;
 }

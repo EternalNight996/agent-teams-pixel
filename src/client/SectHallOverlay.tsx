@@ -131,7 +131,7 @@ export function SectHallOverlay({
   const [collapsed, setCollapsed] = useState(() => readBool(COLLAPSED_KEY))
   const [docked, setDocked] = useState(() => readBool(DOCKED_KEY))
   const [sheet, setSheet] = useState<SheetKind | undefined>()
-  const [sheetAnchor, setSheetAnchor] = useState<{ left: number; bottom: number; width: number } | undefined>()
+  const [sheetAnchor, setSheetAnchor] = useState<{ left: number; top: number; width: number; maxHeight: number } | undefined>()
   const [rect, setRect] = useState<PanelRect>(() => readPanelRect())
   const [token, setToken] = useState<TokenPoint>(() => readTokenPoint())
   const tokenDrag = useRef<{
@@ -187,7 +187,10 @@ export function SectHallOverlay({
       const panel = panelRef.current
       if (panel === null) return
       const bounds = panel.getBoundingClientRect()
-      setSheetAnchor({ ...hallSheetPlacement(bounds.left, window.innerWidth), bottom: 16 })
+      // 内容气泡统一贴面板左上角（用户习惯），并留出视口内的高度上限。
+      const top = Math.max(8, bounds.top)
+      const maxHeight = Math.max(160, window.innerHeight - top - 8)
+      setSheetAnchor({ ...hallSheetPlacement(bounds.left, window.innerWidth), top, maxHeight })
     }
     measure()
     window.addEventListener('resize', measure)
@@ -418,10 +421,11 @@ export function SectHallOverlay({
         data-sheet={sheet}
         style={{
           left: sheetAnchor.left,
-          bottom: sheetAnchor.bottom,
+          top: sheetAnchor.top,
           width: sheetAnchor.width,
-          // 开宗立派固定与洞府同高，其余气泡随内容收缩（视口上限统一由 CSS 兜住）。
-          height: sheet === 'start' ? size.h : undefined,
+          // 所有内容气泡统一与山门洞府同高，窗口更矮时按可用高度封顶。
+          height: Math.min(size.h, sheetAnchor.maxHeight),
+          maxHeight: sheetAnchor.maxHeight,
           ['--hall-sheet-max' as string]: `${size.h}px`,
         } as React.CSSProperties}
         role="dialog"

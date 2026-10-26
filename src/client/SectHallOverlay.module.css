@@ -398,7 +398,7 @@
   flex: 1 1 auto;
   overflow: hidden;
   color: var(--dsw-alias-label-primary);
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -430,7 +430,7 @@
   overflow: auto;
   padding: 12px 14px 14px;
   /* 配置/名册/进度/收信等内容统一放大，解决小字看不清的问题。 */
-  zoom: 1.18;
+  zoom: 1.3;
   scrollbar-width: thin;
 }
 

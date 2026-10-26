@@ -7,19 +7,19 @@
   role (preset roster, selected roles, the role picker and the oath summary);
   custom roles fall back to an initial-letter badge.
 - The wizard's decision bar (取消 / 上一步 / 下一步) is pinned flush to the bottom
-  edge of the sheet instead of floating in the middle of the content. The
-  开宗立派 sheet itself keeps a fixed height equal to the hall panel (other
-  sheets still shrink to their content), so switching steps never resizes it.
+  edge of the sheet; the sheet keeps a fixed height equal to the hall panel, so
+  switching steps never resizes it.
 - 开宗立派 now renders inline in the hall's left-hand content sheet, exactly like
   功德碑/进度 — the header 开宗 button opens that sheet too, and there is no
   standalone quick-start modal any more.
 - The 开宗 doorway transmission gained layered counter-rotating arcs, spiralling
   pixel motes, a soft membrane and a bright core, so it reads as a portal with
   depth instead of a flat spinner.
-- Hall popovers (面板配置 / 名册 / 道统 / 进度 / 收信 / 开宗) now cap their height
-  at the current hall panel instead of forcing it: short content shrinks to fit,
-  tall content scrolls, so no sheet leaves an empty band at the bottom. Their
-  content is scaled up (zoom 1.18) with a larger sheet title/close control.
+- All hall content sheets open at the hall panel's top-left and share its fixed
+  height (viewport-bounded), so 面板配置 / 名册 / 道统 / 进度 / 收信 / 开宗 line up with
+  the panel instead of shrinking per content. Sheet text is scaled up (zoom 1.3,
+  15px title) and the 道统 template grid stretches to fill the remaining height
+  instead of leaving a dead band above the decision bar.
 - The 开宗 gate is back to the wooden 山门 silhouette; its doorway now carries a
   rotating transmission (two counter-rotating rune rings plus a pulsing centre).
 - The 山门洞府 is now the team tab itself: the wall's four facilities (藏经阁 /
