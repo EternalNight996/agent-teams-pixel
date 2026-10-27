@@ -25,7 +25,6 @@ import {
   IconBranchOutline16, IconChevronDownOutline14, IconPanelLeftOutline16,
   IconStopFill16, IconWarningOutline16,
 } from './icons.tsx'
-import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import { PixelOffice } from './pixel-office/PixelOffice.tsx'
 import { currentSessionId } from './session-navigation.ts'
 import { roleLabel } from './role-labels.ts'
@@ -563,6 +562,28 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
   const [stopOpen, setStopOpen] = useState(false)
   const [stopping, setStopping] = useState(false)
   const [stopError, setStopError] = useState('')
+  const stopAnchorRef = useRef<HTMLDivElement>(null)
+  const stopCancelRef = useRef<HTMLButtonElement>(null)
+  // 浮标式确认：点外部或按 Esc 关闭；打开时把焦点放到「取消」，避免误触停止。
+  useEffect(() => {
+    if (!stopOpen) return
+    stopCancelRef.current?.focus()
+    const onPointerDown = (event: PointerEvent): void => {
+      if (stopping) return
+      if (stopAnchorRef.current !== null && !stopAnchorRef.current.contains(event.target as Node)) {
+        setStopOpen(false)
+      }
+    }
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape' && !stopping) setStopOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [stopOpen, stopping])
   const [resuming, setResuming] = useState(false)
   const [resumeError, setResumeError] = useState('')
   const discarded = historic && team.phase === 'staged'
@@ -669,15 +690,51 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
             <span data-stat="messages">{t('team.stats.messages', { count: team.messageCount })}</span>
           </span>
           {canStop && (
-            <button
-              type="button"
-              className={css.teamStopButton}
-              aria-label={t('team.stop')}
-              title={t('team.stop')}
-              onClick={() => { setStopError(''); setStopOpen(true) }}
-            >
-              <IconStopFill16 />
-            </button>
+            <div className={css.stopAnchor} ref={stopAnchorRef}>
+              <button
+                type="button"
+                className={css.teamStopButton}
+                aria-label={t('team.stop')}
+                title={t('team.stop')}
+                aria-haspopup="dialog"
+                aria-expanded={stopOpen}
+                onClick={() => { setStopError(''); setStopOpen(open => !open) }}
+              >
+                <IconStopFill16 />
+              </button>
+              {stopOpen && (
+                <div
+                  className={css.stopPopover}
+                  role="dialog"
+                  aria-label={t('team.stopTitle', { team: team.name })}
+                >
+                  <span className={css.stopPopoverArrow} aria-hidden />
+                  <span className={css.stopPopoverTitle}>{t('team.stopTitle', { team: team.name })}</span>
+                  <span className={css.stopPopoverText}>
+                    {t('team.stopDescription', { tasks: unfinishedCount, members: busyCount })}
+                  </span>
+                  {stopError !== '' && (
+                    <span className={css.stopModalError} role="alert">
+                      <IconWarningOutline16 />{stopError}
+                    </span>
+                  )}
+                  <span className={css.stopModalActions}>
+                    <button
+                      type="button"
+                      ref={stopCancelRef}
+                      disabled={stopping}
+                      onClick={() => { setStopOpen(false) }}
+                    >
+                      {t('team.stopCancel')}
+                    </button>
+                    <button type="button" data-danger disabled={stopping} onClick={() => { void stopTeam() }}>
+                      <IconStopFill16 />
+                      {stopping ? t('team.stopping') : t('team.stopConfirm')}
+                    </button>
+                  </span>
+                </div>
+              )}
+            </div>
           )}
         </header>
 
@@ -911,24 +968,6 @@ export function TeamSection({ team, modelDirectory, onContinuePlanning, onDiscar
       {/* 宗门进度页不再画独立的依赖图：交互关系与进度写在成员卡里，避免和上方像素人重复。 */}
       {!workspace && <DependencyMap tasks={team.tasks} members={team.members} t={t} discarded={discarded} workspace={workspace} onSelectTask={setSelectedTaskId} />}
       </section>
-      <Modal
-        open={stopOpen}
-        onClose={() => { if (!stopping) setStopOpen(false) }}
-        title={t('team.stopTitle', { team: team.name })}
-        closeLabel={t('plan.cancel')}
-        description={t('team.stopDescription', { tasks: unfinishedCount, members: busyCount })}
-        footer={(
-          <span className={css.stopModalActions}>
-            <button type="button" disabled={stopping} onClick={() => { setStopOpen(false) }}>{t('team.stopCancel')}</button>
-            <button type="button" data-danger disabled={stopping} onClick={() => { void stopTeam() }}>
-              <IconStopFill16 />
-              {stopping ? t('team.stopping') : t('team.stopConfirm')}
-            </button>
-          </span>
-        )}
-      >
-        {stopError !== '' && <p className={css.stopModalError} role="alert"><IconWarningOutline16 />{stopError}</p>}
-      </Modal>
     </>
   )
 }

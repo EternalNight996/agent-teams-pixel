@@ -563,6 +563,58 @@
   outline-offset: 2px;
 }
 
+/* 浮标式停止确认：贴着停止按钮弹出，不打断整个面板。 */
+.stopAnchor {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.stopPopover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 60;
+  display: flex;
+  width: min(292px, 78vw);
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 82%, transparent);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow:
+    0 14px 34px color-mix(in srgb, var(--dsw-alias-bg-mask-3) 30%, transparent),
+    0 2px 8px color-mix(in srgb, var(--dsw-alias-bg-mask-3) 18%, transparent);
+  text-align: left;
+}
+
+.stopPopoverArrow {
+  position: absolute;
+  top: -6px;
+  right: 14px;
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  border-top: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 82%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 82%, transparent);
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.stopPopoverTitle {
+  color: var(--dsw-alias-label-primary);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.stopPopoverText {
+  margin-top: -2px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
 .stopModalActions {
   display: flex;
   justify-content: flex-end;
