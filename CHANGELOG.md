@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### Changed
+- Brand: original Zhulong icon (PNG/ICO), a 1280×640 social preview, a current
+  hall screenshot, and a star-focused README (EN/ZH) replacing the old
+  screenshots and third-party project promotion. About/sponsor/package metadata
+  now name **惠州市梦游科技有限公司**; upstream MIT attribution stays only in
+  NOTICE/LICENSE, with an IP/attribution note for the original pixel assets.
 - The project is now published as **dsh-pixel-team** (new GitHub repo and npm
   package, version 0.3.0-rc.2). Package/loader id, host routes, localStorage keys,
   feedback URLs, README/badges and sponsor links use the new identity; a

@@ -13,3 +13,13 @@ licensed under the MIT License.
 The upstream project name, package name and repository remain the property of
 their author. This derivative uses its own package identity
 (`dsh-pixel-team`) and must not be presented as the upstream project.
+
+## Derivative copyright and original additions
+
+Copyright (c) 2026 惠州市梦游科技有限公司.
+
+The pixel hall scene, cultivation/realm system, equipment and mount visuals,
+封神榜, 宗门志, README/marketing copy and the Zhulong icon are original to this
+project. Public prompt-engineering projects referenced in
+`docs/role-prompt-research.md` are cited as concepts only; no third-party source
+code, prompt text, logos or screenshots are copied into the product.

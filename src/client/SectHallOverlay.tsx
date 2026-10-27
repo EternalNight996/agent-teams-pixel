@@ -722,29 +722,10 @@ export function SectHallOverlay({
                   <p className={css.settingsHint}>{t('about.intro')}</p>
                   <div className={css.aboutMeta}>
                     <span>{t('about.version')}: {PLUGIN_VERSION}</span>
-                    <span>{t('about.author')}: EternalNight996</span>
+                    <span>{t('about.author')}: 惠州市梦游科技有限公司</span>
                     <span>{t('about.license')}: MIT</span>
                   </div>
-                  <span className={css.historyTitle}>{t('about.otherProjects')}</span>
-                  <ul className={css.projectList}>
-                    <li>
-                      <a className={css.aboutLink} href="https://github.com/EternalNight996/memory-eternal" target="_blank" rel="noreferrer">memory-eternal</a>
-                      <span>{t('about.project.memoryEternal')}</span>
-                    </li>
-                    <li>
-                      <a className={css.aboutLink} href="https://github.com/EternalNight996/dsh-theme" target="_blank" rel="noreferrer">dsh-theme</a>
-                      <span>{t('about.project.theme')}</span>
-                    </li>
-                    <li>
-                      <a className={css.aboutLink} href="https://github.com/EternalNight996/dsh-ui-three-body" target="_blank" rel="noreferrer">dsh-ui-three-body</a>
-                      <span>{t('about.project.threeBody')}</span>
-                    </li>
-                    <li>
-                      <a className={css.aboutLink} href="https://github.com/EternalNight996/publish-kit" target="_blank" rel="noreferrer">publish-kit</a>
-                      <span>{t('about.project.publishKit')}</span>
-                    </li>
-                  </ul>
-                  <p className={css.settingsMeta}>{t('about.project.desktopNote')}</p>
+                  <p className={css.settingsHint}>{t('about.companyNote')}</p>
                   <div className={css.aboutActions}>
                     <a className={css.aboutLink} href={PLUGIN_REPO} target="_blank" rel="noreferrer">⌂ {t('about.repo')} ↗</a>
                     <a className={css.aboutLink} href={PLUGIN_REPO + '/issues'} target="_blank" rel="noreferrer">🐞 {t('about.issues')} ↗</a>

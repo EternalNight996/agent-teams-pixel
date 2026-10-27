@@ -564,12 +564,7 @@ export declare const zh: {
     'about.version': string;
     'about.author': string;
     'about.license': string;
-    'about.otherProjects': string;
-    'about.project.memoryEternal': string;
-    'about.project.theme': string;
-    'about.project.threeBody': string;
-    'about.project.publishKit': string;
-    'about.project.desktopNote': string;
+    'about.companyNote': string;
     'about.repo': string;
     'about.issues': string;
     'about.releases': string;
@@ -1179,12 +1174,7 @@ export declare const en: {
     'about.version': string;
     'about.author': string;
     'about.license': string;
-    'about.otherProjects': string;
-    'about.project.memoryEternal': string;
-    'about.project.theme': string;
-    'about.project.threeBody': string;
-    'about.project.publishKit': string;
-    'about.project.desktopNote': string;
+    'about.companyNote': string;
     'about.repo': string;
     'about.issues': string;
     'about.releases': string;
