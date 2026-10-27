@@ -40,7 +40,7 @@ declare module '@deepseek-ai/dsh-llm' {
     }
 }
 /** Package identity a released plugin-wrapper source names on older hosts. */
-export declare const AGENT_TEAMS_PLUGIN_NAME = "dsh-pixel-team";
+export declare const AGENT_TEAMS_PLUGIN_NAME = "agent-teams-pixel";
 /**
  * First stored format generation whose migration edges admit producer-owned
  * source kinds. The released v2→v3 payload audit validates every message source

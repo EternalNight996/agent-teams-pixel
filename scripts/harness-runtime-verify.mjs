@@ -112,7 +112,7 @@ if (flags.has('--artifact')) {
     artifactSha = hash(artifact);
     const ownArtifact = join(report, 'artifact-' + artifactSha + '.tgz');
     copyFileSync(artifact, ownArtifact);
-    manifest.dependencies['dsh-pixel-team'] = 'file:' + ownArtifact;
+    manifest.dependencies['agent-teams-pixel'] = 'file:' + ownArtifact;
 }
 else if (!flags.has('--prepare-only'))
     throw Error('--artifact required unless --prepare-only');
@@ -126,15 +126,15 @@ if (flags.has('--prepare-only')) {
     console.log('Prepared ' + version + ' with ' + cohort.count + ' exact DSH packages');
     process.exit(0);
 }
-const plugin = JSON.parse(readFileSync(join(runtime, 'node_modules/dsh-pixel-team/package.json'), 'utf8'));
-if (plugin.name !== 'dsh-pixel-team') throw Error('Artifact package identity does not match AgentTeams');
+const plugin = JSON.parse(readFileSync(join(runtime, 'node_modules/agent-teams-pixel/package.json'), 'utf8'));
+if (plugin.name !== 'agent-teams-pixel') throw Error('Artifact package identity does not match AgentTeams');
 const runs = await runRuntimeScenarios({ report, runtime, command, environment, selectedScenarios: flags.has('--scenario') ? [flags.get('--scenario')] : scenarios });
 // Exercise the same compatibility gate used by the plugin settings UI. Runtime
 // fixtures alone link the package directly and cannot prove installation works.
 if (version === '0.2.1-rc.2') {
     const home = join(report, 'plugin-install-home');
     const install = await command([process.execPath, join(runtime, 'node_modules/@deepseek-ai/dsh/lib/bin.js'), 'plugin', '--profile', 'web', 'add', '--save-exact', resolve(flags.get('--artifact'))], runtime, environment({ DSH_HOME: home, DSH_TELEMETRY_DISABLED: '1' }), 'plugin-manager-install', 120000);
-    const installedPath = join(home, 'profiles/web/node_modules/dsh-pixel-team/package.json');
+    const installedPath = join(home, 'profiles/web/node_modules/agent-teams-pixel/package.json');
     const installed = existsSync(installedPath) ? JSON.parse(readFileSync(installedPath, 'utf8')) : undefined;
     const assertions = { exit0: install.code === 0 && !install.timedOut, exactPluginVersion: installed?.version === plugin.version };
     runs.push({ scenario: 'plugin-manager-install', passed: Object.values(assertions).every(Boolean), assertions });

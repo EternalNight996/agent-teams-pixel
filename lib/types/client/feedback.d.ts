@@ -6,7 +6,7 @@
  * 链接，用户点一次 Submit 才算真正提交。
  */
 /** 本项目仓库地址（反馈与 Star 都指这里）。 */
-export declare const PLUGIN_REPO = "https://github.com/EternalNight996/dsh-pixel-team";
+export declare const PLUGIN_REPO = "https://github.com/EternalNight996/agent-teams-pixel";
 /** 反馈内容：用户描述 + 诊断 + 版本。 */
 export interface FeedbackInput {
     readonly description: string;

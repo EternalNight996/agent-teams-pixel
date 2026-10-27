@@ -11,7 +11,7 @@
  * dependencies, wakes members with messages, relays reports, and collects
  * results.
  *
- * Installation (bundle): `dsh plugin --profile <name> add dsh-pixel-team`
+ * Installation (bundle): `dsh plugin --profile <name> add agent-teams-pixel`
  * (or a local path). The bundle patch mounts this plugin row into the host
  * composition; the tools register into the shared `tools` registry and the
  * usage section into the global system prompt, so the plugin needs no realm.
@@ -260,7 +260,7 @@ export function apply(ctx: Context, config: Config): void {
     // Code desktop watcher's server-side snapshot pattern.
     ctx.effect(() => webServer.register({
     kind: 'exact',
-    path: '/plugins/dsh-pixel-team/state',
+    path: '/plugins/agent-teams-pixel/state',
     handler: async (req, res) => {
       const url = new URL(req.url ?? '/', 'http://x')
       const roots = workspaceRegistry.list().map((workspace) => ({
@@ -285,7 +285,7 @@ export function apply(ctx: Context, config: Config): void {
 
     ctx.effect(() => webServer.register({
       kind: 'exact',
-      path: '/plugins/dsh-pixel-team/halt',
+      path: '/plugins/agent-teams-pixel/halt',
       handler: async (req, res) => {
         if (req.method !== 'POST') {
           res.writeHead(405, { allow: 'POST', 'cache-control': 'no-store' })
@@ -343,7 +343,7 @@ export function apply(ctx: Context, config: Config): void {
     // stay identical to agent_teams_resume.
     ctx.effect(() => webServer.register({
       kind: 'exact',
-      path: '/plugins/dsh-pixel-team/resume',
+      path: '/plugins/agent-teams-pixel/resume',
       handler: async (req, res) => {
         if (req.method !== 'POST') {
           res.writeHead(405, { allow: 'POST', 'cache-control': 'no-store' })
@@ -403,7 +403,7 @@ export function apply(ctx: Context, config: Config): void {
     // command. Approval stays required; this route never spawns members.
     ctx.effect(() => webServer.register({
       kind: 'exact',
-      path: '/plugins/dsh-pixel-team/quick-start',
+      path: '/plugins/agent-teams-pixel/quick-start',
       handler: async (req, res) => {
         if (req.method !== 'POST') {
           res.writeHead(405, { allow: 'POST', 'cache-control': 'no-store' })
@@ -494,7 +494,7 @@ export function apply(ctx: Context, config: Config): void {
 
     ctx.effect(() => webServer.register({
       kind: 'exact',
-      path: '/plugins/dsh-pixel-team/plan',
+      path: '/plugins/agent-teams-pixel/plan',
       handler: async (req, res) => {
         if (req.method !== 'POST') {
           res.writeHead(405, { allow: 'POST', 'cache-control': 'no-store' })
@@ -647,7 +647,7 @@ export function apply(ctx: Context, config: Config): void {
   ])
     ctx.effect(() => webServer.register({
       kind: 'prefix',
-      path: '/plugins/dsh-pixel-team/assets',
+      path: '/plugins/agent-teams-pixel/assets',
     handler: async (req, res) => {
       let name: string
       try {
@@ -688,7 +688,7 @@ export function apply(ctx: Context, config: Config): void {
     ])
     ctx.effect(() => webServer.register({
       kind: 'prefix',
-      path: '/plugins/dsh-pixel-team/support',
+      path: '/plugins/agent-teams-pixel/support',
       handler: async (req, res) => {
         let name: string
         try {

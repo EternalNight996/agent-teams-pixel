@@ -1,7 +1,7 @@
 /**
  * Embed the cultivation artwork into the client bundle as data URIs.
  *
- * The host also serves the same files from /plugins/dsh-pixel-team/assets, but
+ * The host also serves the same files from /plugins/agent-teams-pixel/assets, but
  * a running host keeps its allowlist in memory: a rebuilt client would 404 on
  * every portrait until the whole app restarts. Embedding removes that coupling —
  * the art ships with the client it renders on.

@@ -57,7 +57,7 @@ class WebApprovalAdapter extends LlmAdapter {
         // satisfy the approval/report assertions.
         const pluginMessages = options.messages.filter(message => message.role === 'user' && (
             message.source?.kind === 'agent-teams'
-            || (message.source?.kind === 'plugin' && message.source.plugin === 'dsh-pixel-team')));
+            || (message.source?.kind === 'plugin' && message.source.plugin === 'agent-teams-pixel')));
         const messageText = message => message.content.filter(block => block.type === 'text').map(block => block.text).join('\n');
         const approvals = pluginMessages.filter(message => messageText(message).includes('The user approved the staged AgentTeams plan') && messageText(message).includes('from the pre-run review UI.'));
         const reports = pluginMessages.filter(message => messageText(message).includes('AgentTeams message from member worker:') && messageText(message).includes('WEB_MEMBER_REPORT_OK'));
@@ -147,7 +147,7 @@ export function apply(ctx) {
         assert.equal(auth.status, 303, 'The real browser token exchange must issue a cookie');
         const cookie = auth.headers.get('set-cookie')?.split(';', 1)[0];
         assert.ok(cookie, 'The real connection must mint a browser cookie');
-        const postApproval = teamId => fetch(baseUrl + '/plugins/dsh-pixel-team/plan', { method: 'POST', headers: { 'content-type': 'application/json', origin: baseUrl, cookie }, body: JSON.stringify({ sessionId: captain.id, teamId, action: 'approve' }), signal: AbortSignal.timeout(10000) });
+        const postApproval = teamId => fetch(baseUrl + '/plugins/agent-teams-pixel/plan', { method: 'POST', headers: { 'content-type': 'application/json', origin: baseUrl, cookie }, body: JSON.stringify({ sessionId: captain.id, teamId, action: 'approve' }), signal: AbortSignal.timeout(10000) });
         const beforeInvalidRequests = events.filter(event => event.event === 'web-request' && !event.isMember).length;
         const invalid = await postApproval('missing-team-' + randomUUID());
         const invalidResponse = await invalid.json();
@@ -182,7 +182,7 @@ export function apply(ctx) {
         // #262: the real member is awaiting model output, before in_progress.
         // The panel route must preserve this claim rather than call it ready/running.
         await waitFor(() => events.some(event => event.event === 'web-request' && event.isMember), 'Member request starts before checking claimed state');
-        const activityResponse = await fetch(baseUrl + '/plugins/dsh-pixel-team/state', { headers: { cookie }, signal: AbortSignal.timeout(10000) });
+        const activityResponse = await fetch(baseUrl + '/plugins/agent-teams-pixel/state', { headers: { cookie }, signal: AbortSignal.timeout(10000) });
         assert.equal(activityResponse.status, 200);
         const activityBody = await activityResponse.json();
         const activityTeam = activityBody.teams.find(team => team.teamId === staged.id);

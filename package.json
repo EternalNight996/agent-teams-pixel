@@ -1,5 +1,5 @@
 {
-  "name": "dsh-pixel-team",
+  "name": "agent-teams-pixel",
   "version": "0.3.0-rc.4",
   "description": "DSH Pixel Team：DeepSeek Harness 的像素洞府多智能体团队协作与交付流水线（AgentTeams 衍生，MIT）。",
   "type": "module",
@@ -33,22 +33,21 @@
     "scripts/compatibility.mjs",
     "pnpm-workspace.yaml",
     "scripts/legacy-session-source-repair.mjs",
-    "dsh-plugin.naming.json",
     "assets/zhulong.ico",
     "assets/zhulong-icon.png"
   ],
   "license": "MIT",
   "author": {
     "name": "惠州市梦游科技有限公司",
-    "url": "https://github.com/EternalNight996/dsh-pixel-team"
+    "url": "https://github.com/EternalNight996/agent-teams-pixel"
   },
-  "homepage": "https://github.com/EternalNight996/dsh-pixel-team#readme",
+  "homepage": "https://github.com/EternalNight996/agent-teams-pixel#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EternalNight996/dsh-pixel-team.git"
+    "url": "git+https://github.com/EternalNight996/agent-teams-pixel.git"
   },
   "bugs": {
-    "url": "https://github.com/EternalNight996/dsh-pixel-team/issues"
+    "url": "https://github.com/EternalNight996/agent-teams-pixel/issues"
   },
   "keywords": [
     "dsh",
@@ -258,6 +257,6 @@
     "typescript": "^5.9.3"
   },
   "bin": {
-    "dsh-pixel-team-doctor": "scripts/doctor.mjs"
+    "agent-teams-pixel-doctor": "scripts/doctor.mjs"
   }
 }

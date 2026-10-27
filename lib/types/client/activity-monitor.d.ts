@@ -106,10 +106,10 @@ export declare const ACTIVITY_POLL_MS = 1000;
  */
 export declare const ACTIVITY_PROBE_MS = 5000;
 /** Host route serving live and archived team snapshots. */
-export declare const ACTIVITY_STATE_URL = "/plugins/dsh-pixel-team/state";
-export declare const ACTIVITY_HALT_URL = "/plugins/dsh-pixel-team/halt";
+export declare const ACTIVITY_STATE_URL = "/plugins/agent-teams-pixel/state";
+export declare const ACTIVITY_HALT_URL = "/plugins/agent-teams-pixel/halt";
 /** Host route that resumes a halted team (same path as the captain tool). */
-export declare const ACTIVITY_RESUME_URL = "/plugins/dsh-pixel-team/resume";
+export declare const ACTIVITY_RESUME_URL = "/plugins/agent-teams-pixel/resume";
 interface ActivityFetchResponse {
     readonly ok: boolean;
     json(): Promise<unknown>;

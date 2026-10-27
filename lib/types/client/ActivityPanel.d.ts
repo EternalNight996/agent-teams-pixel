@@ -6,7 +6,7 @@
  * dragged into a floating window, resized, and folded into an activity badge.
  * On wide viewports the docked panel makes the conversation column yield
  * space; narrow viewports keep a simple inset overlay. It
- * polls the host `/plugins/dsh-pixel-team/state` route for
+ * polls the host `/plugins/agent-teams-pixel/state` route for
  * server-side snapshots (durable files + live subagent activity), with a
  * collapsed badge that auto-expands once when activity appears. Archived
  * teams stay available for the owning conversation after live work ends.

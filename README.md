@@ -1,15 +1,15 @@
-# 🐉 dsh-pixel-team — a pixel cultivation hall for your AI team
+# 🐉 agent-teams-pixel — a pixel cultivation hall for your AI team
 
-[![GitHub stars](https://img.shields.io/github/stars/EternalNight996/dsh-pixel-team?style=flat)](https://github.com/EternalNight996/dsh-pixel-team/stargazers)
-[![npm](https://img.shields.io/npm/v/dsh-pixel-team)](https://www.npmjs.com/package/dsh-pixel-team)
-[![release](https://img.shields.io/badge/release-v0.3.0--rc.4-FF7A45)](https://github.com/EternalNight996/dsh-pixel-team/releases)
+[![GitHub stars](https://img.shields.io/github/stars/EternalNight996/agent-teams-pixel?style=flat)](https://github.com/EternalNight996/agent-teams-pixel/stargazers)
+[![npm](https://img.shields.io/npm/v/agent-teams-pixel)](https://www.npmjs.com/package/agent-teams-pixel)
+[![release](https://img.shields.io/badge/release-v0.3.0--rc.4-FF7A45)](https://github.com/EternalNight996/agent-teams-pixel/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-Web%20%2B%20Headless-5B4CF0)](https://github.com/deepseek-ai/deepseek-harness)
 
 **English (default)** · [简体中文](README_ZH.md)
 
 <p align="center">
-  <a href="https://github.com/EternalNight996/dsh-pixel-team"><img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/demo.gif" width="100%" alt="Animated DSH Pixel Team hall: six wall facilities, a centered roster gate, and cultivators working at their desks" /></a>
+  <a href="https://github.com/EternalNight996/agent-teams-pixel"><img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/demo.gif" width="100%" alt="Animated DSH Pixel Team hall: six wall facilities, a centered roster gate, and cultivators working at their desks" /></a>
 </p>
 <p align="center"><sub>▲ 12-second tour — six wall facilities · centered 山门 · live cultivators · equipment preview</sub></p>
 
@@ -24,19 +24,19 @@
 - 📜 **封神榜 + 宗门志** — a sect roll, realm ladder, support/community/about and feedback in one place.
 - 🔒 **Local-first** — team state lives in your workspace; no cloud account.
 
-<p align="center"><strong>⭐ If the pixel hall makes your agents easier to run, a star helps a lot.</strong><br/><sub>One command: <strong>dsh plugin --profile desktop add dsh-pixel-team</strong></sub></p>
+<p align="center"><strong>⭐ If the pixel hall makes your agents easier to run, a star helps a lot.</strong><br/><sub>One command: <strong>dsh plugin --profile desktop add agent-teams-pixel@0.3.0-rc.4</strong></sub></p>
 
 ## ⚡ Quick start
 
 **DeepSeek Harness (desktop / web)**
 
-    dsh plugin --profile desktop add dsh-pixel-team
+    dsh plugin --profile desktop add agent-teams-pixel@0.3.0-rc.4
     # reopen DSH → open 山门 · 名册
 
 **From GitHub**
 
-    git clone https://github.com/EternalNight996/dsh-pixel-team
-    dsh plugin --profile desktop add ./dsh-pixel-team
+    git clone https://github.com/EternalNight996/agent-teams-pixel
+    dsh plugin --profile desktop add ./agent-teams-pixel
 
 **CLI / headless**
 
@@ -135,7 +135,7 @@ Useful docs: [release checklist](docs/release-checklist.md), [maintenance workfl
 
 - QQ group, WeChat support QRs and product updates are in **宗门志** after install.
 - Sponsorship is voluntary; MIT stays free. See [SPONSOR.md](SPONSOR.md).
-- Issues: https://github.com/EternalNight996/dsh-pixel-team/issues
+- Issues: https://github.com/EternalNight996/agent-teams-pixel/issues
 - Maintained and published by **惠州市梦游科技有限公司** (Huizhou Mengyou Technology Co., Ltd.).
 
 ## 📄 License

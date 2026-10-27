@@ -27,7 +27,7 @@ import { hallSheetPlacement, hallYieldWidth } from './hall-geometry.ts'
 import css from './SectHallOverlay.module.css'
 
 /** 交流群 / 赞助码由宿主插件路由提供（assets/support）。 */
-const SUPPORT_BASE = '/plugins/dsh-pixel-team/support'
+const SUPPORT_BASE = '/plugins/agent-teams-pixel/support'
 const supportAsset = (file: string): string => `${SUPPORT_BASE}/${file}`
 
 /** 复制到剪贴板：Clipboard API 失败时退回 execCommand，保持一次点击能复制。 */
@@ -55,9 +55,9 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-const COLLAPSED_KEY = 'dsh-pixel-team.hallCollapsed'
-const PANEL_RECT_KEY = 'dsh-pixel-team.hallRect'
-const TOKEN_KEY = 'dsh-pixel-team.hallToken'
+const COLLAPSED_KEY = 'agent-teams-pixel.hallCollapsed'
+const PANEL_RECT_KEY = 'agent-teams-pixel.hallRect'
+const TOKEN_KEY = 'agent-teams-pixel.hallToken'
 /** 名册历史列表里的“当前宗门”哨兵。 */
 const CURRENT_TEAM_SENTINEL = '__current__'
 

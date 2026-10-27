@@ -39,7 +39,7 @@ ctx.provide('credentials', {
 ctx.provide('webServer', webServer)
 let gate
 let calls = 0
-const paths = ['/plugins/dsh-pixel-team/state', '/plugins/dsh-pixel-team/plan']
+const paths = ['/plugins/agent-teams-pixel/state', '/plugins/agent-teams-pixel/plan']
 const routePlugin = {
   name: 'agent-teams-auth-test',
   apply(owner) {

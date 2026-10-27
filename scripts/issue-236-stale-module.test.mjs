@@ -30,7 +30,7 @@ await test('live format 4 survives a resolved module reporting format 0', () => 
       assert.equal(compat.hostSessionFormatVersion(), 0);
       assert.equal(compat.hostSessionFormatVersion(4), 4, 'the live format must outrank the stale module');
       const modern = {kind:'agent-teams'};
-      const legacy = {kind:'plugin',plugin:'dsh-pixel-team'};
+      const legacy = {kind:'plugin',plugin:'agent-teams-pixel'};
       const agent = {session:{header:{version:4}}};
       assert.equal(compat.observedSessionFormatVersion(agent), 4);
       assert.deepEqual(compat.agentTeamsSource(modern, 4), modern);

@@ -7,7 +7,7 @@
  */
 
 /** 本项目仓库地址（反馈与 Star 都指这里）。 */
-export const PLUGIN_REPO = 'https://github.com/EternalNight996/dsh-pixel-team'
+export const PLUGIN_REPO = 'https://github.com/EternalNight996/agent-teams-pixel'
 
 /** 反馈内容：用户描述 + 诊断 + 版本。 */
 export interface FeedbackInput {
@@ -18,7 +18,7 @@ export interface FeedbackInput {
 }
 
 /** issue 标题：取用户描述的第一行，限制长度；没写就给个兜底标题。 */
-export function buildIssueTitle(description: string, fallback = 'dsh-pixel-team 异常反馈'): string {
+export function buildIssueTitle(description: string, fallback = 'agent-teams-pixel 异常反馈'): string {
   const first = description.trim().split('\n')[0]?.trim() ?? ''
   const title = first === '' ? fallback : first
   return title.length <= 60 ? title : `${title.slice(0, 59)}…`
@@ -59,7 +59,7 @@ export function buildAgentPrompt(input: {
   const diagnostics = input.diagnostics.trim() === '' ? '（未采集到）' : input.diagnostics.trim()
   if (input.locale === 'en') {
     return [
-      'You are debugging the DeepSeek Harness plugin "dsh-pixel-team" (pixel sect office for AgentTeams).',
+      'You are debugging the DeepSeek Harness plugin "agent-teams-pixel" (pixel sect office for AgentTeams).',
       'Reproduce and locate the problem from the report and diagnostics below, then propose a minimal fix.',
       '',
       '## Report',
@@ -70,7 +70,7 @@ export function buildAgentPrompt(input: {
     ].join('\n')
   }
   return [
-    '你是 DeepSeek Harness 插件 dsh-pixel-team（AgentTeams 的像素宗门洞府）的排障助手。',
+    '你是 DeepSeek Harness 插件 agent-teams-pixel（AgentTeams 的像素宗门洞府）的排障助手。',
     '请根据下面的用户反馈与诊断信息复现问题、定位根因，并给出最小修复。',
     '',
     '## 用户反馈',
@@ -94,7 +94,7 @@ export function collectDiagnostics(input: {
   const nav = typeof navigator === 'undefined' ? undefined : navigator
   const win = typeof window === 'undefined' ? undefined : window
   const lines = [
-    `plugin: dsh-pixel-team@${input.version}`,
+    `plugin: agent-teams-pixel@${input.version}`,
     `host: DeepSeek Harness`,
     `user agent: ${nav?.userAgent ?? 'unknown'}`,
     `locale: ${nav?.language ?? 'unknown'}`,

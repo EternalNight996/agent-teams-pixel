@@ -1,15 +1,15 @@
-# 🐉 dsh-pixel-team — 给 AI 团队的像素修仙洞府
+# 🐉 agent-teams-pixel — 给 AI 团队的像素修仙洞府
 
-[![GitHub stars](https://img.shields.io/github/stars/EternalNight996/dsh-pixel-team?style=flat)](https://github.com/EternalNight996/dsh-pixel-team/stargazers)
-[![npm](https://img.shields.io/npm/v/dsh-pixel-team)](https://www.npmjs.com/package/dsh-pixel-team)
-[![release](https://img.shields.io/badge/release-v0.3.0--rc.4-FF7A45)](https://github.com/EternalNight996/dsh-pixel-team/releases)
+[![GitHub stars](https://img.shields.io/github/stars/EternalNight996/agent-teams-pixel?style=flat)](https://github.com/EternalNight996/agent-teams-pixel/stargazers)
+[![npm](https://img.shields.io/npm/v/agent-teams-pixel)](https://www.npmjs.com/package/agent-teams-pixel)
+[![release](https://img.shields.io/badge/release-v0.3.0--rc.4-FF7A45)](https://github.com/EternalNight996/agent-teams-pixel/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-Web%20%2B%20Headless-5B4CF0)](https://github.com/deepseek-ai/deepseek-harness)
 
 [English](README.md) · **简体中文**
 
 <p align="center">
-  <a href="https://github.com/EternalNight996/dsh-pixel-team"><img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/demo.gif" width="100%" alt="DSH Pixel Team 洞府动图：六件墙面设施、居中的山门名册与伏案修士" /></a>
+  <a href="https://github.com/EternalNight996/agent-teams-pixel"><img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/demo.gif" width="100%" alt="DSH Pixel Team 洞府动图：六件墙面设施、居中的山门名册与伏案修士" /></a>
 </p>
 <p align="center"><sub>▲ 12 秒导览 —— 六件墙面设施 · 居中名册 · 实时修士 · 装备预览</sub></p>
 
@@ -24,19 +24,19 @@
 - 📜 **封神榜 + 宗门志**：本宗留名、境界谱、修为卡、赞助/交流群/关于/反馈，一个面板收齐。
 - 🔒 **本地优先**：宗门状态在你的工作区，不需要云账号。
 
-<p align="center"><strong>⭐ 如果这座像素洞府让你的智能体更好用，点一个 Star 就是最大的支持。</strong><br/><sub>一条命令：<strong>dsh plugin --profile desktop add dsh-pixel-team</strong></sub></p>
+<p align="center"><strong>⭐ 如果这座像素洞府让你的智能体更好用，点一个 Star 就是最大的支持。</strong><br/><sub>一条命令：<strong>dsh plugin --profile desktop add agent-teams-pixel@0.3.0-rc.4</strong></sub></p>
 
 ## ⚡ 快速开始
 
 **DeepSeek Harness（桌面 / Web）**
 
-    dsh plugin --profile desktop add dsh-pixel-team
+    dsh plugin --profile desktop add agent-teams-pixel@0.3.0-rc.4
     # 重开 DSH → 打开 山门 · 名册
 
 **从 GitHub 安装**
 
-    git clone https://github.com/EternalNight996/dsh-pixel-team
-    dsh plugin --profile desktop add ./dsh-pixel-team
+    git clone https://github.com/EternalNight996/agent-teams-pixel
+    dsh plugin --profile desktop add ./agent-teams-pixel
 
 **CLI / Headless**
 
@@ -133,7 +133,7 @@
 
 - 安装后可在 **宗门志** 查看 QQ 群、微信支持码与产品更新。
 - 赞助完全自愿，MIT 始终免费；见 [SPONSOR.md](SPONSOR.md)。
-- Issues：https://github.com/EternalNight996/dsh-pixel-team/issues
+- Issues：https://github.com/EternalNight996/agent-teams-pixel/issues
 - 由 **惠州市梦游科技有限公司** 维护与发布。
 
 ## 📄 许可
