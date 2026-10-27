@@ -200,15 +200,9 @@ export function memberKey(name: string): string {
 }
 
 /**
- * 宗门稳定名：去掉开宗时自动追加的 6 位时间后缀。
- * 例如「魔宗·045343」「魔宗-045343」都归到「魔宗」，这样重新开宗能继承掌门等级。
+ * 掌教（掌门）等级全局共享：所有宗门、所有队伍共用一个掌门修为池。
+ * 重新开宗、切换宗门都会继承同一个掌教等级。
  */
-export function sectBaseName(teamName: string): string {
-  const trimmed = teamName.trim()
-  const stripped = trimmed.replace(/[·•・\-–—]\s*\d{6}$/, '').trim()
-  return stripped === '' ? trimmed : stripped
-}
-
-export function captainKey(teamName: string): string {
-  return `captain:${sectBaseName(teamName)}`
+export function captainKey(_teamName?: string): string {
+  return 'captain:global'
 }

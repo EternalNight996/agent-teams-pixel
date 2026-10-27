@@ -9,7 +9,7 @@
 import { useSyncExternalStore } from 'react'
 import type { ActivityTeam } from './activity-monitor.ts'
 import {
-  captainKey, captainTaskXpFor, cultivationFromXp, idleStreakMultiplier, idleXpPer10s, memberKey, sectBaseName, taskXpFor,
+  captainKey, captainTaskXpFor, cultivationFromXp, idleStreakMultiplier, idleXpPer10s, memberKey, taskXpFor,
 } from './cultivation.ts'
 
 interface CultivationState {
@@ -29,19 +29,20 @@ const STORAGE_KEY = 'agent-teams-pixel.cultivation.v1'
 const LEGACY_STORAGE_KEYS = ['dsh-pixel-team.cultivation.v1'] as const
 
 /**
- * 旧版掌门修为按完整队伍名（含 6 位时间后缀）存；迁到稳定的宗门名。
- * 同一个宗门的多支旧队伍取最高值，避免重复开宗把等级越滚越高。
+ * 旧版掌门修为按完整队伍名 / 宗门名存；统一迁到全局掌门池。
+ * 多支旧队伍取最高值，避免重复开宗把等级越滚越高。
  */
 function migrateCaptainXp(xp: Record<string, number>): Record<string, number> {
   const next: Record<string, number> = {}
+  let globalCaptain = 0
   for (const [key, value] of Object.entries(xp)) {
-    if (!key.startsWith('captain:')) {
-      next[key] = value
+    if (key.startsWith('captain:')) {
+      globalCaptain = Math.max(globalCaptain, value)
       continue
     }
-    const baseKey = `captain:${sectBaseName(key.slice('captain:'.length))}`
-    next[baseKey] = Math.max(next[baseKey] ?? 0, value)
+    next[key] = value
   }
+  if (globalCaptain > 0) next['captain:global'] = globalCaptain
   return next
 }
 

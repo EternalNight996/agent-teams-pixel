@@ -4,6 +4,7 @@
  */
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { captainKey } from '../lib/client/cultivation.js'
 import { ingestCultivation, xpOf } from '../lib/client/cultivation-store.js'
 
 const team = (name, captainSessionId, members) => ({
@@ -38,14 +39,14 @@ test('every cultivator in the current panel earns idle XP; another sect does not
     ]
     ingestCultivation(teams, 'cap-a')
     const before = {
-      captain: xpOf('captain:panel-a'),
+      captain: xpOf(captainKey('panel-a')),
       alpha: xpOf('member:alpha'),
       beta: xpOf('member:beta'),
       gamma: xpOf('member:gamma'),
     }
     advance(10_000)
     ingestCultivation(teams, 'cap-a')
-    assert.ok(xpOf('captain:panel-a') > before.captain, 'the panel captain must gain')
+    assert.ok(xpOf(captainKey('panel-a')) > before.captain, 'the global captain must gain')
     assert.ok(xpOf('member:alpha') > before.alpha, 'panel member alpha must gain')
     assert.ok(xpOf('member:beta') > before.beta, 'panel member beta must gain')
     assert.equal(xpOf('member:gamma'), before.gamma, 'another sect must not gain')
@@ -70,10 +71,11 @@ test('no open conversation means nobody earns idle XP', () => {
   withClock(({ advance }) => {
     const teams = [team('panel-d', 'cap-d', [{ id: 'd1', name: 'zeta' }])]
     ingestCultivation(teams, undefined)
+    const captainBefore = xpOf(captainKey('panel-d'))
     advance(20_000)
     ingestCultivation(teams, undefined)
     assert.equal(xpOf('member:zeta'), 0)
-    assert.equal(xpOf('captain:panel-d'), 0)
+    assert.equal(xpOf(captainKey('panel-d')), captainBefore, 'the global captain must not gain without an open conversation')
   })
 })
 

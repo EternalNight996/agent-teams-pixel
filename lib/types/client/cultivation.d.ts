@@ -60,8 +60,7 @@ export declare function cultivationFromXp(xp: number): Cultivation;
 export declare function unlockedItems(level: number): readonly CultivationItem[];
 export declare function memberKey(name: string): string;
 /**
- * 宗门稳定名：去掉开宗时自动追加的 6 位时间后缀。
- * 例如「魔宗·045343」「魔宗-045343」都归到「魔宗」，这样重新开宗能继承掌门等级。
+ * 掌教（掌门）等级全局共享：所有宗门、所有队伍共用一个掌门修为池。
+ * 重新开宗、切换宗门都会继承同一个掌教等级。
  */
-export declare function sectBaseName(teamName: string): string;
-export declare function captainKey(teamName: string): string;
+export declare function captainKey(_teamName?: string): string;

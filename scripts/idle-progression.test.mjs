@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   LEVEL_UP_FX_MS, REALM_BREAK_FX_MS, captainKey, captainTaskXpFor, idleStreakMultiplier, idleXpPer10s,
-  levelUpFxDuration, sectBaseName, taskXpFor, xpNeed,
+  levelUpFxDuration, memberKey, taskXpFor, xpNeed,
 } from '../lib/client/cultivation.js'
 
 /** 满连击（3x）下升一级要多少秒。 */
@@ -78,10 +78,9 @@ test('crossing a realm stretches the level-up effect', () => {
   assert.equal(levelUpFxDuration(150, 151), LEVEL_UP_FX_MS)
 })
 
-test('a re-created sect inherits the same captain level', () => {
-  assert.equal(sectBaseName('魔宗·045343'), '魔宗')
-  assert.equal(sectBaseName('斗法宗-021920'), '斗法宗')
-  assert.equal(sectBaseName('魔宗'), '魔宗')
-  assert.equal(captainKey('魔宗·045343'), captainKey('魔宗·123456'))
-  assert.notEqual(captainKey('魔宗·045343'), captainKey('剑宗·045343'))
+test('every sect shares one global captain level while members keep their own', () => {
+  assert.equal(captainKey('魔宗·045343'), 'captain:global')
+  assert.equal(captainKey('剑宗·123456'), 'captain:global')
+  assert.equal(memberKey('魔修'), 'member:魔修')
+  assert.notEqual(memberKey('魔修'), memberKey('毒修'))
 })
