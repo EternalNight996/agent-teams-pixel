@@ -42,7 +42,7 @@
     dsh --profile desktop
     # ask: 用 AgentTeams 开一个团队做 …
 
-Package version: **0.3.0-rc.2**. Recommended host: DeepSeek Harness **0.2.1-rc.3** (web + headless). See [compatibility.json](compatibility.json) for the exact matrix.
+Package version: **0.3.0-rc.3**. Recommended host: DeepSeek Harness **0.2.1-rc.3** (web + headless). See [compatibility.json](compatibility.json) for the exact matrix.
 
 ## 🏯 What you get
 

@@ -42,7 +42,7 @@
     dsh --profile desktop
     # 直接说：用 AgentTeams 开一个团队做 …
 
-当前版本：**0.3.0-rc.2**。推荐宿主：DeepSeek Harness **0.2.1-rc.3**（Web + Headless），精确矩阵见 [compatibility.json](compatibility.json)。
+当前版本：**0.3.0-rc.3**。推荐宿主：DeepSeek Harness **0.2.1-rc.3**（Web + Headless），精确矩阵见 [compatibility.json](compatibility.json)。
 
 ## 🏯 洞府里有什么
 
