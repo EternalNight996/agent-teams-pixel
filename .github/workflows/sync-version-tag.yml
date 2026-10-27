@@ -1,0 +1,37 @@
+name: Sync Version Tag
+
+# Keep the repository tag in sync with package.json: whenever the version on
+# main changes, the matching v<version> tag must exist. Auto-tagging is
+# idempotent, so later pushes that do not bump the version are no-ops.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  sync-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Read package version
+        id: version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Create the matching tag when missing
+        env:
+          TAG: v${{ steps.version.outputs.value }}
+        run: |
+          if git rev-parse --verify --quiet "refs/tags/$TAG" >/dev/null; then
+            echo "tag $TAG already exists"
+            exit 0
+          fi
+          git tag "$TAG"
+          git push origin "refs/tags/$TAG"
