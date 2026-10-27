@@ -9,7 +9,7 @@
 import { useSyncExternalStore } from 'react'
 import type { ActivityTeam } from './activity-monitor.ts'
 import {
-  captainKey, captainTaskXpFor, cultivationFromXp, idleStreakMultiplier, idleXpPer10s, memberKey, taskXpFor,
+  captainKey, captainTaskXpFor, cultivationFromXp, idleStreakMultiplier, idleXpPer10s, memberKey, sectBaseName, taskXpFor,
 } from './cultivation.ts'
 
 interface CultivationState {
@@ -25,6 +25,35 @@ interface CultivationState {
 }
 
 const STORAGE_KEY = 'agent-teams-pixel.cultivation.v1'
+/** 身份切换期间短暂用过的旧存储键；读不到新键时回退，避免等级凭空消失。 */
+const LEGACY_STORAGE_KEYS = ['dsh-pixel-team.cultivation.v1'] as const
+
+/**
+ * 旧版掌门修为按完整队伍名（含 6 位时间后缀）存；迁到稳定的宗门名。
+ * 同一个宗门的多支旧队伍取最高值，避免重复开宗把等级越滚越高。
+ */
+function migrateCaptainXp(xp: Record<string, number>): Record<string, number> {
+  const next: Record<string, number> = {}
+  for (const [key, value] of Object.entries(xp)) {
+    if (!key.startsWith('captain:')) {
+      next[key] = value
+      continue
+    }
+    const baseKey = `captain:${sectBaseName(key.slice('captain:'.length))}`
+    next[baseKey] = Math.max(next[baseKey] ?? 0, value)
+  }
+  return next
+}
+
+function readRawState(): string | null {
+  const primary = localStorage.getItem(STORAGE_KEY)
+  if (primary !== null) return primary
+  for (const key of LEGACY_STORAGE_KEYS) {
+    const legacy = localStorage.getItem(key)
+    if (legacy !== null) return legacy
+  }
+  return null
+}
 
 function emptyState(): CultivationState {
   return { xp: {}, seen: {}, idleAt: {}, streak: {}, tick: Date.now() }
@@ -33,12 +62,13 @@ function emptyState(): CultivationState {
 function load(): CultivationState {
   if (typeof localStorage === 'undefined') return emptyState()
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = readRawState()
     if (raw === null) return emptyState()
     const parsed = JSON.parse(raw) as Partial<CultivationState>
     if (typeof parsed !== 'object' || parsed === null) return emptyState()
+    const parsedXp = typeof parsed.xp === 'object' && parsed.xp !== null ? parsed.xp : {}
     return {
-      xp: typeof parsed.xp === 'object' && parsed.xp !== null ? parsed.xp : {},
+      xp: migrateCaptainXp(parsedXp),
       seen: typeof parsed.seen === 'object' && parsed.seen !== null ? parsed.seen : {},
       idleAt: typeof parsed.idleAt === 'object' && parsed.idleAt !== null ? parsed.idleAt : {},
       streak: typeof parsed.streak === 'object' && parsed.streak !== null ? parsed.streak : {},

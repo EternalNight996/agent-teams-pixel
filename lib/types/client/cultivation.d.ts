@@ -59,4 +59,9 @@ export declare function cultivationFromXp(xp: number): Cultivation;
 /** 当前等级下已解锁的全部装备/技能（用于物品栏与 tooltip）。 */
 export declare function unlockedItems(level: number): readonly CultivationItem[];
 export declare function memberKey(name: string): string;
+/**
+ * 宗门稳定名：去掉开宗时自动追加的 6 位时间后缀。
+ * 例如「魔宗·045343」「魔宗-045343」都归到「魔宗」，这样重新开宗能继承掌门等级。
+ */
+export declare function sectBaseName(teamName: string): string;
 export declare function captainKey(teamName: string): string;
