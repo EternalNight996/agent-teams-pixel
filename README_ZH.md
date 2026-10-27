@@ -2,15 +2,16 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/EternalNight996/dsh-pixel-team?style=flat)](https://github.com/EternalNight996/dsh-pixel-team/stargazers)
 [![npm](https://img.shields.io/npm/v/dsh-pixel-team)](https://www.npmjs.com/package/dsh-pixel-team)
-[![release](https://img.shields.io/badge/release-v0.3.0--rc.2-FF7A45)](https://github.com/EternalNight996/dsh-pixel-team/releases)
+[![release](https://img.shields.io/badge/release-v0.3.0--rc.4-FF7A45)](https://github.com/EternalNight996/dsh-pixel-team/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-Web%20%2B%20Headless-5B4CF0)](https://github.com/deepseek-ai/deepseek-harness)
 
 [English](README.md) · **简体中文**
 
 <p align="center">
-  <a href="https://github.com/EternalNight996/dsh-pixel-team"><img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/social-preview.png" width="100%" alt="dsh-pixel-team：给 AI 智能体团队的像素修仙洞府" /></a>
+  <a href="https://github.com/EternalNight996/dsh-pixel-team"><img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/demo.gif" width="100%" alt="DSH Pixel Team 洞府动图：六件墙面设施、居中的山门名册与伏案修士" /></a>
 </p>
+<p align="center"><sub>▲ 12 秒导览 —— 六件墙面设施 · 居中名册 · 实时修士 · 装备预览</sub></p>
 
 > **一个 DSH 会话，变成一座宗门。掌门派活，修士伏案，洞府真的可以点。**
 >
@@ -58,6 +59,16 @@
 
 墙面和底栏是同一套面板的两个入口。单击修士进入对话；单击头顶等级牌打开装备。
 
+## 🧩 一个洞府，所有入口
+
+| 入口 | 你能得到什么 |
+|---|---|
+| **墙面** | 六件设施：名册、道统、进度、封神榜、装备、宗门志 |
+| **底栏** | 同一套面板 + 配置，始终一键可达 |
+| **修士** | 打开对话；等级牌打开装备 |
+| **CLI / Headless** | 同一套工具与持久团队状态，不依赖 UI |
+| **本地状态** | 工作区 .agent-teams 下的宗门状态，无需云账号 |
+
 ## 🐉 为什么做成洞府
 
 大部分智能体面板是列表。这里是一个**地方**：掌门案、山门、功德碑、封神榜。你不用翻日志，就能看到谁在干活、谁闲着、什么被卡住、交付了什么。
@@ -70,13 +81,6 @@
 - 独立验证/审查门禁、修复轮次、冷恢复；
 - 前端/后端/合契/验证/审查的角色契约，写入范围互不重叠。
 
-## 🖼️ 当前界面
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/demo.gif" width="90%" alt="DSH Pixel Team 洞府动图：六件墙面设施、居中的山门名册与伏案修士" />
-</p>
-<p align="center"><sub>当前洞府动图：六件墙面设施、居中的山门 · 名册，以及正在工作的团队。</sub></p>
-
 ## 🧩 角色与模板
 
 | 模板 | 默认角色 | 适合 |
@@ -88,12 +92,15 @@
 
 每个专业角色都有固定契约：ownership、must / must not、done、五条 Report、Working budget。全栈刻意压到五人：合契师同时拥有契约与最终联调，少一次交接。
 
-## 🔬 证据，而不是感觉
+## 🧾 交付真的变好了吗？
 
-- 全量 **pnpm verify** exit 0
-- 浏览器侧契约 **56/56**
-- 发布包 smoke：tarball 含运行时与支持二维码，排除源码/测试/文档
-- 真实模型团队跑通过一次“掌门派发 → 成员写文件 → 独立审查 → 汇总”的交付；见 [docs/agent-teams-real-model-verification.json](docs/agent-teams-real-model-verification.json)
+| 信号 | 证据 |
+|---|---|
+| 全量测试 | **pnpm verify** exit 0 |
+| 浏览器侧契约 | **56/56** |
+| 发布产物 | package smoke 检查运行时 + 支持二维码，排除源码/测试/文档 |
+| 真实团队运行 | 掌门派发 → 成员写文件 → 独立审查 → 汇总；见 [docs/agent-teams-real-model-verification.json](docs/agent-teams-real-model-verification.json) |
+| 隔离 | 实现者不能批准自己的实现 |
 
 这是一个追求**并行墙钟 + 独立验证**的工具，不承诺所有任务更省 token。小任务通常单 agent 更合适。
 

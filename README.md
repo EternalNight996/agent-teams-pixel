@@ -2,15 +2,16 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/EternalNight996/dsh-pixel-team?style=flat)](https://github.com/EternalNight996/dsh-pixel-team/stargazers)
 [![npm](https://img.shields.io/npm/v/dsh-pixel-team)](https://www.npmjs.com/package/dsh-pixel-team)
-[![release](https://img.shields.io/badge/release-v0.3.0--rc.2-FF7A45)](https://github.com/EternalNight996/dsh-pixel-team/releases)
+[![release](https://img.shields.io/badge/release-v0.3.0--rc.4-FF7A45)](https://github.com/EternalNight996/dsh-pixel-team/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-Web%20%2B%20Headless-5B4CF0)](https://github.com/deepseek-ai/deepseek-harness)
 
 **English (default)** · [简体中文](README_ZH.md)
 
 <p align="center">
-  <a href="https://github.com/EternalNight996/dsh-pixel-team"><img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/social-preview.png" width="100%" alt="dsh-pixel-team: a pixel cultivation hall for your AI agent team" /></a>
+  <a href="https://github.com/EternalNight996/dsh-pixel-team"><img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/demo.gif" width="100%" alt="Animated DSH Pixel Team hall: six wall facilities, a centered roster gate, and cultivators working at their desks" /></a>
 </p>
+<p align="center"><sub>▲ 12-second tour — six wall facilities · centered 山门 · live cultivators · equipment preview</sub></p>
 
 > **One DSH session becomes a sect. A captain, a roster of specialists, a pixel hall you actually want to open.**
 >
@@ -58,6 +59,16 @@ Package version: **0.3.0-rc.4**. Recommended host: DeepSeek Harness **0.2.1-rc.3
 
 The wall and the floor bar are two routes into the same panels. Click a cultivator to open their conversation; click their level badge to open gear.
 
+## 🧩 One hall, every entry
+
+| Entry | What you get |
+|---|---|
+| **Wall** | six facilities: roster, doctrine, progress, 封神榜, gear, 宗门志 |
+| **Floor bar** | the same panels plus settings, always one click away |
+| **Cultivator** | their conversation; the level badge opens equipment |
+| **CLI / headless** | the same tools and durable team state, no UI required |
+| **Local state** | workspace state under .agent-teams; no cloud account |
+
 ## 🐉 Why this exists
 
 Most agent dashboards are lists. This one is a **place**: the captain’s desk, the gate, the merit stele, the ascension board. You can see who is working, who is idle, what is blocked, and what was delivered — without reading a log.
@@ -70,12 +81,7 @@ Under the pixels is a serious team runtime:
 - independent verifier/reviewer gates, repair rounds and cold recovery;
 - per-role contracts that keep frontend/backend/integrator work in disjoint layers.
 
-## 🖼️ Screenshots
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/demo.gif" width="90%" alt="Animated DSH Pixel Team hall: six wall facilities, a centered roster gate, and cultivators working at their desks" />
-</p>
-<p align="center"><sub>The current pixel hall, animated: six wall facilities, a centered 山门 · 名册, and the team at work.</sub></p>
 
 ## 🧩 Roles & templates
 
@@ -88,12 +94,15 @@ Under the pixels is a serious team runtime:
 
 Each specialist gets a fixed contract: ownership, must / must not, done, five-bullet report, and a working budget. The full-stack team is intentionally five people: the integrator owns both the contract and final integration, cutting one handoff.
 
-## 🔬 Proof, not vibes
+## 🧾 Does it actually improve delivery?
 
-- full suite: **pnpm verify** exit 0
-- browser-side contracts: **56/56**
-- release package smoke: tarball includes runtime + support QRs, excludes source/tests/docs
-- a real-model team run already completed a captain-dispatched, member-written, independently reviewed delivery; see [docs/agent-teams-real-model-verification.json](docs/agent-teams-real-model-verification.json)
+| Signal | Evidence |
+|---|---|
+| Full suite | **pnpm verify** exit 0 |
+| Browser-side contracts | **56/56** |
+| Publish artifact | package smoke checks runtime + support QRs, excludes source/tests/docs |
+| Real team run | captain dispatch → member writes → independent review → summary; see [docs/agent-teams-real-model-verification.json](docs/agent-teams-real-model-verification.json) |
+| Isolation | reviewers cannot approve their own implementation |
 
 This is a tool for **parallel wall-clock + independent verification**, not a promise that every task gets cheaper. Small tasks are usually better with one agent.
 
