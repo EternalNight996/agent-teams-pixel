@@ -1,5 +1,7 @@
 # 🐉 agent-teams-pixel — 给 AI 团队的像素修仙洞府
 
+> **已归档 / 不再维护。** 后续开发在 [**dsh-pixel-team**](https://github.com/EternalNight996/dsh-pixel-team)。本仓库仅作历史保留，不再接受新 issue / PR。
+
 [![GitHub stars](https://img.shields.io/github/stars/EternalNight996/agent-teams-pixel?style=flat)](https://github.com/EternalNight996/agent-teams-pixel/stargazers)
 [![npm](https://img.shields.io/npm/v/agent-teams-pixel)](https://www.npmjs.com/package/agent-teams-pixel)
 [![release](https://img.shields.io/badge/release-v0.3.0--rc.4-FF7A45)](https://github.com/EternalNight996/agent-teams-pixel/releases)

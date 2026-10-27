@@ -1,5 +1,7 @@
 # 🐉 agent-teams-pixel — a pixel cultivation hall for your AI team
 
+> **Archived / no longer maintained.** Development continues in [**dsh-pixel-team**](https://github.com/EternalNight996/dsh-pixel-team). This repository is kept for history; new issues and pull requests are not accepted.
+
 [![GitHub stars](https://img.shields.io/github/stars/EternalNight996/agent-teams-pixel?style=flat)](https://github.com/EternalNight996/agent-teams-pixel/stargazers)
 [![npm](https://img.shields.io/npm/v/agent-teams-pixel)](https://www.npmjs.com/package/agent-teams-pixel)
 [![release](https://img.shields.io/badge/release-v0.3.0--rc.4-FF7A45)](https://github.com/EternalNight996/agent-teams-pixel/releases)
