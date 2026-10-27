@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://github.com/EternalNight996/agent-teams-pixel"><img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/demo.gif" width="100%" alt="DSH Pixel Team 洞府动图：六件墙面设施、居中的山门名册与伏案修士" /></a>
 </p>
-<p align="center"><sub>▲ 12 秒导览 —— 六件墙面设施 · 居中名册 · 实时修士 · 装备预览</sub></p>
+<p align="center"><sub>▲ 17 秒导览 —— 计划审查 · 道统 · 任务进度 · 装备 · 封神榜 · 名册</sub></p>
 
 > **一个 DSH 会话，变成一座宗门。掌门派活，修士伏案，洞府真的可以点。**
 >
@@ -23,6 +23,28 @@
 - 🌱 **看得见的修炼**：任务与挂机共同喂养十五重境界；法器、坐骑、技能直接画进洞府。
 - 📜 **封神榜 + 宗门志**：本宗留名、境界谱、修为卡、赞助/交流群/关于/反馈，一个面板收齐。
 - 🔒 **本地优先**：宗门状态在你的工作区，不需要云账号。
+
+## 🎮 玩点
+
+<p align="center">
+  <img src="assets/readme/plan-review.png" width="49%" alt="执行前计划审查" />
+  <img src="assets/readme/progress.png" width="49%" alt="任务进度与洞府实况" />
+</p>
+<p align="center"><sub><b>先审后跑</b> —— 3 名修士、3 项任务、2 条依赖；确认草案后才创建与调度。 · <b>实时任务 DAG</b> —— 掌门派发 t1，毒修等 t1，体修等 t2。</sub></p>
+
+<p align="center">
+  <img src="assets/readme/equipment.png" width="100%" alt="天机阁装备与坐骑" />
+</p>
+<p align="center"><sub><b>装备真的会画出来</b> —— 换上飞剑，掌门就御剑而行；法器 / 坐骑 / 功法按境界解锁，洞府即时重绘。</sub></p>
+
+<p align="center">
+  <img src="assets/readme/dao-rules.png" width="32%" alt="道统与名册配置" />
+  <img src="assets/readme/ranks.png" width="32%" alt="封神榜十五重境界" />
+  <img src="assets/readme/roster.png" width="32%" alt="山门名册与已完成任务" />
+</p>
+<p align="center"><sub><b>一支小宗门</b> —— 角色、境界、模型、思考档一眼看清。 · <b>十五重境界</b> —— 从凡人到道祖。 · <b>历史留名</b> —— 已完成任务与下一次开宗入口。</sub></p>
+
+<p align="center"><sub>全部截图来自真实 DSH 会话。觉得这座洞府顺手，点个 ⭐ 让它继续长大。</sub></p>
 
 <p align="center"><strong>⭐ 如果这座像素洞府让你的智能体更好用，点一个 Star 就是最大的支持。</strong><br/><sub>一条命令：<strong>dsh plugin --profile desktop add agent-teams-pixel@0.3.0-rc.4</strong></sub></p>
 
