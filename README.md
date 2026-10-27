@@ -73,9 +73,9 @@ Under the pixels is a serious team runtime:
 ## 🖼️ Screenshots
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/hall.png" width="90%" alt="The DSH Pixel Team hall: six wall facilities, a centered roster gate, and cultivators working at their desks" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/demo.gif" width="90%" alt="Animated DSH Pixel Team hall: six wall facilities, a centered roster gate, and cultivators working at their desks" />
 </p>
-<p align="center"><sub>The current pixel hall: six wall facilities, a centered 山门 · 名册, and the team at work.</sub></p>
+<p align="center"><sub>The current pixel hall, animated: six wall facilities, a centered 山门 · 名册, and the team at work.</sub></p>
 
 ## 🧩 Roles & templates
 

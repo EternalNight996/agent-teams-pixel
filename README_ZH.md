@@ -73,9 +73,9 @@
 ## 🖼️ 当前界面
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/hall.png" width="90%" alt="DSH Pixel Team 洞府：六件墙面设施、居中的山门名册与伏案修士" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/dsh-pixel-team/main/assets/readme/demo.gif" width="90%" alt="DSH Pixel Team 洞府动图：六件墙面设施、居中的山门名册与伏案修士" />
 </p>
-<p align="center"><sub>当前洞府：六件墙面设施、居中的山门 · 名册，以及正在工作的团队。</sub></p>
+<p align="center"><sub>当前洞府动图：六件墙面设施、居中的山门 · 名册，以及正在工作的团队。</sub></p>
 
 ## 🧩 角色与模板
 
