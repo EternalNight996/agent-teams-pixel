@@ -27,20 +27,20 @@
 ## 🎮 What's fun
 
 <p align="center">
-  <img src="assets/readme/plan-review.png" width="49%" alt="Plan review before any member spawns" />
-  <img src="assets/readme/progress.png" width="49%" alt="Task progress and the pixel hall" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/plan-review.png" width="49%" alt="Plan review before any member spawns" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/progress.png" width="49%" alt="Task progress and the pixel hall" />
 </p>
 <p align="center"><sub><b>Approve before spawn</b> — 3 members, 3 tasks, 2 dependencies; nothing starts until you confirm. · <b>Live task DAG</b> — the captain dispatches t1; 毒修 waits for t1, 体修 waits for t2.</sub></p>
 
 <p align="center">
-  <img src="assets/readme/equipment.png" width="100%" alt="Equipment and mounts in the hall" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/equipment.png" width="100%" alt="Equipment and mounts in the hall" />
 </p>
 <p align="center"><sub><b>Gear that shows up</b> — equip 飞剑 and the captain actually rides it; artifacts, mounts and skills unlock by realm, and the hall redraws instantly.</sub></p>
 
 <p align="center">
-  <img src="assets/readme/dao-rules.png" width="32%" alt="Doctrine and roster configuration" />
-  <img src="assets/readme/ranks.png" width="32%" alt="15-realm cultivation leaderboard" />
-  <img src="assets/readme/roster.png" width="32%" alt="Sect roster and completed tasks" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/dao-rules.png" width="32%" alt="Doctrine and roster configuration" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/ranks.png" width="32%" alt="15-realm cultivation leaderboard" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/roster.png" width="32%" alt="Sect roster and completed tasks" />
 </p>
 <p align="center"><sub><b>One sect, three cultivators</b> — role, realm, model and reasoning effort at a glance. · <b>15 realms</b> — from 凡人 to 道祖. · <b>History that stays</b> — completed tasks and the next 开宗 entry.</sub></p>
 

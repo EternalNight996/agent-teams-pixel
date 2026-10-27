@@ -125,6 +125,7 @@ import {
 import { FACILITIES, FACILITY_ORDER, WALL_HEIGHT, type FacilityRect, type SceneAction, type SceneHit } from './office-actions.ts'
 import { mountModelFor, toneForTier, weaponShapeFor, type EquipTone, type MountModel, type WeaponShape } from '../equipment-visuals.ts'
 import { realmPaletteForLevel } from '../realm-colors.ts'
+import { isRealmBreak, levelUpFxDuration, LEVEL_UP_FX_MS } from '../cultivation.ts'
 
 const WORLD_W = 520
 const WORLD_MIN_H = 300
@@ -235,7 +236,13 @@ export function createPixelScene(
   const EQUIP_FLASH_MS = 1400
   const nowMs = (): number => (typeof performance === 'undefined' ? Date.now() : performance.now())
   // 修为飘字与升级特效。
-  type CultFx = { x: number; y: number; groundY: number; text: string; start: number; kind: 'xp' | 'level' }
+  type CultFx = {
+    x: number; y: number; groundY: number; text: string; start: number; kind: 'xp' | 'level'
+    /** 破境升级：更长、更亮的特效。 */
+    realmBreak?: boolean
+    /** 特效时长（ms）；普通升级 1400，破境 3200。 */
+    duration?: number
+  }
   let cultivationFx: CultFx[] = []
   const lastXp = new Map<string, number>()
   const lastLevel = new Map<string, number>()
@@ -1844,8 +1851,13 @@ export function createPixelScene(
     if (level !== undefined) {
       const previous = lastLevel.get(id)
       if (previous !== undefined && level > previous) {
-        // 升级横幅抬高，避免和等级框/经验飘字叠在一起。
-        cultivationFx.push({ x: spot.cx, y: spot.baseY - 96, groundY: spot.baseY, text: `Lv.${level}`, start: time, kind: 'level' })
+        const breakthrough = isRealmBreak(previous, level)
+        // 升级横幅抬高，避免和等级框/经验飘字叠在一起；破境时停留更久。
+        cultivationFx.push({
+          x: spot.cx, y: spot.baseY - 96, groundY: spot.baseY, text: `Lv.${level}`, start: time, kind: 'level',
+          realmBreak: breakthrough,
+          duration: levelUpFxDuration(previous, level),
+        })
         leveled = true
       }
       lastLevel.set(id, level)
@@ -1864,7 +1876,8 @@ export function createPixelScene(
   function drawCultivationFx(time: number): void {
     const keep: CultFx[] = []
     for (const fx of cultivationFx) {
-      const progress = (time - fx.start) / 1400
+      const duration = fx.kind === 'level' ? (fx.duration ?? LEVEL_UP_FX_MS) : 1400
+      const progress = (time - fx.start) / duration
       if (progress >= 1) continue
       keep.push(fx)
       const alpha = 1 - progress
@@ -1872,15 +1885,39 @@ export function createPixelScene(
       g.save()
       g.globalAlpha = alpha
       if (fx.kind === 'level') {
-        const ring = 12 + progress * 32
+        const breakthrough = fx.realmBreak === true
+        const ring = 12 + progress * (breakthrough ? 64 : 32)
         const ringY = fx.groundY - 2
-        g.strokeStyle = '#f2c14e'
-        g.lineWidth = 2
+        // 破境：先铺上升光柱 + 地面辉光，再画多圈金环，持续 3.2 秒。
+        if (breakthrough) {
+          const beam = g.createLinearGradient(fx.x, ringY - 78, fx.x, ringY + 6)
+          beam.addColorStop(0, 'rgba(255, 233, 168, 0)')
+          beam.addColorStop(0.55, 'rgba(255, 214, 120, 0.24)')
+          beam.addColorStop(1, 'rgba(255, 233, 168, 0.02)')
+          g.fillStyle = beam
+          g.fillRect(fx.x - 12, ringY - 80, 24, 86)
+          g.beginPath()
+          g.arc(fx.x, ringY, 26 + progress * 16, 0, Math.PI * 2)
+          g.fillStyle = `rgba(255, 214, 120, ${(0.16 * (1 - progress)).toFixed(3)})`
+          g.fill()
+        }
+        g.strokeStyle = breakthrough ? '#ffe9a8' : '#f2c14e'
+        g.lineWidth = breakthrough ? 3 : 2
         g.beginPath(); g.ellipse(fx.x, ringY, ring, ring * 0.32, 0, 0, Math.PI * 2); g.stroke()
-        for (let i = 0; i < 8; i += 1) {
-          const angle = (i / 8) * Math.PI * 2 + progress * 2
-          g.fillStyle = '#ffe9a8'
-          g.fillRect(fx.x + Math.cos(angle) * ring - 1.5, ringY + Math.sin(angle) * ring * 0.32 - 1.5, 3, 3)
+        if (breakthrough) {
+          for (const [scale, alpha] of [[0.62, 0.55], [1.2, 0.32]] as const) {
+            g.globalAlpha = alpha * (1 - progress)
+            g.beginPath(); g.ellipse(fx.x, ringY, ring * scale, ring * scale * 0.32, 0, 0, Math.PI * 2); g.stroke()
+          }
+          g.globalAlpha = 1 - progress
+        }
+        const sparks = breakthrough ? 18 : 8
+        for (let i = 0; i < sparks; i += 1) {
+          const angle = (i / sparks) * Math.PI * 2 + progress * (breakthrough ? 3.2 : 2)
+          const radius = breakthrough ? ring * 1.08 : ring
+          const size = breakthrough ? 4 : 3
+          g.fillStyle = breakthrough ? '#fff3c4' : '#ffe9a8'
+          g.fillRect(fx.x + Math.cos(angle) * radius - size / 2, ringY + Math.sin(angle) * radius * 0.32 - size / 2, size, size)
         }
         g.font = 'bold 9px "Segoe UI", sans-serif'
         const text = `${model?.labels?.levelUp ?? 'Level up'} ${fx.text}`

@@ -24,18 +24,24 @@ export declare const LEVEL_CAP = 9999;
 export declare const REALM_BANDS: readonly [4, 49, 149, 349, 699, 1199, 1899, 2799, 3899, 5199, 6699, 7999, 8999, 9799, 9999];
 /** 等级落在第几重境界（0 起，对应 CULTIVATION_REALMS）。 */
 export declare function realmIndexForLevel(level: number): number;
+/** 升级特效时长（ms）；跨境界的「破境」特效更长，给足视觉反馈。 */
+export declare const LEVEL_UP_FX_MS = 1400;
+export declare const REALM_BREAK_FX_MS = 3200;
+/** 这次升级是否跨过了境界带（例如 4 → 5、49 → 50）。 */
+export declare function isRealmBreak(previousLevel: number, level: number): boolean;
+/** 升级横幅/金环的持续时间：普通升级 1.4 秒，破境拉长到 3.2 秒。 */
+export declare function levelUpFxDuration(previousLevel: number, level: number): number;
 /** 升到下一级还需要的修为（随等级线性增长）。 */
 export declare function xpNeed(level: number): number;
-/** 完成任务获得的修为：等级越高收益越高。 */
+/** 完成任务获得的修为：等级越高收益越高；任务收益整体 ×5（相对旧曲线 +500%）。 */
 export declare function taskXpFor(level: number): number;
-/** 掌门带队完成任务获得的修为。 */
+/** 掌门带队完成任务获得的修为；同样 ×5。 */
 export declare function captainTaskXpFor(level: number): number;
 /**
  * 每 10 秒挂机修为。
  *
- * 目标曲线：1 级正好 10 点（20 秒一级）；其余等级在加速曲线上整体减半。
- * 2 级后逐步加快，100 级约 20 秒一级（满连击），1→100 约 45 分钟；
- * 之后每级耗时按 (lv/100)^0.8 拉长（1000 级约 2 分钟、封顶约 13 分钟），越高越慢。
+ * 目标曲线：1 级 2 点；整体速度为旧版的 1/5（挂机升级慢 80%）。
+ * 任务完成收益则提升到 5 倍，形成「交付驱动、挂机养生」的节奏。
  */
 export declare function idleXpPer10s(level: number): number;
 /** 连续挂机加成：每 1 分钟 +0.5 倍，最高 3 倍（离线补结按基础值）。 */

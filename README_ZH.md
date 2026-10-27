@@ -27,20 +27,20 @@
 ## 🎮 玩点
 
 <p align="center">
-  <img src="assets/readme/plan-review.png" width="49%" alt="执行前计划审查" />
-  <img src="assets/readme/progress.png" width="49%" alt="任务进度与洞府实况" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/plan-review.png" width="49%" alt="执行前计划审查" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/progress.png" width="49%" alt="任务进度与洞府实况" />
 </p>
 <p align="center"><sub><b>先审后跑</b> —— 3 名修士、3 项任务、2 条依赖；确认草案后才创建与调度。 · <b>实时任务 DAG</b> —— 掌门派发 t1，毒修等 t1，体修等 t2。</sub></p>
 
 <p align="center">
-  <img src="assets/readme/equipment.png" width="100%" alt="天机阁装备与坐骑" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/equipment.png" width="100%" alt="天机阁装备与坐骑" />
 </p>
 <p align="center"><sub><b>装备真的会画出来</b> —— 换上飞剑，掌门就御剑而行；法器 / 坐骑 / 功法按境界解锁，洞府即时重绘。</sub></p>
 
 <p align="center">
-  <img src="assets/readme/dao-rules.png" width="32%" alt="道统与名册配置" />
-  <img src="assets/readme/ranks.png" width="32%" alt="封神榜十五重境界" />
-  <img src="assets/readme/roster.png" width="32%" alt="山门名册与已完成任务" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/dao-rules.png" width="32%" alt="道统与名册配置" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/ranks.png" width="32%" alt="封神榜十五重境界" />
+  <img src="https://raw.githubusercontent.com/EternalNight996/agent-teams-pixel/main/assets/readme/roster.png" width="32%" alt="山门名册与已完成任务" />
 </p>
 <p align="center"><sub><b>一支小宗门</b> —— 角色、境界、模型、思考档一眼看清。 · <b>十五重境界</b> —— 从凡人到道祖。 · <b>历史留名</b> —— 已完成任务与下一次开宗入口。</sub></p>
 
