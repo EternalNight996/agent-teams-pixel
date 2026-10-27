@@ -9,7 +9,7 @@
   now name **惠州市梦游科技有限公司**; upstream MIT attribution stays only in
   NOTICE/LICENSE, with an IP/attribution note for the original pixel assets.
 - The project is now published as **dsh-pixel-team** (new GitHub repo and npm
-  package, version 0.3.0-rc.3). Package/loader id, host routes, localStorage keys,
+  package, version 0.3.0-rc.4). Package/loader id, host routes, localStorage keys,
   feedback URLs, README/badges and sponsor links use the new identity; a
   `dsh-plugin.naming.json` declaration is included.
 - Release readiness: added a package-smoke test (npm pack dry-run) that asserts

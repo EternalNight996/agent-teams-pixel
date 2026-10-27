@@ -1,6 +1,6 @@
 {
   "name": "dsh-pixel-team",
-  "version": "0.3.0-rc.3",
+  "version": "0.3.0-rc.4",
   "description": "DSH Pixel Team：DeepSeek Harness 的像素洞府多智能体团队协作与交付流水线（AgentTeams 衍生，MIT）。",
   "type": "module",
   "main": "lib/index.js",
